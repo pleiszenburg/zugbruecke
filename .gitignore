@@ -89,5 +89,5 @@ ENV/
 .ropeproject
 
 # Wine stuff
-win32_*
-win64_*
+win32-*
+win64-*
