@@ -5,10 +5,6 @@
 #include <windows.h>
 #include <stdint.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 // #ifdef BUILDING_EXAMPLE_DLL
 // #define DEMOROUTINE_DUMP __declspec(dllexport)
 // #else
@@ -181,9 +177,5 @@ void __stdcall DEMOROUTINE_DUMP demo_routine(
 	);
 
 DEMOROUTINE_DUMP bool __stdcall DllMain(HANDLE hModule, DWORD ul_reason_for_call, LPVOID lpReserved);
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif
