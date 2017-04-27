@@ -9,8 +9,7 @@ DEMODLL_LDFLAGS =
 all: $(DEMODLL)
 
 $(DEMODLL): $(DEMODLL_C)
-	$(CC) $(DEMODLL_C) $(CFLAGS) -o $(DEMODLL).dll $(LDFLAGS) $(DEMODLL_LDFLAGS)
+	$(CC) $(DEMODLL_C) $(CFLAGS) -o ../$(DEMODLL).dll $(LDFLAGS) $(DEMODLL_LDFLAGS)
 
 clean:
-	rm -rf *.dll *.o
- 
+	rm ../$(DEMODLL).dll
