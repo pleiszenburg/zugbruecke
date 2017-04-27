@@ -91,3 +91,4 @@ ENV/
 # Wine stuff
 win32-*
 win64-*
+*.dll
