@@ -14,46 +14,6 @@ void __stdcall DEMOROUTINE_DUMP demo_routine(
 	)
 {
 	
-	FILE *fd_ch_str1;
-	fd_ch_str1 = fopen("dump_ch_str1.bin","wb");
-	fwrite(ch_str1, sizeof(*ch_str1), 1, fd_ch_str1);
-	fclose(fd_ch_str1);
-	
-	FILE *fd_ch_str2;
-	fd_ch_str2 = fopen("dump_ch_str2.bin","wb");
-	fwrite(ch_str2, sizeof(*ch_str2), 1, fd_ch_str2);
-	fclose(fd_ch_str2);
-	
-	FILE *fd_log1;
-	fd_log1 = fopen("dump_log1.bin","wb");
-	fwrite(Log1, sizeof(*Log1), 1, fd_log1);
-	fclose(fd_log1);
-	
-	FILE *fd_str1;
-	fd_str1 = fopen("dump_str1.bin","wb");
-	fwrite(Str1, sizeof(*Str1), 1, fd_str1);
-	fclose(fd_str1);
-	
-	FILE *fd_int1;
-	fd_int1 = fopen("dump_int1.bin","wb");
-	fwrite(Int1, sizeof(*Int1), 1, fd_int1);
-	fclose(fd_int1);
-	
-	FILE *fd_real1;
-	fd_real1 = fopen("dump_real1.bin","wb");
-	fwrite(Real1, sizeof(*Real1), 1, fd_real1);
-	fclose(fd_real1);
-	
-	FILE *fd_resultc;
-	fd_resultc = fopen("dump_resultc.bin","wb");
-	fwrite(Resultc, sizeof(*Resultc), 1, fd_resultc);
-	fclose(fd_resultc);
-	
-	FILE *fd_resultv;
-	fd_resultv = fopen("dump_resultv.bin","wb");
-	fwrite(Resultv, sizeof(*Resultv), 1, fd_resultv);
-	fclose(fd_resultv);
-	
 	FILE *fd_log1_a;
 	fd_log1_a = fopen("dump_log1.txt","w");
 	fprintf(fd_log1_a, "Depart = '%d' \n", (*Log1).Depart);
