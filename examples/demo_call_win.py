@@ -43,8 +43,6 @@ class demo_routine_caller_class():
 		self._call_demo_routine_.argtypes = [
 			ctypes.c_char_p,
 			ctypes.c_int,
-			ctypes.c_char_p,
-			ctypes.c_int,
 			ctypes.POINTER(type_test_struct)
 			]
 		
@@ -52,17 +50,15 @@ class demo_routine_caller_class():
 		self._call_demo_routine_.restype = ctypes.c_void_p
 	
 	
-	def call(self, p_str1, p_str2, p_L1):
+	def call(self, param_char_p, param_int, param_type_test):
 		
 		try:
 		
 			# Call routine in DLL
 			self._call_demo_routine_(
-				p_str1_buff, 
-				p_str1_len, 
-				p_str2_buff, 
-				p_str2_len, 
-				ctypes.byref(p_L1)
+				param_char_p, 
+				param_int, 
+				ctypes.byref(param_type_test)
 				)
 			
 			return True
@@ -70,4 +66,31 @@ class demo_routine_caller_class():
 		except:
 			
 			return False
+
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# MAKE A CALL
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+if __name__ == '__main__':
+	
+	# Initialize caller
+	demo_routine_caller = demo_routine_caller_class()
+	
+	# Initialize some test parameters
+	sample_param_char_p = 7
+	sample_param_int = 42
+	sample_type_test = type_test_struct()
+	sample_type_test.el_char = 5
+	sample_type_test.el_int8t = 17
+	sample_type_test.el_int16t = 25874
+	sample_type_test.el_float = 2.4
+	sample_type_test.el_double = 8.598e31
+	sample_type_test.el_int8t_4 = [1, 2, 3, 4]
+	sample_type_test.el_int8t_2x3 = [[1, 2, 3], [4, 5, 6]]
+	
+	# Call
+	demo_routine_caller.call()
+	
+	
 
