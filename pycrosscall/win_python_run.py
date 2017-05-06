@@ -8,6 +8,7 @@
 
 import os
 import subprocess
+import sys
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -32,11 +33,11 @@ def wine_translate(path):
 		)
 	winepath_output = winepath_p.communicate()[0].decode(encoding = 'UTF-8')
 
-	return winepath_output
+	return winepath_output.strip()
 
 
 
-def run_windows_python(parameter):
+def run_windows_python(script_name):
 	
 	# Get location of this script file
 	script_path = os.path.split(os.path.realpath(__file__))[0]
@@ -51,14 +52,9 @@ def run_windows_python(parameter):
 	# Translate Python interpreter's Unix path into Wine path
 	pydir_wine = wine_translate(pydir)
 	
-	
-	print(pydir_wine)
-	
-	
-	#export WINEARCH="$arch"
-	#export WINEPREFIX="$(pwd)/$arch-wine"
-	#cd $arch-python$version
-	#subprocess.Popen('echo "python dll_call.py %s" | wine cmd &' % options, shell = True)
+	# Launch Python for Windows with script
+	py_cmd = pydir_wine + '\\python.exe ' + script_name
+	subprocess.Popen('echo "%s" | wine cmd &' % py_cmd, shell = True)
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -67,5 +63,6 @@ def run_windows_python(parameter):
 
 if __name__ == '__main__':
 	
-	run_windows_python(None)
+	if len(sys.argv) > 1:
+		run_windows_python(sys.argv[1])
 
