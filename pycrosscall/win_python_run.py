@@ -24,7 +24,7 @@ version = '3.5.3'
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
-def wine_translate(path):
+def wine_translate_unix2win(path):
 	
 	winepath_p = subprocess.Popen(
 		['winepath', '-w', path],
@@ -36,24 +36,25 @@ def wine_translate(path):
 	return winepath_output.strip()
 
 
-
-def run_windows_python(script_name):
+def run_windows_python(win_python_script_name):
+	
+	# Change the environment for Wine: Architecture
+	os.environ['WINEARCH'] = arch
 	
 	# Get location of this script file
-	script_path = os.path.split(os.path.realpath(__file__))[0]
+	unix_bridge_script_path = os.path.split(os.path.realpath(__file__))[0]
 	
-	# Change the environment for Wine
-	os.environ['WINEARCH'] = arch
-	os.environ['WINEPREFIX'] = os.path.join(script_path, arch + '-wine')
+	# Change the environment for Wine: Wine prefix / profile directory
+	os.environ['WINEPREFIX'] = os.path.join(unix_bridge_script_path, arch + '-wine')
 	
 	# Python interpreter's directory seen from this script
-	pydir = os.path.join(script_path, arch + '-python' + version)
+	pydir_unix = os.path.join(unix_bridge_script_path, arch + '-python' + version)
 	
 	# Translate Python interpreter's Unix path into Wine path
-	pydir_wine = wine_translate(pydir)
+	pydir_win = wine_translate_unix2win(pydir_unix)
 	
 	# Launch Python for Windows with script
-	py_cmd = pydir_wine + '\\python.exe ' + script_name
+	py_cmd = pydir_win + '\\python.exe ' + win_python_script_name
 	subprocess.Popen('echo "%s" | wine cmd &' % py_cmd, shell = True)
 
 
