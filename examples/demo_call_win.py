@@ -86,11 +86,11 @@ if __name__ == '__main__':
 	sample_type_test.el_int16t = 25874
 	sample_type_test.el_float = 2.4
 	sample_type_test.el_double = 8.598e31
-	sample_type_test.el_int8t_4 = [1, 2, 3, 4]
-	sample_type_test.el_int8t_2x3 = [[1, 2, 3], [4, 5, 6]]
+	el_int8t_4 = [1, 2, 3, 4]
+	sample_type_test.el_int8t_4 = (ctypes.c_int8 * len(el_int8t_4))(*el_int8t_4)
+	el_int8t_2x3 = [[1, 2], [3, 4], [5, 6]]
+	sample_type_test.el_int8t_2x3 = (ctypes.c_int8 * len(el_int8t_2x3[0]) * len(el_int8t_2x3))(*(tuple(i) for i in el_int8t_2x3))
 	
 	# Call
-	demo_routine_caller.call()
-	
-	
+	demo_routine_caller.call(sample_param_char_p, sample_param_int, sample_type_test)
 
