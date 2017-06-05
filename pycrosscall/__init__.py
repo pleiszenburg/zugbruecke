@@ -1,3 +1,4 @@
 # -*- coding: utf-8 -*-
 
-from .core import session
+# Expose session class to user
+from .core import session_class as session

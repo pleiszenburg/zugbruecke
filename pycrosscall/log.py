@@ -13,12 +13,14 @@ class log_class:
 		self.id = session_id
 		self.p = parameter
 
+		# Start arrays for stdout and stderr logs
 		self.log_out = []
 		self.log_err = []
 
 
 	def out(self, message):
 
+		# Add lines to log
 		for line in message.split('\n'):
 
 			if line.strip() != '':
@@ -31,6 +33,7 @@ class log_class:
 
 	def err(self, message):
 
+		# Add lines to log
 		for line in message.split('\n'):
 
 			if line.strip() != '':

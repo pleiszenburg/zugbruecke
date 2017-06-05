@@ -17,7 +17,7 @@ from .log import log_class
 # PYCROSSCALL SESSION CLASS
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-class session():
+class session_class():
 
 
 	def __init__(self, parameter = {}):
@@ -25,13 +25,10 @@ class session():
 		# Fill empty parameters with default values
 		self.__fill_parameter__(parameter)
 
-		# Generate unique session id
-		self.id = generate_session_id()
-
 		# Start session logging
 		self.log = log_class(self.id, self.p)
 
-		# TODO if debug
+		# Log status
 		self.log.out('pycrosscall import ...')
 
 		# Initialize Wine session
@@ -46,22 +43,34 @@ class session():
 		# Register session destructur
 		atexit.register(self.terminate)
 
-		# TODO if debug
+		# Log status
 		self.log.out('pycrosscall imported')
 
 
 	def __fill_parameter__(self, parameter):
 
+		# Store parameter dict
 		self.p = parameter
 
+		# If no unique session id was passed, generate one
+		if 'id' not in self.p.keys():
+			self.id = generate_session_id()
+		else:
+			self.id = self.p['id']
+
+		# Display messages from stdout
 		if 'stdout' not in self.p.keys():
 			self.p['stdout'] = True
 
+		# Display messages from stderr
 		if 'stderr' not in self.p.keys():
 			self.p['stderr'] = True
 
 
 	def terminate(self):
 
+		# Destruct wine session, quit wine processes
 		self.wine_session.terminate()
+
+		# Log status
 		self.log.out('pycrosscall unloaded')
