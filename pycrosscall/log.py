@@ -2,13 +2,34 @@
 class log_class:
 
 
-	def __init__(self, session_id):
+	def __init__(self, session_id, parameter):
 
 		self.id = session_id
-		self.book = []
+		self.p = parameter
+
+		self.log_out = []
+		self.log_err = []
 
 
 	def out(self, message):
 
-		self.book.append(message)
-		print('log UNIX (%s): %s' % (self.id, message))
+		for line in message.split('\n'):
+
+			if line.strip() != '':
+
+				self.log_out.append(line)
+
+				if self.p['stdout']:
+					print('UNIX (%s) out: %s' % (self.id, line))
+
+
+	def err(self, message):
+
+		for line in message.split('\n'):
+
+			if line.strip() != '':
+
+				self.log_err.append(line)
+
+				if self.p['stderr']:
+					print('UNIX (%s) err: %s' % (self.id, line))
