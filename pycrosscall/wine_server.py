@@ -6,7 +6,8 @@
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-import os
+import atexit
+# import os
 import sys
 
 from log import log_class # HACK pass messages to UNIX
@@ -18,10 +19,23 @@ from log import log_class # HACK pass messages to UNIX
 
 class wine_server_class:
 
+
 	def __init__(self, session_id):
 
 		self.id = session_id
 		self.log = log_class(parameter = {'platform': 'WINE', 'stdout': True, 'stderr': True}) # HACK pass from UNIX
+
+		# Status log
+		self.log.out('Windows-Python started')
+
+		# Register session destructur
+		atexit.register(self.terminate)
+
+
+	def terminate(self):
+
+		# Status log
+		self.log.out('Wine-Python terminating')
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
