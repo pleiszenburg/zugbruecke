@@ -14,16 +14,17 @@ import subprocess
 
 class wine_session_class:
 
-	def __init__(self, session_id):
+	def __init__(self, session_id, session_log):
 
 		self.id = session_id
+		self.log = session_log
 
-		print('UNIX (%s): wine session started' % self.id)
+		self.log.out('wine session started')
 
 
 	def terminate(self):
 
-		print('UNIX (%s): wine session terminated' % self.id)
+		self.log.out('wine session terminated')
 
 
 	def translate_path_unix2win(self, path):
