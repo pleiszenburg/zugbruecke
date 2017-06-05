@@ -6,8 +6,13 @@
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 import os
+from queue import Queue
 import signal
 import subprocess
+import sys
+from threading import Thread
+
+import psutil
 
 from .lib import get_location_of_file
 
@@ -60,31 +65,83 @@ class wine_session_class:
 		pydir_unix = os.path.join(self.location, self.p['arch'] + '-python' + self.p['version'])
 
 		# Translate Python interpreter's Unix path into Wine path
-		pydir_win = self.translate_path_unix2win(pydir_unix)
+		# pydir_win = self.translate_path_unix2win(pydir_unix)
+
+		# Translate server's Unix path into Wine path
+		location_win = self.translate_path_unix2win(self.location)
 
 		# Prepare Wine-Python server command with session id
-		py_cmd = pydir_win + '\\python.exe win_server.py ' + self.id
+		py_cmd = [
+			os.path.join(pydir_unix, 'python.exe'),
+			"%s\\wine_server.py" % location_win,
+			self.id
+			]
 
 		# Identify wine command for 32 or 64 bit
 		if self.p['arch'] == 'win32':
-			wine_cmd = 'wine'
+			py_cmd.insert(0, 'wine')
 		else: # win64
-			wine_cmd = 'wine64'
+			py_cmd.insert(0, 'wine64')
 
 		# Launch server
+		self.__launch_wine__(py_cmd)
+
+
+	def __read_output_from_pipe__(self, pipe, funcs):
+
+		for line in iter(pipe.readline, b''):
+			for func in funcs:
+				func(line.decode('utf-8'))
+		pipe.close()
+
+
+	def __launch_wine__(self, command_list):
+
 		self.wine_p = subprocess.Popen(
-			'echo "%s" | %s cmd &' % (py_cmd, wine_cmd),
+			command_list,
 			stdin = subprocess.PIPE,
 			stdout = subprocess.PIPE,
 			stderr = subprocess.PIPE,
-			shell = True,
-			preexec_fn = os.setsid
+			shell = False,
+			preexec_fn = os.setsid,
+			close_fds = True,
+			bufsize = 1
 			)
+
+# wineserver first
+# log via reverse xmlrpc
+
+		print([p for p in psutil.process_iter() if self.id in p.cmdline()])
+		self.python_proc = [p for p in psutil.process_iter() if self.id in p.cmdline()][0]
+		print(self.python_proc)
+
+
+		q = Queue()
+
+		stdout_thread = Thread(
+			target = self.__read_output_from_pipe__, args = (self.wine_p.stdout, [q.put, self.log.out])
+			)
+
+		stderr_thread = Thread(
+			target = self.__read_output_from_pipe__, args = (self.wine_p.stderr, [q.put, self.log.err])
+			)
+
+		for t in (stdout_thread, stderr_thread):
+			t.daemon = True
+			t.start()
+
+		self.wine_p.wait()
+
+		for t in (stdout_thread, stderr_thread):
+			t.join()
+
+		q.put(None)
 
 
 	def __server_stop__(self):
 
-		os.killpg(os.getpgid(self.wine_p.pid), signal.SIGTERM)
+		# os.killpg(os.getpgid(self.wine_p.pid), signal.SIGTERM)
+		os.killpg(os.getpgid(self.python_proc.pid), signal.SIGTERM)
 
 
 	def translate_path_unix2win(self, path):
