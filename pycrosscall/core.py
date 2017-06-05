@@ -61,7 +61,6 @@ class session():
 			self.p['stderr'] = True
 
 
-
 	def terminate(self):
 
 		self.wine_session.terminate()
