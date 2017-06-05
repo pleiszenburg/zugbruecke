@@ -18,8 +18,15 @@ class wine_session_class:
 
 		self.id = session_id
 
+		print('UNIX (%s): wine session started' % self.id)
 
-	def _translate_path_unix2win(self, path):
+
+	def terminate(self):
+
+		print('UNIX (%s): wine session terminated' % self.id)
+
+
+	def translate_path_unix2win(self, path):
 
 		winepath_p = subprocess.Popen(
 			['winepath', '-w', path],
