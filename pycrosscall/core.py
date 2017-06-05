@@ -29,7 +29,7 @@ class session_class():
 		self.log = log_class(self.id, self.p)
 
 		# Log status
-		self.log.out('pycrosscall import ...')
+		self.log.out('pycrosscall import (Wine-Python %s %s) ...' % (self.p['version'], self.p['arch']))
 
 		# Initialize Wine session
 		self.wine_session = wine_session_class(self.id, self.p, self.log)
@@ -65,6 +65,14 @@ class session_class():
 		# Display messages from stderr
 		if 'stderr' not in self.p.keys():
 			self.p['stderr'] = True
+
+		# Define Wine & Wine-Python architecture
+		if 'arch' not in self.p.keys():
+			self.p['arch'] = 'win32'
+
+		# Define Wine-Python version
+		if 'version' not in self.p.keys():
+			self.p['version'] = '3.5.3'
 
 
 	def terminate(self):
