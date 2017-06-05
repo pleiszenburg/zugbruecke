@@ -17,6 +17,10 @@ class log_class:
 		self.log_out = []
 		self.log_err = []
 
+		# Determine platform
+		if 'platform' not in self.p.keys():
+			self.p['platform'] = 'UNIX'
+
 
 	def out(self, message):
 
@@ -28,7 +32,7 @@ class log_class:
 				self.log_out.append(line)
 
 				if self.p['stdout']:
-					print('UNIX (%s) out: %s' % (self.id, line))
+					print('%s (%s) out: %s' % (self.p['platform'], self.id, line))
 
 
 	def err(self, message):
@@ -41,4 +45,4 @@ class log_class:
 				self.log_err.append(line)
 
 				if self.p['stderr']:
-					print('UNIX (%s) err: %s' % (self.id, line))
+					print('%s (%s) err: %s' % (self.p['platform'], self.id, line))
