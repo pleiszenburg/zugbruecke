@@ -11,6 +11,7 @@ import signal
 import subprocess
 import sys
 from threading import Thread
+import time
 
 import psutil
 
@@ -24,67 +25,106 @@ from .lib import get_location_of_file
 class wine_session_class:
 
 
+	# session init
 	def __init__(self, session_id, parameter, session_log):
 
+		# Set ID, parameters and pointer to log
 		self.id = session_id
 		self.p = parameter
 		self.log = session_log
 
+		# Log status
 		self.log.out('wine session starting ...')
 
-		# Get location of this script file
-		self.location = get_location_of_file(__file__)
+		# Fire session up
+		self.__session_start__()
 
-		self.__server_start__()
-
+		# Log status
 		self.log.out('wine session started')
 
 
+	# flow control routine for setting things up, called once from init
+	def __session_start__(self):
+
+		# Get location of this script file
+		self.dir_thisfile = get_location_of_file(__file__)
+
+		# Set environment variables for wine
+		self.__set_wine_env__()
+
+		# Translate this file's Unix path into Wine path
+		self.dir_thisfile_wine = self.translate_path_unix2win(self.dir_thisfile)
+
+		# Start wine server
+		self.__wine_server_start__()
+
+		# Start wine python, no wait ...
+		self.__wine_python_start__(self.__compile_wine_python_command__())
+
+
+	# session destructor
 	def terminate(self):
 
-		self.__server_stop__()
+		# Log status
+		self.log.out('wine session terminating ...')
 
+		# Shut down wine python
+		self.__wine_python_stop__()
+
+		# Stop wine server
+		self.__wine_server_stop__()
+
+		# Log status
 		self.log.out('wine session terminated')
 
 
-	def __set_env__(self):
+	def __set_wine_env__(self):
 
 		# Change the environment for Wine: Architecture
 		os.environ['WINEARCH'] = self.p['arch']
 
 		# Change the environment for Wine: Wine prefix / profile directory
-		os.environ['WINEPREFIX'] = os.path.join(self.location, self.p['arch'] + '-wine')
+		os.environ['WINEPREFIX'] = os.path.join(self.dir_thisfile, self.p['arch'] + '-wine')
 
 
-	def __server_start__(self):
+	def __wine_server_start__(self):
 
-		# Set environment variables
-		self.__set_env__()
+		# Start wine server into prepared environment
+		self.proc_wineserver = subprocess.Popen(
+			['wineserver', '-f', '-p'], # run persistent in foreground
+			stdin = subprocess.PIPE,
+			stdout = subprocess.PIPE,
+			stderr = subprocess.PIPE,
+			shell = False
+			)
+
+		# Status log
+		self.log.out('wineserver started with PID %d' % self.proc_wineserver.pid)
+
+		# HACK wait due to lack of feedback
+		time.sleep(1) # seconds
+
+
+	def __compile_wine_python_command__(self):
 
 		# Python interpreter's directory seen from this script
-		pydir_unix = os.path.join(self.location, self.p['arch'] + '-python' + self.p['version'])
-
-		# Translate Python interpreter's Unix path into Wine path
-		# pydir_win = self.translate_path_unix2win(pydir_unix)
-
-		# Translate server's Unix path into Wine path
-		location_win = self.translate_path_unix2win(self.location)
-
-		# Prepare Wine-Python server command with session id
-		py_cmd = [
-			os.path.join(pydir_unix, 'python.exe'),
-			"%s\\wine_server.py" % location_win,
-			self.id
-			]
+		self.dir_python = os.path.join(self.dir_thisfile, self.p['arch'] + '-python' + self.p['version'])
 
 		# Identify wine command for 32 or 64 bit
 		if self.p['arch'] == 'win32':
-			py_cmd.insert(0, 'wine')
-		else: # win64
-			py_cmd.insert(0, 'wine64')
+			wine_cmd = 'wine'
+		elif self.p['arch'] == 'win64':
+			wine_cmd = 'wine64'
+		else:
+			raise # TODO error
 
-		# Launch server
-		self.__launch_wine__(py_cmd)
+		# Prepare Wine-Python server command with session id and return it
+		return [
+			wine_cmd,
+			os.path.join(self.dir_python, 'python.exe'),
+			"%s\\wine_server.py" % self.dir_thisfile_wine,
+			self.id
+			]
 
 
 	def __read_output_from_pipe__(self, pipe, funcs):
@@ -95,9 +135,10 @@ class wine_session_class:
 		pipe.close()
 
 
-	def __launch_wine__(self, command_list):
+	def __wine_python_start__(self, command_list):
 
-		self.wine_p = subprocess.Popen(
+		# Fire up Wine-Python process
+		self.proc_winepython = subprocess.Popen(
 			command_list,
 			stdin = subprocess.PIPE,
 			stdout = subprocess.PIPE,
@@ -108,29 +149,30 @@ class wine_session_class:
 			bufsize = 1
 			)
 
-# wineserver first
-# log via reverse xmlrpc
+		# Status log
+		self.log.out('wine-python started with PID %d' % self.proc_winepython.pid)
 
-		print([p for p in psutil.process_iter() if self.id in p.cmdline()])
-		self.python_proc = [p for p in psutil.process_iter() if self.id in p.cmdline()][0]
-		print(self.python_proc)
+
+		# print([p for p in psutil.process_iter() if self.id in p.cmdline()])
+		# self.proc_python = [p for p in psutil.process_iter() if self.id in p.cmdline()][0]
+		# print(self.proc_python)
 
 
 		q = Queue()
 
 		stdout_thread = Thread(
-			target = self.__read_output_from_pipe__, args = (self.wine_p.stdout, [q.put, self.log.out])
+			target = self.__read_output_from_pipe__, args = (self.proc_winepython.stdout, [q.put, self.log.out])
 			)
 
 		stderr_thread = Thread(
-			target = self.__read_output_from_pipe__, args = (self.wine_p.stderr, [q.put, self.log.err])
+			target = self.__read_output_from_pipe__, args = (self.proc_winepython.stderr, [q.put, self.log.err])
 			)
 
 		for t in (stdout_thread, stderr_thread):
 			t.daemon = True
 			t.start()
 
-		self.wine_p.wait()
+		self.proc_winepython.wait()
 
 		for t in (stdout_thread, stderr_thread):
 			t.join()
@@ -138,10 +180,20 @@ class wine_session_class:
 		q.put(None)
 
 
-	def __server_stop__(self):
+	def __wine_python_stop__(self):
 
-		# os.killpg(os.getpgid(self.wine_p.pid), signal.SIGTERM)
-		os.killpg(os.getpgid(self.python_proc.pid), signal.SIGTERM)
+		# Terminate Wine-Python
+		os.kill(self.proc_winepython.pid, signal.SIGTERM)
+
+		# HACK wait for its destructor
+		time.sleep(1) # seconds
+
+
+	def __wine_server_stop__(self):
+
+		# Killing the server requires two signals as specified in the man page
+		os.kill(self.proc_wineserver.pid, signal.SIGINT)
+		os.kill(self.proc_wineserver.pid, signal.SIGKILL)
 
 
 	def translate_path_unix2win(self, path):
@@ -153,6 +205,7 @@ class wine_session_class:
 			stdout = subprocess.PIPE,
 			stderr = subprocess.PIPE
 			)
+
 		# Get stdout and stderr
 		wine_out, wine_err = winepath_p.communicate()
 
