@@ -40,6 +40,7 @@ class log_class:
 		self.id = session_id
 		self.p = parameter
 
+		# Log is up
 		self.up = True
 
 		# Start arrays for stdout and stderr logs
@@ -69,8 +70,12 @@ class log_class:
 	def terminate(self):
 
 		if self.up:
+
+			# Stop server, if there is one
 			if self.p['log_server']:
 				self.__stop_server__()
+
+			# Log down
 			self.up = False
 
 

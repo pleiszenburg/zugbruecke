@@ -35,12 +35,6 @@ class session_class():
 		# Initialize Wine session
 		self.wine_session = wine_session_class(self.id, self.p, self.log)
 
-		# # Demo call into Wine
-		# test_path_unix = os.path.split(os.path.realpath(__file__))[0]
-		# test_path_win = self.wine_session.translate_path_unix2win(test_path_unix)
-		# self.log.out(test_path_unix)
-		# self.log.out(test_path_win)
-
 		# Mark session as up
 		self.up = True
 
