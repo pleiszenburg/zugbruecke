@@ -48,7 +48,12 @@ class log_class:
 			self.up = False
 
 
-	def __compile_message_dict__(self, message, pipe_name):
+	def __append_message_to_log__(self, message):
+
+		self.log[message['pipe']].append(message)
+
+
+	def __compile_message_dict_list__(self, message, pipe_name):
 
 		message_lines = []
 		message_line_max = 80
@@ -67,46 +72,52 @@ class log_class:
 		return message_lines
 
 
-	def __print_messages__(self, messages):
+	def __print_message__(self, messages):
 
-		for message_item in messages:
-			if self.p['std' + message_item['pipe']]:
-				message_string = '%s (%s @ %.2f) %s: %s\n' % (
-					message_item['platform'],
-					message_item['id'],
-					message_item['time'],
-					message_item['pipe'],
-					message_item['cnt']
-					)
-				if message_item['pipe'] == 'out':
-					sys.stdout.write(message_string)
-				elif message_item['pipe'] == 'err':
-					sys.stderr.write(message_string)
-				else:
-					raise # TODO
-
-
-	def __store_messages__(self, messages):
-
-		for message_item in messages:
-			f = open(self.f[message_item['pipe']], 'a+')
-			f.write(json.dumps(message_item) + '\n')
-			f.close()
-
-
-	def __append_to_log__(self, messages):
-
-		for message_item in messages:
-			self.log[message_item['pipe']].append(message_item)
+		message_string = '%s (%s @ %.2f) %s: %s\n' % (
+			messages['platform'],
+			messages['id'],
+			messages['time'],
+			messages['pipe'],
+			messages['cnt']
+			)
+		if messages['pipe'] == 'out':
+			sys.stdout.write(message_string)
+		elif messages['pipe'] == 'err':
+			sys.stderr.write(message_string)
+		else:
+			raise # TODO
 
 
 	def __process_message__(self, message, pipe):
 
-		message_dict_list = self.__compile_message_dict__(message, pipe)
-		self.__append_to_log__(message_dict_list)
-		self.__print_messages__(message_dict_list)
-		if self.p['logwrite']:
-			self.__store_messages__(message_dict_list)
+		message_dict_list = self.__compile_message_dict_list__(message, pipe)
+
+		for mesage_dict in message_dict_list:
+			self.__append_message_to_log__(mesage_dict)
+			if self.p['std' + mesage_dict['pipe']]:
+				self.__print_message__(mesage_dict)
+			if self.p['remote_log']:
+				self.__push_message_to_server__(mesage_dict)
+			if self.p['logwrite']:
+				self.__store_message__(mesage_dict)
+
+
+	def __push_message_to_server__(self, message):
+
+		pass
+
+
+	def __receive_messages_from_client__(self, messages):
+
+		pass
+
+
+	def __store_message__(self, message):
+
+		f = open(self.f[message['pipe']], 'a+')
+		f.write(json.dumps(message) + '\n')
+		f.close()
 
 
 	def out(self, message):

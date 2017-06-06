@@ -85,9 +85,6 @@ class session_class():
 		# Open server for collected logs from clients
 		self.p['log_server'] = True
 
-		# Open server for collected logs from clients
-		self.p['log_server'] = True
-
 		# Send log messages to remove sever
 		self.p['remote_log'] = False
 
