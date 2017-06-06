@@ -123,6 +123,7 @@ class windll_class():
 
 		self.session = session_class()
 
-	def demo(self):
 
-		print('Huh')
+	def LoadLibrary(self, name):
+
+		print('Huh: ' + name)
