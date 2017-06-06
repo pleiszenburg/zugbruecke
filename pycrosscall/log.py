@@ -110,17 +110,11 @@ class log_class:
 			self.__store_messages__(message_dict_list)
 
 
-	def out(self, message, source = ''):
-
-		if source != '':
-			print('out ' + message)
+	def out(self, message):
 
 		self.__process_message__(message, 'out')
 
 
-	def err(self, message, source = ''):
-
-		if source != '':
-			print('err ' + message)
+	def err(self, message):
 
 		self.__process_message__(message, 'err')
