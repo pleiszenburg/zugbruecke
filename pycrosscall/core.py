@@ -47,6 +47,27 @@ class session_class():
 		self.log.out('pycrosscall imported')
 
 
+	def terminate(self):
+
+		# Run only if session is still up
+		if self.up:
+
+			# Log status
+			self.log.out('pycrosscall unloading ...')
+
+			# Destruct wine session, quit wine processes
+			self.wine_session.terminate()
+
+			# Log status
+			self.log.out('pycrosscall unloaded')
+
+			# Terminate log
+			self.log.terminate()
+
+			# Session down
+			self.up = False
+
+
 	def __fill_parameter__(self, parameter):
 
 		# Store parameter dict
@@ -89,27 +110,6 @@ class session_class():
 		# Define Wine-Python version
 		if 'version' not in self.p.keys():
 			self.p['version'] = '3.5.3'
-
-
-	def terminate(self):
-
-		# Run only if session is still up
-		if self.up:
-
-			# Log status
-			self.log.out('pycrosscall unloading ...')
-
-			# Destruct wine session, quit wine processes
-			self.wine_session.terminate()
-
-			# Log status
-			self.log.out('pycrosscall unloaded')
-
-			# Terminate log
-			self.log.terminate()
-
-			# Session down
-			self.up = False
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
