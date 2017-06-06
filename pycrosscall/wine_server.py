@@ -73,8 +73,8 @@ class wine_server_class:
 		self.id = session_id
 		self.log = log_class(self.id, parameter = {
 			'platform': 'WINE',
-			'stdout': True,
-			'stderr': True,
+			'stdout': False,
+			'stderr': False,
 			'logwrite': True,
 			'remote_log': True,
 			'log_server': False,

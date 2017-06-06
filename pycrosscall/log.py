@@ -8,6 +8,7 @@
 import json
 import re
 import sys
+import threading
 import time
 
 import xmlrpc.client
@@ -24,42 +25,6 @@ class RequestHandler(SimpleXMLRPCRequestHandler):
 
 	# Restrict to a particular path.
 	rpc_paths = ('/RPC2',)
-
-
-class SimpleXMLRPCServer_ALT(SimpleXMLRPCServer):
-
-
-	up = True
-
-
-	def set_log(self, log):
-
-		# Set log
-		self.log = log
-
-		# Status log
-		self.log.out('Logging-XMLRPCServer log connected')
-
-
-	def set_parent_terminate_func(self, func):
-
-		# Set function in parent, which needs to be called on shutdown
-		self.parent_terminate_func = func
-
-
-	def shutdown(self):
-
-		self.up = False
-		self.log.out('XMLRPCServer shutting down ...')
-		self.parent_terminate_func()
-		return 1
-
-
-	def serve_forever(self):
-
-		while self.up:
-			self.handle_request()
-		self.log.out('XMLRPCServer terminated')
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -104,6 +69,8 @@ class log_class:
 	def terminate(self):
 
 		if self.up:
+			if self.p['log_server']:
+				self.__stop_server__()
 			self.up = False
 
 
@@ -153,6 +120,12 @@ class log_class:
 		message_dict_list = self.__compile_message_dict_list__(message, pipe)
 
 		for mesage_dict in message_dict_list:
+
+			self.__process_message_dict__(mesage_dict)
+
+
+	def __process_message_dict__(self, mesage_dict):
+
 			self.__append_message_to_log__(mesage_dict)
 			if self.p['std' + mesage_dict['pipe']]:
 				self.__print_message__(mesage_dict)
@@ -164,12 +137,12 @@ class log_class:
 
 	def __push_message_to_server__(self, message):
 
-		pass
+		self.client.transfer_message(json.dumps(message))
 
 
-	def __receive_messages_from_client__(self, messages):
+	def __receive_message_from_client__(self, message):
 
-		pass
+		self.__process_message_dict__(json.loads(message))
 
 
 	def __start_client__(self):
@@ -179,7 +152,30 @@ class log_class:
 
 	def __start_server__(self):
 
-		pass
+		# Create server
+		self.server = SimpleXMLRPCServer(
+			("localhost", self.p['port_unix']),
+			requestHandler = RequestHandler,
+			allow_none = True
+			)
+
+		# Register functions
+		self.server.register_introspection_functions()
+		self.server.register_function(self.__receive_message_from_client__, 'transfer_message')
+
+		# Run server in its own thread
+		self.thread_server = threading.Thread(
+			target = self.server.serve_forever,
+			args = (),
+			name = 'server'
+			)
+		self.thread_server.daemon = True
+		self.thread_server.start()
+
+
+	def __stop_server__(self):
+
+		self.server.shutdown()
 
 
 	def __store_message__(self, message):
