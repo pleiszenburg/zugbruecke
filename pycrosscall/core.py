@@ -110,3 +110,19 @@ class session_class():
 
 			# Session down
 			self.up = False
+
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# PATCHED CTYPES
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+class windll_class():
+
+
+	def __init__(self):
+
+		self.session = session_class()
+
+	def demo(self):
+
+		print('Huh')
