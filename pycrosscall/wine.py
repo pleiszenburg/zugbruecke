@@ -195,42 +195,27 @@ class wine_session_class:
 
 	def __wine_python_stop__(self):
 
-		print(0)
-
 		# Tell server via message to terminate
 		self.client.terminate()
 
-		print(1)
-
 		# Terminate Wine-Python
 		os.killpg(os.getpgid(self.proc_winepython.pid), signal.SIGINT)
-
-		print(2)
 
 		for t_index, t in enumerate([self.thread_winepython_out, self.thread_winepython_err]):
 			self.log.out('joining thread "%s" ...' % t.name)
 			t.join(timeout = 1) # seconds
 
-		print(3)
-
 		# HACK wait for its destructor
 		time.sleep(1) # seconds
-
-		print(4)
 
 
 	def __wine_server_stop__(self):
 
-		print(5)
-
 		# Killing the server requires two signals as specified in the man page
 		os.kill(self.proc_wineserver.pid, signal.SIGINT)
-		print(6)
 		os.kill(self.proc_wineserver.pid, signal.SIGKILL)
 		# os.killpg(os.getpgid(self.proc_wineserver.pid), signal.SIGINT)
 		# os.killpg(os.getpgid(self.proc_wineserver.pid), signal.SIGKILL)
-
-		print(7)
 
 
 	def translate_path_unix2win(self, path):
