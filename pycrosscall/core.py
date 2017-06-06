@@ -47,6 +47,12 @@ class session_class():
 		self.log.out('pycrosscall imported')
 
 
+	# Replaces the original LoadLibrary function for windll (TODO cdll, oledll)
+	def LoadLibrary(self, name, dll_type = 'windll'):
+
+		print('Trying to access ' + name)
+
+
 	def terminate(self):
 
 		# Run only if session is still up
@@ -116,7 +122,7 @@ class session_class():
 # PATCHED CTYPES
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-class windll_class():
+class __generic_dll__():
 
 
 	def __init__(self):
@@ -124,6 +130,9 @@ class windll_class():
 		self.session = session_class()
 
 
+class windll_class(__generic_dll__):
+
+
 	def LoadLibrary(self, name):
 
-		print('Huh: ' + name)
+		return self.session.LoadLibrary(name, dll_type = 'windll')
