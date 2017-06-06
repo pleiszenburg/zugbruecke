@@ -76,6 +76,10 @@ class session_class():
 		if 'logwrite' not in self.p.keys():
 			self.p['logwrite'] = False
 
+		# Send log messages to remove sever
+		if 'remote_log' not in self.p.keys():
+			self.p['remote_log'] = False
+
 		# Define Wine & Wine-Python architecture
 		if 'arch' not in self.p.keys():
 			self.p['arch'] = 'win32'

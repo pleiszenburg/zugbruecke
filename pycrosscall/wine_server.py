@@ -72,8 +72,13 @@ class wine_server_class:
 
 		self.id = session_id
 		self.log = log_class(self.id, parameter = {
-			'platform': 'WINE', 'stdout': True, 'stderr': True, 'logwrite': True
-			}) # HACK pass from UNIX
+			'platform': 'WINE',
+			'stdout': True,
+			'stderr': True,
+			'logwrite': True,
+			'remote_log': True,
+			'remote_log_port': session_port_out
+			})
 
 		# Session is up
 		self.up = True
