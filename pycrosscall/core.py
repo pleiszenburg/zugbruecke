@@ -7,6 +7,7 @@
 
 import atexit
 import os
+from pprint import pprint as pp
 import signal
 
 from .wine import wine_session_class
@@ -32,6 +33,9 @@ class session_class():
 		# Log status
 		self.log.out('pycrosscall import (Wine-Python %s %s) ...' % (self.p['version'], self.p['arch']))
 
+		# Store current working directory
+		self.dir_cwd = os.getcwd()
+
 		# Initialize Wine session
 		self.wine_session = wine_session_class(self.id, self.p, self.log)
 
@@ -50,7 +54,11 @@ class session_class():
 	# Replaces the original LoadLibrary function for windll (TODO cdll, oledll)
 	def LoadLibrary(self, name, dll_type = 'windll'):
 
-		print('Trying to access ' + name)
+		# Check if file exists
+		if not os.path.isfile(os.path.join(self.dir_cwd, name)):
+			raise # TODO
+		else:
+			self.log.out('Accessing dll %s - exists.' % name)
 
 
 	def terminate(self):
