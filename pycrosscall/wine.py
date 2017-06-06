@@ -11,6 +11,7 @@ import subprocess
 import sys
 import threading
 import time
+import xmlrpc.client
 
 from .lib import get_location_of_file
 
@@ -157,31 +158,53 @@ class wine_session_class:
 		# Status log
 		self.log.out('wine-python started with PID %d' % self.proc_winepython.pid)
 
+		# Prepare threads for stdout and stderr capturing
 		self.thread_winepython_out = threading.Thread(
 			target = self.__read_output_from_pipe__,
-			args = (self.proc_winepython.stdout, self.log.out)
+			args = (self.proc_winepython.stdout, self.log.out),
+			name = 'out'
 			)
 		self.thread_winepython_err = threading.Thread(
 			target = self.__read_output_from_pipe__,
-			args = (self.proc_winepython.stderr, self.log.err)
+			args = (self.proc_winepython.stderr, self.log.err),
+			name = 'err'
 			)
 
+		# Start threads
 		for t in (self.thread_winepython_out, self.thread_winepython_err):
 			t.daemon = True
 			t.start()
 
+		# HACK Wait ...
+		time.sleep(1) # seconds
+
+		# Log status
+		self.log.out('threads for wine-python logging started')
+
+		# Fire up xmlrpc client
+		self.client = xmlrpc.client.ServerProxy('http://localhost:8000')
+
+		# Log status
+		self.log.out('xmlrpc client started')
+
 
 	def __wine_python_stop__(self):
 
+		print(0)
+
+		# Tell server via message to terminate
+		self.client.terminate()
+
 		print(1)
 
-		# for t in (self.thread_winepython_out, self.thread_winepython_err):
-		# 	t.join()
+		# Terminate Wine-Python
+		os.killpg(os.getpgid(self.proc_winepython.pid), signal.SIGINT)
 
 		print(2)
 
-		# Terminate Wine-Python
-		os.killpg(os.getpgid(self.proc_winepython.pid), signal.SIGTERM)
+		for t_index, t in enumerate([self.thread_winepython_out, self.thread_winepython_err]):
+			self.log.out('joining thread "%s" ...' % t.name)
+			t.join(timeout = 1) # seconds
 
 		print(3)
 

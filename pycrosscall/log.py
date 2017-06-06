@@ -38,16 +38,13 @@ class log_class:
 		# Open logfiles
 		if self.p['logwrite']:
 			self.f = {}
-			self.f['out'] = open('%s_%s.txt' % (self.p['platform'], 'out'), 'w+', buffering = 1)
-			self.f['err'] = open('%s_%s.txt' % (self.p['platform'], 'err'), 'w+', buffering = 1)
+			self.f['out'] = '%s_%s.txt' % (self.p['platform'], 'out')
+			self.f['err'] = '%s_%s.txt' % (self.p['platform'], 'err')
 
 
 	def terminate(self):
 
 		if self.up:
-			if self.p['logwrite']:
-				self.f['out'].close()
-				self.f['err'].close()
 			self.up = False
 
 
@@ -92,7 +89,9 @@ class log_class:
 	def __store_messages__(self, messages):
 
 		for message_item in messages:
-			self.f[message_item['pipe']].write(json.dumps(message_item) + '\n')
+			f = open(self.f[message_item['pipe']], 'a+')
+			f.write(json.dumps(message_item) + '\n')
+			f.close()
 
 
 	def __append_to_log__(self, messages):
