@@ -8,6 +8,7 @@
 
 import atexit
 # import os
+import signal
 import sys
 from xmlrpc.server import SimpleXMLRPCServer
 from xmlrpc.server import SimpleXMLRPCRequestHandler
@@ -32,13 +33,20 @@ class wine_server_class:
 	def __init__(self, session_id):
 
 		self.id = session_id
-		self.log = log_class(self.id, parameter = {'platform': 'WINE', 'stdout': True, 'stderr': True}) # HACK pass from UNIX
+		self.log = log_class(self.id, parameter = {
+			'platform': 'WINE', 'stdout': True, 'stderr': True, 'logwrite': True
+			}) # HACK pass from UNIX
 
 		# Status log
 		self.log.out('Wine-Python started')
 
+		# Session is up
+		self.up = True
+
 		# Register session destructur
 		atexit.register(self.terminate)
+		signal.signal(signal.SIGINT, self.terminate)
+		signal.signal(signal.SIGTERM, self.terminate)
 
 		# Create server
 		self.server = SimpleXMLRPCServer(("localhost", 8000), requestHandler = RequestHandler)
@@ -51,8 +59,17 @@ class wine_server_class:
 
 	def terminate(self):
 
-		# Status log
-		self.log.out('Wine-Python terminating')
+		# Run only if session still up
+		if self.up:
+
+			# Status log
+			self.log.out('Wine-Python terminating')
+
+			# Terminate log
+			self.log.terminate()
+
+			# Session down
+			self.up = False
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

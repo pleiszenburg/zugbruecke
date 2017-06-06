@@ -7,6 +7,7 @@
 
 import atexit
 import os
+import signal
 
 from .wine import wine_session_class
 from .lib import generate_session_id
@@ -40,8 +41,13 @@ class session_class():
 		# self.log.out(test_path_unix)
 		# self.log.out(test_path_win)
 
+		# Mark session as up
+		self.up = True
+
 		# Register session destructur
 		atexit.register(self.terminate)
+		signal.signal(signal.SIGINT, self.terminate)
+		signal.signal(signal.SIGTERM, self.terminate)
 
 		# Log status
 		self.log.out('pycrosscall imported')
@@ -66,6 +72,10 @@ class session_class():
 		if 'stderr' not in self.p.keys():
 			self.p['stderr'] = True
 
+		# Write log messages into file
+		if 'logwrite' not in self.p.keys():
+			self.p['logwrite'] = False
+
 		# Define Wine & Wine-Python architecture
 		if 'arch' not in self.p.keys():
 			self.p['arch'] = 'win32'
@@ -77,8 +87,20 @@ class session_class():
 
 	def terminate(self):
 
-		# Destruct wine session, quit wine processes
-		self.wine_session.terminate()
+		# Run only if session is still up
+		if self.up:
 
-		# Log status
-		self.log.out('pycrosscall unloaded')
+			# Log status
+			self.log.out('pycrosscall unloading ...')
+
+			# Destruct wine session, quit wine processes
+			self.wine_session.terminate()
+
+			# Log status
+			self.log.out('pycrosscall unloaded')
+
+			# Terminate log
+			self.log.terminate()
+
+			# Session down
+			self.up = False

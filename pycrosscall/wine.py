@@ -46,6 +46,8 @@ class wine_session_class:
 	# flow control routine for setting things up, called once from init
 	def __session_start__(self):
 
+		self.up = True
+
 		# Get location of this script file
 		self.dir_thisfile = get_location_of_file(__file__)
 
@@ -65,17 +67,21 @@ class wine_session_class:
 	# session destructor
 	def terminate(self):
 
-		# Log status
-		self.log.out('wine session terminating ...')
+		if self.up:
 
-		# Shut down wine python
-		self.__wine_python_stop__()
+			# Log status
+			self.log.out('wine session terminating ...')
 
-		# Stop wine server
-		self.__wine_server_stop__()
+			# Shut down wine python
+			self.__wine_python_stop__()
 
-		# Log status
-		self.log.out('wine session terminated')
+			# Stop wine server
+			self.__wine_server_stop__()
+
+			# Log status
+			self.log.out('wine session terminated')
+
+			self.up = False
 
 
 	def __set_wine_env__(self):
@@ -183,7 +189,7 @@ class wine_session_class:
 	def __wine_python_stop__(self):
 
 		# Terminate Wine-Python
-		os.kill(self.proc_winepython.pid, signal.SIGTERM)
+		os.killpg(os.getpgid(self.proc_winepython.pid), signal.SIGTERM)
 
 		# HACK wait for its destructor
 		time.sleep(1) # seconds
@@ -194,6 +200,8 @@ class wine_session_class:
 		# Killing the server requires two signals as specified in the man page
 		os.kill(self.proc_wineserver.pid, signal.SIGINT)
 		os.kill(self.proc_wineserver.pid, signal.SIGKILL)
+		# os.killpg(os.getpgid(self.proc_wineserver.pid), signal.SIGINT)
+		# os.killpg(os.getpgid(self.proc_wineserver.pid), signal.SIGKILL)
 
 
 	def translate_path_unix2win(self, path):
