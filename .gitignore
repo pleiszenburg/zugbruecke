@@ -92,3 +92,7 @@ ENV/
 win32-*
 win64-*
 *.dll
+
+# Logging
+*_err.txt
+*_out.txt
