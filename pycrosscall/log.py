@@ -156,7 +156,8 @@ class log_class:
 		self.server = SimpleXMLRPCServer(
 			("localhost", self.p['port_unix']),
 			requestHandler = RequestHandler,
-			allow_none = True
+			allow_none = True,
+			logRequests = False
 			)
 
 		# Register functions
