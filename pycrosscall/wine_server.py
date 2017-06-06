@@ -6,6 +6,7 @@
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+import argparse
 # import atexit
 import os
 # import signal
@@ -67,7 +68,7 @@ class SimpleXMLRPCServer_ALT(SimpleXMLRPCServer):
 class wine_server_class:
 
 
-	def __init__(self, session_id):
+	def __init__(self, session_id, session_port_in, session_port_out):
 
 		self.id = session_id
 		self.log = log_class(self.id, parameter = {
@@ -86,7 +87,7 @@ class wine_server_class:
 		# signal.signal(signal.SIGTERM, self.__terminate__)
 
 		# Create server
-		self.server = SimpleXMLRPCServer_ALT(("localhost", 8000), requestHandler = RequestHandler)
+		self.server = SimpleXMLRPCServer_ALT(("localhost", session_port_in), requestHandler = RequestHandler)
 		self.server.set_log(self.log)
 		self.server.set_parent_terminate_func(self.__terminate__)
 
@@ -125,8 +126,22 @@ class wine_server_class:
 
 if __name__ == '__main__':
 
-	if len(sys.argv) > 1:
-		print('SESSION ID: "%s"' % sys.argv[1])
-		session = wine_server_class(sys.argv[1]) # HACK replace with arg parsing and switch
-	else:
-		print('ERROR: no session id passed') # TODO raise error
+	#try:
+
+		parser = argparse.ArgumentParser()
+		parser.add_argument(
+			'--id', type = str, nargs = 1
+			)
+		parser.add_argument(
+			'--port_in', type = int, nargs = 1
+			)
+		parser.add_argument(
+			'--port_out', type = int, nargs = 1
+			)
+		args = parser.parse_args()
+
+		session = wine_server_class(args.id[0], args.port_in[0], args.port_out[0])
+
+	# except:
+	#
+	# 	print('ERROR: arguments') # TODO raise error
