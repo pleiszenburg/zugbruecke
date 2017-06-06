@@ -8,9 +8,9 @@
 
 # import atexit
 import os
-import signal
+# import signal
 import sys
-import threading
+# import threading
 from xmlrpc.server import SimpleXMLRPCServer
 from xmlrpc.server import SimpleXMLRPCRequestHandler
 
@@ -82,8 +82,8 @@ class wine_server_class:
 
 		# Register session destructur
 		# atexit.register(self.__terminate__)
-		signal.signal(signal.SIGINT, self.__terminate__)
-		signal.signal(signal.SIGTERM, self.__terminate__)
+		# signal.signal(signal.SIGINT, self.__terminate__)
+		# signal.signal(signal.SIGTERM, self.__terminate__)
 
 		# Create server
 		self.server = SimpleXMLRPCServer_ALT(("localhost", 8000), requestHandler = RequestHandler)

@@ -44,6 +44,7 @@ class wine_session_class:
 	# flow control routine for setting things up, called once from init
 	def __session_start__(self):
 
+		# Session is up
 		self.up = True
 
 		# Get location of this script file
@@ -79,6 +80,7 @@ class wine_session_class:
 			# Log status
 			self.log.out('wine session terminated')
 
+			# Session is down
 			self.up = False
 
 
