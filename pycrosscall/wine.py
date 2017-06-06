@@ -6,14 +6,11 @@
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 import os
-from queue import Queue
 import signal
 import subprocess
 import sys
-from threading import Thread
+import threading
 import time
-
-import psutil
 
 from .lib import get_location_of_file
 
@@ -60,7 +57,7 @@ class wine_session_class:
 		# Start wine server
 		self.__wine_server_start__()
 
-		# Start wine python, no wait ...
+		# Start wine python
 		self.__wine_python_start__(self.__compile_wine_python_command__())
 
 
@@ -133,15 +130,17 @@ class wine_session_class:
 			]
 
 
-	def __read_output_from_pipe__(self, pipe, funcs):
+	def __read_output_from_pipe__(self, pipe, func):
 
 		for line in iter(pipe.readline, b''):
-			for func in funcs:
-				func(line.decode('utf-8'))
+			func(line.decode('utf-8'), 'async')
 		pipe.close()
 
 
 	def __wine_python_start__(self, command_list):
+
+		# Log status
+		self.log.out('wine-python command: ' + ' '.join(command_list))
 
 		# Fire up Wine-Python process
 		self.proc_winepython = subprocess.Popen(
@@ -158,35 +157,24 @@ class wine_session_class:
 		# Status log
 		self.log.out('wine-python started with PID %d' % self.proc_winepython.pid)
 
-
-		# print([p for p in psutil.process_iter() if self.id in p.cmdline()])
-		# self.proc_python = [p for p in psutil.process_iter() if self.id in p.cmdline()][0]
-		# print(self.proc_python)
-
-
-		q = Queue()
-
-		stdout_thread = Thread(
-			target = self.__read_output_from_pipe__, args = (self.proc_winepython.stdout, [q.put, self.log.out])
+		self.thread_winepython_out = threading.Thread(
+			target = self.__read_output_from_pipe__,
+			args = (self.proc_winepython.stdout, self.log.out)
+			)
+		self.thread_winepython_err = threading.Thread(
+			target = self.__read_output_from_pipe__,
+			args = (self.proc_winepython.stderr, self.log.err)
 			)
 
-		stderr_thread = Thread(
-			target = self.__read_output_from_pipe__, args = (self.proc_winepython.stderr, [q.put, self.log.err])
-			)
-
-		for t in (stdout_thread, stderr_thread):
+		for t in (self.thread_winepython_out, self.thread_winepython_err):
 			t.daemon = True
 			t.start()
 
-		self.proc_winepython.wait()
-
-		for t in (stdout_thread, stderr_thread):
-			t.join()
-
-		q.put(None)
-
 
 	def __wine_python_stop__(self):
+
+		for t in (self.thread_winepython_out, self.thread_winepython_err):
+			t.join()
 
 		# Terminate Wine-Python
 		os.killpg(os.getpgid(self.proc_winepython.pid), signal.SIGTERM)

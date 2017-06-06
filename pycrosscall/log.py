@@ -7,6 +7,7 @@
 
 import json
 import re
+import sys
 import time
 
 
@@ -37,8 +38,8 @@ class log_class:
 		# Open logfiles
 		if self.p['logwrite']:
 			self.f = {}
-			self.f['out'] = open('%s_%s.txt' % (self.p['platform'], 'out'), 'w+')
-			self.f['err'] = open('%s_%s.txt' % (self.p['platform'], 'err'), 'w+')
+			self.f['out'] = open('%s_%s.txt' % (self.p['platform'], 'out'), 'w+', buffering = 1)
+			self.f['err'] = open('%s_%s.txt' % (self.p['platform'], 'err'), 'w+', buffering = 1)
 
 
 	def terminate(self):
@@ -73,13 +74,19 @@ class log_class:
 
 		for message_item in messages:
 			if self.p['std' + message_item['pipe']]:
-				print('%s (%s @ %.2f) %s: %s' % (
+				message_string = '%s (%s @ %.2f) %s: %s\n' % (
 					message_item['platform'],
 					message_item['id'],
 					message_item['time'],
 					message_item['pipe'],
-					message_item['cnt'])
+					message_item['cnt']
 					)
+				if message_item['pipe'] == 'out':
+					sys.stdout.write(message_string)
+				elif message_item['pipe'] == 'err':
+					sys.stderr.write(message_string)
+				else:
+					raise # TODO
 
 
 	def __store_messages__(self, messages):
@@ -103,11 +110,17 @@ class log_class:
 			self.__store_messages__(message_dict_list)
 
 
-	def out(self, message):
+	def out(self, message, source = ''):
+
+		if source != '':
+			print('out ' + message)
 
 		self.__process_message__(message, 'out')
 
 
-	def err(self, message):
+	def err(self, message, source = ''):
+
+		if source != '':
+			print('err ' + message)
 
 		self.__process_message__(message, 'err')
