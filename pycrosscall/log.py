@@ -10,6 +10,57 @@ import re
 import sys
 import time
 
+import xmlrpc.client
+from xmlrpc.server import SimpleXMLRPCServer
+from xmlrpc.server import SimpleXMLRPCRequestHandler
+
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# SERVER CLASS(ES)
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+class RequestHandler(SimpleXMLRPCRequestHandler):
+
+
+	# Restrict to a particular path.
+	rpc_paths = ('/RPC2',)
+
+
+class SimpleXMLRPCServer_ALT(SimpleXMLRPCServer):
+
+
+	up = True
+
+
+	def set_log(self, log):
+
+		# Set log
+		self.log = log
+
+		# Status log
+		self.log.out('Logging-XMLRPCServer log connected')
+
+
+	def set_parent_terminate_func(self, func):
+
+		# Set function in parent, which needs to be called on shutdown
+		self.parent_terminate_func = func
+
+
+	def shutdown(self):
+
+		self.up = False
+		self.log.out('XMLRPCServer shutting down ...')
+		self.parent_terminate_func()
+		return 1
+
+
+	def serve_forever(self):
+
+		while self.up:
+			self.handle_request()
+		self.log.out('XMLRPCServer terminated')
+
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # LOG CLASS
@@ -40,6 +91,14 @@ class log_class:
 			self.f = {}
 			self.f['out'] = '%s_%s.txt' % (self.p['platform'], 'out')
 			self.f['err'] = '%s_%s.txt' % (self.p['platform'], 'err')
+
+		# Fire up server if required
+		if self.p['log_server']:
+			self.__start_server__()
+
+		# Fire up client if required
+		if self.p['remote_log']:
+			self.__start_client__()
 
 
 	def terminate(self):
@@ -109,6 +168,16 @@ class log_class:
 
 
 	def __receive_messages_from_client__(self, messages):
+
+		pass
+
+
+	def __start_client__(self):
+
+		self.client = xmlrpc.client.ServerProxy('http://localhost:%d' % self.p['port_unix'])
+
+
+	def __start_server__(self):
 
 		pass
 

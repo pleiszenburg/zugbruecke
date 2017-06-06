@@ -77,7 +77,8 @@ class wine_server_class:
 			'stderr': True,
 			'logwrite': True,
 			'remote_log': True,
-			'remote_log_port': session_port_out
+			'log_server': False,
+			'port_unix': session_port_out
 			})
 
 		# Session is up
@@ -131,22 +132,16 @@ class wine_server_class:
 
 if __name__ == '__main__':
 
-	try:
+	parser = argparse.ArgumentParser()
+	parser.add_argument(
+		'--id', type = str, nargs = 1
+		)
+	parser.add_argument(
+		'--port_in', type = int, nargs = 1
+		)
+	parser.add_argument(
+		'--port_out', type = int, nargs = 1
+		)
+	args = parser.parse_args()
 
-		parser = argparse.ArgumentParser()
-		parser.add_argument(
-			'--id', type = str, nargs = 1
-			)
-		parser.add_argument(
-			'--port_in', type = int, nargs = 1
-			)
-		parser.add_argument(
-			'--port_out', type = int, nargs = 1
-			)
-		args = parser.parse_args()
-
-		session = wine_server_class(args.id[0], args.port_in[0], args.port_out[0])
-
-	except:
-
-		print('ERROR: arguments') # TODO raise error
+	session = wine_server_class(args.id[0], args.port_in[0], args.port_out[0])
