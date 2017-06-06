@@ -130,8 +130,8 @@ class wine_session_class:
 			os.path.join(self.dir_python, 'python.exe'),
 			"%s\\wine_server.py" % self.dir_thisfile_wine,
 			'--id', self.id,
-			'--port_in', str(8000), # TODO
-			'--port_out', str(8001) # TODO
+			'--port_in', str(self.p['port_wine']),
+			'--port_out', str(self.p['port_unix'])
 			]
 
 
@@ -162,7 +162,8 @@ class wine_session_class:
 		# Status log
 		self.log.out('wine-python started with PID %d' % self.proc_winepython.pid)
 
-		# Prepare threads for stdout and stderr capturing
+		# Prepare threads for stdout and stderr capturing of Wine
+		# BUG does not capture stdout from windows binaries (running with Wine) most of the time
 		self.thread_winepython_out = threading.Thread(
 			target = self.__read_output_from_pipe__,
 			args = (self.proc_winepython.stdout, self.log.out),

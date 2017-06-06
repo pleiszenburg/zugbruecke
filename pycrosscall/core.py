@@ -76,9 +76,20 @@ class session_class():
 		if 'logwrite' not in self.p.keys():
 			self.p['logwrite'] = False
 
+		# Port for xmlrpc server on Unix
+		self.p['port_unix'] = 8001
+
+		# Port for xmlrpc server on Wine
+		self.p['port_wine'] = 8000
+
+		# Open server for collected logs from clients
+		self.p['log_server'] = True
+
+		# Open server for collected logs from clients
+		self.p['log_server'] = True
+
 		# Send log messages to remove sever
-		if 'remote_log' not in self.p.keys():
-			self.p['remote_log'] = False
+		self.p['remote_log'] = False
 
 		# Define Wine & Wine-Python architecture
 		if 'arch' not in self.p.keys():
