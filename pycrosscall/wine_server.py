@@ -126,7 +126,7 @@ class wine_server_class:
 
 if __name__ == '__main__':
 
-	#try:
+	try:
 
 		parser = argparse.ArgumentParser()
 		parser.add_argument(
@@ -142,6 +142,6 @@ if __name__ == '__main__':
 
 		session = wine_server_class(args.id[0], args.port_in[0], args.port_out[0])
 
-	# except:
-	#
-	# 	print('ERROR: arguments') # TODO raise error
+	except:
+
+		print('ERROR: arguments') # TODO raise error
