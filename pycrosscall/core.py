@@ -55,7 +55,6 @@ class session_class():
 		self.log.out('pycrosscall imported')
 
 
-	# Replaces the original LoadLibrary function for windll (TODO cdll, oledll)
 	def LoadLibrary(self, dll_name, dll_type = 'windll'):
 
 		# Get full path of dll
@@ -66,13 +65,11 @@ class session_class():
 
 			raise # TODO
 
-		else:
+		# Simplyfy full path
+		full_path_dll = os.path.abspath(full_path_dll)
 
-			# Simplyfy full path
-			full_path_dll = os.path.abspath(full_path_dll)
-
-			# Log status
-			self.log.out('Accessing dll "%s" - exists.' % full_path_dll)
+		# Log status
+		self.log.out('Accessing dll "%s" - exists.' % full_path_dll)
 
 		# Check whether dll has yet not been touched
 		if full_path_dll not in self.dll_dict.keys():

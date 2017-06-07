@@ -9,5 +9,7 @@ sys.path.insert(0, pycrosscall_path)
 from pycrosscall import ctypes
 _call_demo_routine_ = ctypes.windll.LoadLibrary('demo_dll.dll').demo_routine
 print('Loaded!')
+_call_demo_routine_(20)
+print('Called!')
 
 time.sleep(8)

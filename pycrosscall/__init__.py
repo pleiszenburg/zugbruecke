@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Load windll_class for minicing ctypes.windll eventually, make it private
+# Load windll_class for mimicing ctypes.windll eventually, make it private
 from .core import windll_class as __windll_class__
 
 # Set up and expose windll, starting session while doing so
