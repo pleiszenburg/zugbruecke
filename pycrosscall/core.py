@@ -155,18 +155,18 @@ class session_class():
 # WINDLL CLASS
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-class windll_class():
+class windll_class(): # Mimic ctypes.windll
 
 
 	def __init__(self):
 
-		# Not yet up
+		# Session not yet up
 		self.up = False
 
 
 	def start_session(self):
 
-		# Check if session is up. If not, start it
+		# Session not yet up?
 		if not self.up:
 
 			# Fire up a new session
@@ -178,7 +178,7 @@ class windll_class():
 
 	def LoadLibrary(self, name):
 
-		# Check if session is up
+		# Session not yet up?
 		if not self.up:
 
 			# Fire up session
