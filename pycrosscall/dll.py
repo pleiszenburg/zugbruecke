@@ -26,6 +26,9 @@ class dll_session_class(): # Mimic ctypes.WinDLL. Representing one idividual dll
 		# Store pointer to pycrosscall session
 		self.__session__ = parent_session
 
+		# For convenience ...
+		self.__client__ = self.__session__.wine_session.client
+
 		# Start dict for dll routines
 		self.__dll_routines__ = {}
 
@@ -38,7 +41,15 @@ class dll_session_class(): # Mimic ctypes.WinDLL. Representing one idividual dll
 		# Is routine unknown?
 		if name not in self.__dll_routines__.keys():
 
-			# Look for routine in dll
+			# Log status
+			self.__session__.log.out('Routine not yet in list. Registering ...')
+
+			# Register routine in wine
+			result = self.__client__.register_routine(name)
+
+			# Log status
+			self.__session__.log.out('Feedback from wine: %d' % result)
+
 			# TODO CALL TO WINE
 			# Raise exception if not found
 

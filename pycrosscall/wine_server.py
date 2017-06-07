@@ -50,14 +50,17 @@ class SimpleXMLRPCServer_ALT(SimpleXMLRPCServer):
 
 	def shutdown(self):
 
-		# Sever is marked down
-		self.up = False
+		# Run only if session still up
+		if self.up:
 
-		# Log status
-		self.log.out('XMLRPCServer shutting down ...')
+			# Log status
+			self.log.out('XMLRPCServer shutting down ...')
 
-		# Tell parent to terminate
-		self.parent_terminate_func()
+			# Sever is marked down
+			self.up = False
+
+			# Tell parent to terminate
+			self.parent_terminate_func()
 
 		# Return success, expected default behavior of SimpleXMLRPCServer
 		return 1
@@ -104,14 +107,20 @@ class wine_server_class:
 		# Status log
 		self.log.out('Wine-Python up')
 
+		# Start dict for dll routines
+		self.dll_routines = {}
+
 		# Create server
 		self.server = SimpleXMLRPCServer_ALT(("localhost", session_port_in), requestHandler = RequestHandler)
 		self.server.set_log(self.log)
 		self.server.set_parent_terminate_func(self.__terminate__)
 
-		# Register infrastructure functions
+		# Allow inspection of routines offered by server
 		self.server.register_introspection_functions()
-		self.server.register_function(self.server.shutdown, 'terminate') # Call goes into xmlrpc-server first, which then terminates parent
+		# Register destructur: Call goes into xmlrpc-server first, which then terminates parent
+		self.server.register_function(self.server.shutdown, 'terminate')
+		# Register call for registering dll calls
+		self.server.register_function(self.__register_routine__, 'register_routine')
 
 		# TODO register more functions
 
@@ -120,6 +129,16 @@ class wine_server_class:
 
 		# Run server ...
 		self.server.serve_forever()
+
+
+	def __register_routine__(self, routine_name):
+
+		# Log status
+		self.log.out('Trying to access "%s"' % routine_name)
+
+		# self.dll_routines
+
+		return 1 # Success: 1; Fail: 0
 
 
 	def __terminate__(self):
