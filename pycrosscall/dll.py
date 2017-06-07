@@ -6,7 +6,7 @@
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 from functools import partial
-from pprint import pformat as pf
+# from pprint import pformat as pf
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -39,20 +39,26 @@ class dll_session_class(): # Mimic ctypes.WinDLL. Representing one idividual dll
 		if name not in self.__dll_routines__.keys():
 
 			# Look for routine in dll
-			# CALL TO WINE
+			# TODO CALL TO WINE
 			# Raise exception if not found
 
 			# Add to routine dict
-			self.__dll_routines__[name] = {}
+			self.__dll_routines__[name] = {
+				'call_handler': partial(self.__handle_call__, __routine_name__ = name)
+				}
 
 		# Return handler
-		return partial(self.__handle_call__, __routine_name__ = name)
+		return self.__dll_routines__[name]['call_handler']
 
 
 	def __handle_call__(self, *args, **kw):
 
+		# Store routine name
 		routine_name = kw['__routine_name__']
+
+		# Delete routine name from call parameters
 		del kw['__routine_name__']
 
+		# Log status
 		self.__session__.log.out('trying to call dll routine: %s' % routine_name)
 		self.__session__.log.out('... parameters: %r / %r' % (args, kw))
