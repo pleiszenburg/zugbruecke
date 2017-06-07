@@ -1,9 +1,19 @@
 # -*- coding: utf-8 -*-
 
-# Expose session class to user
-from .core import session_class as session
+# Load windll_class for minicing ctypes.windll eventually, make it private
+from .core import windll_class as __windll_class__
 
-# Expose windll and patched ctypes to user
-from .core import windll_class
+# Set up and expose windll, starting session while doing so
+windll = __windll_class__()
+
+# Import and expose ctypes
 import ctypes
-ctypes.windll = windll_class()
+
+# Patching ctypes
+ctypes.windll = windll
+
+# Exposing LoadLibrary from running session for direct import
+LoadLibrary = windll.LoadLibrary
+
+# Expose session class for advanced users and tests
+from .core import session_class as session

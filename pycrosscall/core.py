@@ -13,6 +13,7 @@ import signal
 from .wine import wine_session_class
 from .lib import generate_session_id
 from .log import log_class
+from .dll import dll_session_class
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -39,6 +40,9 @@ class session_class():
 		# Initialize Wine session
 		self.wine_session = wine_session_class(self.id, self.p, self.log)
 
+		# Set up a dict for loaded dlls
+		self.dll_dict = {}
+
 		# Mark session as up
 		self.up = True
 
@@ -52,13 +56,34 @@ class session_class():
 
 
 	# Replaces the original LoadLibrary function for windll (TODO cdll, oledll)
-	def LoadLibrary(self, name, dll_type = 'windll'):
+	def LoadLibrary(self, dll_name, dll_type = 'windll'):
 
-		# Check if file exists
-		if not os.path.isfile(os.path.join(self.dir_cwd, name)):
+		# Get full path of dll
+		full_path_dll = os.path.join(self.dir_cwd, dll_name)
+
+		# Check if dll file exists
+		if not os.path.isfile(full_path_dll):
+
 			raise # TODO
+
 		else:
-			self.log.out('Accessing dll %s - exists.' % name)
+
+			# Simplyfy full path
+			full_path_dll = os.path.abspath(full_path_dll)
+
+			# Log status
+			self.log.out('Accessing dll "%s" - exists.' % full_path_dll)
+
+		# Check whether dll has yet not been touched
+		if full_path_dll not in self.dll_dict.keys():
+
+			# Fire up new dll object
+			self.dll_dict[full_path_dll] = dll_session_class(
+				full_path_dll, dll_name, dll_type, self
+				)
+
+		# Return reference on existing dll object
+		return self.dll_dict[full_path_dll]
 
 
 	def terminate(self):
@@ -127,20 +152,19 @@ class session_class():
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# PATCHED CTYPES
+# WINDLL CLASS
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-class __generic_dll__():
+class windll_class():
 
 
 	def __init__(self):
 
-		self.session = session_class()
-
-
-class windll_class(__generic_dll__):
+		# Fire up a new session
+		self.__session__ = session_class()
 
 
 	def LoadLibrary(self, name):
 
-		return self.session.LoadLibrary(name, dll_type = 'windll')
+		# Return a DLL instance object from within the session
+		return self.__session__.LoadLibrary(dll_name = name, dll_type = 'windll')
