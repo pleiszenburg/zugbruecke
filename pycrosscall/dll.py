@@ -32,6 +32,12 @@ class dll_session_class(): # Mimic ctypes.WinDLL. Representing one idividual dll
 		# Start dict for dll routines
 		self.__dll_routines__ = {}
 
+		# Translate dll's full path into wine path
+		self.__dll_full_path_wine__ = self.__session__.wine_session.translate_path_unix2win(self.__dll_full_path__)
+
+		# Tell wine about the dll and its type
+		result = self.__client__.access_dll(self.__dll_full_path_wine__, self.__dll_name__, self.__dll_type__)
+
 
 	def __getattr__(self, name): # Handle requests for functions in dll which have yet not been touched
 

@@ -117,18 +117,27 @@ class wine_server_class:
 
 		# Allow inspection of routines offered by server
 		self.server.register_introspection_functions()
+
+		# Register call: Accessing a dll
+		self.server.register_function(self.__access_dll__, 'access_dll')
+		# Register call: Registering dll calls
+		self.server.register_function(self.__register_routine__, 'register_routine')
 		# Register destructur: Call goes into xmlrpc-server first, which then terminates parent
 		self.server.register_function(self.server.shutdown, 'terminate')
-		# Register call for registering dll calls
-		self.server.register_function(self.__register_routine__, 'register_routine')
-
-		# TODO register more functions
 
 		# Status log
 		self.log.out('XMLRPCServer starting ...')
 
 		# Run server ...
 		self.server.serve_forever()
+
+
+	def __access_dll__(self, full_path_dll, dll_name, dll_type):
+
+		# Log status
+		self.log.out('Attaching to "%s" of type %s (%s)' % (dll_name, dll_type, full_path_dll))
+
+		return 1
 
 
 	def __register_routine__(self, routine_name):
