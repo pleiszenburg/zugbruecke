@@ -35,6 +35,11 @@ class dll_session_class(): # Mimic ctypes.WinDLL. Representing one idividual dll
 		# Translate dll's full path into wine path
 		self.__dll_full_path_wine__ = self.__session__.wine_session.translate_path_unix2win(self.__dll_full_path__)
 
+		# Status log
+		self.__session__.log.out('Pushing data to wine: "%s" of type %s (%s)' % (
+			self.__dll_name__, self.__dll_type__, self.__dll_full_path_wine__
+			))
+
 		# Tell wine about the dll and its type
 		result = self.__client__.access_dll(self.__dll_full_path_wine__, self.__dll_name__, self.__dll_type__)
 

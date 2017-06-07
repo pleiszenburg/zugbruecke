@@ -7,6 +7,7 @@
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 import argparse
+import ctypes
 import os
 import sys
 from xmlrpc.server import SimpleXMLRPCServer
@@ -107,8 +108,8 @@ class wine_server_class:
 		# Status log
 		self.log.out('Wine-Python up')
 
-		# Start dict for dll routines
-		self.dll_routines = {}
+		# Start dict for dll files and routines
+		self.dll_dict = {}
 
 		# Create server
 		self.server = SimpleXMLRPCServer_ALT(("localhost", session_port_in), requestHandler = RequestHandler)
@@ -134,10 +135,33 @@ class wine_server_class:
 
 	def __access_dll__(self, full_path_dll, dll_name, dll_type):
 
-		# Log status
-		self.log.out('Attaching to "%s" of type %s (%s)' % (dll_name, dll_type, full_path_dll))
+		# Although this should happen only once per dll, lets be on the safe side
+		if full_path_dll not in self.dll_dict.keys():
 
-		return 1
+			# Log status
+			self.log.out('Attaching to "%s" of type %s (%s) ...' % (dll_name, dll_type, full_path_dll))
+
+			try:
+
+				# Load library TODO do this for different types of dlls (cdll, oledll)
+				self.dll_dict[full_path_dll] = {
+					'type': dll_type,
+					'name': dll_name,
+					'full_path': full_path_dll,
+					'handler': ctypes.windll.LoadLibrary(full_path_dll)
+					}
+
+				# Log status
+				self.log.out(' ... done.')
+
+			except:
+
+				# Log status
+				self.log.out(' ... failed!')
+
+				return 0
+
+		return 1 # Success: 1; Fail: 0
 
 
 	def __register_routine__(self, routine_name):
@@ -145,7 +169,7 @@ class wine_server_class:
 		# Log status
 		self.log.out('Trying to access "%s"' % routine_name)
 
-		# self.dll_routines
+		# self.dll_dict
 
 		return 1 # Success: 1; Fail: 0
 
