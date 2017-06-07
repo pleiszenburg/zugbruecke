@@ -160,11 +160,29 @@ class windll_class():
 
 	def __init__(self):
 
-		# Fire up a new session
-		self.__session__ = session_class()
+		# Not yet up
+		self.up = False
+
+
+	def start_session(self):
+
+		# Check if session is up. If not, start it
+		if not self.up:
+
+			# Fire up a new session
+			self.__session__ = session_class()
+
+			# Mark session as up
+			self.up = True
 
 
 	def LoadLibrary(self, name):
+
+		# Check if session is up
+		if not self.up:
+
+			# Fire up session
+			self.start_session()
 
 		# Return a DLL instance object from within the session
 		return self.__session__.LoadLibrary(dll_name = name, dll_type = 'windll')
