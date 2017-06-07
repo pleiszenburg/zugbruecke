@@ -41,7 +41,9 @@ class dll_session_class(): # Mimic ctypes.WinDLL. Representing one idividual dll
 			))
 
 		# Tell wine about the dll and its type
-		result = self.__client__.access_dll(self.__dll_full_path_wine__, self.__dll_name__, self.__dll_type__)
+		result = self.__client__.access_dll(
+			self.__dll_full_path_wine__, self.__dll_full_path__, self.__dll_name__, self.__dll_type__
+			)
 
 		# Raise error if last step failed
 		if result == 0:

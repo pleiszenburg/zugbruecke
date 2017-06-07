@@ -133,7 +133,7 @@ class wine_server_class:
 		self.server.serve_forever()
 
 
-	def __access_dll__(self, full_path_dll, dll_name, dll_type):
+	def __access_dll__(self, full_path_dll, full_path_dll_unix, dll_name, dll_type):
 
 		# Although this should happen only once per dll, lets be on the safe side
 		if full_path_dll not in self.dll_dict.keys():
@@ -144,7 +144,7 @@ class wine_server_class:
 			try:
 
 				# Load library TODO do this for different types of dlls (cdll, oledll)
-				self.dll_dict[full_path_dll] = {
+				self.dll_dict[full_path_dll_unix] = {
 					'type': dll_type,
 					'name': dll_name,
 					'full_path': full_path_dll,
