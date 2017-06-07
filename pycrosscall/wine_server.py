@@ -111,7 +111,7 @@ class wine_server_class:
 
 		# Register infrastructure functions
 		self.server.register_introspection_functions()
-		self.server.register_function(self.server.shutdown, 'terminate')
+		self.server.register_function(self.server.shutdown, 'terminate') # Call goes into xmlrpc-server first, which then terminates parent
 
 		# TODO register more functions
 
