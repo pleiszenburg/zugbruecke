@@ -12,7 +12,7 @@
 # LOADLIBRARY CLASS
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-class dll_session_class(): # Representing one idividual dll to be called into
+class dll_session_class(): # Representing one idividual dll to be called into, returned by LoadLibrary
 
 
 	def __init__(self, full_path_dll, dll_name, dll_type, parent_session):
