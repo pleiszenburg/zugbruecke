@@ -7,11 +7,8 @@
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 import argparse
-# import atexit
 import os
-# import signal
 import sys
-# import threading
 from xmlrpc.server import SimpleXMLRPCServer
 from xmlrpc.server import SimpleXMLRPCRequestHandler
 
@@ -19,7 +16,7 @@ from log import log_class # HACK pass messages to UNIX
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# ROUTINES
+# XMLRPC SERVER CLASSES
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 class RequestHandler(SimpleXMLRPCRequestHandler):
@@ -32,6 +29,7 @@ class RequestHandler(SimpleXMLRPCRequestHandler):
 class SimpleXMLRPCServer_ALT(SimpleXMLRPCServer):
 
 
+	# Server is by definition up from the beginning
 	up = True
 
 
@@ -52,25 +50,44 @@ class SimpleXMLRPCServer_ALT(SimpleXMLRPCServer):
 
 	def shutdown(self):
 
+		# Sever is marked down
 		self.up = False
+
+		# Log status
 		self.log.out('XMLRPCServer shutting down ...')
+
+		# Tell parent to terminate
 		self.parent_terminate_func()
+
+		# Return success, expected default behavior of SimpleXMLRPCServer
 		return 1
 
 
 	def serve_forever(self):
 
+		# Request handler loop
 		while self.up:
+
+			# Handle requests ...
 			self.handle_request()
+
+		# Log status
 		self.log.out('XMLRPCServer terminated')
 
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# WINE SERVER CLASS
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 class wine_server_class:
 
 
 	def __init__(self, session_id, session_port_in, session_port_out):
 
+		# Store session id
 		self.id = session_id
+
+		# Start logging session and connect it with log on unix side
 		self.log = log_class(self.id, parameter = {
 			'platform': 'WINE',
 			'stdout': False,
@@ -81,25 +98,22 @@ class wine_server_class:
 			'port_unix': session_port_out
 			})
 
-		# Session is up
+		# Mark session as up
 		self.up = True
 
 		# Status log
 		self.log.out('Wine-Python up')
-
-		# Register session destructur
-		# atexit.register(self.__terminate__)
-		# signal.signal(signal.SIGINT, self.__terminate__)
-		# signal.signal(signal.SIGTERM, self.__terminate__)
 
 		# Create server
 		self.server = SimpleXMLRPCServer_ALT(("localhost", session_port_in), requestHandler = RequestHandler)
 		self.server.set_log(self.log)
 		self.server.set_parent_terminate_func(self.__terminate__)
 
-		# TODO register functions
+		# Register infrastructure functions
 		self.server.register_introspection_functions()
 		self.server.register_function(self.server.shutdown, 'terminate')
+
+		# TODO register more functions
 
 		# Status log
 		self.log.out('XMLRPCServer starting ...')
@@ -132,6 +146,7 @@ class wine_server_class:
 
 if __name__ == '__main__':
 
+	# Parse arguments comming from unix side
 	parser = argparse.ArgumentParser()
 	parser.add_argument(
 		'--id', type = str, nargs = 1
@@ -144,4 +159,5 @@ if __name__ == '__main__':
 		)
 	args = parser.parse_args()
 
+	# Fire up wine server session with parsed parameters
 	session = wine_server_class(args.id[0], args.port_in[0], args.port_out[0])
