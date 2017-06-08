@@ -5,8 +5,9 @@
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+import ctypes
 from functools import partial
-# from pprint import pformat as pf
+from pprint import pformat as pf
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -73,7 +74,10 @@ class dll_session_class(): # Mimic ctypes.WinDLL. Representing one idividual dll
 
 			# Add to routine dict
 			self.__dll_routines__[name] = {
-				'call_handler': partial(self.__handle_call__, __routine_name__ = name)
+				'call_handler': partial(self.__handle_call__, __routine_name__ = name),
+				'called': False,
+				'argtypes': [], # By default, assume no arguments
+				'restype': ctypes.c_void_p # By default, assume no return value
 				}
 
 		# Return handler
@@ -83,11 +87,25 @@ class dll_session_class(): # Mimic ctypes.WinDLL. Representing one idividual dll
 	def __handle_call__(self, *args, **kw):
 
 		# Store routine name
-		routine_name = kw['__routine_name__']
+		name = kw['__routine_name__']
 
 		# Delete routine name from call parameters
 		del kw['__routine_name__']
 
+		# Has this routine ever been called?
+		if not self.__dll_routines__[name]['called']:
+
+			# Processing argument and return value types on first call # TODO proper sanity check
+			try:
+				self.__dll_routines__[name]['argtypes'] = self.__dll_routines__[name]['call_handler'].argtypes
+			except:
+				pass
+			try:
+				self.__dll_routines__[name]['restype'] = self.__dll_routines__[name]['call_handler'].restype
+			except:
+				pass
+			self.__session__.log.out(pf(self.__dll_routines__[name]))
+
 		# Log status
-		self.__session__.log.out('trying to call dll routine: %s' % routine_name)
+		self.__session__.log.out('trying to call dll routine: %s' % name)
 		self.__session__.log.out('... parameters: %r / %r' % (args, kw))
