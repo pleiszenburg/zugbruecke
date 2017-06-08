@@ -26,7 +26,12 @@ struct test
 	int8_t el_int8t_2x3[2][3];
 };
 
-void __stdcall DEMOROUTINE_DUMP demo_routine(
+float __stdcall DEMOROUTINE_DUMP simple_demo_routine(
+	float param_a,
+	float param_b
+	);
+
+void __stdcall DEMOROUTINE_DUMP complex_demo_routine(
 	char *param_char_p,
 	int param_int,
 	struct test *param_struct_test_p
