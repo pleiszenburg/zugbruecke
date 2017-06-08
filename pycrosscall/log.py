@@ -111,14 +111,13 @@ class log_class:
 
 		for line in message.split('\n'):
 			if line.strip() != '':
-				for line_chunk in re.findall('.{1,%d}' % message_line_max, line):
-					message_lines.append({
-						'platform': self.p['platform'],
-						'id': self.id,
-						'time': round(time.time(), 2),
-						'pipe': pipe_name,
-						'cnt': line_chunk
-						})
+				message_lines.append({
+					'platform': self.p['platform'],
+					'id': self.id,
+					'time': round(time.time(), 2),
+					'pipe': pipe_name,
+					'cnt': line
+					})
 
 		return message_lines
 

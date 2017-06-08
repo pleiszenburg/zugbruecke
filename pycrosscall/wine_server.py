@@ -40,7 +40,7 @@ class SimpleXMLRPCServer_ALT(SimpleXMLRPCServer):
 		self.log = log
 
 		# Status log
-		self.log.out('XMLRPCServer log connected')
+		self.log.out('log-xmlrpc-server connected')
 
 
 	def set_parent_terminate_func(self, func):
@@ -55,7 +55,7 @@ class SimpleXMLRPCServer_ALT(SimpleXMLRPCServer):
 		if self.up:
 
 			# Log status
-			self.log.out('XMLRPCServer shutting down ...')
+			self.log.out('log-xmlrpc-server shutting down ...')
 
 			# Sever is marked down
 			self.up = False
@@ -76,7 +76,7 @@ class SimpleXMLRPCServer_ALT(SimpleXMLRPCServer):
 			self.handle_request()
 
 		# Log status
-		self.log.out('XMLRPCServer terminated')
+		self.log.out('log-xmlrpc-server terminated')
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -106,7 +106,7 @@ class wine_server_class:
 		self.up = True
 
 		# Status log
-		self.log.out('Wine-Python up')
+		self.log.out('wine-python up')
 
 		# Start dict for dll files and routines
 		self.dll_dict = {}
@@ -127,7 +127,7 @@ class wine_server_class:
 		self.server.register_function(self.server.shutdown, 'terminate')
 
 		# Status log
-		self.log.out('XMLRPCServer starting ...')
+		self.log.out('dll-xmlrpc-server starting ...')
 
 		# Run server ...
 		self.server.serve_forever()
@@ -139,7 +139,8 @@ class wine_server_class:
 		if full_path_dll not in self.dll_dict.keys():
 
 			# Log status
-			self.log.out('Attaching to "%s" of type %s (%s) ...' % (dll_name, dll_type, full_path_dll))
+			self.log.out('Attaching to "%s" of type %s ...' % (dll_name, dll_type))
+			self.log.out(' (%s)' % full_path_dll)
 
 			try:
 
@@ -199,13 +200,13 @@ class wine_server_class:
 		if self.up:
 
 			# Status log
-			self.log.out('Wine-Python terminating ...')
+			self.log.out('wine-python terminating ...')
 
 			# Terminate log
 			self.log.terminate()
 
 			# Status log
-			self.log.out('Wine-Python terminated')
+			self.log.out('wine-python terminated')
 
 			# Session down
 			self.up = False

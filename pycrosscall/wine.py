@@ -190,7 +190,7 @@ class wine_session_class:
 		self.client = xmlrpc.client.ServerProxy('http://localhost:8000')
 
 		# Log status
-		self.log.out('xmlrpc client started')
+		self.log.out('xmlrpc-client started')
 
 
 	def __wine_python_stop__(self):
