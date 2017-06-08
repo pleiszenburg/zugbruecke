@@ -148,30 +148,49 @@ class wine_server_class:
 					'type': dll_type,
 					'name': dll_name,
 					'full_path': full_path_dll,
-					'handler': ctypes.windll.LoadLibrary(full_path_dll)
+					'dll_handler': ctypes.windll.LoadLibrary(full_path_dll),
+					'method_handlers': {}
 					}
 
 				# Log status
 				self.log.out(' ... done.')
+
+				return 1 # Success
 
 			except:
 
 				# Log status
 				self.log.out(' ... failed!')
 
-				return 0
-
-		return 1 # Success: 1; Fail: 0
+				return 0 # Fail
 
 
-	def __register_routine__(self, routine_name):
+	def __register_routine__(self, full_path_dll_unix, routine_name):
 
 		# Log status
 		self.log.out('Trying to access "%s"' % routine_name)
 
-		# self.dll_dict
+		try:
 
-		return 1 # Success: 1; Fail: 0
+			# Just in case this routine is already known
+			if routine_name not in self.dll_dict[full_path_dll_unix]['method_handlers'].keys():
+
+				# Get handler on routine in dll
+				self.dll_dict[full_path_dll_unix]['method_handlers'][routine_name] = getattr(
+					self.dll_dict[full_path_dll_unix]['dll_handler'], routine_name
+					)
+
+			# Log status
+			self.log.out(' ... done.')
+
+			return 1 # Success
+
+		except:
+
+			# Log status
+			self.log.out(' ... failed!')
+
+			return 0 # Fail
 
 
 	def __terminate__(self):

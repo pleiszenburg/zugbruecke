@@ -62,7 +62,7 @@ class dll_session_class(): # Mimic ctypes.WinDLL. Representing one idividual dll
 			self.__session__.log.out('Routine not yet in list. Registering ...')
 
 			# Register routine in wine
-			result = self.__client__.register_routine(name)
+			result = self.__client__.register_routine(self.__dll_full_path__, name)
 
 			# Log status
 			self.__session__.log.out('Feedback from wine: %d' % result)
