@@ -25,6 +25,6 @@ print('Called!')
 try:
 	print('Got "%f".' % return_value)
 except:
-	pass
+	print('Got no return value!')
 
 time.sleep(8)
