@@ -103,6 +103,12 @@ class dll_session_class(): # Mimic ctypes.WinDLL. Representing one idividual dll
 		self.__session__.log.out('trying to call dll routine: %s' % name)
 		self.__session__.log.out('... parameters: %r / %r' % (args, kw))
 
+		# Parse arguments (into json and/or /dev/shm thing)
+		# Push arguments
+		# Call
+		# Receive feedback
+		# Return feedback if there is ...
+
 
 	def __set_argtype_and_restype__(self, name):
 
@@ -115,4 +121,7 @@ class dll_session_class(): # Mimic ctypes.WinDLL. Representing one idividual dll
 			self.__dll_routines__[name]['restype'] = self.__dll_routines__[name]['call_handler'].restype
 		except:
 			pass
-		self.__session__.log.out(pf(self.__dll_routines__[name]))
+
+		# Log status
+		self.__session__.log.out('Routine "%s" argtypes: %s' % (name, pf(self.__dll_routines__[name]['argtypes'])))
+		self.__session__.log.out('Routine "%s" restype: %s' % (name, pf(self.__dll_routines__[name]['restype'])))
