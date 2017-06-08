@@ -106,15 +106,13 @@ class dll_session_class(): # Mimic ctypes.WinDLL. Representing one idividual dll
 		self.__session__.log.out('trying to call dll routine: %s' % name)
 		self.__session__.log.out('... parameters: %r / %r' % (args, kw))
 
-		# # Actually call routine in DLL! TODO Handle structurs and pointers ...
-		# return_value = self.__client__.call_routine(
-		# 	self.__dll_full_path__, name, args, kw
-		# 	)
-
-		return_value = 1
+		# Actually call routine in DLL! TODO Handle structurs and pointers ...
+		return_value = self.__client__.call_dll_routine(
+			self.__dll_full_path__, name, list(args), kw
+			)
 
 		# Return something if there is something to return ... TODO improve
-		if return_value is not None:
+		if return_value != '__none_value__':
 			return return_value
 
 

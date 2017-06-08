@@ -11,6 +11,7 @@ import ctypes
 import os
 from pprint import pformat as pf
 import sys
+import traceback
 from xmlrpc.server import SimpleXMLRPCServer
 from xmlrpc.server import SimpleXMLRPCRequestHandler
 
@@ -123,7 +124,7 @@ class wine_server_class:
 		# Register call: Accessing a dll
 		self.server.register_function(self.__access_dll__, 'access_dll')
 		# Call routine with parameters and, optionally, return value
-		self.server.register_function(self.__call_routine__, 'call_routine')
+		self.server.register_function(self.__call_dll_routine__, 'call_dll_routine')
 		# Register call: Registering arguments and return value types
 		self.server.register_function(self.__register_argtype_and_restype__, 'register_argtype_and_restype')
 		# Register call: Registering dll calls
@@ -174,7 +175,7 @@ class wine_server_class:
 		return 1
 
 
-	def __call_routine__(self, full_path_dll_unix, routine_name, args, kw):
+	def __call_dll_routine__(self, full_path_dll_unix, routine_name, args, kw):
 
 		# Log status
 		self.log.out('Trying to set argument and return value types for "%s" ...' % routine_name)
@@ -182,20 +183,31 @@ class wine_server_class:
 		# Make it shorter ...
 		method = self.dll_dict[full_path_dll_unix]['method_handlers'][routine_name]
 
-		# Call into dll # TODO structs and pointers
-		if method.restype == ctypes.c_void_p:
-			method(*args, **kw)
-		else:
-			return_value = method(*args, **kw)
+		# args is passed as a list, must be a tuple
+		args = tuple(args)
+
+		# Default return value
+		return_value = '__none_value__'
+
+		# This is risky
+		try:
+
+			# Call into dll # TODO structs and pointers
+			if method.restype == ctypes.c_void_p:
+				method(*args, **kw)
+			else:
+				return_value = method(*args, **kw)
+
+		except:
+
+			# Push traceback to log
+			self.log.out(traceback.format_exc())
 
 		# Log status
 		self.log.out(' ... done.')
 
-		# If there is something to return, do it, otherwise return None
-		if method.restype == ctypes.c_void_p:
-			return None
-		else:
-			return return_value
+		# Return result
+		return return_value
 
 
 	def __register_argtype_and_restype__(self, full_path_dll_unix, routine_name, argtypes, restype):
