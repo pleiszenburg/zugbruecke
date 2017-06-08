@@ -95,17 +95,23 @@ class dll_session_class(): # Mimic ctypes.WinDLL. Representing one idividual dll
 		# Has this routine ever been called?
 		if not self.__dll_routines__[name]['called']:
 
-			# Processing argument and return value types on first call # TODO proper sanity check
-			try:
-				self.__dll_routines__[name]['argtypes'] = self.__dll_routines__[name]['call_handler'].argtypes
-			except:
-				pass
-			try:
-				self.__dll_routines__[name]['restype'] = self.__dll_routines__[name]['call_handler'].restype
-			except:
-				pass
-			self.__session__.log.out(pf(self.__dll_routines__[name]))
+			# Processing argument and return value types on first call
+			self.__set_argtype_and_restype__(name)
 
 		# Log status
 		self.__session__.log.out('trying to call dll routine: %s' % name)
 		self.__session__.log.out('... parameters: %r / %r' % (args, kw))
+
+
+	def __set_argtype_and_restype__(self, name):
+
+		# TODO proper sanity check
+		try:
+			self.__dll_routines__[name]['argtypes'] = self.__dll_routines__[name]['call_handler'].argtypes
+		except:
+			pass
+		try:
+			self.__dll_routines__[name]['restype'] = self.__dll_routines__[name]['call_handler'].restype
+		except:
+			pass
+		self.__session__.log.out(pf(self.__dll_routines__[name]))
