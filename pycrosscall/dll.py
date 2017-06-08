@@ -67,8 +67,9 @@ class dll_session_class(): # Mimic ctypes.WinDLL. Representing one idividual dll
 			# Log status
 			self.__session__.log.out('Feedback from wine: %d' % result)
 
-			# TODO CALL TO WINE
 			# Raise exception if not found
+			if result == 0:
+				raise # TODO
 
 			# Add to routine dict
 			self.__dll_routines__[name] = {
