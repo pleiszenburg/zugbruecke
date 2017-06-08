@@ -106,13 +106,16 @@ class dll_session_class(): # Mimic ctypes.WinDLL. Representing one idividual dll
 		self.__session__.log.out('trying to call dll routine: %s' % name)
 		self.__session__.log.out('... parameters: %r / %r' % (args, kw))
 
-		# Call routine in DLL
-		# call_routine()
+		# # Actually call routine in DLL! TODO Handle structurs and pointers ...
+		# return_value = self.__client__.call_routine(
+		# 	self.__dll_full_path__, name, args, kw
+		# 	)
 
-		# Push arguments
-		# Call
-		# Receive feedback
-		# Return feedback if there is ...
+		return_value = 1
+
+		# Return something if there is something to return ... TODO improve
+		if return_value is not None:
+			return return_value
 
 
 	def __push_argtype_and_restype__(self, name):

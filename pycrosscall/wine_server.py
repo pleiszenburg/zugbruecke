@@ -170,10 +170,32 @@ class wine_server_class:
 
 				return 0 # Fail
 
+		# Just in case
+		return 1
+
 
 	def __call_routine__(self, full_path_dll_unix, routine_name, args, kw):
 
-		pass
+		# Log status
+		self.log.out('Trying to set argument and return value types for "%s" ...' % routine_name)
+
+		# Make it shorter ...
+		method = self.dll_dict[full_path_dll_unix]['method_handlers'][routine_name]
+
+		# Call into dll # TODO structs and pointers
+		if method.restype == ctypes.c_void_p:
+			method(*args, **kw)
+		else:
+			return_value = method(*args, **kw)
+
+		# Log status
+		self.log.out(' ... done.')
+
+		# If there is something to return, do it, otherwise return None
+		if method.restype == ctypes.c_void_p:
+			return None
+		else:
+			return return_value
 
 
 	def __register_argtype_and_restype__(self, full_path_dll_unix, routine_name, argtypes, restype):
