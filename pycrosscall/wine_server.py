@@ -9,6 +9,7 @@
 import argparse
 import ctypes
 import os
+from pprint import pformat as pf
 import sys
 from xmlrpc.server import SimpleXMLRPCServer
 from xmlrpc.server import SimpleXMLRPCRequestHandler
@@ -121,6 +122,10 @@ class wine_server_class:
 
 		# Register call: Accessing a dll
 		self.server.register_function(self.__access_dll__, 'access_dll')
+		# Call routine with parameters and, optionally, return value
+		self.server.register_function(self.__call_routine__, 'call_routine')
+		# Register call: Registering arguments and return value types
+		self.server.register_function(self.__register_argtype_and_restype__, 'register_argtype_and_restype')
 		# Register call: Registering dll calls
 		self.server.register_function(self.__register_routine__, 'register_routine')
 		# Register destructur: Call goes into xmlrpc-server first, which then terminates parent
@@ -164,6 +169,58 @@ class wine_server_class:
 				self.log.out(' ... failed!')
 
 				return 0 # Fail
+
+
+	def __call_routine__(self, full_path_dll_unix, routine_name, args, kw):
+
+		pass
+
+
+	def __register_argtype_and_restype__(self, full_path_dll_unix, routine_name, argtypes, restype):
+
+		# Log status
+		self.log.out('Trying to set argument and return value types for "%s" ...' % routine_name)
+
+		# Make it shorter ...
+		method = self.dll_dict[full_path_dll_unix]['method_handlers'][routine_name]
+
+		# Start list for argtypes
+		method.argtypes = []
+
+		# Iterate over argtype strings and parse them into ctypes TODO handle structs
+		for arg_str in argtypes:
+
+			# Try the easy way first ...
+			try:
+
+				# Evaluate string. Does not work for pointers and structs
+				method.argtypes.append(eval(arg_str))
+
+			# And now the hard stuff ...
+			except:
+
+				pass # TODO
+
+		# Set return value type, easy ...
+		try:
+
+			# Evaluate return value type string
+			method.restype = eval(restype)
+
+		# And now the hard way ...
+		except:
+
+			# TODO
+			method.restype = ctypes.c_void_p # HACK assume void
+
+		# Log status
+		self.log.out(' ... done.')
+
+		# Log status
+		self.log.out('Routine "%s" argtypes: %s' % (routine_name, pf(method.argtypes)))
+		self.log.out('Routine "%s" restype: %s' % (routine_name, pf(method.restype)))
+
+		return 1 # Success
 
 
 	def __register_routine__(self, full_path_dll_unix, routine_name):

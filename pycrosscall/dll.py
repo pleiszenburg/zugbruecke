@@ -99,15 +99,37 @@ class dll_session_class(): # Mimic ctypes.WinDLL. Representing one idividual dll
 			# Processing argument and return value types on first call
 			self.__set_argtype_and_restype__(name)
 
+			# Tell wine-python about types
+			self.__push_argtype_and_restype__(name)
+
 		# Log status
 		self.__session__.log.out('trying to call dll routine: %s' % name)
 		self.__session__.log.out('... parameters: %r / %r' % (args, kw))
 
-		# Parse arguments (into json and/or /dev/shm thing)
+		# Call routine in DLL
+		# call_routine()
+
 		# Push arguments
 		# Call
 		# Receive feedback
 		# Return feedback if there is ...
+
+
+	def __push_argtype_and_restype__(self, name):
+
+		# Log status
+		self.__session__.log.out('Pushing argument and return value types ...')
+
+		# Pass argument and return value types as strings ...
+		result = self.__client__.register_argtype_and_restype(
+			self.__dll_full_path__, name,
+			[str(arg).split("'")[1] for arg in self.__dll_routines__[name]['argtypes']],
+			str(self.__dll_routines__[name]['restype']).split("'")[1]
+			)
+
+		# Handle error
+		if result == 0:
+			raise # TODO
 
 
 	def __set_argtype_and_restype__(self, name):
