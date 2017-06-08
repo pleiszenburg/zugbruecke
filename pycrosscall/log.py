@@ -17,6 +17,26 @@ from xmlrpc.server import SimpleXMLRPCRequestHandler
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# CONSTANTS
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+# https://en.wikipedia.org/wiki/ANSI_escape_code
+c = {
+	'RESET': '\033[0;0m',
+	'BOLD': '\033[;1m',
+	'REVERSE': '\033[;7m',
+	'GREY': '\033[1;30m',
+	'RED': '\033[1;31m',
+	'GREEN': '\033[1;32m',
+	'YELLOW': '\033[1;33m',
+	'BLUE': '\033[1;34m',
+	'MAGENTA': '\033[1;35m',
+	'CYAN': '\033[1;36m',
+	'WHITE': '\033[1;37m'
+	}
+
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # SERVER CLASS(ES)
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -105,13 +125,31 @@ class log_class:
 
 	def __print_message__(self, messages):
 
-		message_string = '%s (%s @ %.2f) %s: %s\n' % (
-			messages['platform'],
-			messages['id'],
-			messages['time'],
-			messages['pipe'],
-			messages['cnt']
-			)
+		message_list = []
+
+		message_list.append(c['GREY'] + '(%.2f/%s) ' % (messages['time'], messages['id']) + c['RESET'])
+		if messages['platform'] == 'UNIX':
+			message_list.append(c['BLUE'])
+		elif messages['platform'] == 'WINE':
+			message_list.append(c['MAGENTA'])
+		else:
+			message_list.append(c['WHITE'])
+		message_list.append('%s ' % messages['platform'] + c['RESET'])
+		if messages['pipe'] == 'out':
+			message_list.append(c['GREEN'])
+		elif messages['pipe'] == 'err':
+			message_list.append(c['RED'])
+		message_list.append(messages['pipe'][0] + c['RESET'])
+		message_list.append(': ')
+		if any(ext in messages['cnt'] for ext in ['fixme:', 'err:']):
+			message_list.append(c['GREY'])
+		else:
+			message_list.append(c['WHITE'])
+		message_list.append(messages['cnt'] + c['RESET'])
+		message_list.append('\n')
+
+		message_string = ''.join(message_list)
+
 		if messages['pipe'] == 'out':
 			sys.stdout.write(message_string)
 		elif messages['pipe'] == 'err':
