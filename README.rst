@@ -17,7 +17,8 @@ pycrosscall is written using **Python 3 syntax** and primarely targets the
 **CPython** implementation of Python.
 
 
-*About Wine: Wine (originally an acronym for "Wine Is Not an Emulator") is a compatibility layer
+*About Wine, from winehq.org: Wine (originally an acronym
+for "Wine Is Not an Emulator") is a compatibility layer
 capable of running Windows applications on several POSIX-compliant operating systems,
 such as Linux, MacOS and BSD. Instead of simulating internal Windows logic like a
 virtual machine or emulator, Wine translates Windows API calls into POSIX calls
@@ -131,8 +132,29 @@ CPython interpreter corresponding to the used Unix-version is automatically
 downloaded and placed into the module's folder. Next to it, pycrosscall
 generates its own Wine-profile directory for being used with a dedicated
 ``WINEPREFIX``. This way, any undesirable interferences with other Wine-profile
-directories are avoided.
+directories containing user settings and unrelated software are avoided.
 
 During the import of pycrosscall, the ``ctypes`` module is patched with an
 additional ``windll`` "sub-module" that would otherwise only be present under
 Windows.
+
+Missing features (for full ctypes compatibility)
+================================================
+
+The following features have yet not been added to pycrosscall:
+
+- Access to DLLs using the cdll and oledll calling conventions
+- Windows data types (``wintypes``)
+- Related functions for handling DLLs and routines (``WINFUNCTYPE``, ``DllCanUnloadNow``, ``DllGetClassObject``)
+- Error-handling, Windows-stype (``FormatError``, ``GetLastError``, ``get_last_error``, ``set_last_error``, ``WinError``)
+- Access to default Windows APIs e.g. from kernel32.dll (as far as Wine offers them)
+- Explicitly differentiating between ANSI and Unicode versions of routines
+
+To do (target: BETA-status)
+===========================
+
+The following issues need to be resolved before 'Development Status :: 4 - Beta'
+can be achieved:
+
+- ``wineserver`` start/stop must be implemented in a clean way. Currently using
+  ``sleep`` with fixed time spans, waiting for the server to start and stop.
