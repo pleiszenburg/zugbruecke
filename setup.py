@@ -17,12 +17,14 @@ setup(
 	packages = ['pycrosscall'],
 	version = '0.0.1',
 	description = 'Calling routines in Windows DLLs from Python scripts running under Linux, MacOS or BSD',
-	long_description = 'Calling routines in Windows DLLs from Python scripts running under Linux, MacOS or BSD', # TODO improve
+	long_description = long_description,
 	author = 'Sebastian M. Ernst',
 	author_email = 'ernst@pleiszenburg.de',
 	url = 'https://github.com/s-m-e/pycrosscall',
 	download_url = 'https://github.com/s-m-e/pycrosscall/archive/pycrosscall_0.0.1.tar.gz',
+	license = 'GPLv2',
 	keywords = ['ctypes', 'wine'],
+	install_requires = [],
 	classifiers = [
 		'Development Status :: 3 - Alpha',
 		'Intended Audience :: Developers',
