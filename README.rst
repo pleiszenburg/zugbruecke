@@ -126,6 +126,11 @@ The source code is hosted on GitHub and contributions are welcomed.
 
 https://github.com/s-m-e/pycrosscall/
 
+Bugs
+====
+
+Please report bugs in the GitHub repository at https://github.com/s-m-e/pycrosscall/issues
+
 Implementation details
 ======================
 
@@ -143,7 +148,7 @@ Windows.
 Why?
 ====
 
-Good question. 
+Good question.
 
 Missing features (for full ctypes compatibility)
 ================================================
