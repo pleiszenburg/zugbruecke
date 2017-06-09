@@ -137,7 +137,7 @@ Contributions are highly welcomed!
 
 The source code is hosted on GitHub: https://github.com/s-m-e/pycrosscall/
 Pull requests will be reviewed and, if there is nothing to object, merged promptly.
-Do not break tests, unless there is a justified bug in them!
+Do not break tests (unless there is a justified bug in them)!
 
 Bugs
 ====
