@@ -3,7 +3,7 @@
 Synopsis
 ========
 
-**pycrosscall** is an EXPERIMENTAL **Python module**.
+**pycrosscall** is an EXPERIMENTAL **Python module** (currently "Development Status :: 3 - Alpha").
 It allows to **call routines in Windows DLLs from Python code running on
 Unices / Unix-like systems** such as Linux, MacOS or BSD.
 pycrosscall is designed as a **drop-in replacement for ctypes' windll interface**.
@@ -116,13 +116,15 @@ For more examples and DLL source code check the ``examples`` directory.
 License
 =======
 
-pycrosscall is licensed under GPL v2. See ``LICENSE`` file for details.
+pycrosscall is licensed under **GPL v2**. See ``LICENSE`` file for details.
 
 
 Contribute
 ==========
 
 The source code is hosted on GitHub and contributions are welcomed.
+
+https://github.com/s-m-e/pycrosscall/
 
 Implementation details
 ======================
@@ -137,6 +139,11 @@ directories containing user settings and unrelated software are avoided.
 During the import of pycrosscall, the ``ctypes`` module is patched with an
 additional ``windll`` "sub-module" that would otherwise only be present under
 Windows.
+
+Why?
+====
+
+Good question. 
 
 Missing features (for full ctypes compatibility)
 ================================================
@@ -156,8 +163,8 @@ To do (target: BETA-status)
 The following issues need to be resolved before 'Development Status :: 4 - Beta'
 can be achieved:
 
-- ``wineserver`` start/stop must be implemented in a clean way. Currently using
-  ``sleep`` with fixed time spans, waiting for the server to start and stop.
+- ``wineserver`` start/stop must be implemented in a clean way. pycrosscall is
+  currently using ``time.sleep`` with hard coded time spans, waiting for the server to start and stop.
 - ``wineserver`` and ``wine`` related code should be isolated into independent module or sub-module.
 - Ports for XML-RPC communication must be dynamically allocated instead of being hard coded - allowing
   multiple simultaneous pycrosscall sessions to coexist peacefully.
@@ -171,3 +178,14 @@ can be achieved:
   such as line number or calling routine (based on the ``inspect``).
 - Dedicated error types for catching more errors and their details.
 - Optional: Support Python 2.x?
+
+Known issues
+============
+
+The following relevant issues exist in software pycrosscall depends on:
+
+- Wine bug #42474 ("Python 3.6 needs function api-ms-win-core-path-l1-1-0.dll.PathCchCombineEx")
+  renders CPython 3.6.x for Windows unusable under Wine. 3.5 has to be used instead.
+  More details: https://bugs.winehq.org/show_bug.cgi?id=42474
+- CPython for Windows prior to version 3.5 is not offered as an zipped
+  "embedded" stand-alone version without installer. 3.5 or later has to be used.
