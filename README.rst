@@ -48,20 +48,17 @@ For the latest "stable" release run:
 
 .. code:: bash
 
-   pip install pycrosscall
+	pip install pycrosscall
 
 For the latest development snapshot run:
 
 .. code:: bash
 
-   pip install git+git://github.com/s-m-e/pycrosscal.git@develop
+	pip install git+git://github.com/s-m-e/pycrosscal.git@develop
 
 Because of the use of Wine, which should never be run with root privileges,
 it is highly advisable to install this package with user privileges only into
 a virtual environment.
-
-A stand-alone Windows-version of the CPython interpreter corresponding to the
-used Unix-version is automatically downloaded during the installation of pycrosscall.
 
 Examples
 ========
@@ -82,3 +79,51 @@ should run just fine with pycrosscall.
 	_call_demo_routine_.restype = ctypes.c_float
 	return_value = _call_demo_routine_(20.0, 1.07)
 	print('Got "%f".' % return_value)
+
+In a similar fashion, the following import statements also work independently:
+
+.. code:: python
+
+	from pycrosscall import windll
+	from pycrosscall import LoadLibrary
+
+The ''ctypes'' object offered by pycrosscall is just the Python interpreter's
+regular ''ctypes'', which is patched by pycrosscall during import.
+
+Because of the drop-in replacement design of pycrosscall, it is possible to write
+Python code with works under both Unices and Windows.
+
+.. code:: python
+
+	from sys import platform
+	if [platform.startswith(os) for os in ['linux', 'darwin', 'freebsd']]:
+		from pycrosscall import ctypes
+	elif platform.startswith('win'):
+		import ctypes
+	else:
+		# Handle unsupported platforms
+
+Licence
+=======
+
+pycrosscall is licensed under GPL v2. See LICENSE file for details.
+
+
+Contribute
+==========
+
+The source code is hosted on GitHub and contributions are welcomed.
+
+Implementation details
+======================
+
+During the installation of pycrosscall, a stand-alone Windows-version of the
+CPython interpreter corresponding to the used Unix-version is automatically
+downloaded and placed into the module's folder. Next to it, pycrosscall
+generates its own Wine-profile directory for being used with a dedicated
+WINEPREFIX. This way, any undesirable interferences with other Wine-profile
+directories are avoided.
+
+During the import of pycrosscall, the ''ctypes'' module is patched with an
+additional ''windll'' sub-module that would otherwise only be present under
+Windows.
