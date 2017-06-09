@@ -6,7 +6,7 @@ Synopsis
 **pycrosscall** is an EXPERIMENTAL **Python module**.
 It allows to **call routines in Windows DLLs from Python code running on
 Unices / Unix-like systems** such as Linux, MacOS or BSD.
-pycrosscall is designed as a **drop-in replacement of ctypes' windll interface**.
+pycrosscall is designed as a **drop-in replacement for ctypes' windll interface**.
 *Based on Wine*, it starts a stand-alone Windows Python interpreter in
 the background, which is used to execute the called DLL routines.
 Communication between the UNIX-side and the Windows/Wine-side is based on Python's
@@ -23,7 +23,7 @@ allowing you to cleanly integrate Windows applications into your desktop.*
 
 *For more details go to: https://www.winehq.org/*
 
-**This project is NEITHER associated NOR affiliated in any way or form with the Wine project.**
+***This project is NEITHER associated NOR affiliated in any way or form with the Wine project.***
 
 System requirements
 ===================
