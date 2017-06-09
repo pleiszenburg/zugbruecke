@@ -80,6 +80,14 @@ should run just fine with pycrosscall.
 	return_value = _call_demo_routine_(20.0, 1.07)
 	print('Got "%f".' % return_value)
 
+It will print ``Got "1.308412".`` assuming that the corresponding routine in the DLL
+looks somewhat like this:
+
+.. code:: c
+
+	float __stdcall __declspec(dllimport) simple_demo_routine(float param_a, float param_b)
+	{ return param_a - (param_a / param_b); }
+
 In a similar fashion, the following import statements also work independently:
 
 .. code:: python
@@ -87,8 +95,8 @@ In a similar fashion, the following import statements also work independently:
 	from pycrosscall import windll
 	from pycrosscall import LoadLibrary
 
-The ''ctypes'' object offered by pycrosscall is just the Python interpreter's
-regular ''ctypes'', which is patched by pycrosscall during import.
+The ``ctypes`` object offered by pycrosscall is just the Python interpreter's
+regular ``ctypes``, which is patched by pycrosscall during import.
 
 Because of the drop-in replacement design of pycrosscall, it is possible to write
 Python code with works under both Unices and Windows.
@@ -102,6 +110,8 @@ Python code with works under both Unices and Windows.
 		import ctypes
 	else:
 		# Handle unsupported platforms
+
+For more examples and DLL source code check the examples directory.
 
 Licence
 =======
