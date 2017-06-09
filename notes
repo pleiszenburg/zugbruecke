@@ -20,3 +20,8 @@ FAQ: How do I copy bytes to a ctypes.Structure from Python?
 def receiveSome(self, bytes):
         fit = min(len(bytes), ctypes.sizeof(self))
         ctypes.memmove(ctypes.addressof(self), bytes, fit)
+
+http://peterdowns.com/posts/first-time-with-pypi.html
+https://packaging.python.org/distributing/#setup-py
+
+https://pypi.python.org/pypi?%3Aaction=list_classifiers
