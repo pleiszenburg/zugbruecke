@@ -13,6 +13,9 @@ Communication between the UNIX-side and the Windows/Wine-side is based on Python
 build-in XML-RPC capability.
 pycrosscall comes with extensive logging features allowing to debug problems
 associated with both itself and with Wine.
+pycrosscall is written using **Python 3 syntax** and primarely targets the
+**CPython** implementation of Python.
+
 
 *About Wine: Wine (originally an acronym for "Wine Is Not an Emulator") is a compatibility layer
 capable of running Windows applications on several POSIX-compliant operating systems,
@@ -25,19 +28,39 @@ allowing you to cleanly integrate Windows applications into your desktop.*
 
 **This project is NEITHER associated NOR affiliated in any way or form with the Wine project.**
 
-System requirements
-===================
+Prerequisites
+=============
 
 For using the module:
 
+- CPython 3.x *(tested with 3.5 and 3.6)*
+
+  - No additional Python packages are required.
+
 - Wine 2.x *(tested with 2.6 and 2.6-staging)*
 
-For examples and testing, in addition:
+For examples and tests, in addition:
 
 - mingw cross-compiler *(for building DLLs against which examples and tests can be run)*
 
-pycrosscall is written using **Python 3 syntax**.
-It is known to work with and targeted at **CPython 3** *(tested with 3.5 and 3.6)*.
-A corresponding stand-alone Windows-version of the CPython interpreter is
-automatically downloaded during the installation of pycrosscall.
-No additional Python packages are required on either side.
+Installation
+============
+
+For the latest "stable" release run:
+
+.. code:: bash
+
+   pip install pycrosscall
+
+For the latest development snapshot run:
+
+.. code:: bash
+
+   pip install git+git://github.com/s-m-e/pycrosscal.git@develop
+
+Because of the use of Wine, which should never be run with root privileges,
+it is highly advisable to install this package with user privileges only into
+a virtual environment.
+
+A stand-alone Windows-version of the CPython interpreter corresponding to the
+used Unix-version is automatically downloaded during the installation of pycrosscall.
