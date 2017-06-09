@@ -122,14 +122,18 @@ pycrosscall is licensed under **GPL v2**. See ``LICENSE`` file for details.
 Contribute
 ==========
 
-The source code is hosted on GitHub and contributions are welcomed.
-
-https://github.com/s-m-e/pycrosscall/
+Contributions are highly welcomed! The source code is hosted on GitHub: https://github.com/s-m-e/pycrosscall/
 
 Bugs
 ====
 
-Please report bugs in the GitHub repository at https://github.com/s-m-e/pycrosscall/issues
+Please report bugs in pycrosscall in the pycrosscall GitHub repository at https://github.com/s-m-e/pycrosscall/issues
+
+Please report bugs in Wine in the WineHQ Bug Tracking System: https://bugs.winehq.org/
+
+Make sure to separate between pycrosscall-related and Wine-related bugs.
+Calling routines in DLLs from Windows-executable (executed with Wine) with identical
+parameters for narrowing down the possible sources of an error is a good way to start.
 
 Implementation details
 ======================
@@ -194,3 +198,16 @@ The following relevant issues exist in software pycrosscall depends on:
   More details: https://bugs.winehq.org/show_bug.cgi?id=42474
 - CPython for Windows prior to version 3.5 is not offered as an zipped
   "embedded" stand-alone version without installer. 3.5 or later has to be used.
+
+For production environments
+===========================
+
+Do NOT run this code (as-is) in production environments unless you feel that you
+really know what you are doing or unless you are absolutely desperate.
+Being experimental in nature and of alpha quality, it is prone to fail
+in a number of unpredictable ways, some of which might not be obvious or might
+not show any (intermediately) recognizable symptoms at all.
+
+If this has not driven you off and you nevertheless want to use pycrosscall in
+individual, well isolated cases in production environments, feel free to contact
+its author for exploring further options: ernst@pleiszenburg.de
