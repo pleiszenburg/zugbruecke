@@ -10,11 +10,15 @@ System requirements
 ===================
 
 For using the module:
-* Wine 2.x *(tested with 2.6 and 2.6-staging)*
+
+- Wine 2.x *(tested with 2.6 and 2.6-staging)*
 
 For testing, in addition:
-* mingw cross-compiler *(for building DLLs against which tests can be run)*
 
-pycrosscall uses **Python 3** syntax.
-It is known to work with and targeted at **CPython 3** *(tested with .5.x and .6.x)*.
-No additional Python packages are required.
+- mingw cross-compiler *(for building DLLs against which tests can be run)*
+
+pycrosscall is written using **Python 3 syntax**.
+It is known to work with and targeted at **CPython 3** *(tested with 3.5 and 3.6)*.
+A corresponding stand-alone Windows version of the CPython interpreter is
+automatically downloaded during the installation of pycrosscall.
+No additional Python packages are required on either side.
