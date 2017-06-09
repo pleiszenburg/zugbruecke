@@ -33,11 +33,9 @@ Prerequisites
 
 For using the module:
 
-- CPython 3.x *(tested with 3.5 and 3.6)*
+- CPython 3.x *(tested with 3.5 and 3.6)* - No additional Python packages are required.
 
-  - No additional Python packages are required.
-
-- Wine 2.x *(tested with 2.6 and 2.6-staging)*
+- Wine 2.x *(tested with 2.6 and 2.6-staging)* - Expected to be in the user's PATH.
 
 For examples and tests, in addition:
 
