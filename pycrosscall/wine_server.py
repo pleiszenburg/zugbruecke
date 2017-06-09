@@ -219,7 +219,7 @@ class wine_server_class:
 		method = self.dll_dict[full_path_dll_unix]['method_handlers'][routine_name]
 
 		# Start list for argtypes
-		method.argtypes = []
+		tmp_argtypes = []
 
 		# Iterate over argtype strings and parse them into ctypes TODO handle structs
 		for arg_str in argtypes:
@@ -228,12 +228,18 @@ class wine_server_class:
 			try:
 
 				# Evaluate string. Does not work for pointers and structs
-				method.argtypes.append(eval(arg_str))
+				tmp_argtypes.append(eval(arg_str))
 
 			# And now the hard stuff ...
 			except:
 
-				pass # TODO
+				# Push traceback to log
+				self.log.out(traceback.format_exc())
+
+				# TODO
+
+		# Set argtypes in routine object
+		method.argtypes = tmp_argtypes
 
 		# Set return value type, easy ...
 		try:
