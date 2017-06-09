@@ -177,7 +177,7 @@ The following features have yet not been added to pycrosscall:
 - Access to DLLs using the ``cdll`` and ``oledll`` calling conventions
 - Windows data types (``wintypes``)
 - Related functions for handling DLLs and routines (``WINFUNCTYPE``, ``DllCanUnloadNow``, ``DllGetClassObject``)
-- Error-handling, Windows-stype (``FormatError``, ``GetLastError``, ``get_last_error``, ``set_last_error``, ``WinError``)
+- Error-handling, Windows-style (``FormatError``, ``GetLastError``, ``get_last_error``, ``set_last_error``, ``WinError``)
 - Access to default Windows APIs e.g. from kernel32.dll (as far as Wine offers them)
 - Explicitly differentiating between ANSI and Unicode versions of routines
 
