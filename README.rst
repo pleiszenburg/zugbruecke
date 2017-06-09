@@ -62,3 +62,23 @@ a virtual environment.
 
 A stand-alone Windows-version of the CPython interpreter corresponding to the
 used Unix-version is automatically downloaded during the installation of pycrosscall.
+
+Examples
+========
+
+pycrosscall essentially behaves like a drop-in replacement for ctypes' windll interface.
+Therefore, most code, which was written with windll in mind and which runs under Windows,
+should run just fine with pycrosscall.
+
+.. code:: python
+
+	from pycrosscall import ctypes
+
+	_call_demo_routine_ = ctypes.windll.LoadLibrary('demo_dll.dll').simple_demo_routine
+	_call_demo_routine_.argtypes = [
+		ctypes.c_float,
+		ctypes.c_float
+		]
+	_call_demo_routine_.restype = ctypes.c_float
+	return_value = _call_demo_routine_(20.0, 1.07)
+	print('Got "%f".' % return_value)
