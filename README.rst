@@ -143,7 +143,7 @@ Missing features (for full ctypes compatibility)
 
 The following features have yet not been added to pycrosscall:
 
-- Access to DLLs using the cdll and oledll calling conventions
+- Access to DLLs using the ``cdll`` and ``oledll`` calling conventions
 - Windows data types (``wintypes``)
 - Related functions for handling DLLs and routines (``WINFUNCTYPE``, ``DllCanUnloadNow``, ``DllGetClassObject``)
 - Error-handling, Windows-stype (``FormatError``, ``GetLastError``, ``get_last_error``, ``set_last_error``, ``WinError``)
@@ -158,3 +158,16 @@ can be achieved:
 
 - ``wineserver`` start/stop must be implemented in a clean way. Currently using
   ``sleep`` with fixed time spans, waiting for the server to start and stop.
+- ``wineserver`` and ``wine`` related code should be isolated into independent module or sub-module.
+- Ports for XML-RPC communication must be dynamically allocated instead of being hard coded - allowing
+  multiple simultaneous pycrosscall sessions to coexist peacefully.
+- pycrosscall must become thread safe so it can be used with modules like ``multiprocessing``.
+- A test-suite covering all features must be developed.
+- Structures and pointers should be handled more appropriately.
+  Especially, structures should be passed in a better, more secure and faster way than via ``/dev/shm``.
+- XML-RPC clients should authenticate themselves before being allowed to access servers.
+- The log should be divided into log-levels with more or less details.
+  Higher log-levels should contain details of the current stack frame
+  such as line number or calling routine (based on the ``inspect``).
+- Dedicated error types for catching more errors and their details.
+- Optional: Support Python 2.x?
