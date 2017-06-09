@@ -233,7 +233,7 @@ Do NOT run this code (as-is) in production environments unless you feel that you
 really know what you are doing or unless you are absolutely desperate.
 Being experimental in nature and of alpha quality, it is prone to fail
 in a number of unpredictable ways, some of which might not be obvious or might
-not show any (intermediately) recognizable symptoms at all.
+not even show any (intermediately) recognizable symptoms at all.
 
 If this has not driven you off and you nevertheless want to use pycrosscall in
 individual, well isolated cases in production environments, feel free to contact
