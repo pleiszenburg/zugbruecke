@@ -127,7 +127,7 @@ Contributions are highly welcomed! The source code is hosted on GitHub: https://
 Bugs
 ====
 
-Please report bugs in pycrosscall in the pycrosscall GitHub repository at https://github.com/s-m-e/pycrosscall/issues
+Please report bugs in pycrosscall in the pycrosscall GitHub repository: https://github.com/s-m-e/pycrosscall/issues
 
 Please report bugs in Wine in the WineHQ Bug Tracking System: https://bugs.winehq.org/
 
@@ -194,9 +194,13 @@ Known issues
 The following relevant issues exist in software pycrosscall depends on:
 
 - Wine bug #42474 ("Python 3.6 needs function api-ms-win-core-path-l1-1-0.dll.PathCchCombineEx")
-  renders CPython 3.6.x for Windows unusable under Wine. 3.5 has to be used instead.
+  renders CPython 3.6.x for Windows unusable under Wine. 3.5 or prior has to be used instead.
   More details: https://bugs.winehq.org/show_bug.cgi?id=42474
-- CPython for Windows prior to version 3.5 is not offered as an zipped
+- The CPython installer for Windows does not work with Wine at all.
+  In a similar fashion, msi-files also fail to install.
+  The current work-around is to use the "embedded" stand-alone version of CPython for Windows,
+  which is offered as a zip-file.
+- CPython for Windows prior to version 3.5 is not offered as a zipped
   "embedded" stand-alone version without installer. 3.5 or later has to be used.
 
 For production environments
