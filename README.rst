@@ -12,7 +12,7 @@ the background, which is used to execute the called DLL routines.
 Communication between the UNIX-side and the Windows/Wine-side is based on Python's
 build-in XML-RPC capability.
 pycrosscall comes with extensive logging features allowing to debug problems
-associate with both itself and with Wine.
+associated with both itself and with Wine.
 
 *About Wine: Wine (originally an acronym for "Wine Is Not an Emulator") is a compatibility layer
 capable of running Windows applications on several POSIX-compliant operating systems,
