@@ -12,8 +12,5 @@ import ctypes
 # Patching ctypes
 ctypes.windll = windll
 
-# Exposing LoadLibrary from running session for direct import
-LoadLibrary = windll.LoadLibrary
-
 # Expose session class for advanced users and tests
 from .core import session_class as session

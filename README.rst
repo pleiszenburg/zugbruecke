@@ -63,8 +63,8 @@ a virtual environment.
 Examples
 ========
 
-pycrosscall essentially behaves like a drop-in replacement for ctypes' windll interface.
-Therefore, most code, which was written with windll in mind and which runs under Windows,
+pycrosscall essentially behaves like a drop-in replacement for ctypes' ``windll`` interface.
+Therefore, most code, which was written with ``windll`` in mind and which runs under Windows,
 should run just fine with pycrosscall.
 
 .. code:: python
@@ -88,23 +88,22 @@ looks somewhat like this:
 	float __stdcall __declspec(dllimport) simple_demo_routine(float param_a, float param_b)
 	{ return param_a - (param_a / param_b); }
 
-In a similar fashion, the following import statements also work independently:
+The following import statement also works:
 
 .. code:: python
 
 	from pycrosscall import windll
-	from pycrosscall import LoadLibrary
 
 The ``ctypes`` object offered by pycrosscall is just the Python interpreter's
 regular ``ctypes``, which is patched by pycrosscall during import.
 
 Because of the drop-in replacement design of pycrosscall, it is possible to write
-Python code with works under both Unices and Windows.
+Python code which works under both Unices and Windows.
 
 .. code:: python
 
 	from sys import platform
-	if [platform.startswith(os) for os in ['linux', 'darwin', 'freebsd']]:
+	if True in [platform.startswith(os_name) for os_name in ['linux', 'darwin', 'freebsd']]:
 		from pycrosscall import ctypes
 	elif platform.startswith('win'):
 		import ctypes
