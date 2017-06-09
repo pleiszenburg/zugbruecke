@@ -113,6 +113,11 @@ Python code which works under both Unices and Windows.
 
 For more examples and DLL source code check the ``examples`` directory.
 
+Speed
+=====
+
+...
+
 License
 =======
 
@@ -122,7 +127,11 @@ pycrosscall is licensed under **GPL v2**. See ``LICENSE`` file for details.
 Contribute
 ==========
 
-Contributions are highly welcomed! The source code is hosted on GitHub: https://github.com/s-m-e/pycrosscall/
+Contributions are highly welcomed!
+
+The source code is hosted on GitHub: https://github.com/s-m-e/pycrosscall/
+Pull requests will be reviewed and, if there is nothing to object, merged promptly.
+Do not break tests, unless there is a justified bug in them!
 
 Bugs
 ====
@@ -174,7 +183,7 @@ can be achieved:
 
 - ``wineserver`` start/stop must be implemented in a clean way. pycrosscall is
   currently using ``time.sleep`` with hard coded time spans, waiting for the server to start and stop.
-- ``wineserver`` and ``wine`` related code should be isolated into independent module or sub-module.
+- ``wineserver`` and ``wine`` related code should be isolated into an independent module or sub-module.
 - Ports for XML-RPC communication must be dynamically allocated instead of being hard coded - allowing
   multiple simultaneous pycrosscall sessions to coexist peacefully.
 - pycrosscall must become thread safe so it can be used with modules like ``multiprocessing``.
@@ -186,7 +195,15 @@ can be achieved:
   Higher log-levels should contain details of the current stack frame
   such as line number or calling routine (based on the ``inspect``).
 - Dedicated error types for catching more errors and their details.
-- Optional: Support Python 2.x?
+
+Beyond beta-status
+==================
+
+Potentially interesting features, which might (or might not) be investigated after reaching beta status:
+
+- Support for popular "alternative" Python interpreters such as PyPy
+- Support for Python 2 syntax interpreters
+- Support for other versions of Wine such as CrossOver
 
 Known issues
 ============
