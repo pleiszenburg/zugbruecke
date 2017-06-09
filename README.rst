@@ -110,12 +110,12 @@ Python code which works under both Unices and Windows.
 	else:
 		# Handle unsupported platforms
 
-For more examples and DLL source code check the examples directory.
+For more examples and DLL source code check the ``examples`` directory.
 
-Licence
+License
 =======
 
-pycrosscall is licensed under GPL v2. See LICENSE file for details.
+pycrosscall is licensed under GPL v2. See ``LICENSE`` file for details.
 
 
 Contribute
@@ -130,9 +130,9 @@ During the installation of pycrosscall, a stand-alone Windows-version of the
 CPython interpreter corresponding to the used Unix-version is automatically
 downloaded and placed into the module's folder. Next to it, pycrosscall
 generates its own Wine-profile directory for being used with a dedicated
-WINEPREFIX. This way, any undesirable interferences with other Wine-profile
+``WINEPREFIX``. This way, any undesirable interferences with other Wine-profile
 directories are avoided.
 
-During the import of pycrosscall, the ''ctypes'' module is patched with an
-additional ''windll'' sub-module that would otherwise only be present under
+During the import of pycrosscall, the ``ctypes`` module is patched with an
+additional ``windll`` "sub-module" that would otherwise only be present under
 Windows.
