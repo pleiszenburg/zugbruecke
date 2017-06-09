@@ -23,7 +23,7 @@ allowing you to cleanly integrate Windows applications into your desktop.*
 
 *For more details go to: https://www.winehq.org/*
 
-***This project is NEITHER associated NOR affiliated in any way or form with the Wine project.***
+**This project is NEITHER associated NOR affiliated in any way or form with the Wine project.**
 
 System requirements
 ===================
