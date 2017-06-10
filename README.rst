@@ -9,7 +9,7 @@ Synopsis
 It allows to **call routines in Windows DLLs from Python code running on
 Unices / Unix-like systems** such as Linux, MacOS or BSD.
 pycrosscall is designed as a **drop-in replacement for ctypes' windll interface**.
-pycrosscall is **based on Wine**. A stand-alone Windows Python interpreter
+pycrosscall is **built on top of Wine**. A stand-alone Windows Python interpreter
 launched in the background is used to execute the called DLL routines.
 Communication between the UNIX-side and the Windows/Wine-side is based on Python's
 build-in XML-RPC capability.
