@@ -5,7 +5,7 @@
 Synopsis
 ========
 
-**pycrosscall** is an EXPERIMENTAL **Python module** (currently in development status 3/alpha).
+**pycrosscall** is an EXPERIMENTAL **Python module** (currently in development **status 3/alpha**).
 It allows to **call routines in Windows DLLs from Python code running on
 Unices / Unix-like systems** such as Linux, MacOS or BSD.
 pycrosscall is designed as a **drop-in replacement for ctypes' windll interface**.
