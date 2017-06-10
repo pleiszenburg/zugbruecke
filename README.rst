@@ -63,7 +63,7 @@ Examples
 ========
 
 pycrosscall essentially behaves like a drop-in replacement for ctypes' ``windll`` interface.
-In other words, it only covers the stdcall calling convention at this point.
+In other words, it only covers the "stdcall calling convention" at this point.
 Therefore, most code, which was written with ``windll`` in mind and which runs under Windows,
 should run just fine with pycrosscall.
 
