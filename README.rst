@@ -1,5 +1,7 @@
 **pycrosscall** - Calling routines in Windows DLLs from Python scripts running under Linux, MacOS or BSD
 
+.. image:: http://www.pleiszenburg.de/pycrosscall_logo.png
+
 Synopsis
 ========
 
@@ -231,7 +233,7 @@ to satisfy the desire for a "quick and dirty" solution for calling routines from
 high level scripting language, Python, directly running on the Unix "host" system.
 With respect to "quick", pycrosscall works just out of the box with Wine installed.
 No headers, compilers, cross-compilers or any other configuration is required - one
-import statement followed by well established ``ctypes`` is enough. With respect
+import statement followed by well established ``ctypes`` syntax is enough. With respect
 to "dirty", well, read this document from start to finish.
 
 What are actual use cases for this project?
@@ -250,7 +252,7 @@ What are actual use cases for this project?
   odd reasons (like "developer retired and nobody knows how to do this" or "developer died
   and nobody manages to understand the undocumented code"). The latter is especially
   prevalent in academic environments, where what is left of years of hard work might
-  only be a single binary copy of an old DLL file. As sorts of complicated numerical
+  only be a single "binary blob" - a copy of an old DLL file. As sorts of complicated numerical
   computations come to mind.
 
 Missing features (for full ctypes compatibility)
