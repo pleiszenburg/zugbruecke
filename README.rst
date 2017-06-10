@@ -127,6 +127,7 @@ Security
 ========
 
 pycrosscall is notoriously insecure by design.
+
 - DO NOT run it on any system directly exposed to the internet! Have a firewall on at all times!
 - DO NOT run untrusted code (or DLLs)!
 - DO NOT use pycrosscall for any security related tasks such as encryption, decryption,
@@ -134,6 +135,7 @@ pycrosscall is notoriously insecure by design.
 - DO NOT run it with root / super users privileges!
 
 The following problems also directly apply to pycrosscall:
+
 - XML vulnerabilities: https://docs.python.org/3/library/xml.html#xml-vulnerabilities
 - Wine can in fact theoretically run (some) Windows malware: https://en.wikipedia.org/wiki/Wine_(software)#Security
 - NEVER run Wine as root: https://wiki.winehq.org/FAQ#Should_I_run_Wine_as_root.3F
