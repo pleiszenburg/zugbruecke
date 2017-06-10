@@ -31,7 +31,7 @@ setup(
 		'Intended Audience :: Information Technology',
 		'Intended Audience :: Science/Research',
 		'Intended Audience :: System Administrators',
-		'License :: OSI Approved :: GNU General Public License v2 (GPLv2)',
+		'License :: OSI Approved :: GNU Lesser General Public License v2 (LGPLv2)',
 		'Operating System :: MacOS',
 		'Operating System :: POSIX :: BSD',
 		'Operating System :: POSIX :: Linux',
