@@ -151,7 +151,7 @@ Please report bugs in pycrosscall in the pycrosscall GitHub repository: https://
 Please report bugs in Wine in the WineHQ Bug Tracking System: https://bugs.winehq.org/
 
 Make sure to separate between pycrosscall-related and Wine-related bugs.
-Calling routines in DLLs from Windows-executable (executed with Wine) with identical
+Calling routines in DLLs from Windows-executables (executed with Wine) with identical
 parameters for narrowing down the possible sources of an error is a good way to start.
 
 How to bisect issues
@@ -161,7 +161,8 @@ pycrosscall is based on a session model. Each session can be launched with
 parameters. Instead of leaving the session start with default parameters to
 pycrosscall, the process can be triggered manually instead.
 Right after import and before ``LoadLibrary`` is invoked for the first time,
-start a pycrosscall session as follows and pass parameters into it.
+start a pycrosscall session as follows and pass parameters like the "log level"
+into it.
 
 .. code:: python
 
