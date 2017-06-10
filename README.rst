@@ -157,7 +157,25 @@ parameters for narrowing down the possible sources of an error is a good way to 
 How to bisect issues
 --------------------
 
-Turn on logging.
+pycrosscall is based on a session model. Each session can be launched with
+parameters. Instead of leaving the session start with default parameters to
+pycrosscall, the process can be triggered manually instead.
+Right after import and before ``LoadLibrary`` is invoked for the first time,
+start a pycrosscall session as follows and pass parameters into it.
+
+.. code:: python
+
+	from pycrosscall import ctypes
+	ctypes.windll.start_session(parameter = {'log_level': 10})
+	# proceed as usual ...
+
+The higher the log level, the more output you will get. Default is 0 for no logs.
+The on-screen log is color-coded for readability. The log can also, in addition,
+be written to disk, where every log item with plenty of meta data is represented
+as a one-line JSON object for easy parsing and analysis of larger log files.
+
+Have a look into the routine ``__fill_parameter__`` in ``pycrosscall/core.py`` for
+a comprehensive overview over all possible parameters.
 
 Implementation details
 ======================
