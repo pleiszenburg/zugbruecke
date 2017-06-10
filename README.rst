@@ -126,14 +126,22 @@ see the following numbers:
 Security
 ========
 
-pycrosscall is notoriously insecure by design. DO NOT run it on any system directly
-exposed to the internet! DO NOT run untrusted code (or DLLs)!
+pycrosscall is notoriously insecure by design.
+- DO NOT run it on any system directly exposed to the internet! Have a firewall on at all times!
+- DO NOT run untrusted code (or DLLs)!
+- DO NOT use pycrosscall for any security related tasks such as encryption, decryption,
+  authentication and handling of key or passwords!
+- DO NOT run it with root / super users privileges!
+
+The following problems also directly apply to pycrosscall:
+- XML vulnerabilities: https://docs.python.org/3/library/xml.html#xml-vulnerabilities
+- Wine can in fact theoretically run (some) Windows malware: https://en.wikipedia.org/wiki/Wine_(software)#Security
+- NEVER run Wine as root: https://wiki.winehq.org/FAQ#Should_I_run_Wine_as_root.3F
 
 License
 =======
 
 pycrosscall is licensed under **GPL v2**. See ``LICENSE`` file for details.
-
 
 Contribute
 ==========
@@ -198,6 +206,8 @@ Why?
 
 Good question.
 
+
+
 Missing features (for full ctypes compatibility)
 ================================================
 
@@ -259,11 +269,11 @@ The following relevant issues exist in software pycrosscall depends on:
 For production environments
 ===========================
 
-Do NOT run this code (as-is) in production environments unless you feel that you
-really know what you are doing or unless you are absolutely desperate.
+**DO NOT run this code (as-is) in production environments unless you feel that you
+really know what you are doing or unless you are absolutely desperate!
 Being experimental in nature and of alpha quality, it is prone to fail
 in a number of unpredictable ways, some of which might not be obvious or might
-not even show any (intermediately) recognizable symptoms at all.
+not even show any (intermediately) recognizable symptoms at all!**
 
 If this has not driven you off and you nevertheless want to use pycrosscall in
 individual, well isolated cases in production environments, feel free to contact
