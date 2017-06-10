@@ -243,6 +243,7 @@ What are actual use cases for this project?
 
 - Calling routines in DLLs which come, for some odd reason (like "developer suddenly
   disappeared with source code"), without source code.
+  DLLs found in company-internal software or R&D projects come to mind.
 
 - More common than one might think, calling routines in DLLs, of which the source code is available but
   can not be (re-)compiled (on another platform) / understood / ported for similarly
