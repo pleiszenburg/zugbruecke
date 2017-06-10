@@ -161,13 +161,13 @@ class windll_class(): # Mimic ctypes.windll
 		self.up = False
 
 
-	def start_session(self):
+	def start_session(self, parameter = {}):
 
 		# Session not yet up?
 		if not self.up:
 
 			# Fire up a new session
-			self.__session__ = session_class()
+			self.__session__ = session_class(parameter)
 
 			# Mark session as up
 			self.up = True

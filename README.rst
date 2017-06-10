@@ -114,13 +114,19 @@ For more examples and DLL source code check the ``examples`` directory.
 Speed
 =====
 
-...
+The communication via XML-RPC adds significant overhead to every function call.
+Depending on the use-case, instead of working with pycrosscall, it will be significantly
+faster to implement function calls in a dedicated Python script and run it
+directly with a Windows Python interpreter under Wine. For comparison,
+see the following numbers:
 
+...
 
 Security
 ========
 
-...
+pycrosscall is notoriously insecure by design. DO NOT run it on any system directly
+exposed to the internet! DO NOT run untrusted code (or DLLs)!
 
 License
 =======
@@ -200,6 +206,7 @@ can be achieved:
 - Structures and pointers should be handled more appropriately.
   Especially, structures should be passed in a better, more secure and faster way than via ``/dev/shm``.
 - XML-RPC clients should authenticate themselves before being allowed to access servers.
+  Running connections through SSL should be investigated.
 - The log should be divided into log-levels with more or less details.
   Higher log-levels should contain details of the current stack frame
   such as line number or calling routine (based on the ``inspect``).
