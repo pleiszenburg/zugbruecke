@@ -121,7 +121,14 @@ faster to implement function calls in a dedicated Python script and run it
 directly with a Windows Python interpreter under Wine. For comparison,
 see the following numbers:
 
-...
+===================  ===============  =================== ==================== ==================
+Example call         # of iterations  w/o pycrosscall [s] *w/ pycrosscall* [s] overhead/call [µs]
+===================  ===============  =================== ==================== ==================
+simple_demo_routine  500k             2.1                 3.7                  25
+===================  ===============  =================== ==================== ==================
+
+Benchmarks were performed with an i7 860 CPU, Linux kernel 4.4.62, Wine 2.6-Staging,
+CPython 3.6.0 x86-64 for Linux and CPython 3.5.3 x86-32 for Windows.
 
 Security
 ========
