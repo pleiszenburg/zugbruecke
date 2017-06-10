@@ -167,7 +167,10 @@ class wine_server_class:
 			except:
 
 				# Log status
-				self.log.out(' ... failed!')
+				self.log.out(' ... failed! Traceback:')
+
+				# Push traceback to log
+				self.log.out(traceback.format_exc())
 
 				return 0 # Fail
 
@@ -178,7 +181,7 @@ class wine_server_class:
 	def __call_dll_routine__(self, full_path_dll_unix, routine_name, args, kw):
 
 		# Log status
-		self.log.out('Trying to set argument and return value types for "%s" ...' % routine_name)
+		self.log.out('Trying call routine "%s" ...' % routine_name)
 
 		# Make it shorter ...
 		method = self.dll_dict[full_path_dll_unix]['method_handlers'][routine_name]
@@ -198,13 +201,16 @@ class wine_server_class:
 			else:
 				return_value = method(*args, **kw)
 
+			# Log status
+			self.log.out(' ... done.')
+
 		except:
+
+			# Log status
+			self.log.out(' ... failed! Traceback:')
 
 			# Push traceback to log
 			self.log.out(traceback.format_exc())
-
-		# Log status
-		self.log.out(' ... done.')
 
 		# Return result
 		return return_value
@@ -286,7 +292,10 @@ class wine_server_class:
 		except:
 
 			# Log status
-			self.log.out(' ... failed!')
+			self.log.out(' ... failed! Traceback:')
+
+			# Push traceback to log
+			self.log.out(traceback.format_exc())
 
 			return 0 # Fail
 

@@ -37,7 +37,7 @@ class dll_session_class(): # Mimic ctypes.WinDLL. Representing one idividual dll
 		self.__dll_full_path_wine__ = self.__session__.wine_session.translate_path_unix2win(self.__dll_full_path__)
 
 		# Status log
-		self.__session__.log.out('Pushing data to wine: "%s" of type %s' % (
+		self.__session__.log.out('[00] Telling wine-python about new DLL file: "%s" of type %s' % (
 			self.__dll_name__, self.__dll_type__
 			))
 		self.__session__.log.out(' (%s)' % self.__dll_full_path_wine__)
@@ -55,19 +55,19 @@ class dll_session_class(): # Mimic ctypes.WinDLL. Representing one idividual dll
 	def __getattr__(self, name): # Handle requests for functions in dll which have yet not been touched
 
 		# Status log
-		self.__session__.log.out('Trying to access routine "%s" in dll file "%s"' % (name, self.__dll_name__))
+		self.__session__.log.out('[01] Trying to attach to routine "%s" in DLL file "%s" ...' % (name, self.__dll_name__))
 
 		# Is routine unknown?
 		if name not in self.__dll_routines__.keys():
 
 			# Log status
-			self.__session__.log.out('Routine not yet in list. Registering ...')
+			self.__session__.log.out('[02] Routine not yet in list. Registering ...')
 
 			# Register routine in wine
 			result = self.__client__.register_routine(self.__dll_full_path__, name)
 
 			# Log status
-			self.__session__.log.out('Feedback from wine: %d' % result)
+			self.__session__.log.out('[02] Feedback from wine-python: %d' % result)
 
 			# Raise exception if not found
 			if result == 0:
@@ -81,6 +81,9 @@ class dll_session_class(): # Mimic ctypes.WinDLL. Representing one idividual dll
 				'restype': ctypes.c_void_p # By default, assume no return value
 				}
 
+		# Log status
+		self.__session__.log.out('[03] Return unconfigured handler for "%s" in DLL file "%s".' % (name, self.__dll_name__))
+
 		# Return handler
 		return self.__dll_routines__[name]['call_handler']
 
@@ -93,8 +96,14 @@ class dll_session_class(): # Mimic ctypes.WinDLL. Representing one idividual dll
 		# Delete routine name from call parameters
 		del kw['__routine_name__']
 
+		# Log status
+		self.__session__.log.out('[04] Trying to call routine "%s" in DLL file "%s" ...' % (name, self.__dll_name__))
+
 		# Has this routine ever been called?
 		if not self.__dll_routines__[name]['called']:
+
+			# Log status
+			self.__session__.log.out('[05] "%s" in DLL file "%s" has not been called before. Configuring ...' % (name, self.__dll_name__))
 
 			# Processing argument and return value types on first call
 			self.__set_argtype_and_restype__(name)
@@ -102,14 +111,19 @@ class dll_session_class(): # Mimic ctypes.WinDLL. Representing one idividual dll
 			# Tell wine-python about types
 			self.__push_argtype_and_restype__(name)
 
+			# Change status of routine - it has been called once and is therefore configured
+			self.__dll_routines__[name]['called'] = True
+
 		# Log status
-		self.__session__.log.out('trying to call dll routine: %s' % name)
-		self.__session__.log.out('... parameters: %r / %r' % (args, kw))
+		self.__session__.log.out('[08] Call parameters are %r / %r. Pushing to wine-python ...' % (args, kw))
 
 		# Actually call routine in DLL! TODO Handle structurs and pointers ...
 		return_value = self.__client__.call_dll_routine(
 			self.__dll_full_path__, name, list(args), kw
 			)
+
+		# Log status
+		self.__session__.log.out('[09] Received feedback from wine-python, returning ...')
 
 		# Return something if there is something to return ... TODO improve
 		if return_value != '__none_value__':
@@ -119,7 +133,7 @@ class dll_session_class(): # Mimic ctypes.WinDLL. Representing one idividual dll
 	def __push_argtype_and_restype__(self, name):
 
 		# Log status
-		self.__session__.log.out('Pushing argument and return value types ...')
+		self.__session__.log.out('[07] Pushing argument and return value types ...')
 
 		# Pass argument and return value types as strings ...
 		result = self.__client__.register_argtype_and_restype(
@@ -146,5 +160,5 @@ class dll_session_class(): # Mimic ctypes.WinDLL. Representing one idividual dll
 			pass
 
 		# Log status
-		self.__session__.log.out('Routine "%s" argtypes: %s' % (name, pf(self.__dll_routines__[name]['argtypes'])))
-		self.__session__.log.out('Routine "%s" restype: %s' % (name, pf(self.__dll_routines__[name]['restype'])))
+		self.__session__.log.out('[06] Set routine "%s" argtypes: %s' % (name, pf(self.__dll_routines__[name]['argtypes'])))
+		self.__session__.log.out('[06] Set routine "%s" restype: %s' % (name, pf(self.__dll_routines__[name]['restype'])))
