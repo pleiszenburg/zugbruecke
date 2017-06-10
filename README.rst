@@ -32,9 +32,9 @@ Prerequisites
 
 For using the module:
 
-- CPython 3.x *(tested with 3.5 and 3.6)* - No additional Python packages are required.
+- **CPython 3.x** *(tested with 3.5 and 3.6)* - No additional Python packages are required.
 
-- Wine 2.x *(tested with 2.6 and 2.6-staging)* - Expected to be in the user's PATH.
+- **Wine 2.x** *(tested with 2.6 and 2.6-staging)* - Expected to be in the user's PATH.
 
 For examples and tests, in addition:
 
@@ -43,13 +43,13 @@ For examples and tests, in addition:
 Installation
 ============
 
-For the latest "stable" release run:
+For the latest "stable" (working) **release** run:
 
 .. code:: bash
 
 	pip install pycrosscall
 
-For the latest development snapshot run:
+For the latest **development snapshot** (likely broken) run:
 
 .. code:: bash
 
@@ -115,7 +115,9 @@ For more examples and DLL source code check the ``examples`` directory.
 Speed
 =====
 
-The communication via **XML-RPC adds significant overhead** to every function call.
+The inter-process communication via **XML-RPC adds significant overhead** to every function call.
+Calls are slow as hell in general, but the first call of an individual routine within
+a session is even slower due to necessary initialization happening beforehand.
 Depending on the use-case, instead of working with pycrosscall, it will be significantly
 faster to isolate functionality depending on DLL calls into a dedicated Python
 script and run it directly with a Windows Python interpreter under Wine. For comparison,
@@ -129,24 +131,24 @@ simple_demo_routine  10k             0.015               12.230               1.
 
 Benchmarks were performed with an i7 860 CPU, Linux kernel 4.4.62, Wine 2.6-Staging,
 CPython 3.6.0 x86-64 for Linux and CPython 3.5.3 x86-32 for Windows. pycrosscall was
-configured with log level 0 (logs off).
+configured with log level 0 (logs off) for minimal XML-RPC overhead.
 
 Security
 ========
 
 pycrosscall is **notoriously insecure by design**.
 
-- DO NOT run it on any system directly exposed to the internet! Have a firewall on at all times!
-- DO NOT run untrusted code (or DLLs)!
-- DO NOT use pycrosscall for any security related tasks such as encryption, decryption,
+- **DO NOT** run it on any system directly exposed to the internet! Have a firewall on at all times!
+- **DO NOT** run untrusted code (or DLLs)!
+- **DO NOT** use pycrosscall for any security related tasks such as encryption, decryption,
   authentication and handling of key or passwords!
-- DO NOT run it with root / super users privileges!
+- **DO NOT** run it with root / super users privileges!
 
 The following problems also directly apply to pycrosscall:
 
 - XML vulnerabilities: https://docs.python.org/3/library/xml.html#xml-vulnerabilities
 - Wine can in fact theoretically run (some) Windows malware: https://en.wikipedia.org/wiki/Wine_(software)#Security
-- NEVER run Wine as root: https://wiki.winehq.org/FAQ#Should_I_run_Wine_as_root.3F
+- **NEVER run Wine as root**: https://wiki.winehq.org/FAQ#Should_I_run_Wine_as_root.3F
 
 License
 =======
@@ -156,7 +158,7 @@ pycrosscall is licensed under **GPL v2**. See ``LICENSE`` file for details.
 Contribute
 ==========
 
-Contributions are highly welcomed!
+**Contributions are highly welcomed!**
 
 The source code is hosted on GitHub: https://github.com/s-m-e/pycrosscall/
 Pull requests will be reviewed and, if there is nothing to object, merged promptly.
@@ -211,12 +213,44 @@ During the import of pycrosscall, the ``ctypes`` module is patched with an
 additional ``windll`` "sub-module" that would otherwise only be present under
 Windows.
 
-Why?
-====
+FAQ
+===
 
-Good question.
+Why? Seriously, WHY?
+--------------------
 
+Good question. Academic interest and frustration over the lack of a project of
+this kind, mostly. The need for calling individual routines offered by DLLs
+from Linux/MacOS/BSD software/scripts is reflected in numerous threads in forums and
+mailing lists reaching back well over a decade. The recommended approach so far
+has been (and still is!) to write a Wine application, which links against ``winelib``,
+thus allowing to access DLLs. Wine applications can also access libraries
+on the Unix "host" system, which provides the desired bridge between both worlds.
+Nevertheless, this approach is anything but trivial. pycrosscall is supposed
+to satisfy the desire for a "quick and dirty" solution for calling routines from a
+high level scripting language, Python, directly running on the Unix "host" system.
+With respect to "quick", pycrosscall works just out of the box with Wine installed.
+No headers, compilers, cross-compilers or any other configuration is required - one
+import statement followed by well established ``ctypes`` is enough. With respect
+to "dirty", well, read this document from start to finish.
 
+What are actual use cases for this project?
+-------------------------------------------
+
+- Quickly calling routines in proprietary DLLs. Reading legacy file formats and
+  running mission critical legacy plugins for legacy ERP software in a modern environment
+  comes to mind.
+
+- Calling routines in DLLs which come, for some odd reason (like "developer suddenly
+  disappeared with source code"), without source code.
+
+- More common than one might think, calling routines in DLLs, of which the source code is available but
+  can not be (re-)compiled (on another platform) / understood / ported for similarly
+  odd reasons (like "developer retired and nobody knows how to do this" or "developer died
+  and nobody manages to understand the undocumented code"). The latter is especially
+  prevalent in academic environments, where what is left of years of hard work might
+  only be a single binary copy of an old DLL file. As sorts of complicated numerical
+  computations come to mind.
 
 Missing features (for full ctypes compatibility)
 ================================================
@@ -250,6 +284,7 @@ can be achieved:
 - The log should be divided into log-levels with more or less details.
   Higher log-levels should contain details of the current stack frame
   such as line number or calling routine (based on the ``inspect``).
+  Log level support exists, though all messages currently use default level 1.
 - Dedicated error types for catching more errors and their details.
 
 Beyond beta-status
@@ -283,7 +318,8 @@ For production environments
 really know what you are doing or unless you are absolutely desperate!
 Being experimental in nature and of alpha quality, it is prone to fail
 in a number of unpredictable ways, some of which might not be obvious or might
-not even show any (intermediately) recognizable symptoms at all!**
+not even show any (intermediately) recognizable symptoms at all!
+You might end up with plain wrong, nonsensical results without noticing it!**
 
 If this has not driven you off and you nevertheless want to use pycrosscall in
 individual, well isolated cases in production environments, feel free to contact
