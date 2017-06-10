@@ -252,7 +252,7 @@ What are actual use cases for this project?
   odd reasons (like "developer retired and nobody knows how to do this" or "developer died
   and nobody manages to understand the undocumented code"). The latter is especially
   prevalent in academic environments, where what is left of years of hard work might
-  only be a single "binary blob" - a copy of an old DLL file. As sorts of complicated numerical
+  only be a single "binary blob" - a copy of an old DLL file. All sorts of complicated numerical
   computations come to mind.
 
 Missing features (for full ctypes compatibility)
