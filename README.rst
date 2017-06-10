@@ -3,19 +3,18 @@
 Synopsis
 ========
 
-**pycrosscall** is an EXPERIMENTAL **Python module** (currently "Development Status :: 3 - Alpha").
+**pycrosscall** is an EXPERIMENTAL **Python module** (currently in development status 3/alpha).
 It allows to **call routines in Windows DLLs from Python code running on
 Unices / Unix-like systems** such as Linux, MacOS or BSD.
 pycrosscall is designed as a **drop-in replacement for ctypes' windll interface**.
-*Based on Wine*, it starts a stand-alone Windows Python interpreter in
-the background, which is used to execute the called DLL routines.
+pycrosscall is **based on Wine**. A stand-alone Windows Python interpreter
+launched in the background is used to execute the called DLL routines.
 Communication between the UNIX-side and the Windows/Wine-side is based on Python's
 build-in XML-RPC capability.
 pycrosscall comes with extensive logging features allowing to debug problems
 associated with both itself and with Wine.
-pycrosscall is written using **Python 3 syntax** and primarely targets the
+pycrosscall is written using **Python 3 syntax** and primarily targets the
 **CPython** implementation of Python.
-
 
 *About Wine, from winehq.org: Wine (originally an acronym
 for "Wine Is Not an Emulator") is a compatibility layer
@@ -23,9 +22,8 @@ capable of running Windows applications on several POSIX-compliant operating sys
 such as Linux, MacOS and BSD. Instead of simulating internal Windows logic like a
 virtual machine or emulator, Wine translates Windows API calls into POSIX calls
 on-the-fly, eliminating the performance and memory penalties of other methods and
-allowing you to cleanly integrate Windows applications into your desktop.*
-
-*For more details go to: https://www.winehq.org/*
+allowing you to cleanly integrate Windows applications into your desktop.
+For more details go to: https://www.winehq.org/*
 
 **This project is NEITHER associated NOR affiliated in any way or form with the Wine project.**
 
@@ -149,6 +147,11 @@ Please report bugs in Wine in the WineHQ Bug Tracking System: https://bugs.wineh
 Make sure to separate between pycrosscall-related and Wine-related bugs.
 Calling routines in DLLs from Windows-executable (executed with Wine) with identical
 parameters for narrowing down the possible sources of an error is a good way to start.
+
+How to bisect issues
+--------------------
+
+Turn on logging.
 
 Implementation details
 ======================
