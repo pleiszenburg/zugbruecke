@@ -155,7 +155,7 @@ The following problems also directly apply to pycrosscall:
 License
 =======
 
-pycrosscall is licensed under **GPL v2**. See ``LICENSE`` file for details.
+pycrosscall is licensed under **LGPL v2.1**. See ``LICENSE`` file for details.
 
 Contribute
 ==========
