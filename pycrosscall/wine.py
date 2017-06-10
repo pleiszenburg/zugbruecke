@@ -131,7 +131,8 @@ class wine_session_class:
 			"%s\\wine_server.py" % self.dir_thisfile_wine,
 			'--id', self.id,
 			'--port_in', str(self.p['port_wine']),
-			'--port_out', str(self.p['port_unix'])
+			'--port_out', str(self.p['port_unix']),
+			'--log_level', str(self.p['log_level'])
 			]
 
 

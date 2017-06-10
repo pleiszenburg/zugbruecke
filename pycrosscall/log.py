@@ -104,7 +104,7 @@ class log_class:
 		self.log[message['pipe']].append(message)
 
 
-	def __compile_message_dict_list__(self, message, pipe_name):
+	def __compile_message_dict_list__(self, message, pipe_name, level):
 
 		message_lines = []
 		message_line_max = 80
@@ -112,6 +112,7 @@ class log_class:
 		for line in message.split('\n'):
 			if line.strip() != '':
 				message_lines.append({
+					'level': level,
 					'platform': self.p['platform'],
 					'id': self.id,
 					'time': round(time.time(), 2),
@@ -157,9 +158,9 @@ class log_class:
 			raise # TODO
 
 
-	def __process_message__(self, message, pipe):
+	def __process_message__(self, message, pipe, level):
 
-		message_dict_list = self.__compile_message_dict_list__(message, pipe)
+		message_dict_list = self.__compile_message_dict_list__(message, pipe, level)
 
 		for mesage_dict in message_dict_list:
 
@@ -228,11 +229,13 @@ class log_class:
 		f.close()
 
 
-	def out(self, message):
+	def out(self, message, level = 1):
 
-		self.__process_message__(message, 'out')
+		if level <= self.p['log_level']:
+			self.__process_message__(message, 'out', level)
 
 
-	def err(self, message):
+	def err(self, message, level = 1):
 
-		self.__process_message__(message, 'err')
+		if level <= self.p['log_level']:
+			self.__process_message__(message, 'err', level)
