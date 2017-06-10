@@ -115,25 +115,26 @@ For more examples and DLL source code check the ``examples`` directory.
 Speed
 =====
 
-The communication via XML-RPC adds significant overhead to every function call.
+The communication via **XML-RPC adds significant overhead** to every function call.
 Depending on the use-case, instead of working with pycrosscall, it will be significantly
-faster to implement function calls in a dedicated Python script and run it
-directly with a Windows Python interpreter under Wine. For comparison,
+faster to isolate functionality depending on DLL calls into a dedicated Python
+script and run it directly with a Windows Python interpreter under Wine. For comparison,
 see the following numbers:
 
-===================  ===============  =================== ==================== ==================
-Example call         # of iterations  w/o pycrosscall [s] *w/ pycrosscall* [s] overhead/call [µs]
-===================  ===============  =================== ==================== ==================
-simple_demo_routine  500k             2.1                 3.7                  25
-===================  ===============  =================== ==================== ==================
+===================  ==============  =================== ==================== ==================
+Example call         iterations [#]  w/o pycrosscall [s] *w/ pycrosscall* [s] overhead/call [µs]
+===================  ==============  =================== ==================== ==================
+simple_demo_routine  10k             0.015               12.230               1.222
+===================  ==============  =================== ==================== ==================
 
 Benchmarks were performed with an i7 860 CPU, Linux kernel 4.4.62, Wine 2.6-Staging,
-CPython 3.6.0 x86-64 for Linux and CPython 3.5.3 x86-32 for Windows.
+CPython 3.6.0 x86-64 for Linux and CPython 3.5.3 x86-32 for Windows. pycrosscall was
+configured with log level 0 (logs off).
 
 Security
 ========
 
-pycrosscall is notoriously insecure by design.
+pycrosscall is **notoriously insecure by design**.
 
 - DO NOT run it on any system directly exposed to the internet! Have a firewall on at all times!
 - DO NOT run untrusted code (or DLLs)!

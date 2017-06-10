@@ -30,11 +30,11 @@ _simple_demo_routine_.restype = ctypes.c_float
 return_value = _simple_demo_routine_(20.0, 1.07) # Run once, so everything is set up
 return_value = _simple_demo_routine_(20.0, 1.07) # Run twice for checks ...
 
-# def test_simple_demo_routine():
-# 	return_value = _simple_demo_routine_(20.0, 1.07)
-#
-# t = timeit.Timer(
-# 	'test_simple_demo_routine()',
-# 	setup = "from __main__ import test_simple_demo_routine"
-# 	)
-# print('[TIME] %f' % t.timeit(number = 10))
+def test_simple_demo_routine():
+	return_value = _simple_demo_routine_(20.0, 1.07)
+
+t = timeit.Timer(
+	'test_simple_demo_routine()',
+	setup = "from __main__ import test_simple_demo_routine"
+	)
+print('[TIME] %f' % t.timeit(number = 10000))
