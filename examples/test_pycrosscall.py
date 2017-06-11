@@ -4,6 +4,7 @@ import os
 import time
 
 from pycrosscall import ctypes
+ctypes.windll.start_session(parameter = {'log_level': 10})
 
 _call_demo_routine_ = ctypes.windll.LoadLibrary('demo_dll.dll').simple_demo_routine
 print('DLL and routine loaded!')

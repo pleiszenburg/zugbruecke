@@ -116,7 +116,9 @@ class wine_session_class:
 		os.environ['WINEARCH'] = self.p['arch']
 
 		# Change the environment for Wine: Wine prefix / profile directory
-		os.environ['WINEPREFIX'] = os.path.join(self.dir_thisfile, self.p['arch'] + '-wine')
+		os.environ['WINEPREFIX'] = os.path.join(
+			self.p['dir'], self.p['arch'] + '-wine'
+			)
 
 
 	def __wine_server_start__(self):
@@ -140,7 +142,7 @@ class wine_session_class:
 	def __compile_wine_python_command__(self):
 
 		# Python interpreter's directory seen from this script
-		self.dir_python = os.path.join(self.dir_thisfile, self.p['arch'] + '-python' + self.p['version'])
+		self.dir_python = os.path.join(self.p['dir'], self.p['arch'] + '-python' + self.p['version'])
 
 		# Identify wine command for 32 or 64 bit
 		if self.p['arch'] == 'win32':
