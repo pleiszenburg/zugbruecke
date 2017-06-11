@@ -89,8 +89,6 @@ ENV/
 .ropeproject
 
 # Wine stuff
-win32-*
-win64-*
 *.dll
 
 # Logging

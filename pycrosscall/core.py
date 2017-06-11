@@ -67,6 +67,13 @@ class session_class():
 		# Store current working directory
 		self.dir_cwd = os.getcwd()
 
+		# Install wine-python
+		setup_wine_python(
+			self.p['arch'],
+			self.p['version'],
+			self.p['dir']
+			)
+
 		# Initialize Wine session
 		self.wine_session = wine_session_class(self.id, self.p, self.log)
 
