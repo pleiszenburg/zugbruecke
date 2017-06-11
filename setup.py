@@ -6,6 +6,8 @@
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 from distutils.core import setup
+import os
+from glob import glob
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -25,6 +27,7 @@ setup(
 	license = 'GPLv2',
 	keywords = ['ctypes', 'wine'],
 	install_requires = [],
+	scripts = glob(os.path.join('scripts', '*')),
 	classifiers = [
 		'Development Status :: 3 - Alpha',
 		'Intended Audience :: Developers',
