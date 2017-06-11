@@ -183,6 +183,11 @@ class python_interpreter():
 		print(cfg)
 
 
+	def start_session(self, parameter = {}):
+
+		pass
+
+
 	def run(self):
 
 		pass
