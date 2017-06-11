@@ -85,6 +85,10 @@ def setup_wine_python(arch, version, directory, overwrite = False):
 		# Delete folder
 		shutil.rmtree(path)
 
+	# Make sure the target directory exists
+	if not os.path.exists(directory):
+		os.makedirs(directory)
+
 	# Only do if Python is not there OR if should be overwritten
 	if overwrite or not preexisting:
 

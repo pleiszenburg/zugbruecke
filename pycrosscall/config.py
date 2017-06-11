@@ -76,7 +76,7 @@ def get_default_config():
 	cfg['arch'] = 'win32'
 
 	# Define Wine-Python version
-	cfg['version'] = '3.5.0'
+	cfg['version'] = '3.5.3'
 
 	# Default config directory
 	cfg['dir'] = __get_default_config_directory__()
