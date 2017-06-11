@@ -143,7 +143,7 @@ pycrosscall is **notoriously insecure by design**.
 - **DO NOT** run it on any system directly exposed to the internet! Have a firewall on at all times!
 - **DO NOT** run untrusted code (or DLLs)!
 - **DO NOT** use pycrosscall for any security related tasks such as encryption, decryption,
-  authentication and handling of key or passwords!
+  authentication and handling of keys or passwords!
 - **DO NOT** run it with root / super users privileges!
 
 The following problems also directly apply to pycrosscall:
@@ -233,8 +233,9 @@ to satisfy the desire for a "quick and dirty" solution for calling routines from
 high level scripting language, Python, directly running on the Unix "host" system.
 With respect to "quick", pycrosscall works just out of the box with Wine installed.
 No headers, compilers, cross-compilers or any other configuration is required - one
-import statement followed by well established ``ctypes`` syntax is enough. With respect
-to "dirty", well, read this document from start to finish.
+import statement followed by well established ``ctypes`` syntax is enough.
+It is pure Python doing its job.
+With respect to "dirty", well, read this document from start to finish.
 
 What are actual use cases for this project?
 -------------------------------------------
@@ -252,8 +253,8 @@ What are actual use cases for this project?
   odd reasons (like "developer retired and nobody knows how to do this" or "developer died
   and nobody manages to understand the undocumented code"). The latter is especially
   prevalent in academic environments, where what is left of years of hard work might
-  only be a single "binary blob" - a copy of an old DLL file. All sorts of complicated numerical
-  computations come to mind.
+  only be a single "binary blob" - a copy of an old DLL file. All sorts of complicated
+  and highly specialized numerical computations come to mind.
 
 Missing features (for full ctypes compatibility)
 ================================================
@@ -261,6 +262,7 @@ Missing features (for full ctypes compatibility)
 The following features have yet not been added to pycrosscall:
 
 - Access to DLLs using the ``cdll`` and ``oledll`` calling conventions
+- Access to DLL functions exported by ordinal instead of by name
 - Windows data types (``wintypes``)
 - Related functions for handling DLLs and routines (``WINFUNCTYPE``, ``DllCanUnloadNow``, ``DllGetClassObject``)
 - Error-handling, Windows-style (``FormatError``, ``GetLastError``, ``get_last_error``, ``set_last_error``, ``WinError``)
