@@ -38,6 +38,7 @@ import signal
 
 from .config import get_module_config
 from .wine import wine_session_class
+from .lib import setup_wine_python
 from .log import log_class
 from .dll import dll_session_class
 
@@ -180,7 +181,14 @@ class python_interpreter():
 	def __init__(self, cmd_line_args):
 
 		cfg = get_module_config()
-		print(cfg)
+
+		setup_wine_python(
+			cfg['arch'],
+			cfg['version'],
+			cfg['dir']
+			)
+
+		print('!!!')
 
 
 	def start_session(self, parameter = {}):

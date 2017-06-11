@@ -34,7 +34,7 @@ specific language governing rights and limitations under the License.
 import os
 import random
 import shutil
-import urllib
+import urllib.request
 import zipfile
 
 
@@ -92,14 +92,13 @@ def setup_wine_python(arch, version, directory, overwrite = False):
 		archive_path = os.path.join(directory, pyarchive)
 
 		# Download zip file from Python website into directory
-		testfile = urllib.URLopener()
-		testfile.retrieve(
+		urllib.request.urlretrieve(
 			'https://www.python.org/ftp/python/%s/%s' % (version, pyarchive),
 			archive_path
 			)
 
 		# Unpack
-		f = zipfile.ZipFile.open(archive_path, mode = 'r')
+		f = zipfile.ZipFile(archive_path, mode = 'r')
 		f.extractall(path = target_directory)
 		f.close()
 
