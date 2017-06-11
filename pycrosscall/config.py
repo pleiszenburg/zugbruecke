@@ -78,6 +78,9 @@ def get_default_config():
 	# Define Wine-Python version
 	cfg['version'] = '3.5.0'
 
+	# Default config directory
+	cfg['dir'] = __get_default_config_directory__()
+
 	return cfg
 
 
@@ -94,6 +97,11 @@ def get_module_config(override_dict = {}):
 
 	# Sort and return the config
 	return __join_config_by_priority__(config)
+
+
+def __get_default_config_directory__():
+
+	return os.path.join(os.path.expanduser('~'), '.pycrosscall')
 
 
 def __join_config_by_priority__(config_dict_list):
@@ -128,7 +136,7 @@ def __locate_and_read_config_files__():
 	for file_location in [
 		os.curdir,
 		os.environ.get('PYCROSSCALL'),
-		os.path.join(os.path.expanduser('~'), '.pycrosscall'),
+		__get_default_config_directory__(),
 		'/etc/pycrosscall'
 		]:
 
