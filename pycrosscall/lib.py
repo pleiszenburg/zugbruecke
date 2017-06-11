@@ -6,7 +6,7 @@ PYCROSSCALL
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/s-m-e/pycrosscall
 
-	pycrosscall/lib.py: General purpose routines.
+	pycrosscall/lib.py: General purpose routines
 
 	Required to run on platform / side: [UNIX]
 
