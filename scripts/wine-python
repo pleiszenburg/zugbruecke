@@ -32,8 +32,18 @@ specific language governing rights and limitations under the License.
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-# HACK 
+import os
+import sys
+
+# HACK
 pycrosscall_path = os.path.abspath(os.path.join(os.path.split(os.path.realpath(__file__))[0], '..'))
 sys.path.insert(0, pycrosscall_path)
 
-from pycrosscall import get_pycrosscall_config
+from pycrosscall import python_interpreter
+
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# RUN
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+python_interpreter(sys.argv).run()

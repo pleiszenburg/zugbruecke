@@ -26,8 +26,8 @@ specific language governing rights and limitations under the License.
 
 """
 
-# Expose routine for reading the module's user/system-wide configuration
-from .config import get_module_config as get_pycrosscall_config
+# Expose a routine for starting a Python interpreter directly
+from .core import python_interpreter
 
 # Load windll_class for mimicing ctypes.windll eventually, make it private
 from .core import windll_class as __windll_class__
