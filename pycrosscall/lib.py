@@ -33,6 +33,9 @@ specific language governing rights and limitations under the License.
 
 import os
 import random
+import shutil
+import urllib
+import zipfile
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -57,3 +60,48 @@ def generate_session_id():
 
 	# A session id by default is an 8 digit hash string
 	return get_randhashstr(8)
+
+
+def setup_wine_python(arch, version, directory, overwrite = False):
+
+	# File name for python stand-alone zip file
+	pyarchive = 'python-%s-embed-%s.zip' % (version, arch)
+
+	# Name of target subfolder
+	pydir = '%s-python%s' % (arch, version)
+
+	# Target directory
+	target_directory = os.path.join(directory, pydir)
+
+	# Target location of python.exe
+	python_exe_path = os.path.join(target_directory, 'python.exe')
+
+	# Is there a pre-existing Python installation with identical parameters?
+	preexisting = os.path.isfile(python_exe_path)
+
+	# Is there a preexisting installation and should it be overwritten?
+	if preexisting and overwrite:
+
+		# Delete folder
+		shutil.rmtree(path)
+
+	# Only do if Python is not there OR if should be overwritten
+	if overwrite or not preexisting:
+
+		# Path to zip archive
+		archive_path = os.path.join(directory, pyarchive)
+
+		# Download zip file from Python website into directory
+		testfile = urllib.URLopener()
+		testfile.retrieve(
+			'https://www.python.org/ftp/python/%s/%s' % (version, pyarchive),
+			archive_path
+			)
+
+		# Unpack
+		f = zipfile.ZipFile.open(archive_path, mode = 'r')
+		f.extractall(path = target_directory)
+		f.close()
+
+		# Delete zip file
+		os.remove(os.path.join(directory, pyarchive))
