@@ -24,7 +24,7 @@ setup(
 	author_email = 'ernst@pleiszenburg.de',
 	url = 'https://github.com/s-m-e/pycrosscall',
 	download_url = 'https://github.com/s-m-e/pycrosscall/archive/pycrosscall_0.0.1.tar.gz',
-	license = 'GPLv2',
+	license = 'LGPLv2',
 	keywords = ['ctypes', 'wine'],
 	install_requires = [],
 	scripts = glob(os.path.join('scripts', '*')),
