@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 """
@@ -6,7 +7,7 @@ PYCROSSCALL
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/s-m-e/pycrosscall
 
-	pycrosscall/__init__.py: Module init file
+	scripts/wine-python: Runs a Python interpreter on top of Wine
 
 	Required to run on platform / side: [UNIX]
 
@@ -26,20 +27,13 @@ specific language governing rights and limitations under the License.
 
 """
 
-# Expose routine for reading the module's user/system-wide configuration
-from .config import get_module_config as get_pycrosscall_config
 
-# Load windll_class for mimicing ctypes.windll eventually, make it private
-from .core import windll_class as __windll_class__
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# IMPORT
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-# Set up and expose windll, starting session while doing so
-windll = __windll_class__()
+# HACK 
+pycrosscall_path = os.path.abspath(os.path.join(os.path.split(os.path.realpath(__file__))[0], '..'))
+sys.path.insert(0, pycrosscall_path)
 
-# Import and expose ctypes
-import ctypes
-
-# Patching ctypes
-ctypes.windll = windll
-
-# Expose session class for advanced users and tests
-from .core import session_class as session
+from pycrosscall import get_pycrosscall_config

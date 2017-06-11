@@ -36,6 +36,7 @@ import os
 from pprint import pprint as pp
 import signal
 
+from .config import get_module_config
 from .wine import wine_session_class
 from .lib import generate_session_id
 from .log import log_class
@@ -131,6 +132,8 @@ class session_class():
 
 
 	def __fill_parameter__(self, parameter):
+
+		# TODO: Handle input provided by get_module_config
 
 		# Store parameter dict
 		self.p = parameter
