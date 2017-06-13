@@ -167,7 +167,7 @@ class log_class:
 			message_list.append(c['RED'])
 		message_list.append(messages['pipe'][0] + c['RESET'])
 		message_list.append(': ')
-		if any(ext in messages['cnt'] for ext in ['fixme:', 'err:']):
+		if any(ext in messages['cnt'] for ext in ['fixme:', 'err:', 'wine client error']):
 			message_list.append(c['GREY'])
 		else:
 			message_list.append(c['WHITE'])

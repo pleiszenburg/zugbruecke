@@ -33,8 +33,10 @@ specific language governing rights and limitations under the License.
 
 import os
 import signal
+import socket
 import subprocess
 import sys
+import tempfile
 import threading
 import time
 import xmlrpc.client
@@ -57,18 +59,15 @@ class wine_session_class:
 		self.p = parameter
 		self.log = session_log
 
-		# Log status
-		self.log.out('wine session starting ...')
-
 		# Fire session up
 		self.__session_start__()
-
-		# Log status
-		self.log.out('wine session started')
 
 
 	# flow control routine for setting things up, called once from init
 	def __session_start__(self):
+
+		# Log status
+		self.log.out('[wine session] starting ...')
 
 		# Session is up
 		self.up = True
@@ -79,14 +78,20 @@ class wine_session_class:
 		# Set environment variables for wine
 		self.__set_wine_env__()
 
-		# Translate this file's Unix path into Wine path
-		self.dir_thisfile_wine = self.translate_path_unix2win(self.dir_thisfile)
+		# Create WINEPREFIX if it does not exist yet
+		self.__create_wine_prefix__()
 
 		# Start wine server
 		self.__wine_server_start__()
 
+		# Translate this file's Unix path into Wine path
+		self.dir_thisfile_wine = self.translate_path_unix2win(self.dir_thisfile)
+
 		# Start wine python
 		self.__wine_python_start__(self.__compile_wine_python_command__())
+
+		# Log status
+		self.log.out('[wine session] started')
 
 
 	# session destructor
@@ -95,7 +100,7 @@ class wine_session_class:
 		if self.up:
 
 			# Log status
-			self.log.out('wine session terminating ...')
+			self.log.out('[wine session] terminating ...')
 
 			# Shut down wine python
 			self.__wine_python_stop__()
@@ -104,10 +109,46 @@ class wine_session_class:
 			self.__wine_server_stop__()
 
 			# Log status
-			self.log.out('wine session terminated')
+			self.log.out('[wine session] terminated')
 
 			# Session is down
 			self.up = False
+
+
+	def __create_wine_prefix__(self):
+
+		# Log status
+		self.log.out('Checking for WINEPREFIX "%s"...' % self.dir_wineprefix)
+
+		# Does it exist?
+		if not os.path.exists(self.dir_wineprefix):
+
+			# Log status
+			self.log.out('... does not exists, creating ...')
+
+			# Start wine server into prepared environment
+			proc_winecfg = subprocess.Popen(
+				['winecfg'],
+				stdin = subprocess.PIPE,
+				stdout = subprocess.PIPE,
+				stderr = subprocess.PIPE,
+				shell = False
+				)
+
+			# Get feedback
+			cfg_out, cfg_err = proc_winecfg.communicate()
+
+			# Log feedback
+			self.log.out(cfg_out.decode(encoding = 'UTF-8'))
+			self.log.err(cfg_err.decode(encoding = 'UTF-8'))
+
+			# Log status
+			self.log.out('... done.')
+
+		else:
+
+			# Log status
+			self.log.out('... exists.')
 
 
 	def __set_wine_env__(self):
@@ -116,12 +157,16 @@ class wine_session_class:
 		os.environ['WINEARCH'] = self.p['arch']
 
 		# Change the environment for Wine: Wine prefix / profile directory
-		os.environ['WINEPREFIX'] = os.path.join(
+		self.dir_wineprefix = os.path.join(
 			self.p['dir'], self.p['arch'] + '-wine'
 			)
+		os.environ['WINEPREFIX'] = self.dir_wineprefix
 
 
 	def __wine_server_start__(self):
+
+		# Status log
+		self.log.out('Launching wineserver ...')
 
 		# Start wine server into prepared environment
 		self.proc_wineserver = subprocess.Popen(
@@ -133,10 +178,81 @@ class wine_session_class:
 			)
 
 		# Status log
-		self.log.out('wineserver started with PID %d' % self.proc_wineserver.pid)
+		self.log.out('wineserver started with PID %d ...' % self.proc_wineserver.pid)
 
-		# HACK wait due to lack of feedback
-		time.sleep(1) # seconds
+		# Get info on WINEPREFIX folder
+		info_wineprefix = os.stat(self.dir_wineprefix)
+
+		# Get path of wineserver socket file
+		socket_path = os.path.join(
+			tempfile.gettempdir(),
+			'.wine-%d' % os.getuid(),
+			'server-%x-%x' % (info_wineprefix.st_dev, info_wineprefix.st_ino),
+			'socket'
+			)
+
+		# Status log
+		self.log.out('... expecting socket at %s ...' % socket_path)
+
+		# Create socket client
+		wineserver_client = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+		# Set a timeout
+		wineserver_client.settimeout(1.0) # seconds
+		# Status variable
+		got_connection = False
+		# Time-step
+		wait_for_seconds = 0.01
+		# Timeout
+		timeout_after_seconds = 30.0
+		# Already waited for ...
+		waited_for_seconds = 0.0
+		# Connection trys
+		tried_this_many_times = 0
+
+		# Run loop until socket appears
+		while True:
+
+			# Does socket file exist?
+			if os.path.exists(socket_path):
+
+				# Count attempts
+				tried_this_many_times += 1
+
+				# Can I connect to it?
+				try:
+					wineserver_client.connect(socket_path)
+					got_connection = True
+					break
+				except:
+					pass
+
+			# Keep track of time
+			waited_for_seconds += wait_for_seconds
+
+			# Break to loop after timeout
+			if waited_for_seconds >= timeout_after_seconds:
+				break
+
+			# Wait before trying again
+			time.sleep(wait_for_seconds)
+
+		# Evaluate the result
+		if not got_connection:
+
+			self.log.out(
+				'... did not appear (after %0.2f seconds & %d attempts)! Quit.' % (timeout_after_seconds, tried_this_many_times)
+				)
+			sys.exit()
+
+		else:
+
+			# If it worked, disconnect
+			wineserver_client.close()
+
+			# Log status
+			self.log.out(
+				'... appeared (after %0.2f seconds & %d attempts)!' % (waited_for_seconds, tried_this_many_times)
+				)
 
 
 	def __compile_wine_python_command__(self):
@@ -249,6 +365,9 @@ class wine_session_class:
 
 	def translate_path_unix2win(self, path):
 
+		# Pass stderr into log
+		self.log.out('Translate in: "%s"' % path)
+
 		# Start winepath for tanslating path, catch output from all pipes
 		winepath_p = subprocess.Popen(
 			['winepath', '-w', path],
@@ -260,8 +379,18 @@ class wine_session_class:
 		# Get stdout and stderr
 		wine_out, wine_err = winepath_p.communicate()
 
+		# Change encoding
+		wine_out = wine_out.decode(encoding = 'UTF-8').strip()
+
 		# Pass stderr into log
 		self.log.err(wine_err.decode(encoding = 'UTF-8'))
 
+		# Pass stderr into log
+		self.log.out('Translate out: "%s"' % wine_out)
+
+		# Catch errors
+		if wine_out == '':
+			raise # TODO error
+
 		# Return translated path
-		return wine_out.decode(encoding = 'UTF-8').strip()
+		return wine_out
