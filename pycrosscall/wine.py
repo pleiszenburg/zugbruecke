@@ -272,7 +272,7 @@ class wine_session_class:
 		return [
 			wine_cmd,
 			os.path.join(self.dir_python, 'python.exe'),
-			"%s\\wine_server.py" % self.dir_thisfile_wine,
+			"%s\\_server_.py" % self.dir_thisfile_wine,
 			'--id', self.id,
 			'--port_in', str(self.p['port_wine']),
 			'--port_out', str(self.p['port_unix']),
