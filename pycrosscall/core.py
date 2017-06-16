@@ -37,10 +37,11 @@ from pprint import pprint as pp
 import signal
 
 from .config import get_module_config
-from .wineserver import wineserver_session_class
+from .dll import dll_session_class
+from .interpreter import interpreter_session_class
 from .lib import setup_wine_python
 from .log import log_class
-from .dll import dll_session_class
+from .wineserver import wineserver_session_class
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -62,7 +63,8 @@ class session_class():
 		self.log = log_class(self.id, self.p)
 
 		# Log status
-		self.log.out('pycrosscall import (Wine-Python %s %s) ...' % (self.p['version'], self.p['arch']))
+		self.log.out('[core session] STARTING ...')
+		self.log.out('[core session] Configured Wine-Python version is %s for %s.' % (self.p['version'], self.p['arch']))
 
 		# Store current working directory
 		self.dir_cwd = os.getcwd()
@@ -77,7 +79,8 @@ class session_class():
 		# Initialize Wine session
 		self.wineserver_session = wineserver_session_class(self.id, self.p, self.log)
 
-		
+		# Initialize interpreter session
+		self.interpreter_session = interpreter_session_class(self.id, self.p, self.log, self.wineserver_session)
 
 		# Set up a dict for loaded dlls
 		self.dll_dict = {}
@@ -91,10 +94,13 @@ class session_class():
 		signal.signal(signal.SIGTERM, self.terminate)
 
 		# Log status
-		self.log.out('pycrosscall imported')
+		self.log.out('[core session] STARTED.')
 
 
 	def LoadLibrary(self, dll_name, dll_type = 'windll'):
+
+		# Log status
+		self.log.out('[core session] Trying to access DLL "%s" ...' % full_path_dll)
 
 		# Get full path of dll
 		full_path_dll = os.path.join(self.dir_cwd, dll_name)
@@ -102,21 +108,35 @@ class session_class():
 		# Check if dll file exists
 		if not os.path.isfile(full_path_dll):
 
+			# Log status
+			self.log.out('[core session] ... does NOT exist!' % full_path_dll)
+
 			raise # TODO
+
+		# Log status
+		self.log.out('[core session] ... exists ...' % full_path_dll)
 
 		# Simplyfy full path
 		full_path_dll = os.path.abspath(full_path_dll)
 
-		# Log status
-		self.log.out('Accessing dll "%s" - exists.' % full_path_dll)
-
 		# Check whether dll has yet not been touched
 		if full_path_dll not in self.dll_dict.keys():
+
+			# Log status
+			self.log.out('[core session] ... not yet touched ...' % full_path_dll)
 
 			# Fire up new dll object
 			self.dll_dict[full_path_dll] = dll_session_class(
 				full_path_dll, dll_name, dll_type, self
 				)
+
+			# Log status
+			self.log.out('[core session] ... touched and added to list.' % full_path_dll)
+
+		else:
+
+			# Log status
+			self.log.out('[core session] ... already touched and in list.' % full_path_dll)
 
 		# Return reference on existing dll object
 		return self.dll_dict[full_path_dll]
@@ -128,13 +148,16 @@ class session_class():
 		if self.up:
 
 			# Log status
-			self.log.out('pycrosscall unloading ...')
+			self.log.out('[core session] TERMINATING ...')
 
-			# Destruct wine session, quit wine processes
+			# Destruct interpreter session
+			self.interpreter_session.terminate()
+
+			# Destruct Wine session, quit wine processes
 			self.wineserver_session.terminate()
 
 			# Log status
-			self.log.out('pycrosscall unloaded')
+			self.log.out('[core session] TERMINATED.')
 
 			# Terminate log
 			self.log.terminate()

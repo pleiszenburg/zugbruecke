@@ -145,6 +145,9 @@ class wineserver_session_class:
 		# Change the environment for Wine: Architecture
 		os.environ['WINEARCH'] = self.p['arch']
 
+		# Log status
+		self.log.out('[wine session] Set WINEARCH env. variable: "%s"' % self.dir_wineprefix)
+
 		# Change the environment for Wine: Wine prefix / profile directory
 		self.dir_wineprefix = os.path.join(
 			self.p['dir'], self.p['arch'] + '-wine'
@@ -152,7 +155,7 @@ class wineserver_session_class:
 		os.environ['WINEPREFIX'] = self.dir_wineprefix
 
 		# Log status
-		self.log.out('[wine session] Set WINEPREFIX and WINEARCH environment variables.')
+		self.log.out('[wine session] Set WINEPREFIX env. variable: "%s"' % self.p['arch'])
 
 
 	def __wine_server_start__(self):
