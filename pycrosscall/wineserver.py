@@ -84,9 +84,6 @@ class wineserver_session_class:
 			# Log status
 			self.log.out('[wine session] TERMINATING ...')
 
-			# Shut down wine python
-			# self.__wine_python_stop__()
-
 			# Stop wine server
 			self.__wine_server_stop__()
 
