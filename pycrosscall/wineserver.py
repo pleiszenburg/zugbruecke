@@ -57,19 +57,13 @@ class wineserver_session_class:
 		self.p = parameter
 		self.log = session_log
 
-		# Fire session up
-		self.__session_start__()
-
-
-	# flow control routine for setting things up, called once from init
-	def __session_start__(self):
-
 		# Log status
 		self.log.out('[wine session] STARTING ...')
 
 		# Session is up
 		self.up = True
 
+		# Set environment variables
 		self.__set_wine_env__()
 
 		# Create WINEPREFIX if it does not exist yet
