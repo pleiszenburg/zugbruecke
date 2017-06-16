@@ -47,7 +47,7 @@ class xmlrpc_requesthandler(SimpleXMLRPCRequestHandler):
 	rpc_paths = ('/RPC2',)
 
 
-class xmlrpc_server_alternative(SimpleXMLRPCServer):
+class xmlrpc_server_alternative(xmlrpc_server):
 
 
 	# Server is by definition up from the beginning

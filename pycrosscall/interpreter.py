@@ -37,6 +37,8 @@ import subprocess
 import threading
 import time
 
+from .lib import get_location_of_file
+
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # WINE PYTHON INTERPRETER CLASS

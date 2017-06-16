@@ -39,7 +39,6 @@ import sys
 import tempfile
 import time
 
-from .lib import get_location_of_file
 from .xmlrpc import xmlrpc_client
 
 
@@ -146,7 +145,7 @@ class wineserver_session_class:
 		os.environ['WINEARCH'] = self.p['arch']
 
 		# Log status
-		self.log.out('[wine session] Set WINEARCH env. variable: "%s"' % self.dir_wineprefix)
+		self.log.out('[wine session] Set WINEARCH env. variable: "%s"' % self.p['arch'])
 
 		# Change the environment for Wine: Wine prefix / profile directory
 		self.dir_wineprefix = os.path.join(
@@ -155,7 +154,7 @@ class wineserver_session_class:
 		os.environ['WINEPREFIX'] = self.dir_wineprefix
 
 		# Log status
-		self.log.out('[wine session] Set WINEPREFIX env. variable: "%s"' % self.p['arch'])
+		self.log.out('[wine session] Set WINEPREFIX env. variable: "%s"' % self.dir_wineprefix)
 
 
 	def __wine_server_start__(self):
@@ -173,7 +172,7 @@ class wineserver_session_class:
 			)
 
 		# Status log
-		self.log.out('[wine session] wineserver started with PID %d ...' % self.proc_wineserver.pid)
+		self.log.out('[wine session] ... started with PID %d ...' % self.proc_wineserver.pid)
 
 		# Get info on WINEPREFIX folder
 		info_wineprefix = os.stat(self.dir_wineprefix)
