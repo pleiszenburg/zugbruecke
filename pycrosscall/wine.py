@@ -66,7 +66,7 @@ class wine_session_class:
 	def __session_start__(self):
 
 		# Log status
-		self.log.out('[wine session] starting ...')
+		self.log.out('[wine session] STARTING ...')
 
 		# Session is up
 		self.up = True
@@ -80,7 +80,7 @@ class wine_session_class:
 		self.__wine_server_start__()
 
 		# Log status
-		self.log.out('[wine session] started')
+		self.log.out('[wine session] STARTED.')
 
 
 	# session destructor
@@ -89,7 +89,7 @@ class wine_session_class:
 		if self.up:
 
 			# Log status
-			self.log.out('[wine session] terminating ...')
+			self.log.out('[wine session] TERMINATING ...')
 
 			# Shut down wine python
 			# self.__wine_python_stop__()
@@ -98,7 +98,7 @@ class wine_session_class:
 			self.__wine_server_stop__()
 
 			# Log status
-			self.log.out('[wine session] terminated')
+			self.log.out('[wine session] TERMINATED.')
 
 			# Session is down
 			self.up = False
@@ -107,13 +107,13 @@ class wine_session_class:
 	def __create_wine_prefix__(self):
 
 		# Log status
-		self.log.out('Checking for WINEPREFIX "%s"...' % self.dir_wineprefix)
+		self.log.out('[wine session] Checking for WINEPREFIX directory "%s"...' % self.dir_wineprefix)
 
 		# Does it exist?
 		if not os.path.exists(self.dir_wineprefix):
 
 			# Log status
-			self.log.out('... does not exists, creating ...')
+			self.log.out('[wine session] ... does not exists, creating ...')
 
 			# Start wine server into prepared environment
 			proc_winecfg = subprocess.Popen(
@@ -132,12 +132,12 @@ class wine_session_class:
 			self.log.err(cfg_err.decode(encoding = 'UTF-8'))
 
 			# Log status
-			self.log.out('... done.')
+			self.log.out('[wine session] ... done.')
 
 		else:
 
 			# Log status
-			self.log.out('... exists.')
+			self.log.out('[wine session] ... exists.')
 
 
 	def __set_wine_env__(self):
@@ -151,11 +151,14 @@ class wine_session_class:
 			)
 		os.environ['WINEPREFIX'] = self.dir_wineprefix
 
+		# Log status
+		self.log.out('[wine session] Set WINEPREFIX and WINEARCH environment variables.')
+
 
 	def __wine_server_start__(self):
 
 		# Status log
-		self.log.out('Launching wineserver ...')
+		self.log.out('[wine session] Launching wineserver ...')
 
 		# Start wine server into prepared environment
 		self.proc_wineserver = subprocess.Popen(
@@ -167,7 +170,7 @@ class wine_session_class:
 			)
 
 		# Status log
-		self.log.out('wineserver started with PID %d ...' % self.proc_wineserver.pid)
+		self.log.out('[wine session] wineserver started with PID %d ...' % self.proc_wineserver.pid)
 
 		# Get info on WINEPREFIX folder
 		info_wineprefix = os.stat(self.dir_wineprefix)
@@ -181,7 +184,7 @@ class wine_session_class:
 			)
 
 		# Status log
-		self.log.out('... expecting socket at %s ...' % socket_path)
+		self.log.out('[wine session] ... expecting socket at %s ...' % socket_path)
 
 		# Create socket client
 		wineserver_client = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
@@ -229,7 +232,7 @@ class wine_session_class:
 		if not got_connection:
 
 			self.log.out(
-				'... did not appear (after %0.2f seconds & %d attempts)! Quit.' % (timeout_after_seconds, tried_this_many_times)
+				'[wine session] ... did not appear (after %0.2f seconds & %d attempts)! Quit.' % (timeout_after_seconds, tried_this_many_times)
 				)
 			sys.exit()
 
@@ -240,7 +243,7 @@ class wine_session_class:
 
 			# Log status
 			self.log.out(
-				'... appeared (after %0.2f seconds & %d attempts)!' % (waited_for_seconds, tried_this_many_times)
+				'[wine session] ... appeared (after %0.2f seconds & %d attempts)!' % (waited_for_seconds, tried_this_many_times)
 				)
 
 
@@ -256,7 +259,7 @@ class wine_session_class:
 	def translate_path_unix2win(self, path):
 
 		# Pass stderr into log
-		self.log.out('Translate in: "%s"' % path)
+		self.log.out('[wine session] Translate path input: "%s"' % path)
 
 		# Start winepath for tanslating path, catch output from all pipes
 		winepath_p = subprocess.Popen(
@@ -276,7 +279,7 @@ class wine_session_class:
 		self.log.err(wine_err.decode(encoding = 'UTF-8'))
 
 		# Pass stderr into log
-		self.log.out('Translate out: "%s"' % wine_out)
+		self.log.out('[wine session] Translate path output: "%s"' % wine_out)
 
 		# Catch errors
 		if wine_out == '':
