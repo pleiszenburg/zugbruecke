@@ -47,7 +47,7 @@ from .xmlrpc import xmlrpc_client
 # WINE SESSION CLASS
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-class wine_session_class:
+class wineserver_session_class:
 
 
 	# session init

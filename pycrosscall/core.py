@@ -37,7 +37,7 @@ from pprint import pprint as pp
 import signal
 
 from .config import get_module_config
-from .wine import wine_session_class
+from .wineserver import wineserver_session_class
 from .lib import setup_wine_python
 from .log import log_class
 from .dll import dll_session_class
@@ -75,7 +75,9 @@ class session_class():
 			)
 
 		# Initialize Wine session
-		self.wine_session = wine_session_class(self.id, self.p, self.log)
+		self.wineserver_session = wineserver_session_class(self.id, self.p, self.log)
+
+		
 
 		# Set up a dict for loaded dlls
 		self.dll_dict = {}
@@ -129,7 +131,7 @@ class session_class():
 			self.log.out('pycrosscall unloading ...')
 
 			# Destruct wine session, quit wine processes
-			self.wine_session.terminate()
+			self.wineserver_session.terminate()
 
 			# Log status
 			self.log.out('pycrosscall unloaded')
