@@ -45,3 +45,55 @@ class xmlrpc_requesthandler(SimpleXMLRPCRequestHandler):
 
 	# Restrict to a particular path.
 	rpc_paths = ('/RPC2',)
+
+
+class xmlrpc_server_alternative(SimpleXMLRPCServer):
+
+
+	# Server is by definition up from the beginning
+	up = True
+
+
+	def set_log(self, log):
+
+		# Set log
+		self.log = log
+
+		# Status log
+		self.log.out('log-xmlrpc-server connected')
+
+
+	def set_parent_terminate_func(self, func):
+
+		# Set function in parent, which needs to be called on shutdown
+		self.parent_terminate_func = func
+
+
+	def shutdown(self):
+
+		# Run only if session still up
+		if self.up:
+
+			# Log status
+			self.log.out('log-xmlrpc-server shutting down ...')
+
+			# Sever is marked down
+			self.up = False
+
+			# Tell parent to terminate
+			self.parent_terminate_func()
+
+		# Return success, expected default behavior of SimpleXMLRPCServer
+		return 1
+
+
+	def serve_forever(self):
+
+		# Request handler loop
+		while self.up:
+
+			# Handle requests ...
+			self.handle_request()
+
+		# Log status
+		self.log.out('log-xmlrpc-server terminated')
