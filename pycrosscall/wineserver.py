@@ -190,7 +190,7 @@ class wineserver_session_class:
 		# Timeout
 		timeout_after_seconds = 30.0
 		# Already waited for ...
-		waited_for_seconds = 0.0
+		started_waiting_at = time.time()
 		# Connection trys
 		tried_this_many_times = 0
 
@@ -211,11 +211,8 @@ class wineserver_session_class:
 				except:
 					pass
 
-			# Keep track of time
-			waited_for_seconds += wait_for_seconds
-
 			# Break to loop after timeout
-			if waited_for_seconds >= timeout_after_seconds:
+			if time.time() >= (started_waiting_at + timeout_after_seconds):
 				break
 
 			# Wait before trying again
@@ -236,7 +233,7 @@ class wineserver_session_class:
 
 			# Log status
 			self.log.out(
-				'[wine session] ... appeared (after %0.2f seconds & %d attempts)!' % (waited_for_seconds, tried_this_many_times)
+				'[wine session] ... appeared (after %0.2f seconds & %d attempts)!' % (time.time() - started_waiting_at, tried_this_many_times)
 				)
 
 
