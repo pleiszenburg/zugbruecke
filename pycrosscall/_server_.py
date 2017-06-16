@@ -7,7 +7,7 @@ PYCROSSCALL
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/s-m-e/pycrosscall
 
-	pycrosscall/wine_server.py: Started with Python on Wine, executing DLL calls
+	pycrosscall/_server_.py: Started with Python on Wine, executing DLL calls
 
 	Required to run on platform / side: [WINE]
 
