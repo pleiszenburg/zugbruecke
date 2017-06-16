@@ -8,7 +8,7 @@ https://github.com/s-m-e/pycrosscall
 
 	pycrosscall/_server_.py: Class(es) for managing Python interpreter on Wine
 
-	Required to run on platform / side: [WINE]
+	Required to run on platform / side: [UNIX]
 
 	Copyright (C) 2017 Sebastian M. Ernst <ernst@pleiszenburg.de>
 

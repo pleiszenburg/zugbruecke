@@ -8,7 +8,7 @@ https://github.com/s-m-e/pycrosscall
 
 	pycrosscall/_server_.py: Customized XML-RPC classes
 
-	Required to run on platform / side: [WINE]
+	Required to run on platform / side: [UNIX, WINE]
 
 	Copyright (C) 2017 Sebastian M. Ernst <ernst@pleiszenburg.de>
 
