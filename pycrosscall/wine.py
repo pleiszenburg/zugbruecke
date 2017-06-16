@@ -39,9 +39,9 @@ import sys
 import tempfile
 import threading
 import time
-import xmlrpc.client
 
 from .lib import get_location_of_file
+from .xmlrpc import xmlrpc_client
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -332,7 +332,7 @@ class wine_session_class:
 		self.log.out('threads for wine-python logging started')
 
 		# Fire up xmlrpc client
-		self.client = xmlrpc.client.ServerProxy('http://localhost:8000')
+		self.client = xmlrpc_client.ServerProxy('http://localhost:8000')
 
 		# Log status
 		self.log.out('xmlrpc-client started')
