@@ -362,6 +362,79 @@ class wineserver_session_class:
 	def translate_path_unix2win(self, path):
 
 		# Pass stderr into log
+		self.log.out('[wine session] Translate path ...')
+		self.log.out('[wine session] ... input: "%s" ...' % path)
+
+		# Count attempts
+		tried_this_many_times = 0
+		# Specify max attempts
+		max_attempts = 10
+		# Timeout after seconds per attempt
+		time_out_after_seconds = 0.1
+		# Status variable
+		path_converted = False
+
+		# Really bad HACK: Loop until max attempts are reached or path is converted
+		while tried_this_many_times < max_attempts:
+
+			# Count attempts
+			tried_this_many_times += 1
+
+			# Log status
+			self.log.out('[wine session] ... attempt %d to call winepath ...' % tried_this_many_times)
+
+			# Start winepath for tanslating path, catch output from all pipes
+			winepath_p = subprocess.Popen(
+				['winepath', '-w', path],
+				stdin = subprocess.PIPE,
+				stdout = subprocess.PIPE,
+				stderr = subprocess.PIPE
+				)
+
+			# Log status
+			self.log.out('[wine session] ... process started with PID %d ...' % winepath_p.pid)
+
+			# Get stdout and stderr with timeout
+			try:
+				wine_out, wine_err = winepath_p.communicate(timeout = time_out_after_seconds)
+			except subprocess.TimeoutExpired:
+				self.log.out('[wine session] ... timed out, killing process ...')
+				winepath_p.kill()
+				wine_out, wine_err = b'', b''
+
+			# Change encoding
+			wine_out = wine_out.decode(encoding = 'UTF-8').strip()
+
+			# Pass stderr into log
+			self.log.err(wine_err.decode(encoding = 'UTF-8'))
+
+			# Check result
+			if wine_out != '':
+
+				# Update status: It worked.
+				path_converted = True
+
+				# Break the loop
+				break
+
+		# Log status
+		self.log.out('[wine session] ... output: "%s".' % wine_out)
+
+		# Catch errors
+		if wine_out == '' or not path_converted:
+
+			# Log status
+			self.log.out('[wine session] ... failed!')
+
+			raise # TODO error
+
+		# Return translated path
+		return wine_out
+
+
+	def __translate_path_unix2win__(self, path):
+
+		# Pass stderr into log
 		self.log.out('[wine session] Translate path input: "%s"' % path)
 
 		# Start winepath for tanslating path, catch output from all pipes
