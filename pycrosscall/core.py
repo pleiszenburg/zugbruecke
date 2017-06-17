@@ -40,6 +40,7 @@ from .config import get_module_config
 from .dll import dll_session_class
 from .interpreter import interpreter_session_class
 from .lib import (
+	get_free_port,
 	get_location_of_file,
 	setup_wine_python
 	)
@@ -199,7 +200,7 @@ class session_class():
 			time.sleep(1) # seconds
 
 			# Fire up xmlrpc client
-			self.client = xmlrpc_client(('localhost', 8000))
+			self.client = xmlrpc_client(('localhost', self.p['port_server_ctypes']))
 
 			# Log status
 			self.log.out('[core] XML-RPX-client started.')
@@ -210,11 +211,14 @@ class session_class():
 		# If in ctypes mode, prepare command
 		if self.p['mode'] == 'ctypes':
 
+			# Get free port for ctypes bridge
+			self.p['port_server_ctypes'] = get_free_port()
+
 			# Prepare command
 			self.p['command_dict'] = [
 				'%s\\_server_.py' % self.wineserver_session.translate_path_unix2win(get_location_of_file(__file__)),
 				'--id', self.id,
-				'--port_in', str(self.p['port_wine']),
+				'--port_server_ctypes', str(self.p['port_server_ctypes']),
 				'--port_server_log', str(self.p['port_server_log']),
 				'--log_level', str(self.p['log_level'])
 				]

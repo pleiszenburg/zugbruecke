@@ -73,7 +73,7 @@ class wine_server_class:
 
 		# Create server
 		self.server = xmlrpc_server_alternative(
-			('localhost', self.p['session_port_in']),
+			('localhost', self.p['port_server_ctypes']),
 			requestHandler = xmlrpc_requesthandler
 			)
 		self.server.set_log(self.log)
@@ -94,6 +94,7 @@ class wine_server_class:
 		self.server.register_function(self.server.shutdown, 'terminate')
 
 		# Status log
+		self.log.out('[_server_] ctypes server is listening on port %d.' % self.p['port_server_ctypes'])
 		self.log.out('[_server_] STARTED.')
 		self.log.out('[_server_] Serve forever ...')
 
@@ -292,7 +293,7 @@ if __name__ == '__main__':
 		'--id', type = str, nargs = 1
 		)
 	parser.add_argument(
-		'--port_in', type = int, nargs = 1
+		'--port_server_ctypes', type = int, nargs = 1
 		)
 	parser.add_argument(
 		'--port_server_log', type = int, nargs = 1
@@ -312,7 +313,7 @@ if __name__ == '__main__':
 		'remote_log': True,
 		'log_level': args.log_level[0],
 		'log_server': False,
-		'session_port_in': args.port_in[0],
+		'port_server_ctypes': args.port_server_ctypes[0],
 		'port_server_log': args.port_server_log[0]
 		}
 
