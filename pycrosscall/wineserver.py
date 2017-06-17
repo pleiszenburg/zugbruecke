@@ -180,6 +180,9 @@ class wineserver_session_class:
 		# Wait for socket ...
 		# self.__wait_for_socket__()
 
+		# Testing the server by converting a path
+		dir_cwd_wine = self.translate_path_unix2win(os.getcwd())
+
 
 	def __get_lock_pid__(self, file_descriptor):
 
