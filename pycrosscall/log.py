@@ -37,11 +37,18 @@ import sys
 import threading
 import time
 
-from .xmlrpc import (
-	xmlrpc_client,
-	xmlrpc_requesthandler,
-	xmlrpc_server
-	)
+try:
+	from .xmlrpc import (
+		xmlrpc_client,
+		xmlrpc_requesthandler,
+		xmlrpc_server
+		)
+except:
+	from xmlrpc import (
+		xmlrpc_client,
+		xmlrpc_requesthandler,
+		xmlrpc_server
+		)
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

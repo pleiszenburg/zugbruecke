@@ -36,6 +36,7 @@ import os
 import signal
 import socket
 import subprocess
+import struct
 import sys
 import time
 
@@ -182,6 +183,24 @@ class wineserver_session_class:
 		# self.__wait_for_socket__()
 
 
+	def __get_lock_pid__(self, file_descriptor):
+
+		l_type = fcntl.F_WRLCK
+		l_whence = 0 # SEEK_SET
+		l_start = 0
+		l_len = 0
+		l_pid = 0
+
+		lock = struct.pack('hhlli', l_type, l_whence, l_start, l_len, l_pid)
+		lock = fcntl.fcntl(file_descriptor, fcntl.F_GETLK, lock)
+		l_type, l_whence, l_start, l_len, l_pid = struct.unpack('hhlli', lock)
+
+		if l_type != fcntl.F_UNLCK:
+			return l_pid
+		else:
+			return None
+
+
 	def __wait_for_lock__(self):
 
 		# Get full path of socket
@@ -190,10 +209,63 @@ class wineserver_session_class:
 		# Status log
 		self.log.out('[wine session] Expecting wineserver lock at %s ...' % lock_path)
 
+		# Status variable
+		got_lock_pid = False
+		# Time-step
+		wait_for_seconds = 0.01
+		# Timeout
+		timeout_after_seconds = 30.0
+		# Already waited for ...
+		started_waiting_at = time.time()
+		# Connection trys
+		tried_this_many_times = 0
 
+		# Run loop until socket appears
+		while True:
 
+			# Does socket file exist?
+			if os.path.exists(lock_path):
 
+				# Count attempts
+				tried_this_many_times += 1
 
+				# Open lock file
+				lock_file = open(lock_path, 'rb')
+				# Can I retrieve a PID?
+				lock_pid = self.__get_lock_pid__(lock_file)
+				# Close lock file
+				lock_file.close()
+
+				# Check result
+				if lock_pid is not None:
+					got_lock_pid = True
+					break
+
+			# Break the loop after timeout
+			if time.time() >= (started_waiting_at + timeout_after_seconds):
+				break
+
+			# Wait before trying again
+			time.sleep(wait_for_seconds)
+
+		# Evaluate the result
+		if not got_lock_pid:
+
+			self.log.out(
+				'[wine session] ... was not locked %d (after %0.2f seconds & %d attempts)! Quit.' % (
+					timeout_after_seconds, tried_this_many_times
+					)
+				)
+			sys.exit()
+
+		else:
+
+			# Log status
+			self.log.out(
+				'[wine session] ... is locked by PID %d (after %0.2f seconds & %d attempts)!' % (
+					lock_pid, time.time() - started_waiting_at, tried_this_many_times
+					)
+				)
 
 
 	def __wait_for_socket__(self, test_connect = False):
@@ -243,7 +315,7 @@ class wineserver_session_class:
 
 					got_connection = True
 
-			# Break to loop after timeout
+			# Break the loop after timeout
 			if time.time() >= (started_waiting_at + timeout_after_seconds):
 				break
 
@@ -262,8 +334,10 @@ class wineserver_session_class:
 
 		else:
 
-			# If it worked, disconnect
-			wineserver_client.close()
+			if test_connect:
+
+				# If it worked, disconnect
+				wineserver_client.close()
 
 			# Log status
 			self.log.out(
