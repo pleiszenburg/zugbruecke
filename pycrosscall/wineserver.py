@@ -106,7 +106,7 @@ class wineserver_session_class:
 
 			# Start wine server into prepared environment
 			proc_winecfg = subprocess.Popen(
-				['winecfg'],
+				['wineboot', '-i'],
 				stdin = subprocess.PIPE,
 				stdout = subprocess.PIPE,
 				stderr = subprocess.PIPE,
