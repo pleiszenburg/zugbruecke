@@ -63,8 +63,8 @@ class session_class():
 		self.log = log_class(self.id, self.p)
 
 		# Log status
-		self.log.out('[core session] STARTING ...')
-		self.log.out('[core session] Configured Wine-Python version is %s for %s.' % (self.p['version'], self.p['arch']))
+		self.log.out('[core] STARTING ...')
+		self.log.out('[core] Configured Wine-Python version is %s for %s.' % (self.p['version'], self.p['arch']))
 
 		# Store current working directory
 		self.dir_cwd = os.getcwd()
@@ -94,7 +94,7 @@ class session_class():
 		signal.signal(signal.SIGTERM, self.terminate)
 
 		# Log status
-		self.log.out('[core session] STARTED.')
+		self.log.out('[core] STARTED.')
 
 
 	def LoadLibrary(self, dll_name, dll_type = 'windll'):
@@ -103,18 +103,18 @@ class session_class():
 		full_path_dll = os.path.join(self.dir_cwd, dll_name)
 
 		# Log status
-		self.log.out('[core session] Trying to access DLL "%s" ...' % full_path_dll)
+		self.log.out('[core] Trying to access DLL "%s" ...' % full_path_dll)
 
 		# Check if dll file exists
 		if not os.path.isfile(full_path_dll):
 
 			# Log status
-			self.log.out('[core session] ... does NOT exist!')
+			self.log.out('[core] ... does NOT exist!')
 
 			raise # TODO
 
 		# Log status
-		self.log.out('[core session] ... exists ...')
+		self.log.out('[core] ... exists ...')
 
 		# Simplyfy full path
 		full_path_dll = os.path.abspath(full_path_dll)
@@ -123,7 +123,7 @@ class session_class():
 		if full_path_dll not in self.dll_dict.keys():
 
 			# Log status
-			self.log.out('[core session] ... not yet touched ...')
+			self.log.out('[core] ... not yet touched ...')
 
 			# Fire up new dll object
 			self.dll_dict[full_path_dll] = dll_session_class(
@@ -131,12 +131,12 @@ class session_class():
 				)
 
 			# Log status
-			self.log.out('[core session] ... touched and added to list.')
+			self.log.out('[core] ... touched and added to list.')
 
 		else:
 
 			# Log status
-			self.log.out('[core session] ... already touched and in list.')
+			self.log.out('[core] ... already touched and in list.')
 
 		# Return reference on existing dll object
 		return self.dll_dict[full_path_dll]
@@ -148,7 +148,7 @@ class session_class():
 		if self.up:
 
 			# Log status
-			self.log.out('[core session] TERMINATING ...')
+			self.log.out('[core] TERMINATING ...')
 
 			# Destruct interpreter session
 			self.interpreter_session.terminate()
@@ -157,7 +157,7 @@ class session_class():
 			self.wineserver_session.terminate()
 
 			# Log status
-			self.log.out('[core session] TERMINATED.')
+			self.log.out('[core] TERMINATED.')
 
 			# Terminate log
 			self.log.terminate()
