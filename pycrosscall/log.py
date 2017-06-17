@@ -217,7 +217,7 @@ class log_class:
 
 	def __start_client__(self):
 
-		self.client = xmlrpc_client('http://localhost:%d' % self.p['port_server_log'])
+		self.client = xmlrpc_client(('localhost', self.p['port_server_log']))
 
 
 	def __start_server__(self):

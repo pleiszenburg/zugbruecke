@@ -31,14 +31,19 @@ specific language governing rights and limitations under the License.
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-from xmlrpc.client import ServerProxy as xmlrpc_client
+from xmlrpc.client import ServerProxy
 from xmlrpc.server import SimpleXMLRPCServer as xmlrpc_server
 from xmlrpc.server import SimpleXMLRPCRequestHandler
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# CLASSES
+# CLASSES AND CONSTRUCTOR ROUTINES
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+def xmlrpc_client(address):
+
+	return ServerProxy('http://%s:%d' % address)
+
 
 class xmlrpc_requesthandler(SimpleXMLRPCRequestHandler):
 
