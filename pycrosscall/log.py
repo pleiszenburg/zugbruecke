@@ -227,7 +227,7 @@ class log_class:
 
 		# Create server
 		self.server = xmlrpc_server(
-			("localhost", self.server_port),
+			('localhost', self.server_port),
 			requestHandler = xmlrpc_requesthandler,
 			allow_none = True,
 			logRequests = False
