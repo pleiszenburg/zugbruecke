@@ -70,11 +70,11 @@ class wine_server_class:
 			'port_unix': session_port_out
 			})
 
+		# Status log
+		self.log.out('[_server_] STARTING ...')
+
 		# Mark session as up
 		self.up = True
-
-		# Status log
-		self.log.out('wine-python up')
 
 		# Start dict for dll files and routines
 		self.dll_dict = {}
@@ -102,7 +102,8 @@ class wine_server_class:
 		self.server.register_function(self.server.shutdown, 'terminate')
 
 		# Status log
-		self.log.out('dll-xmlrpc-server starting ...')
+		self.log.out('[_server_] STARTED.')
+		self.log.out('[_server_] Serve forever ...')
 
 		# Run server ...
 		self.server.serve_forever()
@@ -114,8 +115,8 @@ class wine_server_class:
 		if full_path_dll not in self.dll_dict.keys():
 
 			# Log status
-			self.log.out('Attaching to "%s" of type %s ...' % (dll_name, dll_type))
-			self.log.out(' (%s)' % full_path_dll)
+			self.log.out('[_server_] Attaching to "%s" of type %s ...' % (dll_name, dll_type))
+			self.log.out('[_server_]  (%s)' % full_path_dll)
 
 			try:
 
@@ -129,14 +130,14 @@ class wine_server_class:
 					}
 
 				# Log status
-				self.log.out(' ... done.')
+				self.log.out('[_server_] ... done.')
 
 				return 1 # Success
 
 			except:
 
 				# Log status
-				self.log.out(' ... failed! Traceback:')
+				self.log.out('[_server_] ... failed! Traceback:')
 
 				# Push traceback to log
 				self.log.out(traceback.format_exc())
@@ -150,7 +151,7 @@ class wine_server_class:
 	def __call_dll_routine__(self, full_path_dll_unix, routine_name, args, kw):
 
 		# Log status
-		self.log.out('Trying call routine "%s" ...' % routine_name)
+		self.log.out('[_server_] Trying call routine "%s" ...' % routine_name)
 
 		# Make it shorter ...
 		method = self.dll_dict[full_path_dll_unix]['method_handlers'][routine_name]
@@ -171,12 +172,12 @@ class wine_server_class:
 				return_value = method(*args, **kw)
 
 			# Log status
-			self.log.out(' ... done.')
+			self.log.out('[_server_] ... done.')
 
 		except:
 
 			# Log status
-			self.log.out(' ... failed! Traceback:')
+			self.log.out('[_server_] ... failed! Traceback:')
 
 			# Push traceback to log
 			self.log.out(traceback.format_exc())
@@ -188,7 +189,7 @@ class wine_server_class:
 	def __register_argtype_and_restype__(self, full_path_dll_unix, routine_name, argtypes, restype):
 
 		# Log status
-		self.log.out('Trying to set argument and return value types for "%s" ...' % routine_name)
+		self.log.out('[_server_] Trying to set argument and return value types for "%s" ...' % routine_name)
 
 		# Make it shorter ...
 		method = self.dll_dict[full_path_dll_unix]['method_handlers'][routine_name]
@@ -229,11 +230,11 @@ class wine_server_class:
 			method.restype = ctypes.c_void_p # HACK assume void
 
 		# Log status
-		self.log.out(' ... done.')
+		self.log.out('[_server_] ... done.')
 
 		# Log status
-		self.log.out('Routine "%s" argtypes: %s' % (routine_name, pf(method.argtypes)))
-		self.log.out('Routine "%s" restype: %s' % (routine_name, pf(method.restype)))
+		self.log.out('[_server_] Routine "%s" argtypes: %s' % (routine_name, pf(method.argtypes)))
+		self.log.out('[_server_] Routine "%s" restype: %s' % (routine_name, pf(method.restype)))
 
 		return 1 # Success
 
@@ -241,7 +242,7 @@ class wine_server_class:
 	def __register_routine__(self, full_path_dll_unix, routine_name):
 
 		# Log status
-		self.log.out('Trying to access "%s"' % routine_name)
+		self.log.out('[_server_] Trying to access "%s"' % routine_name)
 
 		try:
 
@@ -254,14 +255,14 @@ class wine_server_class:
 					)
 
 			# Log status
-			self.log.out(' ... done.')
+			self.log.out('[_server_] ... done.')
 
 			return 1 # Success
 
 		except:
 
 			# Log status
-			self.log.out(' ... failed! Traceback:')
+			self.log.out('[_server_] ... failed! Traceback:')
 
 			# Push traceback to log
 			self.log.out(traceback.format_exc())
@@ -275,13 +276,13 @@ class wine_server_class:
 		if self.up:
 
 			# Status log
-			self.log.out('wine-python terminating ...')
+			self.log.out('[_server_] TERMINATING ...')
 
 			# Terminate log
 			self.log.terminate()
 
 			# Status log
-			self.log.out('wine-python terminated')
+			self.log.out('[_server_] TERMINATED.')
 
 			# Session down
 			self.up = False

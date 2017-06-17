@@ -66,7 +66,7 @@ class dll_session_class(): # Mimic ctypes.WinDLL. Representing one idividual dll
 		self.__session__.log.out('[00] Telling wine-python about new DLL file: "%s" of type %s' % (
 			self.__dll_name__, self.__dll_type__
 			))
-		self.__session__.log.out(' (%s)' % self.__dll_full_path_wine__)
+		self.__session__.log.out('[00] (%s)' % self.__dll_full_path_wine__)
 
 		# Tell wine about the dll and its type
 		result = self.__client__.access_dll(

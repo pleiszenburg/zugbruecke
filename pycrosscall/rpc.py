@@ -60,7 +60,7 @@ class xmlrpc_server_alternative(xmlrpc_server):
 		self.log = log
 
 		# Status log
-		self.log.out('log-xmlrpc-server connected')
+		self.log.out('[xmlrpc-server] Log attached.')
 
 
 	def set_parent_terminate_func(self, func):
@@ -75,7 +75,7 @@ class xmlrpc_server_alternative(xmlrpc_server):
 		if self.up:
 
 			# Log status
-			self.log.out('log-xmlrpc-server shutting down ...')
+			self.log.out('[xmlrpc-server] TERMINATING ...')
 
 			# Sever is marked down
 			self.up = False
