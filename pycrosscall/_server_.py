@@ -53,22 +53,14 @@ from rpc import (
 class wine_server_class:
 
 
-	def __init__(self, session_id, session_port_in, port_server_log, log_level):
+	def __init__(self, session_id, parameter):
 
-		# Store session id
+		# Store session id and parameter
 		self.id = session_id
+		self.p = parameter
 
 		# Start logging session and connect it with log on unix side
-		self.log = log_class(self.id, parameter = {
-			'platform': 'WINE',
-			'stdout': False,
-			'stderr': False,
-			'logwrite': True,
-			'remote_log': True,
-			'log_level': log_level,
-			'log_server': False,
-			'port_server_log': port_server_log
-			})
+		self.log = log_class(self.id, self.p)
 
 		# Status log
 		self.log.out('[_server_] STARTING ...')
@@ -81,7 +73,7 @@ class wine_server_class:
 
 		# Create server
 		self.server = xmlrpc_server_alternative(
-			('localhost', session_port_in),
+			('localhost', self.p['session_port_in']),
 			requestHandler = xmlrpc_requesthandler
 			)
 		self.server.set_log(self.log)
@@ -310,5 +302,19 @@ if __name__ == '__main__':
 		)
 	args = parser.parse_args()
 
+	# Generate parameter dict
+	parameter = {
+		'id': args.id[0],
+		'platform': 'WINE',
+		'stdout': False,
+		'stderr': False,
+		'logwrite': True,
+		'remote_log': True,
+		'log_level': args.log_level[0],
+		'log_server': False,
+		'session_port_in': args.port_in[0],
+		'port_server_log': args.port_server_log[0]
+		}
+
 	# Fire up wine server session with parsed parameters
-	session = wine_server_class(args.id[0], args.port_in[0], args.port_server_log[0], args.log_level[0])
+	session = wine_server_class(parameter['id'], parameter)
