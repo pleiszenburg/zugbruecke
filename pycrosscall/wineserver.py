@@ -176,8 +176,11 @@ class wineserver_session_class:
 			'server-%x-%x' % (info_wineprefix.st_dev, info_wineprefix.st_ino)
 			)
 
+		# HACK
+		time.sleep(2.0)
+
 		# Wait for lock ...
-		self.__wait_for_lock__()
+		# self.__wait_for_lock__()
 
 		# Wait for socket ...
 		# self.__wait_for_socket__()
