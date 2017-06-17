@@ -173,7 +173,7 @@ class interpreter_session_class():
 		self.log.out('[interpreter] Logging threads started.')
 
 		# Fire up xmlrpc client
-		self.client = xmlrpc_client('http://localhost:8000')
+		self.client = xmlrpc_client('http://localhost:%d' % 8000)
 
 		# Log status
 		self.log.out('[interpreter] XML-RPX-client started.')
