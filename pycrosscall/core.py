@@ -99,22 +99,22 @@ class session_class():
 
 	def LoadLibrary(self, dll_name, dll_type = 'windll'):
 
-		# Log status
-		self.log.out('[core session] Trying to access DLL "%s" ...' % full_path_dll)
-
 		# Get full path of dll
 		full_path_dll = os.path.join(self.dir_cwd, dll_name)
+
+		# Log status
+		self.log.out('[core session] Trying to access DLL "%s" ...' % full_path_dll)
 
 		# Check if dll file exists
 		if not os.path.isfile(full_path_dll):
 
 			# Log status
-			self.log.out('[core session] ... does NOT exist!' % full_path_dll)
+			self.log.out('[core session] ... does NOT exist!')
 
 			raise # TODO
 
 		# Log status
-		self.log.out('[core session] ... exists ...' % full_path_dll)
+		self.log.out('[core session] ... exists ...')
 
 		# Simplyfy full path
 		full_path_dll = os.path.abspath(full_path_dll)
@@ -123,7 +123,7 @@ class session_class():
 		if full_path_dll not in self.dll_dict.keys():
 
 			# Log status
-			self.log.out('[core session] ... not yet touched ...' % full_path_dll)
+			self.log.out('[core session] ... not yet touched ...')
 
 			# Fire up new dll object
 			self.dll_dict[full_path_dll] = dll_session_class(
@@ -131,12 +131,12 @@ class session_class():
 				)
 
 			# Log status
-			self.log.out('[core session] ... touched and added to list.' % full_path_dll)
+			self.log.out('[core session] ... touched and added to list.')
 
 		else:
 
 			# Log status
-			self.log.out('[core session] ... already touched and in list.' % full_path_dll)
+			self.log.out('[core session] ... already touched and in list.')
 
 		# Return reference on existing dll object
 		return self.dll_dict[full_path_dll]
