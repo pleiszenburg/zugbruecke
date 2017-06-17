@@ -226,6 +226,8 @@ class session_class():
 		# If in interpreter mode, parse parameters and prepare command
 		elif self.p['mode'] == 'interpreter':
 
+			print(self.p['args'])
+
 			# Empty command starts interpreter TODO parse cmd line
 			self.p['command_dict'] = []
 
