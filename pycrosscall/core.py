@@ -284,18 +284,26 @@ class python_interpreter():
 
 	def __init__(self, cmd_line_args):
 
-		print('!!!')
+		# Session not yet up
+		self.up = False
+
+		# Store arguments
+		self.args = cmd_line_args
 
 
 	def start_session(self, parameter = {}):
 
-		# Set session mode to ctypes bridge
-		# parameter['mode'] = 'interpreter'
-		# Start normal session here
+		# Session not yet up?
+		if not self.up:
 
-		pass
+			# Set session mode to interpreter
+			parameter['mode'] = 'interpreter'
 
+			# Add args to parameter dict
+			parameter['args'] = self.args
 
-	def run(self):
+			# Fire up a new session
+			self.__session__ = session_class(parameter)
 
-		pass
+			# Mark session as up
+			self.up = True

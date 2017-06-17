@@ -42,4 +42,3 @@ from pycrosscall import python_interpreter
 
 stand_alone = python_interpreter(sys.argv)
 stand_alone.start_session(parameter = {'log_level': 10})
-stand_alone.run()
