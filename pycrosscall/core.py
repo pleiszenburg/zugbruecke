@@ -216,18 +216,14 @@ class python_interpreter():
 
 	def __init__(self, cmd_line_args):
 
-		cfg = get_module_config()
-
-		setup_wine_python(
-			cfg['arch'],
-			cfg['version'],
-			cfg['dir']
-			)
-
 		print('!!!')
 
 
 	def start_session(self, parameter = {}):
+
+		# Set session mode to ctypes bridge
+		# parameter['mode'] = 'interpreter'
+		# Start normal session here
 
 		pass
 

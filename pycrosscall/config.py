@@ -48,6 +48,9 @@ def get_default_config():
 	# Generate unique session id
 	cfg['id'] = generate_session_id()
 
+	# Session mode
+	cfg['mode'] = 'ctypes'
+
 	# Display messages from stdout
 	cfg['stdout'] = True
 
