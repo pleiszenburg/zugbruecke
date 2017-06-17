@@ -31,6 +31,7 @@ specific language governing rights and limitations under the License.
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+import fcntl
 import os
 import signal
 import socket
@@ -174,11 +175,28 @@ class wineserver_session_class:
 			'server-%x-%x' % (info_wineprefix.st_dev, info_wineprefix.st_ino)
 			)
 
+		# Wait for lock ...
+		self.__wait_for_lock__()
+
 		# Wait for socket ...
-		self.__wait_for_socket__()
+		# self.__wait_for_socket__()
 
 
-	def __wait_for_socket__(self):
+	def __wait_for_lock__(self):
+
+		# Get full path of socket
+		lock_path = os.path.join(self.server_path, 'lock')
+
+		# Status log
+		self.log.out('[wine session] Expecting wineserver lock at %s ...' % lock_path)
+
+
+
+
+
+
+
+	def __wait_for_socket__(self, test_connect = False):
 
 		# Get full path of socket
 		socket_path = os.path.join(self.server_path, 'socket')
@@ -210,13 +228,20 @@ class wineserver_session_class:
 				# Count attempts
 				tried_this_many_times += 1
 
-				# Can I connect to it?
-				try:
-					wineserver_client.connect(socket_path)
+				# Socket file exists - should connection be attemted?
+				if test_connect:
+
+					# Can I connect to it?
+					try:
+						wineserver_client.connect(socket_path)
+						got_connection = True
+						break
+					except:
+						pass
+
+				else:
+
 					got_connection = True
-					break
-				except:
-					pass
 
 			# Break to loop after timeout
 			if time.time() >= (started_waiting_at + timeout_after_seconds):
@@ -229,7 +254,9 @@ class wineserver_session_class:
 		if not got_connection:
 
 			self.log.out(
-				'[wine session] ... did not appear (after %0.2f seconds & %d attempts)! Quit.' % (timeout_after_seconds, tried_this_many_times)
+				'[wine session] ... did not appear (after %0.2f seconds & %d attempts)! Quit.' % (
+					timeout_after_seconds, tried_this_many_times
+					)
 				)
 			sys.exit()
 
@@ -240,7 +267,9 @@ class wineserver_session_class:
 
 			# Log status
 			self.log.out(
-				'[wine session] ... appeared (after %0.2f seconds & %d attempts)!' % (time.time() - started_waiting_at, tried_this_many_times)
+				'[wine session] ... appeared (after %0.2f seconds & %d attempts)!' % (
+					time.time() - started_waiting_at, tried_this_many_times
+					)
 				)
 
 
