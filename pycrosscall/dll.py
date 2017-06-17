@@ -54,13 +54,13 @@ class dll_session_class(): # Mimic ctypes.WinDLL. Representing one idividual dll
 		self.__session__ = parent_session
 
 		# For convenience ...
-		self.__client__ = self.__session__.wine_session.client
+		self.__client__ = self.__session__.interpreter_session.client
 
 		# Start dict for dll routines
 		self.__dll_routines__ = {}
 
 		# Translate dll's full path into wine path
-		self.__dll_full_path_wine__ = self.__session__.wine_session.translate_path_unix2win(self.__dll_full_path__)
+		self.__dll_full_path_wine__ = self.__session__.wineserver_session.translate_path_unix2win(self.__dll_full_path__)
 
 		# Status log
 		self.__session__.log.out('[00] Telling wine-python about new DLL file: "%s" of type %s' % (
