@@ -37,9 +37,11 @@ import sys
 import threading
 import time
 
-import xmlrpc.client
-from xmlrpc.server import SimpleXMLRPCServer
-from xmlrpc.server import SimpleXMLRPCRequestHandler
+from .xmlrpc import (
+	xmlrpc_client,
+	xmlrpc_requesthandler,
+	xmlrpc_server
+	)
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -60,17 +62,6 @@ c = {
 	'CYAN': '\033[1;36m',
 	'WHITE': '\033[1;37m'
 	}
-
-
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# SERVER CLASS(ES)
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-class RequestHandler(SimpleXMLRPCRequestHandler):
-
-
-	# Restrict to a particular path.
-	rpc_paths = ('/RPC2',)
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -216,15 +207,15 @@ class log_class:
 
 	def __start_client__(self):
 
-		self.client = xmlrpc.client.ServerProxy('http://localhost:%d' % self.p['port_unix'])
+		self.client = xmlrpc_client.ServerProxy('http://localhost:%d' % self.p['port_unix'])
 
 
 	def __start_server__(self):
 
 		# Create server
-		self.server = SimpleXMLRPCServer(
+		self.server = xmlrpc_server(
 			("localhost", self.p['port_unix']),
-			requestHandler = RequestHandler,
+			requestHandler = xmlrpc_requesthandler,
 			allow_none = True,
 			logRequests = False
 			)
