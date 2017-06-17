@@ -116,7 +116,7 @@ class interpreter_session_class():
 			"%s\\_server_.py" % dir_thisfile_wine,
 			'--id', self.id,
 			'--port_in', str(self.p['port_wine']),
-			'--port_out', str(self.p['port_unix']),
+			'--port_server_log', str(self.p['port_server_log']),
 			'--log_level', str(self.p['log_level'])
 			]
 

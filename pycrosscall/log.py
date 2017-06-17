@@ -38,12 +38,14 @@ import threading
 import time
 
 try:
+	from .lib import get_free_port
 	from .rpc import (
 		xmlrpc_client,
 		xmlrpc_requesthandler,
 		xmlrpc_server
 		)
 except:
+	from lib import get_free_port
 	from rpc import (
 		xmlrpc_client,
 		xmlrpc_requesthandler,
@@ -103,6 +105,7 @@ class log_class:
 			self.f['err'] = '%s_%s.txt' % (self.p['platform'], 'err')
 
 		# Fire up server if required
+		self.server_port = 0
 		if self.p['log_server']:
 			self.__start_server__()
 
@@ -214,14 +217,17 @@ class log_class:
 
 	def __start_client__(self):
 
-		self.client = xmlrpc_client('http://localhost:%d' % self.p['port_unix'])
+		self.client = xmlrpc_client('http://localhost:%d' % self.p['port_server_log'])
 
 
 	def __start_server__(self):
 
+		# Get a free port from the OS
+		self.server_port = get_free_port()
+
 		# Create server
 		self.server = xmlrpc_server(
-			("localhost", self.p['port_unix']),
+			("localhost", self.server_port),
 			requestHandler = xmlrpc_requesthandler,
 			allow_none = True,
 			logRequests = False

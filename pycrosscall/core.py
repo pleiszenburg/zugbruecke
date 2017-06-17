@@ -62,9 +62,13 @@ class session_class():
 		# Start session logging
 		self.log = log_class(self.id, self.p)
 
+		# Extract server port from log module
+		self.p['port_server_log'] = self.log.server_port
+
 		# Log status
 		self.log.out('[core] STARTING ...')
 		self.log.out('[core] Configured Wine-Python version is %s for %s.' % (self.p['version'], self.p['arch']))
+		self.log.out('[core] Log server is listening on port %d.' % self.p['port_server_log'])
 
 		# Store current working directory
 		self.dir_cwd = os.getcwd()

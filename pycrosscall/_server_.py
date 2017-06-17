@@ -53,7 +53,7 @@ from rpc import (
 class wine_server_class:
 
 
-	def __init__(self, session_id, session_port_in, session_port_out, log_level):
+	def __init__(self, session_id, session_port_in, port_server_log, log_level):
 
 		# Store session id
 		self.id = session_id
@@ -67,7 +67,7 @@ class wine_server_class:
 			'remote_log': True,
 			'log_level': log_level,
 			'log_server': False,
-			'port_unix': session_port_out
+			'port_server_log': port_server_log
 			})
 
 		# Status log
@@ -303,7 +303,7 @@ if __name__ == '__main__':
 		'--port_in', type = int, nargs = 1
 		)
 	parser.add_argument(
-		'--port_out', type = int, nargs = 1
+		'--port_server_log', type = int, nargs = 1
 		)
 	parser.add_argument(
 		'--log_level', type = int, nargs = 1
@@ -311,4 +311,4 @@ if __name__ == '__main__':
 	args = parser.parse_args()
 
 	# Fire up wine server session with parsed parameters
-	session = wine_server_class(args.id[0], args.port_in[0], args.port_out[0], args.log_level[0])
+	session = wine_server_class(args.id[0], args.port_in[0], args.port_server_log[0], args.log_level[0])

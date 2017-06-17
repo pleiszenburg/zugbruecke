@@ -34,6 +34,7 @@ specific language governing rights and limitations under the License.
 import os
 import random
 import shutil
+import socket
 import urllib.request
 import zipfile
 
@@ -41,6 +42,16 @@ import zipfile
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # LIBRARY ROUTINES
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+def get_free_port():
+
+	s = socket.socket()
+	s.bind(('', 0))
+	port = s.getsockname()[1]
+	s.close()
+	
+	return port
+
 
 def get_location_of_file(filename = ''):
 
