@@ -37,11 +37,6 @@ import subprocess
 import threading
 import time
 
-from .lib import get_location_of_file
-from .rpc import (
-	xmlrpc_client
-	)
-
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # WINE PYTHON INTERPRETER CLASS
@@ -92,12 +87,6 @@ class interpreter_session_class():
 
 	def __compile_wine_python_command__(self):
 
-		# Get location of this script file
-		dir_thisfile = get_location_of_file(__file__)
-
-		# Translate this file's Unix path into Wine path
-		dir_thisfile_wine = self.wineserver.translate_path_unix2win(dir_thisfile)
-
 		# Python interpreter's directory seen from this script
 		dir_python = os.path.join(self.p['dir'], self.p['arch'] + '-python' + self.p['version'])
 
@@ -109,16 +98,8 @@ class interpreter_session_class():
 		else:
 			raise # TODO error
 
-		# Prepare Wine-Python server command with session id and return it
-		return [
-			wine_cmd,
-			os.path.join(dir_python, 'python.exe'),
-			"%s\\_server_.py" % dir_thisfile_wine,
-			'--id', self.id,
-			'--port_in', str(self.p['port_wine']),
-			'--port_server_log', str(self.p['port_server_log']),
-			'--log_level', str(self.p['log_level'])
-			]
+		# Prepare full python interpreter command
+		return [wine_cmd, os.path.join(dir_python, 'python.exe')] + self.p['command_dict']
 
 
 	def __read_output_from_pipe__(self, pipe, func):
@@ -166,23 +147,11 @@ class interpreter_session_class():
 			t.daemon = True
 			t.start()
 
-		# HACK Wait ... becomes obsolete, when client is moved. Client needs retries and a timeout
-		time.sleep(1) # seconds
-
 		# Log status
 		self.log.out('[interpreter] Logging threads started.')
 
-		# Fire up xmlrpc client
-		self.client = xmlrpc_client(('localhost', 8000))
-
-		# Log status
-		self.log.out('[interpreter] XML-RPX-client started.')
-
 
 	def __wine_python_stop__(self):
-
-		# Tell server via message to terminate
-		self.client.terminate()
 
 		# Terminate Wine-Python
 		os.killpg(os.getpgid(self.proc_winepython.pid), signal.SIGINT)

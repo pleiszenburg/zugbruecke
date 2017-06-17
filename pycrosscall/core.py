@@ -33,15 +33,21 @@ specific language governing rights and limitations under the License.
 
 import atexit
 import os
-from pprint import pprint as pp
 import signal
+import time
 
 from .config import get_module_config
 from .dll import dll_session_class
 from .interpreter import interpreter_session_class
-from .lib import setup_wine_python
+from .lib import (
+	get_location_of_file,
+	setup_wine_python
+	)
 from .log import log_class
 from .wineserver import wineserver_session_class
+from .rpc import (
+	xmlrpc_client
+	)
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -74,20 +80,22 @@ class session_class():
 		self.dir_cwd = os.getcwd()
 
 		# Install wine-python
-		setup_wine_python(
-			self.p['arch'],
-			self.p['version'],
-			self.p['dir']
-			)
+		setup_wine_python(self.p['arch'], self.p['version'], self.p['dir'])
 
 		# Initialize Wine session
 		self.wineserver_session = wineserver_session_class(self.id, self.p, self.log)
 
+		# Log status
+		self.log.out('[core] Mode: "%s".' % self.p['mode'])
+
+		# Prepare python command for ctypes server or interpreter
+		self.__prepare_python_command__()
+
 		# Initialize interpreter session
 		self.interpreter_session = interpreter_session_class(self.id, self.p, self.log, self.wineserver_session)
 
-		# Set up a dict for loaded dlls
-		self.dll_dict = {}
+		# If in ctypes mode ...
+		self.__prepare_ctypes__()
 
 		# Mark session as up
 		self.up = True
@@ -101,7 +109,37 @@ class session_class():
 		self.log.out('[core] STARTED.')
 
 
-	def LoadLibrary(self, dll_name, dll_type = 'windll'):
+	def terminate(self):
+
+		# Run only if session is still up
+		if self.up:
+
+			# Log status
+			self.log.out('[core] TERMINATING ...')
+
+			# If in ctypes mode ...
+			if self.p['mode'] == 'ctypes':
+
+				# Tell server via message to terminate
+				self.client.terminate()
+
+			# Destruct interpreter session
+			self.interpreter_session.terminate()
+
+			# Destruct Wine session, quit wine processes
+			self.wineserver_session.terminate()
+
+			# Log status
+			self.log.out('[core] TERMINATED.')
+
+			# Terminate log
+			self.log.terminate()
+
+			# Session down
+			self.up = False
+
+
+	def __loadlibrary__(self, dll_name, dll_type = 'windll'):
 
 		# Get full path of dll
 		full_path_dll = os.path.join(self.dir_cwd, dll_name)
@@ -146,28 +184,54 @@ class session_class():
 		return self.dll_dict[full_path_dll]
 
 
-	def terminate(self):
+	def __prepare_ctypes__(self):
 
-		# Run only if session is still up
-		if self.up:
+		# Allow only in ctypes mode
+		if self.p['mode'] == 'ctypes':
+
+			# Set up a dict for loaded dlls
+			self.dll_dict = {}
+
+			# Expose LoadLibrary
+			self.LoadLibrary = self.__loadlibrary__
+
+			# HACK Wait ... becomes obsolete, when client is moved. Client needs retries and a timeout
+			time.sleep(1) # seconds
+
+			# Fire up xmlrpc client
+			self.client = xmlrpc_client(('localhost', 8000))
 
 			# Log status
-			self.log.out('[core] TERMINATING ...')
+			self.log.out('[core] XML-RPX-client started.')
 
-			# Destruct interpreter session
-			self.interpreter_session.terminate()
 
-			# Destruct Wine session, quit wine processes
-			self.wineserver_session.terminate()
+	def __prepare_python_command__(self):
+
+		# If in ctypes mode, prepare command
+		if self.p['mode'] == 'ctypes':
+
+			# Prepare command
+			self.p['command_dict'] = [
+				'%s\\_server_.py' % self.wineserver_session.translate_path_unix2win(get_location_of_file(__file__)),
+				'--id', self.id,
+				'--port_in', str(self.p['port_wine']),
+				'--port_server_log', str(self.p['port_server_log']),
+				'--log_level', str(self.p['log_level'])
+				]
+
+		# If in interpreter mode, parse parameters and prepare command
+		elif self.p['mode'] == 'interpreter':
+
+			# Empty command starts interpreter TODO parse cmd line
+			self.p['command_dict'] = []
+
+		else:
 
 			# Log status
-			self.log.out('[core] TERMINATED.')
+			self.log.out('[core] Error: Unkown mode!')
 
-			# Terminate log
-			self.log.terminate()
-
-			# Session down
-			self.up = False
+			# Unknown mode
+			raise # TODO
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

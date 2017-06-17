@@ -54,7 +54,7 @@ class dll_session_class(): # Mimic ctypes.WinDLL. Representing one idividual dll
 		self.__session__ = parent_session
 
 		# For convenience ...
-		self.__client__ = self.__session__.interpreter_session.client
+		self.__client__ = self.__session__.client
 
 		# Start dict for dll routines
 		self.__dll_routines__ = {}
