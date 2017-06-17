@@ -69,7 +69,7 @@ class wineserver_session_class:
 		self.__create_wine_prefix__()
 
 		# Start wine server
-		self.__wine_server_start__()
+		self.__start__()
 
 		# Log status
 		self.log.out('[wine session] STARTED.')
@@ -84,7 +84,7 @@ class wineserver_session_class:
 			self.log.out('[wine session] TERMINATING ...')
 
 			# Stop wine server
-			self.__wine_server_stop__()
+			self.__stop__()
 
 			# Log status
 			self.log.out('[wine session] TERMINATED.')
@@ -147,7 +147,7 @@ class wineserver_session_class:
 		self.log.out('[wine session] Set WINEPREFIX env. variable: "%s"' % self.dir_wineprefix)
 
 
-	def __wine_server_start__(self):
+	def __start__(self):
 
 		# Status log
 		self.log.out('[wine session] Launching wineserver ...')
@@ -162,21 +162,30 @@ class wineserver_session_class:
 			)
 
 		# Status log
-		self.log.out('[wine session] ... started with PID %d ...' % self.proc_wineserver.pid)
+		self.log.out('[wine session] ... started with PID %d.' % self.proc_wineserver.pid)
 
 		# Get info on WINEPREFIX folder
 		info_wineprefix = os.stat(self.dir_wineprefix)
 
 		# Get path of wineserver socket file
-		socket_path = os.path.join(
+		self.server_path = os.path.join(
 			'/tmp', # Folder is hard-coded into Wine
 			'.wine-%d' % os.getuid(),
 			'server-%x-%x' % (info_wineprefix.st_dev, info_wineprefix.st_ino),
 			'socket'
 			)
 
+		# Wait for socket ...
+		self.__wait_for_socket__()
+
+
+def __wait_for_socket__(self):
+
+		# Get full path of socket
+		socket_path = os.path.join(self.server_path, 'socket')
+
 		# Status log
-		self.log.out('[wine session] ... expecting socket at %s ...' % socket_path)
+		self.log.out('[wine session] Expecting wineserver socket at %s ...' % socket_path)
 
 		# Create socket client
 		wineserver_client = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
@@ -236,7 +245,7 @@ class wineserver_session_class:
 				)
 
 
-	def __wine_server_stop__(self):
+	def __stop__(self):
 
 		# Killing the server requires two signals as specified in the man page
 		os.kill(self.proc_wineserver.pid, signal.SIGINT)
