@@ -36,7 +36,6 @@ import signal
 import socket
 import subprocess
 import sys
-import tempfile
 import time
 
 from .xmlrpc import xmlrpc_client
@@ -170,7 +169,7 @@ class wineserver_session_class:
 
 		# Get path of wineserver socket file
 		socket_path = os.path.join(
-			tempfile.gettempdir(),
+			'/tmp', # Folder is hard-coded into Wine
 			'.wine-%d' % os.getuid(),
 			'server-%x-%x' % (info_wineprefix.st_dev, info_wineprefix.st_ino),
 			'socket'
