@@ -171,15 +171,14 @@ class wineserver_session_class:
 		self.server_path = os.path.join(
 			'/tmp', # Folder is hard-coded into Wine
 			'.wine-%d' % os.getuid(),
-			'server-%x-%x' % (info_wineprefix.st_dev, info_wineprefix.st_ino),
-			'socket'
+			'server-%x-%x' % (info_wineprefix.st_dev, info_wineprefix.st_ino)
 			)
 
 		# Wait for socket ...
 		self.__wait_for_socket__()
 
 
-def __wait_for_socket__(self):
+	def __wait_for_socket__(self):
 
 		# Get full path of socket
 		socket_path = os.path.join(self.server_path, 'socket')
