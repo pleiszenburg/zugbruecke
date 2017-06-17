@@ -24,5 +24,3 @@ try:
 	print('Got "%f".' % return_value)
 except:
 	print('Got no return value!')
-
-time.sleep(8)
