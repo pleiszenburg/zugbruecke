@@ -60,7 +60,7 @@ class interpreter_session_class():
 		self.wineserver = session_wineserver
 
 		# Log status
-		self.log.out('[interpreter session] STARTING ...')
+		self.log.out('[interpreter] STARTING ...')
 
 		# Session is up
 		self.up = True
@@ -69,7 +69,7 @@ class interpreter_session_class():
 		self.__wine_python_start__(self.__compile_wine_python_command__())
 
 		# Log status
-		self.log.out('[interpreter session] STARTED.')
+		self.log.out('[interpreter] STARTED.')
 
 
 	# session destructor
@@ -78,13 +78,13 @@ class interpreter_session_class():
 		if self.up:
 
 			# Log status
-			self.log.out('[interpreter session] TERMINATING ...')
+			self.log.out('[interpreter] TERMINATING ...')
 
 			# Shut down wine python
 			self.__wine_python_stop__()
 
 			# Log status
-			self.log.out('[interpreter session] TERMINATED.')
+			self.log.out('[interpreter] TERMINATED.')
 
 			# Session is down
 			self.up = False
@@ -131,7 +131,7 @@ class interpreter_session_class():
 	def __wine_python_start__(self, command_list):
 
 		# Log status
-		self.log.out('[interpreter session] Command: ' + ' '.join(command_list))
+		self.log.out('[interpreter] Command: ' + ' '.join(command_list))
 
 		# Fire up Wine-Python process
 		self.proc_winepython = subprocess.Popen(
@@ -146,7 +146,7 @@ class interpreter_session_class():
 			)
 
 		# Status log
-		self.log.out('[interpreter session] Started with PID %d.' % self.proc_winepython.pid)
+		self.log.out('[interpreter] Started with PID %d.' % self.proc_winepython.pid)
 
 		# Prepare threads for stdout and stderr capturing of Wine
 		# BUG does not capture stdout from windows binaries (running with Wine) most of the time
@@ -170,13 +170,13 @@ class interpreter_session_class():
 		time.sleep(1) # seconds
 
 		# Log status
-		self.log.out('[interpreter session] Logging threads started.')
+		self.log.out('[interpreter] Logging threads started.')
 
 		# Fire up xmlrpc client
 		self.client = xmlrpc_client('http://localhost:8000')
 
 		# Log status
-		self.log.out('[interpreter session] XML-RPX-client started.')
+		self.log.out('[interpreter] XML-RPX-client started.')
 
 
 	def __wine_python_stop__(self):
@@ -188,11 +188,11 @@ class interpreter_session_class():
 		os.killpg(os.getpgid(self.proc_winepython.pid), signal.SIGINT)
 
 		for t_index, t in enumerate([self.thread_winepython_out, self.thread_winepython_err]):
-			self.log.out('[interpreter session] Joining logging thread "%s" ...' % t.name)
+			self.log.out('[interpreter] Joining logging thread "%s" ...' % t.name)
 			t.join(timeout = 1) # seconds
 
 		# Log status
-		self.log.out('[interpreter session] Logging threads joined or timed out.')
+		self.log.out('[interpreter] Logging threads joined or timed out.')
 
 		# HACK wait for its destructor
 		time.sleep(1) # seconds
