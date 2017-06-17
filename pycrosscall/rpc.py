@@ -102,6 +102,3 @@ class xmlrpc_server_alternative(xmlrpc_server):
 
 			# Handle requests ...
 			self.handle_request()
-
-		# Log status
-		self.log.out('log-xmlrpc-server terminated')
