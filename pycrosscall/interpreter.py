@@ -162,6 +162,3 @@ class interpreter_session_class():
 
 		# Log status
 		self.log.out('[interpreter] Logging threads joined or timed out.')
-
-		# HACK wait for its destructor
-		time.sleep(1) # seconds
