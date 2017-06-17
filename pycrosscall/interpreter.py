@@ -166,7 +166,7 @@ class interpreter_session_class():
 			t.daemon = True
 			t.start()
 
-		# HACK Wait ...
+		# HACK Wait ... becomes obsolete, when client is moved. Client needs retries and a timeout
 		time.sleep(1) # seconds
 
 		# Log status
