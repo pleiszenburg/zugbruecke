@@ -38,13 +38,13 @@ import threading
 import time
 
 try:
-	from .xmlrpc import (
+	from .rpc import (
 		xmlrpc_client,
 		xmlrpc_requesthandler,
 		xmlrpc_server
 		)
 except:
-	from xmlrpc import (
+	from rpc import (
 		xmlrpc_client,
 		xmlrpc_requesthandler,
 		xmlrpc_server
@@ -214,7 +214,7 @@ class log_class:
 
 	def __start_client__(self):
 
-		self.client = xmlrpc_client.ServerProxy('http://localhost:%d' % self.p['port_unix'])
+		self.client = xmlrpc_client('http://localhost:%d' % self.p['port_unix'])
 
 
 	def __start_server__(self):

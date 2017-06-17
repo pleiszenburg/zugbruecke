@@ -38,7 +38,7 @@ import threading
 import time
 
 from .lib import get_location_of_file
-from .xmlrpc import (
+from .rpc import (
 	xmlrpc_client
 	)
 
@@ -173,7 +173,7 @@ class interpreter_session_class():
 		self.log.out('[interpreter session] Logging threads started.')
 
 		# Fire up xmlrpc client
-		self.client = xmlrpc_client.ServerProxy('http://localhost:8000')
+		self.client = xmlrpc_client('http://localhost:8000')
 
 		# Log status
 		self.log.out('[interpreter session] XML-RPX-client started.')

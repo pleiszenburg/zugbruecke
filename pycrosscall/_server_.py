@@ -40,7 +40,7 @@ import sys
 import traceback
 
 from log import log_class
-from xmlrpc import (
+from rpc import (
 	xmlrpc_requesthandler,
 	xmlrpc_server_alternative
 	)

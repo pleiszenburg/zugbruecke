@@ -40,8 +40,6 @@ import struct
 import sys
 import time
 
-from .xmlrpc import xmlrpc_client
-
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # WINE SESSION CLASS
@@ -362,7 +360,7 @@ class wineserver_session_class:
 	def translate_path_unix2win(self, path):
 
 		# Pass stderr into log
-		self.log.out('[wine session] Translate path ...')
+		self.log.out('[wine session] Translating path ...')
 		self.log.out('[wine session] ... input: "%s" ...' % path)
 
 		# Count attempts
