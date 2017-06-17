@@ -83,6 +83,9 @@ class xmlrpc_server_alternative(xmlrpc_server):
 			# Tell parent to terminate
 			self.parent_terminate_func()
 
+			# Log status
+			self.log.out('[xmlrpc-server] TERMINATED.')
+
 		# Return success, expected default behavior of SimpleXMLRPCServer
 		return 1
 
