@@ -2,9 +2,20 @@
 import sys
 import os
 import time
+from sys import platform
 
-from pycrosscall import ctypes
-ctypes.windll.start_session(parameter = {'log_level': 10})
+if True in [platform.startswith(os_name) for os_name in ['linux', 'darwin', 'freebsd']]:
+
+	from pycrosscall import ctypes
+	ctypes.windll.start_session(parameter = {'log_level': 10})
+
+elif platform.startswith('win'):
+
+	import ctypes
+
+else:
+
+	raise # TODO unsupported platform
 
 _call_demo_routine_ = ctypes.windll.LoadLibrary('demo_dll.dll').simple_demo_routine
 print('DLL and routine loaded!')
