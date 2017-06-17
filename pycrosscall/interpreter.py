@@ -76,7 +76,7 @@ class interpreter_session_class():
 			self.log.out('[interpreter] TERMINATING ...')
 
 			# Shut down wine python
-			self.__python_stop__()
+			self.__python_stop_ctypes__()
 
 			# Log status
 			self.log.out('[interpreter] TERMINATED.')
@@ -151,7 +151,7 @@ class interpreter_session_class():
 		self.log.out('[interpreter] Logging threads started.')
 
 
-	def __python_stop__(self):
+	def __python_stop_ctypes__(self):
 
 		# Terminate Wine-Python
 		os.killpg(os.getpgid(self.proc_winepython.pid), signal.SIGINT)
