@@ -201,20 +201,6 @@ as a one-line JSON object for easy parsing and analysis of larger log files.
 Have a look into the routine ``get_default_config`` in ``pycrosscall/config.py`` for
 a comprehensive overview over all possible parameters.
 
-Implementation details
-======================
-
-During the installation of pycrosscall, a stand-alone Windows-version of the
-CPython interpreter corresponding to the used Unix-version is automatically
-downloaded and placed into the module's folder. Next to it, pycrosscall
-generates its own Wine-profile directory for being used with a dedicated
-``WINEPREFIX``. This way, any undesirable interferences with other Wine-profile
-directories containing user settings and unrelated software are avoided.
-
-During the import of pycrosscall, the ``ctypes`` module is patched with an
-additional ``windll`` "sub-module" that would otherwise only be present under
-Windows.
-
 FAQ
 ===
 
@@ -256,6 +242,26 @@ What are actual use cases for this project?
   only be a single "binary blob" - a copy of an old DLL file. All sorts of complicated
   and highly specialized numerical computations come to mind.
 
+How does it work?
+-----------------
+
+During the first import of pycrosscall, a stand-alone Windows-version of the
+CPython interpreter corresponding to the used Unix-version is automatically
+downloaded and placed into the module's configuration folder (by default located at
+``~/.pycrosscall/``). Next to it, also during first import, pycrosscall
+generates its own Wine-profile directory for being used with a dedicated
+``WINEPREFIX``. This way, any undesirable interferences with other Wine-profile
+directories containing user settings and unrelated software are avoided.
+
+During every import of pycrosscall, the ``ctypes`` module is patched with an
+additional ``windll`` "sub-module" that would otherwise only be present under
+Windows. Once ``LoadLibrary`` is invoked for the first time, pycrosscall starts
+its own wineserver and, on top of it, a Windows Python interpreter. The latter is
+used to run a server script (named ``_server_.py``, located in the module's folder).
+From now on, pycrosscall on the "Unix side" acts as a client to its server on the
+"Wine side". The client passes calls with their parameters to the server, which executes
+them using the regular ``ctypes`` interface for Windows.
+
 Missing features (for full ctypes compatibility)
 ================================================
 
@@ -275,15 +281,13 @@ To do (target: BETA-status)
 The following issues need to be resolved before 'Development Status :: 4 - Beta'
 can be achieved:
 
-- ``wineserver`` start/stop must be implemented in a clean way. pycrosscall is
-  currently using ``time.sleep`` with hard coded time spans, waiting for the server to start and stop.
-- ``wineserver`` and ``wine`` related code should be isolated into an independent module or sub-module.
-- Ports for XML-RPC communication must be dynamically allocated instead of being hard coded - allowing
-  multiple simultaneous pycrosscall sessions to coexist peacefully.
+- ``wineserver`` start/stop must be implemented in a clean(er) way. pycrosscall is
+  currently using a few odd workarounds trying not to trigger bugs in Wine.
 - pycrosscall must become thread safe so it can be used with modules like ``multiprocessing``.
 - A test-suite covering all features must be developed.
 - Structures and pointers should be handled more appropriately.
-  Especially, structures should be passed in a better, more secure and faster way than via ``/dev/shm``.
+  Especially, structures should be passed in a better, more secure and faster way
+  than via ``/dev/shm`` on Linux. For MacOS and BSD, similar solutions must be implemented.
 - XML-RPC clients should authenticate themselves before being allowed to access servers.
   Running connections through SSL should be investigated.
 - The log should be divided into log-levels with more or less details.
