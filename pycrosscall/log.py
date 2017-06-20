@@ -246,6 +246,9 @@ class log_class:
 		self.thread_server.daemon = True
 		self.thread_server.start()
 
+		# Store server port in central parameter dict
+		self.p['port_server_log'] = self.server_port
+
 
 	def __stop_server__(self):
 

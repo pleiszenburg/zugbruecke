@@ -60,7 +60,7 @@ class session_class():
 
 	def __init__(self, parameter = {}):
 
-		# Fill empty parameters with default values
+		# Fill empty parameters with default values and/or config file contents
 		self.p = get_module_config(parameter)
 
 		# Get and set session id
@@ -68,9 +68,6 @@ class session_class():
 
 		# Start session logging
 		self.log = log_class(self.id, self.p)
-
-		# Extract server port from log module
-		self.p['port_server_log'] = self.log.server_port
 
 		# Log status
 		self.log.out('[core] STARTING ...')
