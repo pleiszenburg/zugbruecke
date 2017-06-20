@@ -61,7 +61,7 @@ class interpreter_session_class():
 		self.up = True
 
 		# Start wine python
-		self.__python_start_ctypes__(self.__compile_python_command__())
+		self.__python_start__(self.__compile_python_command__())
 
 		# Log status
 		self.log.out('[interpreter] STARTED.')
@@ -76,7 +76,7 @@ class interpreter_session_class():
 			self.log.out('[interpreter] TERMINATING ...')
 
 			# Shut down wine python
-			self.__python_stop_ctypes__()
+			self.__python_stop__()
 
 			# Log status
 			self.log.out('[interpreter] TERMINATED.')
@@ -109,7 +109,7 @@ class interpreter_session_class():
 		pipe.close()
 
 
-	def __python_start_ctypes__(self, command_list):
+	def __python_start__(self, command_list):
 
 		# Log status
 		self.log.out('[interpreter] Command: ' + ' '.join(command_list))
@@ -151,7 +151,7 @@ class interpreter_session_class():
 		self.log.out('[interpreter] Logging threads started.')
 
 
-	def __python_stop_ctypes__(self):
+	def __python_stop__(self):
 
 		# Terminate Wine-Python
 		os.killpg(os.getpgid(self.proc_winepython.pid), signal.SIGINT)
