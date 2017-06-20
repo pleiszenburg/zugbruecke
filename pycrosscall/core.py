@@ -86,9 +86,6 @@ class session_class():
 		# Initialize Wine session
 		self.wineserver_session = wineserver_session_class(self.id, self.p, self.log)
 
-		# Log status
-		self.log.out('[core] Mode: "%s".' % self.p['mode'])
-
 		# Prepare python command for ctypes server or interpreter
 		self.__prepare_python_command__()
 
@@ -118,11 +115,8 @@ class session_class():
 			# Log status
 			self.log.out('[core] TERMINATING ...')
 
-			# If in ctypes mode ...
-			if self.p['mode'] == 'ctypes':
-
-				# Tell server via message to terminate
-				self.client.terminate()
+			# Tell server via message to terminate
+			self.client.terminate()
 
 			# Destruct interpreter session
 			self.interpreter_session.terminate()
@@ -140,7 +134,7 @@ class session_class():
 			self.up = False
 
 
-	def __loadlibrary__(self, dll_name, dll_type = 'windll'):
+	def LoadLibrary(self, dll_name, dll_type = 'windll'):
 
 		# Get full path of dll
 		full_path_dll = os.path.join(self.dir_cwd, dll_name)
@@ -187,57 +181,32 @@ class session_class():
 
 	def __prepare_ctypes__(self):
 
-		# Allow only in ctypes mode
-		if self.p['mode'] == 'ctypes':
+		# Set up a dict for loaded dlls
+		self.dll_dict = {}
 
-			# Set up a dict for loaded dlls
-			self.dll_dict = {}
+		# HACK Wait ... becomes obsolete, when client is moved. Client needs retries and a timeout
+		time.sleep(1) # seconds
 
-			# Expose LoadLibrary
-			self.LoadLibrary = self.__loadlibrary__
+		# Fire up xmlrpc client
+		self.client = rpc_client(('localhost', self.p['port_server_ctypes']))
 
-			# HACK Wait ... becomes obsolete, when client is moved. Client needs retries and a timeout
-			time.sleep(1) # seconds
-
-			# Fire up xmlrpc client
-			self.client = rpc_client(('localhost', self.p['port_server_ctypes']))
-
-			# Log status
-			self.log.out('[core] ctypes client started.')
+		# Log status
+		self.log.out('[core] ctypes client started.')
 
 
 	def __prepare_python_command__(self):
 
-		# If in ctypes mode, prepare command
-		if self.p['mode'] == 'ctypes':
+		# Get free port for ctypes bridge
+		self.p['port_server_ctypes'] = get_free_port()
 
-			# Get free port for ctypes bridge
-			self.p['port_server_ctypes'] = get_free_port()
-
-			# Prepare command
-			self.p['command_dict'] = [
-				'%s\\_server_.py' % self.wineserver_session.translate_path_unix2win(get_location_of_file(__file__)),
-				'--id', self.id,
-				'--port_server_ctypes', str(self.p['port_server_ctypes']),
-				'--port_server_log', str(self.p['port_server_log']),
-				'--log_level', str(self.p['log_level'])
-				]
-
-		# If in interpreter mode, parse parameters and prepare command
-		elif self.p['mode'] == 'interpreter':
-
-			print(self.p['args'])
-
-			# Empty command starts interpreter TODO parse cmd line
-			self.p['command_dict'] = []
-
-		else:
-
-			# Log status
-			self.log.out('[core] Error: Unkown mode!')
-
-			# Unknown mode
-			raise # TODO
+		# Prepare command
+		self.p['command_dict'] = [
+			'%s\\_server_.py' % self.wineserver_session.translate_path_unix2win(get_location_of_file(__file__)),
+			'--id', self.id,
+			'--port_server_ctypes', str(self.p['port_server_ctypes']),
+			'--port_server_log', str(self.p['port_server_log']),
+			'--log_level', str(self.p['log_level'])
+			]
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -275,37 +244,3 @@ class windll_class(): # Mimic ctypes.windll
 
 		# Return a DLL instance object from within the session
 		return self.__session__.LoadLibrary(dll_name = name, dll_type = 'windll')
-
-
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# STAND-ALONE PYTHON INTERPRETER
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-class python_interpreter():
-
-
-	def __init__(self, cmd_line_args):
-
-		# Session not yet up
-		self.up = False
-
-		# Store arguments
-		self.args = cmd_line_args
-
-
-	def start_session(self, parameter = {}):
-
-		# Session not yet up?
-		if not self.up:
-
-			# Set session mode to interpreter
-			parameter['mode'] = 'interpreter'
-
-			# Add args to parameter dict
-			parameter['args'] = self.args
-
-			# Fire up a new session
-			self.__session__ = session_class(parameter)
-
-			# Mark session as up
-			self.up = True
