@@ -384,7 +384,6 @@ class wineserver_session_class:
 			# Start winepath for tanslating path, catch output from all pipes
 			winepath_p = subprocess.Popen(
 				['winepath', '-w', path],
-				stdin = subprocess.PIPE,
 				stdout = subprocess.PIPE,
 				stderr = subprocess.PIPE
 				)
