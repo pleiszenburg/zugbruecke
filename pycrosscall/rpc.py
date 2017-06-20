@@ -35,10 +35,55 @@ from xmlrpc.client import ServerProxy
 from xmlrpc.server import SimpleXMLRPCServer as rpc_server
 from xmlrpc.server import SimpleXMLRPCRequestHandler
 
+from multiprocessing.connection import Listener
+
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # CLASSES AND CONSTRUCTOR ROUTINES
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+class mp_server():
+
+
+	def __init__(self, address, authkey):
+
+		self.up = True
+		self.address = address
+		self.authkey = authkey
+
+
+	def terminate(self):
+
+		if self.up:
+			self.up = False
+
+
+	def __process_call__(self, message):
+
+		print(message)
+
+
+	def __read_client__(self, connection_client):
+
+		try:
+			while True:
+				incomming_message = connection_client.recv()
+				self.__process_call__(incomming_message)
+		except EOFError:
+			print('Connection closed')
+
+
+	def serve_forever(self):
+
+		self.server = Listener(self.address, authkey = self.authkey)
+
+		while self.up:
+			try:
+				client = self.server.accept()
+				self.__handle_message__(client)
+			except Exception:
+				traceback.print_exc()
+
 
 def rpc_client(address):
 
