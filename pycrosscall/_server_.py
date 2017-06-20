@@ -41,8 +41,8 @@ import traceback
 
 from log import log_class
 from rpc import (
-	xmlrpc_requesthandler,
-	xmlrpc_server_alternative
+	rpc_requesthandler,
+	rpc_server_alternative
 	)
 
 
@@ -72,9 +72,9 @@ class wine_server_class:
 		self.dll_dict = {}
 
 		# Create server
-		self.server = xmlrpc_server_alternative(
+		self.server = rpc_server_alternative(
 			('localhost', self.p['port_server_ctypes']),
-			requestHandler = xmlrpc_requesthandler
+			requestHandler = rpc_requesthandler
 			)
 		self.server.set_log(self.log)
 		self.server.set_parent_terminate_func(self.__terminate__)

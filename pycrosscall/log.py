@@ -40,16 +40,16 @@ import time
 try:
 	from .lib import get_free_port
 	from .rpc import (
-		xmlrpc_client,
-		xmlrpc_requesthandler,
-		xmlrpc_server
+		rpc_client,
+		rpc_requesthandler,
+		rpc_server
 		)
 except:
 	from lib import get_free_port
 	from rpc import (
-		xmlrpc_client,
-		xmlrpc_requesthandler,
-		xmlrpc_server
+		rpc_client,
+		rpc_requesthandler,
+		rpc_server
 		)
 
 
@@ -217,7 +217,7 @@ class log_class:
 
 	def __start_client__(self):
 
-		self.client = xmlrpc_client(('localhost', self.p['port_server_log']))
+		self.client = rpc_client(('localhost', self.p['port_server_log']))
 
 
 	def __start_server__(self):
@@ -226,9 +226,9 @@ class log_class:
 		self.server_port = get_free_port()
 
 		# Create server
-		self.server = xmlrpc_server(
+		self.server = rpc_server(
 			('localhost', self.server_port),
-			requestHandler = xmlrpc_requesthandler,
+			requestHandler = rpc_requesthandler,
 			allow_none = True,
 			logRequests = False
 			)

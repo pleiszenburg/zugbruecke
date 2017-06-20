@@ -32,7 +32,7 @@ specific language governing rights and limitations under the License.
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 from xmlrpc.client import ServerProxy
-from xmlrpc.server import SimpleXMLRPCServer as xmlrpc_server
+from xmlrpc.server import SimpleXMLRPCServer as rpc_server
 from xmlrpc.server import SimpleXMLRPCRequestHandler
 
 
@@ -40,19 +40,19 @@ from xmlrpc.server import SimpleXMLRPCRequestHandler
 # CLASSES AND CONSTRUCTOR ROUTINES
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-def xmlrpc_client(address):
+def rpc_client(address):
 
 	return ServerProxy('http://%s:%d' % address)
 
 
-class xmlrpc_requesthandler(SimpleXMLRPCRequestHandler):
+class rpc_requesthandler(SimpleXMLRPCRequestHandler):
 
 
 	# Restrict to a particular path.
 	rpc_paths = ('/RPC2',)
 
 
-class xmlrpc_server_alternative(xmlrpc_server):
+class rpc_server_alternative(rpc_server):
 
 
 	# Server is by definition up from the beginning
@@ -65,7 +65,7 @@ class xmlrpc_server_alternative(xmlrpc_server):
 		self.log = log
 
 		# Status log
-		self.log.out('[xmlrpc-server] Log attached.')
+		self.log.out('[rpc-server] Log attached.')
 
 
 	def set_parent_terminate_func(self, func):
@@ -80,7 +80,7 @@ class xmlrpc_server_alternative(xmlrpc_server):
 		if self.up:
 
 			# Log status
-			self.log.out('[xmlrpc-server] TERMINATING ...')
+			self.log.out('[rpc-server] TERMINATING ...')
 
 			# Sever is marked down
 			self.up = False
@@ -89,7 +89,7 @@ class xmlrpc_server_alternative(xmlrpc_server):
 			self.parent_terminate_func()
 
 			# Log status
-			self.log.out('[xmlrpc-server] TERMINATED.')
+			self.log.out('[rpc-server] TERMINATED.')
 
 		# Return success, expected default behavior of SimpleXMLRPCServer
 		return 1

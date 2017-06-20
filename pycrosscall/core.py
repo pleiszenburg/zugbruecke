@@ -47,7 +47,7 @@ from .lib import (
 from .log import log_class
 from .wineserver import wineserver_session_class
 from .rpc import (
-	xmlrpc_client
+	rpc_client
 	)
 
 
@@ -200,10 +200,10 @@ class session_class():
 			time.sleep(1) # seconds
 
 			# Fire up xmlrpc client
-			self.client = xmlrpc_client(('localhost', self.p['port_server_ctypes']))
+			self.client = rpc_client(('localhost', self.p['port_server_ctypes']))
 
 			# Log status
-			self.log.out('[core] XML-RPX-client started.')
+			self.log.out('[core] ctypes client started.')
 
 
 	def __prepare_python_command__(self):
