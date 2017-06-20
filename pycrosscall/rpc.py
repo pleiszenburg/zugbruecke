@@ -45,10 +45,10 @@ from multiprocessing.connection import Listener
 class mp_server():
 
 
-	def __init__(self, address, authkey):
+	def __init__(self, socket_path, authkey):
 
 		self.up = True
-		self.address = address
+		self.socket_path = socket_path
 		self.authkey = authkey
 
 
@@ -75,7 +75,7 @@ class mp_server():
 
 	def serve_forever(self):
 
-		self.server = Listener(self.address, authkey = self.authkey)
+		self.server = Listener(self.socket_path, authkey = self.authkey)
 
 		while self.up:
 			try:
