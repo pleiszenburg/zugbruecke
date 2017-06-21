@@ -85,9 +85,16 @@ class mp_server_handler_class:
 		self.__functions__ = {}
 
 
-	def register_function(self, function_pointer):
+	def register_function(self, function_pointer, public_name = None):
 
-		self.__functions__[function_pointer.__name__] = function_pointer
+		# Is there a custom public name?
+		if public_name not None:
+			function_name = public_name
+		else:
+			function_name = function_pointer.__name__
+
+		# Register function in dict
+		self.__functions__[function_name] = function_pointer
 
 
 	def handle_connection(self, connection_client):
