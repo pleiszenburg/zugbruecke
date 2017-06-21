@@ -292,7 +292,7 @@ if __name__ == '__main__':
 		'--port_server_ctypes', type = int, nargs = 1
 		)
 	parser.add_argument(
-		'--port_server_log', type = int, nargs = 1
+		'--dir_socket_log_main', type = str, nargs = 1
 		)
 	parser.add_argument(
 		'--log_level', type = int, nargs = 1
@@ -310,7 +310,7 @@ if __name__ == '__main__':
 		'log_level': args.log_level[0],
 		'log_server': False,
 		'port_server_ctypes': args.port_server_ctypes[0],
-		'port_server_log': args.port_server_log[0]
+		'dir_socket_log_main': args.dir_socket_log_main[0]
 		}
 
 	# Fire up wine server session with parsed parameters

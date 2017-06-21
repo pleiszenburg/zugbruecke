@@ -201,7 +201,7 @@ class session_class():
 			'%s\\_server_.py' % self.wineserver_session.translate_path_unix2win(get_location_of_file(__file__)),
 			'--id', self.id,
 			'--port_server_ctypes', str(self.p['port_server_ctypes']),
-			'--port_server_log', str(self.p['port_server_log']),
+			'--dir_socket_log_main', self.wineserver_session.translate_path_unix2win(self.p['dir_socket_log_main']),
 			'--log_level', str(self.p['log_level'])
 			]
 
