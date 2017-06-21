@@ -53,7 +53,7 @@ class mp_client_class:
 	def __init__(self, socket_path, authkey):
 
 		# Start new client on top of socket
-		self.client = Client(socket_path, authkey = authkey)
+		self.client = Client(socket_path, authkey = authkey.encode('utf-8'))
 
 
 	def __getattr__(self, name):
@@ -127,7 +127,7 @@ class mp_server_class():
 		# Store parameters
 		self.up = True
 		self.socket_path = socket_path
-		self.authkey = authkey
+		self.authkey = authkey.encode('utf-8')
 
 		# Set terminate func - to be called on termination. Likely None.
 		self.terminate_function = terminate_function
@@ -186,6 +186,14 @@ class mp_server_class():
 
 				# TODO just print traceback. Better solution?
 				traceback.print_exc()
+
+
+	def server_forever_in_thread(self):
+
+		# Start the server in its own thread
+		t = Thread(target = self.serve_forever)
+		t.daemon = True
+		t.start()
 
 
 def rpc_client(address):
