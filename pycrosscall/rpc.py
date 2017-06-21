@@ -31,12 +31,13 @@ specific language governing rights and limitations under the License.
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-from multiprocessing.connection import
+from multiprocessing.connection import (
 	Client,
 	Listener
 	)
 import pickle
 from threading import Thread
+import traceback
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -84,7 +85,7 @@ class mp_server_handler_class:
 	def register_function(self, function_pointer, public_name = None):
 
 		# Is there a custom public name?
-		if public_name not None:
+		if public_name is not None:
 			function_name = public_name
 		else:
 			function_name = function_pointer.__name__
@@ -123,7 +124,7 @@ class mp_server_class():
 		self.log = log
 
 		# Status log
-		if self.log not None:
+		if self.log is not None:
 			self.log.out('[mp-server] STARTING ...')
 			self.log.out('[mp-server] Log attached.')
 
@@ -142,7 +143,7 @@ class mp_server_class():
 		self.register_function = self.handler.register_function
 
 		# Status log
-		if self.log not None:
+		if self.log is not None:
 			self.log.out('[mp-server] STARTED.')
 
 
@@ -152,18 +153,18 @@ class mp_server_class():
 		if self.up:
 
 			# Status log
-			if self.log not None:
+			if self.log is not None:
 				self.log.out('[mp-server] TERMINATING ...')
 
 			# Stop the server by killing the loop
 			self.up = False
 
 			# Call terminate function if it exists
-			if self.terminate_function not None:
+			if self.terminate_function is not None:
 				self.terminate_function()
 
 			# Status log
-			if self.log not None:
+			if self.log is not None:
 				self.log.out('[mp-server] TERMINATED.')
 
 
@@ -178,7 +179,7 @@ class mp_server_class():
 			try:
 
 				# Accept new client
-				client = sock.accept()
+				client = self.server.accept()
 
 				# Handle incomming message in new thread
 				t = Thread(target = self.handler.handle_connection, args = (client,))

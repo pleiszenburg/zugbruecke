@@ -224,7 +224,7 @@ class log_class:
 	def __start_server__(self):
 
 		# Generate new socket and store it
-		self.p['dir_socket_log_main'] = generate_socket_filename()
+		self.p['dir_socket_log_main'] = generate_socket_filename(self.id)
 
 		# Create server
 		self.server = mp_server_class(

@@ -72,7 +72,7 @@ class session_class():
 		# Log status
 		self.log.out('[core] STARTING ...')
 		self.log.out('[core] Configured Wine-Python version is %s for %s.' % (self.p['version'], self.p['arch']))
-		self.log.out('[core] Log socket: "%d".' % self.p['dir_socket_log_main'])
+		self.log.out('[core] Log socket: "%s".' % self.p['dir_socket_log_main'])
 
 		# Store current working directory
 		self.dir_cwd = os.getcwd()
@@ -192,6 +192,8 @@ class session_class():
 
 
 		# TODO Loop until echo message is received
+		# HACK Wait ... becomes obsolete, when client is moved. Client needs retries and a timeout
+		time.sleep(1) # seconds
 
 
 		# Log status
@@ -201,7 +203,7 @@ class session_class():
 	def __prepare_python_command__(self):
 
 		# Get socket for ctypes bridge
-		self.p['dir_socket_ctypes'] = generate_socket_filename()
+		self.p['dir_socket_ctypes'] = generate_socket_filename(self.id)
 
 		# Prepare command with minimal meta info. All other info can be passed via sockets.
 		self.p['command_dict'] = [
