@@ -41,8 +41,7 @@ import traceback
 
 from log import log_class
 from rpc import (
-	rpc_requesthandler,
-	rpc_server_alternative
+	mp_server_class
 	)
 
 
@@ -78,9 +77,6 @@ class wine_server_class:
 			)
 		self.server.set_log(self.log)
 		self.server.set_parent_terminate_func(self.__terminate__)
-
-		# Allow inspection of routines offered by server
-		self.server.register_introspection_functions()
 
 		# Register call: Accessing a dll
 		self.server.register_function(self.__access_dll__, 'access_dll')

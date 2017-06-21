@@ -114,12 +114,23 @@ class mp_server_handler_class:
 class mp_server_class():
 
 
-	def __init__(self, socket_path, authkey):
+	def __init__(self, socket_path, authkey, log = None, terminate_function = None):
+
+		# Set log, likely None
+		self.log = log
+
+		# Status log
+		if self.log not None:
+			self.log.out('[mp-server] STARTING ...')
+			self.log.out('[mp-server] Log attached.')
 
 		# Store parameters
 		self.up = True
 		self.socket_path = socket_path
 		self.authkey = authkey
+
+		# Set terminate func - to be called on termination. Likely None.
+		self.terminate_function = terminate_function
 
 		# Set up handler
 		self.handler = mp_server_handler_class()
@@ -127,12 +138,30 @@ class mp_server_class():
 		# Directly pass functions into handler
 		self.register_function = self.handler.register_function
 
+		# Status log
+		if self.log not None:
+			self.log.out('[mp-server] STARTED.')
+
 
 	def terminate(self):
 
-		# Stop the server by killing the loop
+		# Terminate only once
 		if self.up:
+
+			# Status log
+			if self.log not None:
+				self.log.out('[mp-server] TERMINATING ...')
+
+			# Stop the server by killing the loop
 			self.up = False
+
+			# Call terminate function if it exists
+			if self.terminate_function not None:
+				self.terminate_function()
+
+			# Status log
+			if self.log not None:
+				self.log.out('[mp-server] TERMINATED.')
 
 
 	def serve_forever(self):
