@@ -38,13 +38,13 @@ import threading
 import time
 
 try:
-	from .lib import get_free_port
+	from .lib import generate_socket_filename
 	from .rpc import (
 		mp_client_class,
 		mp_server_class
 		)
 except:
-	from lib import get_free_port
+	from lib import generate_socket_filename
 	from rpc import (
 		mp_client_class,
 		mp_server_class
@@ -216,19 +216,19 @@ class log_class:
 	def __start_client__(self):
 
 		self.client = mp_client_class(
-			self.p['dir_socket_log_wine'],
+			self.p['dir_socket_log_main'],
 			'pycrosscall_log_main'
 			)
 
 
 	def __start_server__(self):
 
-		# Get a free port from the OS
-		self.dir_socket_log = get_free_port()
+		# Generate new socket and store it
+		self.p['dir_socket_log_main'] = generate_socket_filename()
 
 		# Create server
 		self.server = mp_server_class(
-			self.dir_socket_log,
+			self.p['dir_socket_log_main'],
 			'pycrosscall_log_main'
 			)
 
@@ -237,9 +237,6 @@ class log_class:
 
 		# Run server in its own thread
 		self.server.server_forever_in_thread()
-
-		# Store server port in central parameter dict
-		self.p['dir_socket_log'] = self.dir_socket_log
 
 
 	def __stop_server__(self):
