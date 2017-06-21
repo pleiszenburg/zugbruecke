@@ -31,10 +31,6 @@ specific language governing rights and limitations under the License.
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-from xmlrpc.client import ServerProxy
-from xmlrpc.server import SimpleXMLRPCServer as rpc_server
-from xmlrpc.server import SimpleXMLRPCRequestHandler
-
 from multiprocessing.connection import
 	Client,
 	Listener
@@ -201,67 +197,3 @@ class mp_server_class():
 		t = Thread(target = self.serve_forever)
 		t.daemon = True
 		t.start()
-
-
-def rpc_client(address):
-
-	return ServerProxy('http://%s:%d' % address)
-
-
-class rpc_requesthandler(SimpleXMLRPCRequestHandler):
-
-
-	# Restrict to a particular path.
-	rpc_paths = ('/RPC2',)
-
-
-class rpc_server_alternative(rpc_server):
-
-
-	# Server is by definition up from the beginning
-	up = True
-
-
-	def set_log(self, log):
-
-		# Set log
-		self.log = log
-
-		# Status log
-		self.log.out('[rpc-server] Log attached.')
-
-
-	def set_parent_terminate_func(self, func):
-
-		# Set function in parent, which needs to be called on shutdown
-		self.parent_terminate_func = func
-
-
-	def shutdown(self):
-
-		# Run only if session still up
-		if self.up:
-
-			# Log status
-			self.log.out('[rpc-server] TERMINATING ...')
-
-			# Sever is marked down
-			self.up = False
-
-			# Tell parent to terminate
-			self.parent_terminate_func()
-
-			# Log status
-			self.log.out('[rpc-server] TERMINATED.')
-
-		# Return success, expected default behavior of SimpleXMLRPCServer
-		return 1
-
-
-	def serve_forever(self):
-
-		# Request handler loop
-		while self.up:
-
-			# Handle requests ...
-			self.handle_request()
