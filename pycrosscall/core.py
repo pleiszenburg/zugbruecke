@@ -47,7 +47,7 @@ from .lib import (
 from .log import log_class
 from .wineserver import wineserver_session_class
 from .rpc import (
-	rpc_client
+	mp_client_class
 	)
 
 
@@ -72,7 +72,7 @@ class session_class():
 		# Log status
 		self.log.out('[core] STARTING ...')
 		self.log.out('[core] Configured Wine-Python version is %s for %s.' % (self.p['version'], self.p['arch']))
-		self.log.out('[core] Log server is listening on port %d.' % self.p['port_server_log'])
+		self.log.out('[core] Log socket: "%d".' % self.p['dir_socket_log_main'])
 
 		# Store current working directory
 		self.dir_cwd = os.getcwd()
