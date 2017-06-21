@@ -36,52 +36,93 @@ from xmlrpc.server import SimpleXMLRPCServer as rpc_server
 from xmlrpc.server import SimpleXMLRPCRequestHandler
 
 from multiprocessing.connection import Listener
+import pickle
+from threading import Thread
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # CLASSES AND CONSTRUCTOR ROUTINES
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-class mp_server():
+class mp_server_handler_class:
+
+
+	def __init__(self):
+
+		self.__functions__ = {}
+
+
+	def register_function(self, function_pointer):
+
+		self.__functions__[function_pointer.__name__] = function_pointer
+
+
+	def handle_connection(self, connection_client):
+
+		try:
+
+			while True:
+
+				# Receive the incomming message
+				function_name, args, kwargs = pickle.loads(connection_client.recv())
+
+				# Run the RPC and send a response
+				try:
+					r = self.__functions__[function_name](*args,**kwargs)
+					connection_client.send(pickle.dumps(r))
+				except Exception as e:
+					connection_client.send(pickle.dumps(e))
+
+		except EOFError:
+
+			pass
+
+
+class mp_server_class():
 
 
 	def __init__(self, socket_path, authkey):
 
+		# Store parameters
 		self.up = True
 		self.socket_path = socket_path
 		self.authkey = authkey
 
+		# Set up handler
+		self.handler = mp_server_handler_class()
+
+		# Directly pass functions into handler
+		self.register_function = self.handler.register_function
+
 
 	def terminate(self):
 
+		# Stop the server by killing the loop
 		if self.up:
 			self.up = False
 
 
-	def __process_call__(self, message):
-
-		print(message)
-
-
-	def __read_client__(self, connection_client):
-
-		try:
-			while True:
-				incomming_message = connection_client.recv()
-				self.__process_call__(incomming_message)
-		except EOFError:
-			print('Connection closed')
-
-
 	def serve_forever(self):
 
+		# Open socket
 		self.server = Listener(self.socket_path, authkey = self.authkey)
 
+		# Server while server is up
 		while self.up:
+
 			try:
-				client = self.server.accept()
-				self.__handle_message__(client)
+
+				# Accept new client
+				client = sock.accept()
+
+				# Handle incomming message in new thread
+				t = Thread(target = self.handler.handle_connection, args = (client,))
+				t.daemon = True
+				t.start()
+
 			except Exception:
+
+				# TODO just print traceback. Better solution?
 				traceback.print_exc()
 
 
