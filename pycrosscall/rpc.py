@@ -35,7 +35,10 @@ from xmlrpc.client import ServerProxy
 from xmlrpc.server import SimpleXMLRPCServer as rpc_server
 from xmlrpc.server import SimpleXMLRPCRequestHandler
 
-from multiprocessing.connection import Listener
+from multiprocessing.connection import
+	Client,
+	Listener
+	)
 import pickle
 from threading import Thread
 
@@ -43,6 +46,36 @@ from threading import Thread
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # CLASSES AND CONSTRUCTOR ROUTINES
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+class mp_client_class:
+
+
+	def __init__(self, socket_path, authkey):
+
+		# Start new client on top of socket
+		self.client = Client(socket_path, authkey = authkey)
+
+
+	def __getattr__(self, name):
+
+		# Handler routine in __getattr__ namespace
+		def do_rpc(*args, **kwargs):
+
+			# Send request to server
+			self.client.send(pickle.dumps((name, args, kwargs)))
+			# Receive answer
+			result = pickle.loads(self.client.recv())
+
+			# If the answer is an error, raise it
+			if isinstance(result, Exception):
+				raise result
+
+			# Return answer
+			return result
+
+		# Return pointer to handler routine
+		return do_rpc
+
 
 class mp_server_handler_class:
 
