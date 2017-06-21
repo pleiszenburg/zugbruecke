@@ -185,7 +185,10 @@ class session_class():
 		time.sleep(1) # seconds
 
 		# Fire up xmlrpc client
-		self.client = mp_client_class(self.p['dir_socket_ctypes'])
+		self.client = mp_client_class(
+			self.p['dir_socket_ctypes'],
+			pycrosscall_server_main
+			)
 
 
 		# TODO Loop until echo message is received

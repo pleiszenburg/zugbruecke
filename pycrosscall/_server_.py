@@ -71,12 +71,12 @@ class wine_server_class:
 		self.dll_dict = {}
 
 		# Create server
-		self.server = rpc_server_alternative(
-			('localhost', self.p['port_server_ctypes']),
-			requestHandler = rpc_requesthandler
+		self.server = mp_server_class(
+			self.p['dir_socket_ctypes'],
+			'pycrosscall_server_main',
+			log = self.log,
+			terminate_function = self.__terminate__
 			)
-		self.server.set_log(self.log)
-		self.server.set_parent_terminate_func(self.__terminate__)
 
 		# Register call: Accessing a dll
 		self.server.register_function(self.__access_dll__, 'access_dll')
@@ -289,7 +289,7 @@ if __name__ == '__main__':
 		'--id', type = str, nargs = 1
 		)
 	parser.add_argument(
-		'--port_server_ctypes', type = int, nargs = 1
+		'--dir_socket_ctypes', type = str, nargs = 1
 		)
 	parser.add_argument(
 		'--dir_socket_log_main', type = str, nargs = 1
@@ -309,7 +309,7 @@ if __name__ == '__main__':
 		'remote_log': True,
 		'log_level': args.log_level[0],
 		'log_server': False,
-		'port_server_ctypes': args.port_server_ctypes[0],
+		'dir_socket_ctypes': args.dir_socket_ctypes[0],
 		'dir_socket_log_main': args.dir_socket_log_main[0]
 		}
 
