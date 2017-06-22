@@ -25,7 +25,77 @@ specific language governing rights and limitations under the License.
 */
 
 
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// INCLUDE
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
 #include "demo_dll.h"
+
+
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// Python Cookbook R3 Demo: https://github.com/dabeaz/python-cookbook/blob/master/src/15/sample.c
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+/* Compute the greatest common divisor */
+int gcd(int x, int y) {
+    int g = y;
+    while (x > 0) {
+        g = x;
+        x = y % x;
+        y = g;
+    }
+    return g;
+}
+
+
+/* Test if (x0,y0) is in the Mandelbrot set or not */
+int in_mandel(double x0, double y0, int n) {
+  double x=0,y=0,xtemp;
+  while (n > 0) {
+    xtemp = x*x - y*y + x0;
+    y = 2*x*y + y0;
+    x = xtemp;
+    n -= 1;
+    if (x*x + y*y > 4) return 0;
+  }
+  return 1;
+}
+
+
+/* Divide two numbers */
+int divide(int a, int b, int *remainder) {
+  int quot = a / b;
+  *remainder = a % b;
+  return quot;
+}
+
+
+/* Average values in an array */
+double avg(double *a, int n) {
+  int i;
+  double total = 0.0;
+  for (i = 0; i < n; i++) {
+    total += a[i];
+  }
+  return total / n;
+}
+
+
+/* A C data structure */
+typedef struct Point {
+    double x,y;
+} Point;
+
+
+/* Function involving a C data structure */
+double distance(Point *p1, Point *p2) {
+   return hypot(p1->x - p2->x, p1->y - p2->y);
+}
+
+
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// pycrosscall demo
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 float __stdcall DEMODLL simple_demo_routine(
 	float param_a,
@@ -36,6 +106,7 @@ float __stdcall DEMODLL simple_demo_routine(
 	return param_a - (param_a / param_b);
 
 }
+
 
 void __stdcall DEMODLL complex_demo_routine(
 	char *param_char_p,
@@ -51,6 +122,11 @@ void __stdcall DEMODLL complex_demo_routine(
 	printf("el_int8t_4[3] = '%d' \n", (*param_struct_test_p).el_int8t_4[3]);
 
 }
+
+
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// DLL infrastructure
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 DEMODLL bool __stdcall DllMain(HANDLE hModule, DWORD ul_reason_for_call, LPVOID lpReserved)
 {
