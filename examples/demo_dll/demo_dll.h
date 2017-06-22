@@ -31,6 +31,7 @@ specific language governing rights and limitations under the License.
 #include <stdio.h>
 #include <windows.h>
 #include <stdint.h>
+#include <math.h>
 
 // #ifdef BUILDING_EXAMPLE_DLL
 // #define DEMODLL __declspec(dllexport)
