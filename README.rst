@@ -261,6 +261,35 @@ From now on, pycrosscall on the "Unix side" acts as a client to its server on th
 "Wine side". The client passes calls with their parameters to the server, which executes
 them using the regular ``ctypes`` interface for Windows.
 
+Is it secure?
+-----------
+
+No. See "Security" section of this document.
+
+How fast/slow is it?
+--------------------
+
+It performs reasonably well. See "Speed" section of this document.
+
+Can it handle structures?
+-------------------------
+
+Yes, in principle. But avoid pointers within structures, if you
+can. See next question for details.
+
+Can it handle pointers?
+-----------------------
+
+Yes and no. Pointers to simple C data types (int, float, etc.)
+used as function parameters can be handled just fine. Pointers
+to arbitrary data structures are a bit of a problem. Pointers
+returned by a DLL pointing to memory allocated by the DLL are
+problematic, too. pycrosscall offers ways to copy memory from
+the Unix side to the Wine side as well as in the opposite
+direction, but those operations must (a) be triggered by the
+programmer (manually, so to speak) and (b) require knowledge
+of the size of the data structure to copied.
+
 Missing features (for full ctypes compatibility)
 ================================================
 
