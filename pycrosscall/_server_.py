@@ -82,6 +82,8 @@ class wine_server_class:
 		self.server.register_function(self.__access_dll__, 'access_dll')
 		# Call routine with parameters and, optionally, return value
 		self.server.register_function(self.__call_dll_routine__, 'call_dll_routine')
+		# Return status of server
+		self.server.register_function(self.__get_status__, 'get_status')
 		# Register call: Registering arguments and return value types
 		self.server.register_function(self.__register_argtype_and_restype__, 'register_argtype_and_restype')
 		# Register call: Registering dll calls
@@ -173,6 +175,14 @@ class wine_server_class:
 
 		# Return result
 		return return_value
+
+
+	def __get_status__(self):
+
+		if self.up:
+			return 'up'
+		else:
+			return 'down'
 
 
 	def __register_argtype_and_restype__(self, full_path_dll_unix, routine_name, argtypes, restype):
