@@ -25,21 +25,21 @@ specific language governing rights and limitations under the License.
 */
 
 
-#ifndef DEMOROUTINE_DUMP_H
-#define DEMOROUTINE_DUMP_H
+#ifndef DEMODLL_H
+#define DEMODLL_H
 
 #include <stdio.h>
 #include <windows.h>
 #include <stdint.h>
 
 // #ifdef BUILDING_EXAMPLE_DLL
-// #define DEMOROUTINE_DUMP __declspec(dllexport)
+// #define DEMODLL __declspec(dllexport)
 // #else
-#define DEMOROUTINE_DUMP __declspec(dllimport)
+#define DEMODLL __declspec(dllimport)
 // #endif
 
 typedef int32_t bool;
-#define TRUE  1
+#define TRUE 1
 #define FALSE 0
 
 struct test
@@ -53,17 +53,18 @@ struct test
 	int8_t el_int8t_2x3[2][3];
 };
 
-float __stdcall DEMOROUTINE_DUMP simple_demo_routine(
+float __stdcall DEMODLL simple_demo_routine(
 	float param_a,
 	float param_b
 	);
 
-void __stdcall DEMOROUTINE_DUMP complex_demo_routine(
+void __stdcall DEMODLL complex_demo_routine(
 	char *param_char_p,
 	int param_int,
 	struct test *param_struct_test_p
 	);
 
-DEMOROUTINE_DUMP bool __stdcall DllMain(HANDLE hModule, DWORD ul_reason_for_call, LPVOID lpReserved);
+DEMODLL bool __stdcall DllMain(HANDLE hModule, DWORD ul_reason_for_call, LPVOID lpReserved);
 
+// DEMODLL_H
 #endif
