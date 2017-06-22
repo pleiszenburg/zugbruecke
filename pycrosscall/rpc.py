@@ -31,74 +31,170 @@ specific language governing rights and limitations under the License.
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-from xmlrpc.client import ServerProxy
-from xmlrpc.server import SimpleXMLRPCServer as rpc_server
-from xmlrpc.server import SimpleXMLRPCRequestHandler
+from multiprocessing.connection import (
+	Client,
+	Listener
+	)
+import pickle
+from threading import Thread
+import traceback
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # CLASSES AND CONSTRUCTOR ROUTINES
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-def rpc_client(address):
-
-	return ServerProxy('http://%s:%d' % address)
+class mp_client_class:
 
 
-class rpc_requesthandler(SimpleXMLRPCRequestHandler):
+	def __init__(self, socket_path, authkey):
+
+		# Start new client on top of socket
+		self.client = Client(socket_path, authkey = authkey.encode('utf-8'))
 
 
-	# Restrict to a particular path.
-	rpc_paths = ('/RPC2',)
+	def __getattr__(self, name):
+
+		# Handler routine in __getattr__ namespace
+		def do_rpc(*args, **kwargs):
+
+			# Send request to server
+			self.client.send(pickle.dumps((name, args, kwargs)))
+			# Receive answer
+			result = pickle.loads(self.client.recv())
+
+			# If the answer is an error, raise it
+			if isinstance(result, Exception):
+				raise result
+
+			# Return answer
+			return result
+
+		# Return pointer to handler routine
+		return do_rpc
 
 
-class rpc_server_alternative(rpc_server):
+class mp_server_handler_class:
 
 
-	# Server is by definition up from the beginning
-	up = True
+	def __init__(self):
+
+		self.__functions__ = {}
 
 
-	def set_log(self, log):
+	def register_function(self, function_pointer, public_name = None):
 
-		# Set log
+		# Is there a custom public name?
+		if public_name is not None:
+			function_name = public_name
+		else:
+			function_name = function_pointer.__name__
+
+		# Register function in dict
+		self.__functions__[function_name] = function_pointer
+
+
+	def handle_connection(self, connection_client):
+
+		try:
+
+			while True:
+
+				# Receive the incomming message
+				function_name, args, kwargs = pickle.loads(connection_client.recv())
+
+				# Run the RPC and send a response
+				try:
+					r = self.__functions__[function_name](*args,**kwargs)
+					connection_client.send(pickle.dumps(r))
+				except Exception as e:
+					connection_client.send(pickle.dumps(e))
+
+		except EOFError:
+
+			pass
+
+
+class mp_server_class():
+
+
+	def __init__(self, socket_path, authkey, log = None, terminate_function = None):
+
+		# Set log, likely None
 		self.log = log
 
 		# Status log
-		self.log.out('[rpc-server] Log attached.')
+		if self.log is not None:
+			self.log.out('[mp-server] STARTING ...')
+			self.log.out('[mp-server] Log attached.')
+
+		# Store parameters
+		self.up = True
+		self.socket_path = socket_path
+		self.authkey = authkey.encode('utf-8')
+
+		# Set terminate func - to be called on termination. Likely None.
+		self.terminate_function = terminate_function
+
+		# Set up handler
+		self.handler = mp_server_handler_class()
+
+		# Directly pass functions into handler
+		self.register_function = self.handler.register_function
+
+		# Status log
+		if self.log is not None:
+			self.log.out('[mp-server] STARTED.')
 
 
-	def set_parent_terminate_func(self, func):
+	def terminate(self):
 
-		# Set function in parent, which needs to be called on shutdown
-		self.parent_terminate_func = func
-
-
-	def shutdown(self):
-
-		# Run only if session still up
+		# Terminate only once
 		if self.up:
 
-			# Log status
-			self.log.out('[rpc-server] TERMINATING ...')
+			# Status log
+			if self.log is not None:
+				self.log.out('[mp-server] TERMINATING ...')
 
-			# Sever is marked down
+			# Stop the server by killing the loop
 			self.up = False
 
-			# Tell parent to terminate
-			self.parent_terminate_func()
+			# Call terminate function if it exists
+			if self.terminate_function is not None:
+				self.terminate_function()
 
-			# Log status
-			self.log.out('[rpc-server] TERMINATED.')
-
-		# Return success, expected default behavior of SimpleXMLRPCServer
-		return 1
+			# Status log
+			if self.log is not None:
+				self.log.out('[mp-server] TERMINATED.')
 
 
 	def serve_forever(self):
 
-		# Request handler loop
+		# Open socket
+		self.server = Listener(self.socket_path, authkey = self.authkey)
+
+		# Server while server is up
 		while self.up:
 
-			# Handle requests ...
-			self.handle_request()
+			try:
+
+				# Accept new client
+				client = self.server.accept()
+
+				# Handle incomming message in new thread
+				t = Thread(target = self.handler.handle_connection, args = (client,))
+				t.daemon = True
+				t.start()
+
+			except Exception:
+
+				# TODO just print traceback. Better solution?
+				traceback.print_exc()
+
+
+	def server_forever_in_thread(self):
+
+		# Start the server in its own thread
+		t = Thread(target = self.serve_forever)
+		t.daemon = True
+		t.start()

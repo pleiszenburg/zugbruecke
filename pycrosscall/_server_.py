@@ -41,8 +41,7 @@ import traceback
 
 from log import log_class
 from rpc import (
-	rpc_requesthandler,
-	rpc_server_alternative
+	mp_server_class
 	)
 
 
@@ -72,29 +71,28 @@ class wine_server_class:
 		self.dll_dict = {}
 
 		# Create server
-		self.server = rpc_server_alternative(
-			('localhost', self.p['port_server_ctypes']),
-			requestHandler = rpc_requesthandler
+		self.server = mp_server_class(
+			('localhost', self.p['port_socket_ctypes']),
+			'pycrosscall_server_main',
+			log = self.log,
+			terminate_function = self.__terminate__
 			)
-		self.server.set_log(self.log)
-		self.server.set_parent_terminate_func(self.__terminate__)
-
-		# Allow inspection of routines offered by server
-		self.server.register_introspection_functions()
 
 		# Register call: Accessing a dll
 		self.server.register_function(self.__access_dll__, 'access_dll')
 		# Call routine with parameters and, optionally, return value
 		self.server.register_function(self.__call_dll_routine__, 'call_dll_routine')
+		# Return status of server
+		self.server.register_function(self.__get_status__, 'get_status')
 		# Register call: Registering arguments and return value types
 		self.server.register_function(self.__register_argtype_and_restype__, 'register_argtype_and_restype')
 		# Register call: Registering dll calls
 		self.server.register_function(self.__register_routine__, 'register_routine')
 		# Register destructur: Call goes into xmlrpc-server first, which then terminates parent
-		self.server.register_function(self.server.shutdown, 'terminate')
+		self.server.register_function(self.server.terminate, 'terminate')
 
 		# Status log
-		self.log.out('[_server_] ctypes server is listening on port %d.' % self.p['port_server_ctypes'])
+		self.log.out('[_server_] ctypes server is listening on port %d.' % self.p['port_socket_ctypes'])
 		self.log.out('[_server_] STARTED.')
 		self.log.out('[_server_] Serve forever ...')
 
@@ -177,6 +175,14 @@ class wine_server_class:
 
 		# Return result
 		return return_value
+
+
+	def __get_status__(self):
+
+		if self.up:
+			return 'up'
+		else:
+			return 'down'
 
 
 	def __register_argtype_and_restype__(self, full_path_dll_unix, routine_name, argtypes, restype):
@@ -293,10 +299,10 @@ if __name__ == '__main__':
 		'--id', type = str, nargs = 1
 		)
 	parser.add_argument(
-		'--port_server_ctypes', type = int, nargs = 1
+		'--port_socket_ctypes', type = int, nargs = 1
 		)
 	parser.add_argument(
-		'--port_server_log', type = int, nargs = 1
+		'--port_socket_log_main', type = int, nargs = 1
 		)
 	parser.add_argument(
 		'--log_level', type = int, nargs = 1
@@ -313,8 +319,8 @@ if __name__ == '__main__':
 		'remote_log': True,
 		'log_level': args.log_level[0],
 		'log_server': False,
-		'port_server_ctypes': args.port_server_ctypes[0],
-		'port_server_log': args.port_server_log[0]
+		'port_socket_ctypes': args.port_socket_ctypes[0],
+		'port_socket_log_main': args.port_socket_log_main[0]
 		}
 
 	# Fire up wine server session with parsed parameters

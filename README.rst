@@ -12,7 +12,7 @@ pycrosscall is designed as a **drop-in replacement for ctypes' windll interface*
 pycrosscall is **built on top of Wine**. A stand-alone Windows Python interpreter
 launched in the background is used to execute the called DLL routines.
 Communication between the UNIX-side and the Windows/Wine-side is based on Python's
-build-in XML-RPC capability.
+build-in multiprocessing connection capability.
 pycrosscall comes with extensive logging features allowing to debug problems
 associated with both itself and with Wine.
 pycrosscall is written using **Python 3 syntax** and primarily targets the
@@ -36,7 +36,7 @@ For using the module:
 
 - **CPython 3.x** *(tested with 3.5 and 3.6)* - No additional Python packages are required.
 
-- **Wine 2.x** *(tested with 2.6 and 2.6-staging)* - Expected to be in the user's PATH.
+- **Wine 2.x** *(tested with 2.5, 2.6(-staging), 2.10(-staging))* - Expected to be in the user's PATH.
 
 For examples and tests, in addition:
 
@@ -117,8 +117,8 @@ For more examples and DLL source code check the ``examples`` directory.
 Speed
 =====
 
-The inter-process communication via **XML-RPC adds significant overhead** to every function call.
-Calls are slow as hell in general, but the first call of an individual routine within
+The inter-process communication via **multiprocessing connections adds overhead** to every function call.
+Calls are slow in general, but the first call of an individual routine within
 a session is even slower due to necessary initialization happening beforehand.
 Depending on the use-case, instead of working with pycrosscall, it will be significantly
 faster to isolate functionality depending on DLL calls into a dedicated Python
@@ -126,14 +126,14 @@ script and run it directly with a Windows Python interpreter under Wine. For com
 see the following numbers:
 
 ===================  ==============  =================== ==================== ==================
-Example call         iterations [#]  w/o pycrosscall [s] *w/ pycrosscall* [s] overhead/call [µs]
+Example call         iterations [#]  w/o pycrosscall [s] *w/ pycrosscall* [s] overhead/call [ns]
 ===================  ==============  =================== ==================== ==================
-simple_demo_routine  10k             0.015               12.230               1.222
+simple_demo_routine  100k            0.095               10.042               99.5
 ===================  ==============  =================== ==================== ==================
 
-Benchmarks were performed with an i7 860 CPU, Linux kernel 4.4.62, Wine 2.6-Staging,
-CPython 3.6.0 x86-64 for Linux and CPython 3.5.3 x86-32 for Windows. pycrosscall was
-configured with log level 0 (logs off) for minimal XML-RPC overhead.
+Benchmarks were performed with an i7 3740QM CPU, Linux kernel 4.4.72, Wine 2.10,
+CPython 3.6.1 x86-64 for Linux and CPython 3.5.3 x86-32 for Windows. pycrosscall was
+configured with log level 0 (logs off) for minimal overhead.
 
 Security
 ========
@@ -148,7 +148,6 @@ pycrosscall is **notoriously insecure by design**.
 
 The following problems also directly apply to pycrosscall:
 
-- XML vulnerabilities: https://docs.python.org/3/library/xml.html#xml-vulnerabilities
 - Wine can in fact theoretically run (some) Windows malware: https://en.wikipedia.org/wiki/Wine_(software)#Security
 - **NEVER run Wine as root**: https://wiki.winehq.org/FAQ#Should_I_run_Wine_as_root.3F
 
@@ -262,6 +261,35 @@ From now on, pycrosscall on the "Unix side" acts as a client to its server on th
 "Wine side". The client passes calls with their parameters to the server, which executes
 them using the regular ``ctypes`` interface for Windows.
 
+Is it secure?
+-----------
+
+No. See "Security" section of this document.
+
+How fast/slow is it?
+--------------------
+
+It performs reasonably well. See "Speed" section of this document.
+
+Can it handle structures?
+-------------------------
+
+Yes, in principle. But avoid pointers within structures, if you
+can. See next question for details.
+
+Can it handle pointers?
+-----------------------
+
+Yes and no. Pointers to simple C data types (int, float, etc.)
+used as function parameters can be handled just fine. Pointers
+to arbitrary data structures are a bit of a problem. Pointers
+returned by a DLL pointing to memory allocated by the DLL are
+problematic, too. pycrosscall offers ways to copy memory from
+the Unix side to the Wine side as well as in the opposite
+direction, but those operations must (a) be triggered by the
+programmer (manually, so to speak) and (b) require knowledge
+of the size of the data structure to copied.
+
 Missing features (for full ctypes compatibility)
 ================================================
 
@@ -288,8 +316,6 @@ can be achieved:
 - Structures and pointers should be handled more appropriately.
   Especially, structures should be passed in a better, more secure and faster way
   than via ``/dev/shm`` on Linux. For MacOS and BSD, similar solutions must be implemented.
-- XML-RPC clients should authenticate themselves before being allowed to access servers.
-  Running connections through SSL should be investigated.
 - The log should be divided into log-levels with more or less details.
   Higher log-levels should contain details of the current stack frame
   such as line number or calling routine (based on the ``inspect``).

@@ -47,7 +47,7 @@ from .lib import (
 from .log import log_class
 from .wineserver import wineserver_session_class
 from .rpc import (
-	rpc_client
+	mp_client_class
 	)
 
 
@@ -72,7 +72,7 @@ class session_class():
 		# Log status
 		self.log.out('[core] STARTING ...')
 		self.log.out('[core] Configured Wine-Python version is %s for %s.' % (self.p['version'], self.p['arch']))
-		self.log.out('[core] Log server is listening on port %d.' % self.p['port_server_log'])
+		self.log.out('[core] Log socket port: %d.' % self.p['port_socket_log_main'])
 
 		# Store current working directory
 		self.dir_cwd = os.getcwd()
@@ -89,8 +89,11 @@ class session_class():
 		# Initialize interpreter session
 		self.interpreter_session = interpreter_session_class(self.id, self.p, self.log, self.wineserver_session)
 
+		# Set up a dict for loaded dlls
+		self.dll_dict = {}
+
 		# If in ctypes mode ...
-		self.__prepare_ctypes__()
+		self.__start_ctypes_client__()
 
 		# Mark session as up
 		self.up = True
@@ -176,32 +179,84 @@ class session_class():
 		return self.dll_dict[full_path_dll]
 
 
-	def __prepare_ctypes__(self):
-
-		# Set up a dict for loaded dlls
-		self.dll_dict = {}
-
-		# HACK Wait ... becomes obsolete, when client is moved. Client needs retries and a timeout
-		time.sleep(1) # seconds
-
-		# Fire up xmlrpc client
-		self.client = rpc_client(('localhost', self.p['port_server_ctypes']))
+	def __start_ctypes_client__(self):
 
 		# Log status
-		self.log.out('[core] ctypes client started.')
+		self.log.out('[core] ctypes client connecting ...')
+
+		# Status variable
+		ctypes_server_up = False
+		# Time-step
+		wait_for_seconds = 0.01
+		# Timeout
+		timeout_after_seconds = 30.0
+		# Already waited for ...
+		started_waiting_at = time.time()
+		# Connection trys
+		tried_this_many_times = 0
+
+		# Run loop until socket appears
+		while True:
+
+			# Try to get server status
+			try:
+
+				# Count attempts
+				tried_this_many_times += 1
+
+				# Fire up xmlrpc client
+				self.client = mp_client_class(
+					('localhost', self.p['port_socket_ctypes']),
+					'pycrosscall_server_main'
+					)
+
+				# Get status from server
+				server_status = self.client.get_status()
+
+				# Check result
+				if server_status == 'up':
+					ctypes_server_up = True
+					break
+
+			except:
+
+				pass
+
+			# Break the loop after timeout
+			if time.time() >= (started_waiting_at + timeout_after_seconds):
+				break
+
+			# Wait before trying again
+			time.sleep(wait_for_seconds)
+
+		# Evaluate the result
+		if not ctypes_server_up:
+
+			# Log status
+			self.log.out('[core] ... could not connect (after %0.2f seconds & %d attempts)! Error.' %
+				(time.time() - started_waiting_at, tried_this_many_times)
+				)
+			raise # TODO
+
+		else:
+
+			# Log status
+			self.log.out('[core] ... connected (after %0.2f seconds & %d attempts).' %
+				(time.time() - started_waiting_at, tried_this_many_times)
+				)
 
 
 	def __prepare_python_command__(self):
 
-		# Get free port for ctypes bridge
-		self.p['port_server_ctypes'] = get_free_port()
+		# Get socket for ctypes bridge
+		self.p['port_socket_ctypes'] = get_free_port()
 
-		# Prepare command
+		# Prepare command with minimal meta info. All other info can be passed via sockets.
 		self.p['command_dict'] = [
 			'%s\\_server_.py' % self.wineserver_session.translate_path_unix2win(get_location_of_file(__file__)),
 			'--id', self.id,
-			'--port_server_ctypes', str(self.p['port_server_ctypes']),
-			'--port_server_log', str(self.p['port_server_log']),
+			'--port_socket_ctypes', str(self.p['port_socket_ctypes']),
+			'--port_socket_log_main', str(self.p['port_socket_log_main']),
 			'--log_level', str(self.p['log_level'])
 			]
 
