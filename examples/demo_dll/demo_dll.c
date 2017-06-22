@@ -37,59 +37,84 @@ specific language governing rights and limitations under the License.
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 /* Compute the greatest common divisor */
-int gcd(int x, int y) {
-    int g = y;
-    while (x > 0) {
-        g = x;
-        x = y % x;
-        y = g;
-    }
-    return g;
+int cookbook_gcd(
+	int x,
+	int y
+	)
+{
+	int g = y;
+	while (x > 0)
+	{
+		g = x;
+		x = y % x;
+		y = g;
+	}
+	return g;
 }
 
 
 /* Test if (x0,y0) is in the Mandelbrot set or not */
-int in_mandel(double x0, double y0, int n) {
-  double x=0,y=0,xtemp;
-  while (n > 0) {
-    xtemp = x*x - y*y + x0;
-    y = 2*x*y + y0;
-    x = xtemp;
-    n -= 1;
-    if (x*x + y*y > 4) return 0;
-  }
-  return 1;
+int cookbook_in_mandel(
+	double x0,
+	double y0,
+	int n
+	)
+{
+	double x = 0, y = 0, xtemp;
+	while (n > 0)
+	{
+		xtemp = x * x - y * y + x0;
+		y = 2 * x * y + y0;
+		x = xtemp;
+		n -= 1;
+		if (x * x + y * y > 4) return 0;
+	}
+	return 1;
 }
 
 
 /* Divide two numbers */
-int divide(int a, int b, int *remainder) {
-  int quot = a / b;
-  *remainder = a % b;
-  return quot;
+int cookbook_divide(
+	int a,
+	int b,
+	int *remainder
+	)
+{
+	int quot = a / b;
+	*remainder = a % b;
+	return quot;
 }
 
 
 /* Average values in an array */
-double avg(double *a, int n) {
-  int i;
-  double total = 0.0;
-  for (i = 0; i < n; i++) {
-    total += a[i];
-  }
-  return total / n;
+double cookbook_avg(
+	double *a,
+	int n
+	)
+{
+	int i;
+	double total = 0.0;
+	for (i = 0; i < n; i++)
+	{
+		total += a[i];
+	}
+	return total / n;
 }
 
 
 /* A C data structure */
-typedef struct Point {
-    double x,y;
-} Point;
+typedef struct cookbook_point {
+	double x, y;
+} cookbook_point;
 
 
 /* Function involving a C data structure */
-double distance(Point *p1, Point *p2) {
-   return hypot(p1->x - p2->x, p1->y - p2->y);
+double distance(
+	cookbook_point *p1,
+	cookbook_point *p2
+	)
+{
+	return hypot(p1.x - p2.x, p1.y - p2.y);
 }
 
 
@@ -102,9 +127,7 @@ float __stdcall DEMODLL simple_demo_routine(
 	float param_b
 	)
 {
-
 	return param_a - (param_a / param_b);
-
 }
 
 
@@ -114,13 +137,11 @@ void __stdcall DEMODLL complex_demo_routine(
 	struct test *param_struct_test_p
 	)
 {
-
 	printf("el_int8t = '%d' \n", (*param_struct_test_p).el_int8t);
 	printf("el_int8t_4[0] = '%d' \n", (*param_struct_test_p).el_int8t_4[0]);
 	printf("el_int8t_4[1] = '%d' \n", (*param_struct_test_p).el_int8t_4[1]);
 	printf("el_int8t_4[2] = '%d' \n", (*param_struct_test_p).el_int8t_4[2]);
 	printf("el_int8t_4[3] = '%d' \n", (*param_struct_test_p).el_int8t_4[3]);
-
 }
 
 
