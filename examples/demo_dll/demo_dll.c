@@ -37,7 +37,7 @@ specific language governing rights and limitations under the License.
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 /* Compute the greatest common divisor */
-int cookbook_gcd(
+int __stdcall DEMODLL cookbook_gcd(
 	int x,
 	int y
 	)
@@ -54,7 +54,7 @@ int cookbook_gcd(
 
 
 /* Test if (x0,y0) is in the Mandelbrot set or not */
-int cookbook_in_mandel(
+int __stdcall DEMODLL cookbook_in_mandel(
 	double x0,
 	double y0,
 	int n
@@ -74,7 +74,7 @@ int cookbook_in_mandel(
 
 
 /* Divide two numbers */
-int cookbook_divide(
+int __stdcall DEMODLL cookbook_divide(
 	int a,
 	int b,
 	int *remainder
@@ -87,7 +87,7 @@ int cookbook_divide(
 
 
 /* Average values in an array */
-double cookbook_avg(
+double __stdcall DEMODLL cookbook_avg(
 	double *a,
 	int n
 	)
@@ -102,19 +102,13 @@ double cookbook_avg(
 }
 
 
-/* A C data structure */
-typedef struct cookbook_point {
-	double x, y;
-} cookbook_point;
-
-
 /* Function involving a C data structure */
-double distance(
+double __stdcall DEMODLL cookbook_distance(
 	cookbook_point *p1,
 	cookbook_point *p2
 	)
 {
-	return hypot(p1.x - p2.x, p1.y - p2.y);
+	return hypot(p1->x - p2->x, p1->y - p2->y);
 }
 
 

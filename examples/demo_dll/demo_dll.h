@@ -24,14 +24,23 @@ specific language governing rights and limitations under the License.
 
 */
 
-
 #ifndef DEMODLL_H
 #define DEMODLL_H
+
+
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// INCLUDE
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 #include <stdio.h>
 #include <windows.h>
 #include <stdint.h>
 #include <math.h>
+
+
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// MACROS
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 // #ifdef BUILDING_EXAMPLE_DLL
 // #define DEMODLL __declspec(dllexport)
@@ -42,6 +51,47 @@ specific language governing rights and limitations under the License.
 typedef int32_t bool;
 #define TRUE 1
 #define FALSE 0
+
+
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// Python Cookbook R3 Demo: https://github.com/dabeaz/python-cookbook/blob/master/src/15/sample.c
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+int __stdcall DEMODLL cookbook_gcd(
+	int x,
+	int y
+	);
+
+int __stdcall DEMODLL cookbook_in_mandel(
+	double x0,
+	double y0,
+	int n
+	);
+
+int __stdcall DEMODLL cookbook_divide(
+	int a,
+	int b,
+	int *remainder
+	);
+
+double __stdcall DEMODLL cookbook_avg(
+	double *a,
+	int n
+	);
+
+typedef struct cookbook_point {
+	double x, y;
+} cookbook_point;
+
+double __stdcall DEMODLL cookbook_distance(
+	cookbook_point *p1,
+	cookbook_point *p2
+	);
+
+
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// pycrosscall demo
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 struct test
 {
@@ -64,6 +114,11 @@ void __stdcall DEMODLL complex_demo_routine(
 	int param_int,
 	struct test *param_struct_test_p
 	);
+
+
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// DLL infrastructure
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 DEMODLL bool __stdcall DllMain(HANDLE hModule, DWORD ul_reason_for_call, LPVOID lpReserved);
 
