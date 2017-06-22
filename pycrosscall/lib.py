@@ -44,6 +44,16 @@ import zipfile
 # LIBRARY ROUTINES
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+def get_free_port():
+
+	s = socket.socket()
+	s.bind(('', 0))
+	port = s.getsockname()[1]
+	s.close()
+
+	return port
+
+
 def get_location_of_file(filename = ''):
 
 	if filename == '':
@@ -58,24 +68,24 @@ def get_randhashstr(dig):
 	return (('%0' + str(dig) + 'x') % random.randrange(16**dig))
 
 
-def generate_socket_filename(session_id):
-
-	# Figure out where OS stores temp files
-	dir_tmp = tempfile.gettempdir()
-
-	# If pycrosscall folder does not exist, create it
-	dir_pycrosscall_tmp = os.path.join(dir_tmp, 'pycrosscall')
-	if not os.path.exists(dir_pycrosscall_tmp):
-		os.makedirs(dir_pycrosscall_tmp)
-
-	# Generate new socket id - 10 digit hash string
-	socket_id = get_randhashstr(10)
-
-	# Generate socket name
-	socket_name = 'socket_%s_%s' % (session_id, socket_id)
-
-	# Return full UNIX path to socket file
-	return os.path.join(dir_pycrosscall_tmp, socket_name)
+# def generate_socket_filename(session_id):
+#
+# 	# Figure out where OS stores temp files
+# 	dir_tmp = tempfile.gettempdir()
+#
+# 	# If pycrosscall folder does not exist, create it
+# 	dir_pycrosscall_tmp = os.path.join(dir_tmp, 'pycrosscall')
+# 	if not os.path.exists(dir_pycrosscall_tmp):
+# 		os.makedirs(dir_pycrosscall_tmp)
+#
+# 	# Generate new socket id - 10 digit hash string
+# 	socket_id = get_randhashstr(10)
+#
+# 	# Generate socket name
+# 	socket_name = 'socket_%s_%s' % (session_id, socket_id)
+#
+# 	# Return full UNIX path to socket file
+# 	return os.path.join(dir_pycrosscall_tmp, socket_name)
 
 
 def generate_session_id():

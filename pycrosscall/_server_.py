@@ -72,7 +72,7 @@ class wine_server_class:
 
 		# Create server
 		self.server = mp_server_class(
-			self.p['dir_socket_ctypes'],
+			('localhost', self.p['port_socket_ctypes']),
 			'pycrosscall_server_main',
 			log = self.log,
 			terminate_function = self.__terminate__
@@ -87,10 +87,10 @@ class wine_server_class:
 		# Register call: Registering dll calls
 		self.server.register_function(self.__register_routine__, 'register_routine')
 		# Register destructur: Call goes into xmlrpc-server first, which then terminates parent
-		self.server.register_function(self.server.shutdown, 'terminate')
+		self.server.register_function(self.server.terminate, 'terminate')
 
 		# Status log
-		self.log.out('[_server_] ctypes server is listening on port %d.' % self.p['port_server_ctypes'])
+		self.log.out('[_server_] ctypes server is listening on port %d.' % self.p['port_socket_ctypes'])
 		self.log.out('[_server_] STARTED.')
 		self.log.out('[_server_] Serve forever ...')
 
@@ -289,10 +289,10 @@ if __name__ == '__main__':
 		'--id', type = str, nargs = 1
 		)
 	parser.add_argument(
-		'--dir_socket_ctypes', type = str, nargs = 1
+		'--port_socket_ctypes', type = int, nargs = 1
 		)
 	parser.add_argument(
-		'--dir_socket_log_main', type = str, nargs = 1
+		'--port_socket_log_main', type = int, nargs = 1
 		)
 	parser.add_argument(
 		'--log_level', type = int, nargs = 1
@@ -309,8 +309,8 @@ if __name__ == '__main__':
 		'remote_log': True,
 		'log_level': args.log_level[0],
 		'log_server': False,
-		'dir_socket_ctypes': args.dir_socket_ctypes[0],
-		'dir_socket_log_main': args.dir_socket_log_main[0]
+		'port_socket_ctypes': args.port_socket_ctypes[0],
+		'port_socket_log_main': args.port_socket_log_main[0]
 		}
 
 	# Fire up wine server session with parsed parameters

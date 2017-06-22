@@ -40,7 +40,7 @@ from .config import get_module_config
 from .dll import dll_session_class
 from .interpreter import interpreter_session_class
 from .lib import (
-	generate_socket_filename,
+	get_free_port,
 	get_location_of_file,
 	setup_wine_python
 	)
@@ -72,7 +72,7 @@ class session_class():
 		# Log status
 		self.log.out('[core] STARTING ...')
 		self.log.out('[core] Configured Wine-Python version is %s for %s.' % (self.p['version'], self.p['arch']))
-		self.log.out('[core] Log socket: "%s".' % self.p['dir_socket_log_main'])
+		self.log.out('[core] Log socket port: %d.' % self.p['port_socket_log_main'])
 
 		# Store current working directory
 		self.dir_cwd = os.getcwd()
@@ -186,8 +186,8 @@ class session_class():
 
 		# Fire up xmlrpc client
 		self.client = mp_client_class(
-			self.p['dir_socket_ctypes'],
-			pycrosscall_server_main
+			('localhost', self.p['port_socket_ctypes']),
+			'pycrosscall_server_main'
 			)
 
 
@@ -203,14 +203,14 @@ class session_class():
 	def __prepare_python_command__(self):
 
 		# Get socket for ctypes bridge
-		self.p['dir_socket_ctypes'] = generate_socket_filename(self.id)
+		self.p['port_socket_ctypes'] = get_free_port()
 
 		# Prepare command with minimal meta info. All other info can be passed via sockets.
 		self.p['command_dict'] = [
 			'%s\\_server_.py' % self.wineserver_session.translate_path_unix2win(get_location_of_file(__file__)),
 			'--id', self.id,
-			'--dir_socket_ctypes', self.wineserver_session.translate_path_unix2win(self.p['dir_socket_ctypes']),
-			'--dir_socket_log_main', self.wineserver_session.translate_path_unix2win(self.p['dir_socket_log_main']),
+			'--port_socket_ctypes', str(self.p['port_socket_ctypes']),
+			'--port_socket_log_main', str(self.p['port_socket_log_main']),
 			'--log_level', str(self.p['log_level'])
 			]
 
