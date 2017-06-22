@@ -288,7 +288,7 @@ problematic, too. pycrosscall offers ways to copy memory from
 the Unix side to the Wine side as well as in the opposite
 direction, but those operations must (a) be triggered by the
 programmer (manually, so to speak) and (b) require knowledge
-of the size of the data structure to copied.
+of the size of the data structure to be copied.
 
 Missing features (for full ctypes compatibility)
 ================================================
