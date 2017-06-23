@@ -55,13 +55,6 @@ else:
 # CLASSES AND ROUTINES
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-def divide(x, y):
-
-	rem = ctypes.c_int()
-	quot = _divide(x,y,rem)
-	return quot,rem.value
-
-
 # Define a special type for the 'double *' argument
 class DoubleArrayType:
 
@@ -69,12 +62,12 @@ class DoubleArrayType:
 	def from_param(self, param):
 
 		typename = type(param).__name__
-		if hasattr(self, 'from_'+typename):
-			return getattr(self, 'from_'+typename)(param)
+		if hasattr(self, 'from_' + typename):
+			return getattr(self, 'from_' + typename)(param)
 		elif isinstance(param, ctypes.Array):
 			return param
 		else:
-			raise TypeError("Can't convert %s" % typename)
+			raise TypeError('Can\'t convert %s' % typename)
 
 
 	# Cast from array.array objects
@@ -102,11 +95,6 @@ class DoubleArrayType:
 		return param.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
 
 
-def avg(values):
-
-	return _avg(values, len(values))
-
-
 # struct Point { }
 class Point(ctypes.Structure):
 
@@ -122,33 +110,45 @@ class sample_class:
 
 	def __init__(self):
 
-		_mod = ctypes.windll.LoadLibrary('demo_dll.dll')
+		self.__dll__ = ctypes.windll.LoadLibrary('demo_dll.dll')
 
 		# int gcd(int, int)
-		gcd = _mod.cookbook_gcd
-		gcd.argtypes = (ctypes.c_int, ctypes.c_int)
-		gcd.restype = ctypes.c_int
+		self.gcd = self.__dll__.cookbook_gcd
+		self.gcd.argtypes = (ctypes.c_int, ctypes.c_int)
+		self.gcd.restype = ctypes.c_int
 
 		# int in_mandel(double, double, int)
-		in_mandel = _mod.cookbook_in_mandel
-		in_mandel.argtypes = (ctypes.c_double, ctypes.c_double, ctypes.c_int)
-		in_mandel.restype = ctypes.c_int
+		self.in_mandel = self.__dll__.cookbook_in_mandel
+		self.in_mandel.argtypes = (ctypes.c_double, ctypes.c_double, ctypes.c_int)
+		self.in_mandel.restype = ctypes.c_int
 
 		# int divide(int, int, int *)
-		_divide = _mod.cookbook_divide
-		_divide.argtypes = (ctypes.c_int, ctypes.c_int, ctypes.POINTER(ctypes.c_int))
-		_divide.restype = ctypes.c_int
+		self.__divide__ = self.__dll__.cookbook_divide
+		self.__divide__.argtypes = (ctypes.c_int, ctypes.c_int, ctypes.POINTER(ctypes.c_int))
+		self.__divide__.restype = ctypes.c_int
 
 		# void avg(double *, int n)
 		DoubleArray = DoubleArrayType()
-		_avg = _mod.cookbook_avg
-		_avg.argtypes = (DoubleArray, ctypes.c_int)
-		_avg.restype = ctypes.c_double
+		self.__avg__ = self.__dll__.cookbook_avg
+		self.__avg__.argtypes = (DoubleArray, ctypes.c_int)
+		self.__avg__.restype = ctypes.c_double
 
 		# double distance(Point *, Point *)
-		distance = _mod.cookbook_distance
-		distance.argtypes = (ctypes.POINTER(Point), ctypes.POINTER(Point))
-		distance.restype = ctypes.c_double
+		self.distance = self.__dll__.cookbook_distance
+		self.distance.argtypes = (ctypes.POINTER(Point), ctypes.POINTER(Point))
+		self.distance.restype = ctypes.c_double
+
+
+	def avg(self, values):
+
+		return self.__avg__(values, len(values))
+
+
+	def divide(self, x, y):
+
+		rem = ctypes.c_int()
+		quot = self.__divide__(x, y, rem)
+		return quot, rem.value
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
