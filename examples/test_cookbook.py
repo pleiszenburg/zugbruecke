@@ -160,8 +160,8 @@ if __name__ == '__main__':
 	sample = sample_class()
 
 	print(7, sample.gcd(35, 42))
-	# print(sample.in_mandel(0, 0, 500))
-	# print(sample.in_mandel(2.0, 1.0, 500))
+	print(1, sample.in_mandel(0, 0, 500))
+	print(0, sample.in_mandel(2.0, 1.0, 500))
 	# print(sample.divide(42, 8))
 	# print(sample.avg([1, 2, 3]))
 	# p1 = sample.Point(1, 2)
