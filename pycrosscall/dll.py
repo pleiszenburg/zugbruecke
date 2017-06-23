@@ -161,11 +161,19 @@ class dll_session_class(): # Mimic ctypes.WinDLL. Representing one idividual dll
 		# Log status
 		self.__session__.log.out('[07] Pushing argument and return value types ...')
 
+		# Prepare list of arguments
+		arguments = []
+
+		# Go through original arguments, parse them
+		for arg in self.__dll_routines__[name]['argtypes']:
+			arguments.append(str(arg).split("'")[1])
+
+		# Parse return type
+		returntype = str(self.__dll_routines__[name]['restype']).split("'")[1]
+
 		# Pass argument and return value types as strings ...
 		result = self.__client__.register_argtype_and_restype(
-			self.__dll_full_path__, name,
-			[str(arg).split("'")[1] for arg in self.__dll_routines__[name]['argtypes']],
-			str(self.__dll_routines__[name]['restype']).split("'")[1]
+			self.__dll_full_path__, name, arguments, returntype
 			)
 
 		# Handle error
