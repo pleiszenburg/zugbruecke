@@ -191,7 +191,7 @@ class wine_server_class:
 		arguments_list = []
 
 		# Step through arguments
-		for arg, arg_index in enumerate(args):
+		for arg_index, arg in enumerate(args):
 
 			# Fetch definition of current argument
 			arg_definition_dict = method_metainfo['argtypes'][arg_index]
@@ -309,7 +309,7 @@ class wine_server_class:
 		args = arg_message_dict['args']
 
 		# Step through arguments
-		for arg, arg_index in enumerate(args):
+		for arg_index, arg in enumerate(args):
 
 			# Fetch definition of current argument
 			arg_definition_dict = method_metainfo['argtypes'][arg_index]

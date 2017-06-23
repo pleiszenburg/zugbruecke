@@ -181,7 +181,7 @@ class dll_session_class(): # Mimic ctypes.WinDLL. Representing one idividual dll
 
 			return {
 				'p': is_pointer, # Is a pointer
-				't': type_name # Type name, such as 'c_int'
+				't': type_name, # Type name, such as 'c_int'
 				'f': True # Is a fundamental type
 				}
 
@@ -199,7 +199,7 @@ class dll_session_class(): # Mimic ctypes.WinDLL. Representing one idividual dll
 		method_metainfo_argtypes = self.__dll_routines__[function_name]['argtypes_p']
 
 		# Step through arguments
-		for arg, arg_index in enumerate(args):
+		for arg_index, arg in enumerate(args):
 
 			# Fetch definition of current argument
 			arg_definition_dict = method_metainfo_argtypes[arg_index]
@@ -285,10 +285,10 @@ class dll_session_class(): # Mimic ctypes.WinDLL. Representing one idividual dll
 		method_metainfo_argtypes = self.__dll_routines__[function_name]['argtypes_p']
 
 		# Step through arguments
-		for arg, arg_index in enumerate(args):
+		for arg_index, arg in enumerate(args):
 
 			# Fetch definition of current argument
-			arg_definition_dict = method_metainfo['argtypes'][arg_index]
+			arg_definition_dict = method_metainfo_argtypes[arg_index]
 
 			# Handle fundamental types by value
 			if not arg_definition_dict['p'] and arg_definition_dict['f']:
@@ -300,7 +300,7 @@ class dll_session_class(): # Mimic ctypes.WinDLL. Representing one idividual dll
 			elif arg_definition_dict['p'] and arg_definition_dict['f']:
 
 				# Put value back into its ctypes datatype
-				args.value = arguments_list[arg_index]
+				args[arg_index].value = arguments_list[arg_index]
 
 			# Handle everything else (structures)
 			else:
