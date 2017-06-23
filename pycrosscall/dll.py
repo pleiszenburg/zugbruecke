@@ -166,7 +166,7 @@ class dll_session_class(): # Mimic ctypes.WinDLL. Representing one idividual dll
 		# Get name of datatype
 		type_name = datatype.__name__
 
-		# Check for pointer, is yes, flag it and isolate datatype
+		# Check for pointer, if yes, flag it and isolate datatype
 		if type_name.startswith('LP_'):
 			is_pointer = True
 			type_name = type_name[3:]
