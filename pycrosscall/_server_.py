@@ -194,46 +194,11 @@ class wine_server_class:
 		# Make it shorter ...
 		method = self.dll_dict[full_path_dll_unix]['method_handlers'][routine_name]
 
-		# Start list for argtypes
-		tmp_argtypes = []
+		# Parse argtype dicts into argtypes
+		method.argtypes = [self.__unpack_datatype_dict__(arg_dict) for arg_dict in argtypes]
 
-		# Iterate over argtype strings and parse them into ctypes TODO handle structs
-		for arg_dict in argtypes:
-
-			# Handle the 'easy' stuff ...
-			if arg_dict['t'] in FUNDAMENTAL_C_DATATYPES:
-
-				# Get type class or type pointer
-				if arg_dict['p']:
-					type_class = ctypes.POINTER(getattr(ctypes, arg_dict['t']))
-				else:
-					type_class = getattr(ctypes, arg_dict['t'])
-
-				# Evaluate string. Does not work for pointers and structs
-				tmp_argtypes.append(type_class)
-
-			# And now the hard stuff ...
-			else:
-
-				# Push traceback to log
-				self.log.out('[_server_] ... unhandled datatype: %s ...' % arg_dict['t'])
-
-				# TODO
-
-		# Set argtypes in routine object
-		method.argtypes = tmp_argtypes
-
-		# Set return value type, easy ...
-		try:
-
-			# Set return value class TODO pointers
-			method.restype = getattr(ctypes, restype)
-
-		# And now the hard way ...
-		except:
-
-			# TODO
-			method.restype = ctypes.c_void_p # HACK assume void
+		# Parse return value type
+		method.restype = self.__unpack_datatype_dict__(restype)
 
 		# Log status
 		self.log.out('[_server_] ... argtypes: %s ...' % pf(method.argtypes))
@@ -292,6 +257,27 @@ class wine_server_class:
 
 			# Session down
 			self.up = False
+
+
+	def __unpack_datatype_dict__(self, datatype_dict):
+
+		# Handle the 'easy' stuff ...
+		if datatype_dict['t'] in FUNDAMENTAL_C_DATATYPES:
+
+			# Return type class or type pointer
+			if datatype_dict['p']:
+				return ctypes.POINTER(getattr(ctypes, datatype_dict['t']))
+			else:
+				return getattr(ctypes, datatype_dict['t'])
+
+		# And now the hard stuff ...
+		else:
+
+			# Push traceback to log
+			self.log.out('[_server_] ... unhandled datatype: %s ...' % datatype_dict['t'])
+
+			# HACK TODO
+			return ctypes.c_int
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
