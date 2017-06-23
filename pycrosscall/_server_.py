@@ -118,7 +118,8 @@ class wine_server_class:
 					'name': dll_name,
 					'full_path': full_path_dll,
 					'dll_handler': ctypes.windll.LoadLibrary(full_path_dll),
-					'method_handlers': {}
+					'method_handlers': {},
+					'method_metainfo': {}
 					}
 
 				# Log status
@@ -140,28 +141,26 @@ class wine_server_class:
 		return 1
 
 
-	def __call_dll_routine__(self, full_path_dll_unix, routine_name, args, kw):
+	def __call_dll_routine__(self, full_path_dll_unix, routine_name, arg_message_dict):
 
 		# Log status
 		self.log.out('[_server_] Trying call routine "%s" ...' % routine_name)
 
 		# Make it shorter ...
 		method = self.dll_dict[full_path_dll_unix]['method_handlers'][routine_name]
+		method_metainfo = self.dll_dict[full_path_dll_unix]['method_metainfo'][routine_name]
 
-		# args is passed as a list, must be a tuple
-		args = tuple(args)
+		# Unpack passed arguments, handle pointers and structs ...
+		args, kw = self.__unpack_arguments__(method_metainfo, arg_message_dict)
 
 		# Default return value
-		return_value = '__none_value__'
+		return_value = None
 
 		# This is risky
 		try:
 
-			# Call into dll # TODO structs and pointers
-			if method.restype == ctypes.c_void_p:
-				method(*args, **kw)
-			else:
-				return_value = method(*args, **kw)
+			# Call into dll
+			return_value = method(*args, **kw)
 
 			# Log status
 			self.log.out('[_server_] ... done.')
@@ -174,8 +173,8 @@ class wine_server_class:
 			# Push traceback to log
 			self.log.out(traceback.format_exc())
 
-		# Return result
-		return return_value
+		# Pack return package and return it
+		return self.__pack_return__(method_metainfo, args, kw, return_value)
 
 
 	def __get_status__(self):
@@ -186,6 +185,42 @@ class wine_server_class:
 			return 'down'
 
 
+	def __pack_return__(self, method_metainfo, args, kw, return_value):
+
+		# Start argument list as a list
+		arguments_list = []
+
+		# Step through arguments
+		for arg, arg_index in enumerate(args):
+
+			# Fetch definition of current argument
+			arg_definition_dict = method_metainfo['argtypes'][arg_index]
+
+			# Handle fundamental types by value
+			if not arg_definition_dict['p'] and arg_definition_dict['f']:
+
+				# Nothing to do ...
+				arguments_list.append(None)
+
+			# Handle fundamental types by reference
+			elif arg_definition_dict['p'] and arg_definition_dict['f']:
+
+				# Append value from ctypes datatype (because most of their Python equivalents are immutable)
+				arguments_list.append(arg.value)
+
+			# Handle everything else (structures)
+			else:
+
+				# HACK TODO
+				arguments_list.append(None)
+
+		return {
+			'args': arguments_list,
+			'kw': {}, # TODO not yet handled
+			'return_value': return_value # TODO allow & handle pointers
+			}
+
+
 	def __register_argtype_and_restype__(self, full_path_dll_unix, routine_name, argtypes, restype):
 
 		# Log status
@@ -193,11 +228,14 @@ class wine_server_class:
 
 		# Make it shorter ...
 		method = self.dll_dict[full_path_dll_unix]['method_handlers'][routine_name]
+		method_metainfo = self.dll_dict[full_path_dll_unix]['method_metainfo'][routine_name]
 
-		# Parse argtype dicts into argtypes
+		# Parse & store argtype dicts into argtypes
+		method_metainfo['argtypes'] = argtypes
 		method.argtypes = [self.__unpack_datatype_dict__(arg_dict) for arg_dict in argtypes]
 
-		# Parse return value type
+		# Parse & store return value type
+		method_metainfo['restype'] = restype
 		method.restype = self.__unpack_datatype_dict__(restype)
 
 		# Log status
@@ -224,6 +262,9 @@ class wine_server_class:
 				self.dll_dict[full_path_dll_unix]['method_handlers'][routine_name] = getattr(
 					self.dll_dict[full_path_dll_unix]['dll_handler'], routine_name
 					)
+
+				# Prepare dict for metainfo
+				self.dll_dict[full_path_dll_unix]['method_metainfo'][routine_name] = {}
 
 			# Log status
 			self.log.out('[_server_] ... done.')
@@ -257,6 +298,44 @@ class wine_server_class:
 
 			# Session down
 			self.up = False
+
+
+	def __unpack_arguments__(self, method_metainfo, arg_message_dict):
+
+		# Start argument list as a list
+		arguments_list = []
+
+		# Get arguments' list
+		args = arg_message_dict['args']
+
+		# Step through arguments
+		for arg, arg_index in enumerate(args):
+
+			# Fetch definition of current argument
+			arg_definition_dict = method_metainfo['argtypes'][arg_index]
+
+			# Handle fundamental types by value
+			if not arg_definition_dict['p'] and arg_definition_dict['f']:
+
+				# Append value
+				arguments_list.append(arg)
+
+			# Handle fundamental types by reference
+			elif arg_definition_dict['p'] and arg_definition_dict['f']:
+
+				# Put value back into its ctypes datatype
+				arguments_list.append(
+					getattr(ctypes, arg_definition_dict['t'])(arg)
+					)
+
+			# Handle everything else (structures)
+			else:
+
+				# HACK TODO
+				arguments_list.append(None)
+
+		# Return args as tuple and kw as dict
+		return tuple(arguments_list), {} # TODO kw not yet handled
 
 
 	def __unpack_datatype_dict__(self, datatype_dict):
