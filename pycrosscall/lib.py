@@ -8,7 +8,7 @@ https://github.com/s-m-e/pycrosscall
 
 	pycrosscall/lib.py: General purpose routines
 
-	Required to run on platform / side: [UNIX]
+	Required to run on platform / side: [UNIX, WINE]
 
 	Copyright (C) 2017 Sebastian M. Ernst <ernst@pleiszenburg.de>
 
@@ -38,6 +38,32 @@ import socket
 import tempfile
 import urllib.request
 import zipfile
+
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# LIBRARY CONST
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+FUNDAMENTAL_C_DATATYPES = [
+	'c_bool',
+	'c_char',
+	'c_wchar',
+	'c_byte',
+	'c_ubyte',
+	'c_short',
+	'c_ushort',
+	'c_int',
+	'c_uint',
+	'c_long',
+	'c_ulong',
+	'c_longlong',
+	'c_ulonglong',
+	'c_size_t',
+	'c_ssize_t',
+	'c_float',
+	'c_double',
+	'c_longdouble'
+	]
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

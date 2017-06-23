@@ -35,6 +35,8 @@ import ctypes
 from functools import partial
 from pprint import pformat as pf
 
+from .lib import FUNDAMENTAL_C_DATATYPES
+
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # LOADLIBRARY CLASS
@@ -166,10 +168,32 @@ class dll_session_class(): # Mimic ctypes.WinDLL. Representing one idividual dll
 
 		# Go through original arguments, parse them
 		for arg in self.__dll_routines__[name]['argtypes']:
-			arguments.append(str(arg).split("'")[1])
+
+			# Pointer status
+			is_pointer = False
+
+			# Get name of datatype
+			type_name = arg.__name__
+
+			# Check for pointer, is yes, flag it and isolate datatype
+			if type_name.startswith('LP_'):
+				is_pointer = True
+				type_name = type_name[3:]
+
+			# Handle cases
+			if type_name in FUNDAMENTAL_C_DATATYPES:
+				arguments.append({
+					'p': is_pointer,
+					't': type_name
+					})
+			else:
+				raise # TODO
 
 		# Parse return type
-		returntype = str(self.__dll_routines__[name]['restype']).split("'")[1]
+		returntype = self.__dll_routines__[name]['restype'].__name__
+
+		self.__session__.log.out('[07] ... argtypes: %s' % pf(arguments))
+		self.__session__.log.out('[07] ... restype: %s' % pf(returntype))
 
 		# Pass argument and return value types as strings ...
 		result = self.__client__.register_argtype_and_restype(

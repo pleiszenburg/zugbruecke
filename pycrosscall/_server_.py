@@ -39,6 +39,7 @@ from pprint import pformat as pf
 import sys
 import traceback
 
+from lib import FUNDAMENTAL_C_DATATYPES
 from log import log_class
 from rpc import (
 	mp_server_class
@@ -197,19 +198,25 @@ class wine_server_class:
 		tmp_argtypes = []
 
 		# Iterate over argtype strings and parse them into ctypes TODO handle structs
-		for arg_str in argtypes:
+		for arg_dict in argtypes:
 
-			# Try the easy way first ...
-			try:
+			# Handle the 'easy' stuff ...
+			if arg_dict['t'] in FUNDAMENTAL_C_DATATYPES:
+
+				# Get type class or type pointer
+				if arg_dict['p']:
+					type_class = ctypes.POINTER(getattr(ctypes, arg_dict['t']))
+				else:
+					type_class = getattr(ctypes, arg_dict['t'])
 
 				# Evaluate string. Does not work for pointers and structs
-				tmp_argtypes.append(eval(arg_str))
+				tmp_argtypes.append(type_class)
 
 			# And now the hard stuff ...
-			except:
+			else:
 
 				# Push traceback to log
-				self.log.out(traceback.format_exc())
+				self.log.out('[_server_] ... unhandled datatype: %s ...' % arg_dict['t'])
 
 				# TODO
 
@@ -219,8 +226,8 @@ class wine_server_class:
 		# Set return value type, easy ...
 		try:
 
-			# Evaluate return value type string
-			method.restype = eval(restype)
+			# Set return value class TODO pointers
+			method.restype = getattr(ctypes, restype)
 
 		# And now the hard way ...
 		except:
@@ -229,11 +236,11 @@ class wine_server_class:
 			method.restype = ctypes.c_void_p # HACK assume void
 
 		# Log status
-		self.log.out('[_server_] ... done.')
+		self.log.out('[_server_] ... argtypes: %s ...' % pf(method.argtypes))
+		self.log.out('[_server_] ... restype: %s ...' % pf(method.restype))
 
 		# Log status
-		self.log.out('[_server_] Routine "%s" argtypes: %s' % (routine_name, pf(method.argtypes)))
-		self.log.out('[_server_] Routine "%s" restype: %s' % (routine_name, pf(method.restype)))
+		self.log.out('[_server_] ... done.')
 
 		return 1 # Success
 
