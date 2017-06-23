@@ -104,7 +104,7 @@ class dll_session_class(): # Mimic ctypes.WinDLL. Representing one idividual dll
 				'call_handler': partial(self.__handle_call__, __routine_name__ = name),
 				'called': False,
 				'argtypes': [], # By default, assume no arguments
-				'restype': ctypes.c_void_p # By default, assume no return value
+				'restype': ctypes.c_int # By default, assume no return value
 				}
 
 		# Log status
