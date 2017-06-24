@@ -147,11 +147,11 @@ class dll_session_class(): # Mimic ctypes.WinDLL. Representing one idividual dll
 		self.__session__.log.out('[08] Call parameters are %r / %r. Pushing to wine-python ...' % (args, kw))
 
 		# Pack arguments and handle pointers based on parsed argument definition TODO kw!
-		arg_message_dict = self.__pack_args__(self.__dll_routines__[function_name]['argtypes_p'], args)
+		arg_message_list = self.__pack_args__(self.__dll_routines__[function_name]['argtypes_p'], args)
 
 		# Actually call routine in DLL! TODO Handle structurs and pointers ...
 		return_dict = self.__client__.call_dll_routine(
-			self.__dll_full_path__, name, arg_message_dict
+			self.__dll_full_path__, name, arg_message_list
 			)
 
 		# Unpack return dict (for pointers and structs)
