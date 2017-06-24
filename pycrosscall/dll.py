@@ -213,12 +213,13 @@ class dll_session_class(): # Mimic ctypes.WinDLL. Representing one idividual dll
 		# Pointers of pointers
 		elif group_name == 'PyCPointerType':
 
+			self.__session__.log.err('ERROR: Unhandled pointer of pointer')
 			raise # TODO
 
 		# UNKNOWN stuff
 		else:
 
-			self.__session__.log.out('ERROR: Unknown class of datatype: "%s"', group_name)
+			self.__session__.log.err('ERROR: Unknown class of datatype: "%s"', group_name)
 			raise # TODO
 
 
