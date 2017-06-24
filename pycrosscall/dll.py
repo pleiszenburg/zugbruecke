@@ -270,8 +270,6 @@ class dll_session_class(): # Mimic ctypes.WinDLL. Representing one idividual dll
 		# Prepare list of arguments by parsing them into list of dicts (TODO field name / kw)
 		arguments = [self.__pack_datatype_dict__(arg) for arg in self.__dll_routines__[name]['argtypes']]
 
-		self.__session__.log.out(pf(arguments))
-
 		# Store processed arguments
 		self.__dll_routines__[name]['argtypes_p'] = arguments
 
