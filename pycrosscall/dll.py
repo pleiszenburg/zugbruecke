@@ -115,6 +115,9 @@ class dll_session_class(): # Mimic ctypes.WinDLL. Representing one idividual dll
 
 
 	def __handle_call__(self, *args, **kw):
+	"""
+	TODO Optimize for speed!
+	"""
 
 		# Store routine name
 		name = kw['__routine_name__']
@@ -143,8 +146,8 @@ class dll_session_class(): # Mimic ctypes.WinDLL. Representing one idividual dll
 		# Log status
 		self.__session__.log.out('[08] Call parameters are %r / %r. Pushing to wine-python ...' % (args, kw))
 
-		# Pack arguments and handle pointers
-		arg_message_dict = self.__pack_arguments__(name, args, kw)
+		# Pack arguments and handle pointers based on parsed argument definition TODO kw!
+		arg_message_dict = self.__pack_args__(self.__dll_routines__[function_name]['argtypes_p'], args)
 
 		# Actually call routine in DLL! TODO Handle structurs and pointers ...
 		return_dict = self.__client__.call_dll_routine(
@@ -223,13 +226,13 @@ class dll_session_class(): # Mimic ctypes.WinDLL. Representing one idividual dll
 			raise # TODO
 
 
-	def __pack_arguments__(self, function_name, args, kw):
+	def __pack_args__(self, method_metainfo_argtypes, args): # TODO kw
+	"""
+	TODO Optimize for speed!
+	"""
 
 		# Shortcut for speed
 		arguments_list = []
-
-		# Make it short
-		method_metainfo_argtypes = self.__dll_routines__[function_name]['argtypes_p']
 
 		# Step through arguments
 		for arg_index, arg in enumerate(args):
@@ -237,25 +240,28 @@ class dll_session_class(): # Mimic ctypes.WinDLL. Representing one idividual dll
 			# Fetch definition of current argument
 			arg_definition_dict = method_metainfo_argtypes[arg_index]
 
-			# Handle fundamental types by value
+			# Handle fundamental types
 			if arg_definition_dict['f']:
 
 				# If pointer
 				if arg_definition_dict['p']:
 
 					# Append value from ctypes datatype (because most of their Python equivalents are immutable)
-					arguments_list.append(arg.value)
+					arguments_list.append((arg_definition_dict['n'], arg.value))
 
-				# If no pointer
+				# If value
 				else:
 
 					# Append value
-					arguments_list.append(arg)
+					arguments_list.append((arg_definition_dict['n'], arg))
 
 			# Handle structs
 			elif arg_definition_dict['s']:
 
-				pass
+				# Reclusively call this routine for packing structs
+				arguments_list.append((arg_definition_dict['n'], self.__pack_args__(
+					arg_definition_dict['_fields_'], arg
+					)))
 
 			# Handle everything else (structures)
 			else:
@@ -264,10 +270,7 @@ class dll_session_class(): # Mimic ctypes.WinDLL. Representing one idividual dll
 				arguments_list.append(None)
 
 		# Return parameter message dict - MUST WORK WITH PICKLE
-		return {
-			'args': arguments_list,
-			'kw': {} # TODO not yet handled
-			}
+		return arguments_list
 
 
 	def __push_argtype_and_restype__(self, name):
@@ -318,6 +321,9 @@ class dll_session_class(): # Mimic ctypes.WinDLL. Representing one idividual dll
 
 
 	def __unpack_return__(self, function_name, args, kw, return_dict): # TODO kw not yet handled
+	"""
+	TODO Optimize for speed!
+	"""
 
 		# Get arguments' list
 		arguments_list = return_dict['args']
