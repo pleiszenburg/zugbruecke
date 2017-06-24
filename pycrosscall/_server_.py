@@ -39,7 +39,6 @@ from pprint import pformat as pf
 import sys
 import traceback
 
-from lib import FUNDAMENTAL_C_DATATYPES
 from log import log_class
 from rpc import (
 	mp_server_class
@@ -340,8 +339,8 @@ class wine_server_class:
 
 	def __unpack_datatype_dict__(self, datatype_dict):
 
-		# Handle the 'easy' stuff ...
-		if datatype_dict['t'] in FUNDAMENTAL_C_DATATYPES:
+		# Handle the 'easy' stuff (PyCSimpleType) ...
+		if datatype_dict['f']:
 
 			# Return type class or type pointer
 			if datatype_dict['p']:

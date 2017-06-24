@@ -35,8 +35,6 @@ import ctypes
 from functools import partial
 from pprint import pformat as pf
 
-from .lib import FUNDAMENTAL_C_DATATYPES
-
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # LOADLIBRARY CLASS
@@ -167,26 +165,45 @@ class dll_session_class(): # Mimic ctypes.WinDLL. Representing one idividual dll
 
 		# Pointer status
 		is_pointer = False
+		# Struct status
+		is_struct = False
 
 		# Get name of datatype
 		type_name = datatype.__name__
+		# Get group of datatype
+		group_name = type(datatype).__name__ # 'PyCSimpleType', 'PyCStructType' or 'PyCPointerType'
 
 		# Check for pointer, if yes, flag it and isolate datatype
-		if type_name.startswith('LP_'):
+		if group_name == 'PyCPointerType':
 			is_pointer = True
-			type_name = type_name[3:]
+			type_name = datatype._type_.__name__
+			group_name = type(datatype._type_).__name__
 
-		# Handle cases
-		if type_name in FUNDAMENTAL_C_DATATYPES:
+		# Fundamental C types
+		if group_name == 'PyCSimpleType':
 
 			return {
+				'n': None, # Does not have a parameter name (kw)
 				'p': is_pointer, # Is a pointer
 				't': type_name, # Type name, such as 'c_int'
-				'f': True # Is a fundamental type
+				'f': True, # Is a fundamental type (PyCSimpleType)
+				's': False # Is not a struct
 				}
 
+		# Structs
+		elif group_name == 'PyCStructType':
+
+			raise # TODO
+
+		# Pointers of pointers
+		elif group_name == 'PyCPointerType':
+
+			raise # TODO
+
+		# UNKNOWN stuff
 		else:
 
+			self.__session__.log.out('ERROR: Unknown class of datatype: "%s"', group_name)
 			raise # TODO
 
 
