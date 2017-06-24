@@ -238,16 +238,24 @@ class dll_session_class(): # Mimic ctypes.WinDLL. Representing one idividual dll
 			arg_definition_dict = method_metainfo_argtypes[arg_index]
 
 			# Handle fundamental types by value
-			if not arg_definition_dict['p'] and arg_definition_dict['f']:
+			if arg_definition_dict['f']:
 
-				# Append value
-				arguments_list.append(arg)
+				# If pointer
+				if arg_definition_dict['p']:
 
-			# Handle fundamental types by reference
-			elif arg_definition_dict['p'] and arg_definition_dict['f']:
+					# Append value from ctypes datatype (because most of their Python equivalents are immutable)
+					arguments_list.append(arg.value)
 
-				# Append value from ctypes datatype (because most of their Python equivalents are immutable)
-				arguments_list.append(arg.value)
+				# If no pointer
+				else:
+
+					# Append value
+					arguments_list.append(arg)
+
+			# Handle structs
+			elif arg_definition_dict['s']:
+
+				pass
 
 			# Handle everything else (structures)
 			else:
