@@ -234,11 +234,20 @@ class dll_session_class(): # Mimic ctypes.WinDLL. Representing one idividual dll
 		# Shortcut for speed
 		arguments_list = []
 
-		# Step through arguments
-		for arg_index, arg in enumerate(args):
+		# # Step through arguments
+		# for arg_index, arg in enumerate(args):
+		#
+		# 	# Fetch definition of current argument
+		# 	arg_definition_dict = method_metainfo_argtypes[arg_index]
 
-			# Fetch definition of current argument
-			arg_definition_dict = method_metainfo_argtypes[arg_index]
+		# Step through arguments
+		for arg_index, arg_definition_dict in enumerate(method_metainfo_argtypes):
+
+			# Fetch current argument
+			if type(args) is list or type(args) is tuple:
+				arg = args[arg_index]
+			else:
+				arg = getattr(args, arg_definition_dict['n'])
 
 			# Handle fundamental types
 			if arg_definition_dict['f']:

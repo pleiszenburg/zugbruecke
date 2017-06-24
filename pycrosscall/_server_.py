@@ -343,7 +343,7 @@ class wine_server_class:
 				struct_arg = datatype_store_dict[arg_definition_dict['t']]()
 
 				# Unpack values into struct
-				self.__unpack_arguments_struct__(arg_definition_dict['_fields'], struct_arg, arg[1], datatype_store_dict)
+				self.__unpack_arguments_struct__(arg_definition_dict['_fields_'], struct_arg, arg[1], datatype_store_dict)
 
 				# Append struct to list
 				arguments_list.append(struct_arg)
