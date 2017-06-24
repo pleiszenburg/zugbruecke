@@ -358,13 +358,16 @@ class wine_server_class:
 		return tuple(arguments_list), {} # TODO kw not yet handled
 
 
-	def __unpack_arguments_struct__(self, arg_definition_dict, struct_inst, args_list, datatype_store_dict):
+	def __unpack_arguments_struct__(self, arg_definition_list, struct_inst, args_list, datatype_store_dict):
 		"""
 		TODO Optimize for speed!
 		"""
 
 		# Step through arguments
 		for arg_index, arg in enumerate(args_list):
+
+			# Get current argument definition
+			arg_definition_dict = arg_definition_list[arg_index]
 
 			# Handle fundamental types
 			if arg_definition_dict['f']:

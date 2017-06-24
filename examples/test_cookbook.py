@@ -166,4 +166,4 @@ if __name__ == '__main__':
 	# print(sample.avg([1, 2, 3]))
 	p1 = Point(1, 2)
 	p2 = Point(4, 5)
-	print(sample.distance(p1, p2))
+	print(4.242640687119285, sample.distance(p1, p2))
