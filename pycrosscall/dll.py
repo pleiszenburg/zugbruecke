@@ -161,7 +161,7 @@ class dll_session_class(): # Mimic ctypes.WinDLL. Representing one idividual dll
 		return return_dict['return_value']
 
 
-	def __pack_datatype_dict__(self, datatype):
+	def __pack_datatype_dict__(self, datatype, field_name = None):
 
 		# Pointer status
 		is_pointer = False
@@ -183,7 +183,7 @@ class dll_session_class(): # Mimic ctypes.WinDLL. Representing one idividual dll
 		if group_name == 'PyCSimpleType':
 
 			return {
-				'n': None, # Does not have a parameter name (kw)
+				'n': field_name, # kw
 				'p': is_pointer, # Is a pointer
 				't': type_name, # Type name, such as 'c_int'
 				'f': True, # Is a fundamental type (PyCSimpleType)
@@ -193,7 +193,22 @@ class dll_session_class(): # Mimic ctypes.WinDLL. Representing one idividual dll
 		# Structs
 		elif group_name == 'PyCStructType':
 
-			raise # TODO
+			# Get fields
+			if is_pointer:
+				struct_fields = datatype._type_._fields_
+			else:
+				struct_fields = datatype._fields_
+
+			return {
+				'n': field_name, # kw
+				'p': is_pointer, # Is a pointer
+				't': type_name, # Type name, such as 'c_int'
+				'f': False, # Is a fundamental type (PyCSimpleType)
+				's': True, # Is not a struct
+				'_fields_': [
+					self.__pack_datatype_dict__(field[1], field[0]) for field in struct_fields
+					]
+				}
 
 		# Pointers of pointers
 		elif group_name == 'PyCPointerType':
@@ -251,8 +266,10 @@ class dll_session_class(): # Mimic ctypes.WinDLL. Representing one idividual dll
 		# Log status
 		self.__session__.log.out('[07] Processing & pushing argument and return value types ...')
 
-		# Prepare list of arguments by parsing them into list of dicts
+		# Prepare list of arguments by parsing them into list of dicts (TODO field name / kw)
 		arguments = [self.__pack_datatype_dict__(arg) for arg in self.__dll_routines__[name]['argtypes']]
+
+		self.__session__.log.out(pf(arguments))
 
 		# Store processed arguments
 		self.__dll_routines__[name]['argtypes_p'] = arguments
