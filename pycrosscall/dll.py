@@ -269,7 +269,7 @@ class dll_session_class(): # Mimic ctypes.WinDLL. Representing one idividual dll
 				# HACK TODO
 				arguments_list.append(None)
 
-		# Return parameter message dict - MUST WORK WITH PICKLE
+		# Return parameter message list - MUST WORK WITH PICKLE
 		return arguments_list
 
 
