@@ -234,11 +234,11 @@ class wine_server_class:
 
 		# Parse & store argtype dicts into argtypes
 		method_metainfo['argtypes'] = argtypes
-		method.argtypes = [self.__unpack_datatype_dict__(arg_dict, method_metainfo['datatypes']) for arg_dict in argtypes]
+		method.argtypes = [self.__unpack_type_dict__(arg_dict, method_metainfo['datatypes']) for arg_dict in argtypes]
 
 		# Parse & store return value type
 		method_metainfo['restype'] = restype
-		method.restype = self.__unpack_datatype_dict__(restype, method_metainfo['datatypes'])
+		method.restype = self.__unpack_type_dict__(restype, method_metainfo['datatypes'])
 
 		# Log status
 		self.log.out('[_server_] ... argtypes: %s ...' % pf(method.argtypes))
@@ -340,17 +340,17 @@ class wine_server_class:
 		return tuple(arguments_list), {} # TODO kw not yet handled
 
 
-	def __unpack_datatype_dict__(self, datatype_dict, datatype_store_dict):
+	def __unpack_type_dict__(self, datatype_dict, datatype_store_dict):
 
 		# Handle fundamental C datatypes (PyCSimpleType)
 		if datatype_dict['f']:
 
-			return self.__unpack_fundamental_dict__(datatype_dict)
+			return self.__unpack_type_fundamental_dict__(datatype_dict)
 
 		# Structures (PyCStructType)
 		elif datatype_dict['s']:
 
-			return self.__unpack_struct_dict__(datatype_dict, datatype_store_dict)
+			return self.__unpack_type_struct_dict__(datatype_dict, datatype_store_dict)
 
 		# Undhandled stuff (pointers of pointers etc.) TODO
 		else:
@@ -362,7 +362,7 @@ class wine_server_class:
 			return ctypes.c_int
 
 
-	def __unpack_fundamental_dict__(self, datatype_dict):
+	def __unpack_type_fundamental_dict__(self, datatype_dict):
 
 		# Return type class or type pointer
 		if datatype_dict['p']:
@@ -371,11 +371,11 @@ class wine_server_class:
 			return getattr(ctypes, datatype_dict['t'])
 
 
-	def __unpack_struct_dict__(self, datatype_dict, datatype_store_dict):
+	def __unpack_type_struct_dict__(self, datatype_dict, datatype_store_dict):
 
 		# Generate struct class if it does not exist yet
 		if datatype_dict['t'] not in datatype_store_dict.keys():
-			self.__unpack_struct_dict_generate__(datatype_dict, datatype_store_dict)
+			self.__unpack_type_struct_dict_generator__(datatype_dict, datatype_store_dict)
 
 		# Return type class or type pointer
 		if datatype_dict['p']:
@@ -384,7 +384,7 @@ class wine_server_class:
 			return datatype_store_dict[datatype_dict['t']]
 
 
-	def __unpack_struct_dict_generate__(self, datatype_dict, datatype_store_dict):
+	def __unpack_type_struct_dict_generator__(self, datatype_dict, datatype_store_dict):
 
 		# Prepare fields
 		fields = []
@@ -398,7 +398,7 @@ class wine_server_class:
 				# Add tuple with name and fundamental datatype
 				fields.append((
 					field['n'],
-					self.__unpack_fundamental_dict__(field)
+					self.__unpack_type_fundamental_dict__(field)
 					))
 
 			# Structures (PyCStructType)
