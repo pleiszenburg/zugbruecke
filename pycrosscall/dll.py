@@ -115,9 +115,9 @@ class dll_session_class(): # Mimic ctypes.WinDLL. Representing one idividual dll
 
 
 	def __handle_call__(self, *args, **kw):
-	"""
-	TODO Optimize for speed!
-	"""
+		"""
+		TODO Optimize for speed!
+		"""
 
 		# Store routine name
 		name = kw['__routine_name__']
@@ -227,9 +227,9 @@ class dll_session_class(): # Mimic ctypes.WinDLL. Representing one idividual dll
 
 
 	def __pack_args__(self, method_metainfo_argtypes, args): # TODO kw
-	"""
-	TODO Optimize for speed!
-	"""
+		"""
+		TODO Optimize for speed!
+		"""
 
 		# Shortcut for speed
 		arguments_list = []
@@ -321,9 +321,9 @@ class dll_session_class(): # Mimic ctypes.WinDLL. Representing one idividual dll
 
 
 	def __unpack_return__(self, function_name, args, kw, return_dict): # TODO kw not yet handled
-	"""
-	TODO Optimize for speed!
-	"""
+		"""
+		TODO Optimize for speed!
+		"""
 
 		# Get arguments' list
 		arguments_list = return_dict['args']

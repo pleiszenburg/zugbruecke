@@ -140,7 +140,10 @@ class wine_server_class:
 		return 1
 
 
-	def __call_dll_routine__(self, full_path_dll_unix, routine_name, arg_message_dict):
+	def __call_dll_routine__(self, full_path_dll_unix, routine_name, arg_message_list):
+		"""
+		TODO Optimize for speed!
+		"""
 
 		# Log status
 		self.log.out('[_server_] Trying call routine "%s" ...' % routine_name)
@@ -150,7 +153,7 @@ class wine_server_class:
 		method_metainfo = self.dll_dict[full_path_dll_unix]['method_metainfo'][routine_name]
 
 		# Unpack passed arguments, handle pointers and structs ...
-		args, kw = self.__unpack_arguments__(method_metainfo, arg_message_dict)
+		args, kw = self.__unpack_arguments__(method_metainfo, arg_message_list, method_metainfo['datatypes'])
 
 		# Default return value
 		return_value = None
@@ -302,42 +305,115 @@ class wine_server_class:
 			self.up = False
 
 
-	def __unpack_arguments__(self, method_metainfo, arg_message_dict):
+	def __unpack_arguments__(self, method_metainfo, args_list, datatype_store_dict):
+		"""
+		TODO Optimize for speed!
+		"""
 
-		# Start argument list as a list
+		# Start argument list as a list (will become a tuple)
 		arguments_list = []
 
-		# Get arguments' list
-		args = arg_message_dict['args']
-
 		# Step through arguments
-		for arg_index, arg in enumerate(args):
+		for arg_index, arg in enumerate(args_list):
 
 			# Fetch definition of current argument
 			arg_definition_dict = method_metainfo['argtypes'][arg_index]
 
-			# Handle fundamental types by value
-			if not arg_definition_dict['p'] and arg_definition_dict['f']:
+			# Handle fundamental types
+			if arg_definition_dict['f']:
 
-				# Append value
-				arguments_list.append(arg)
+				# By reference
+				if arg_definition_dict['p']:
 
-			# Handle fundamental types by reference
-			elif arg_definition_dict['p'] and arg_definition_dict['f']:
+					# Put value back into its ctypes datatype
+					arguments_list.append(
+						getattr(ctypes, arg_definition_dict['t'])(arg[1])
+						)
 
-				# Put value back into its ctypes datatype
-				arguments_list.append(
-					getattr(ctypes, arg_definition_dict['t'])(arg)
-					)
+				# By value
+				else:
 
-			# Handle everything else (structures)
+					# Append value
+					arguments_list.append(arg[1])
+
+			# Handle structs
+			elif arg_definition_dict['s']:
+
+				# Generate new instance of struct datatype
+				struct_arg = datatype_store_dict[arg_definition_dict['t']]()
+
+				# Unpack values into struct
+				self.__unpack_arguments_struct__(arg_definition_dict['_fields'], struct_arg, arg[1], datatype_store_dict)
+
+				# Append struct to list
+				arguments_list.append(struct_arg)
+
+			# Handle everything else ...
 			else:
 
 				# HACK TODO
-				arguments_list.append(None)
+				arguments_list.append(0)
 
 		# Return args as tuple and kw as dict
 		return tuple(arguments_list), {} # TODO kw not yet handled
+
+
+	def __unpack_arguments_struct__(self, arg_definition_dict, struct_inst, args_list, datatype_store_dict):
+		"""
+		TODO Optimize for speed!
+		"""
+
+		# Step through arguments
+		for arg_index, arg in enumerate(args_list):
+
+			# Handle fundamental types
+			if arg_definition_dict['f']:
+
+				# By reference
+				if arg_definition_dict['p']:
+
+					# Put value back into its ctypes datatype
+					setattr(
+						struct_inst, # struct instance to be modified
+						arg[0], # parameter name (from tuple)
+						getattr(ctypes, arg_definition_dict['t'])(arg[1]) # ctypes instance of type with value from tuple
+						)
+
+				# By value
+				else:
+
+					# Append value
+					setattr(
+						struct_inst, # struct instance to be modified
+						arg[0], # parameter name (from tuple)
+						arg[1] # value from tuple
+						)
+
+			# Handle structs
+			elif arg_definition_dict['s']:
+
+				# Generate new instance of struct datatype
+				struct_arg = datatype_store_dict[arg_definition_dict['t']]()
+
+				# Unpack values into struct
+				self.__unpack_arguments_struct__(arg_definition_dict['_fields'], struct_arg, arg[1], datatype_store_dict)
+
+				# Append struct to struct TODO handle pointer to structs!
+				setattr(
+					struct_inst, # struct instance to be modified
+					arg[0], # parameter name (from tuple)
+					struct_arg # value from tuple
+					)
+
+			# Handle everything else ...
+			else:
+
+				# HACK TODO
+				setattr(
+					struct_inst, # struct instance to be modified
+					arg[0], # parameter name (from tuple)
+					0 # least destructive value ...
+					)
 
 
 	def __unpack_type_dict__(self, datatype_dict, datatype_store_dict):
