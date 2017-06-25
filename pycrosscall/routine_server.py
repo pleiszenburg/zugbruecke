@@ -57,7 +57,7 @@ class routine_server_class():
 		self.name = routine_name
 
 		# Prepare dict for custom datatypes (structs)
-		self.datatypes = {}
+		self.datatypes_dict = {}
 
 		# Log status
 		self.log.out('[routine-server] Attaching to routine "%s" in DLL file "%s" ...' % (self.name, self.dll.name))
@@ -91,11 +91,8 @@ class routine_server_class():
 		# Log status
 		self.log.out('[routine-server] Trying call routine "%s" ...' % routine_name)
 
-		# Make it shorter ...
-		method_metainfo = self.dll_dict[full_path_dll_unix]['method_metainfo'][routine_name]
-
 		# Unpack passed arguments, handle pointers and structs ...
-		args, kw = self.__unpack_arguments__(method_metainfo, arg_message_list, method_metainfo['datatypes'])
+		args, kw = self.__unpack_arguments__(arg_message_list)
 
 		# Default return value
 		return_value = None
@@ -144,7 +141,125 @@ class routine_server_class():
 		return True # Success
 
 
+	def __unpack_arguments__(self, args_list):
+		"""
+		TODO Optimize for speed!
+		"""
+
+		# Start argument list as a list (will become a tuple)
+		arguments_list = []
+
+		# Step through arguments
+		for arg_index, arg in enumerate(args_list):
+
+			# Fetch definition of current argument
+			arg_definition_dict = self.argtypes[arg_index]
+
+			# Handle fundamental types
+			if arg_definition_dict['f']:
+
+				# By reference
+				if arg_definition_dict['p']:
+
+					# Put value back into its ctypes datatype
+					arguments_list.append(
+						getattr(ctypes, arg_definition_dict['t'])(arg[1])
+						)
+
+				# By value
+				else:
+
+					# Append value
+					arguments_list.append(arg[1])
+
+			# Handle structs
+			elif arg_definition_dict['s']:
+
+				# Generate new instance of struct datatype
+				struct_arg = self.datatypes_dict[arg_definition_dict['t']]()
+
+				# Unpack values into struct
+				self.__unpack_arguments_struct__(arg_definition_dict['_fields_'], struct_arg, arg[1])
+
+				# Append struct to list
+				arguments_list.append(struct_arg)
+
+			# Handle everything else ...
+			else:
+
+				# HACK TODO
+				arguments_list.append(0)
+
+		# Return args as tuple and kw as dict
+		return tuple(arguments_list), {} # TODO kw not yet handled
+
+
+	def __unpack_arguments_struct__(self, arg_definition_list, struct_inst, args_list):
+		"""
+		TODO Optimize for speed!
+		Can be called recursively!
+		"""
+
+		# Step through arguments
+		for arg_index, arg in enumerate(args_list):
+
+			# Get current argument definition
+			arg_definition_dict = arg_definition_list[arg_index]
+
+			# Handle fundamental types
+			if arg_definition_dict['f']:
+
+				# By reference
+				if arg_definition_dict['p']:
+
+					# Put value back into its ctypes datatype
+					setattr(
+						struct_inst, # struct instance to be modified
+						arg[0], # parameter name (from tuple)
+						getattr(ctypes, arg_definition_dict['t'])(arg[1]) # ctypes instance of type with value from tuple
+						)
+
+				# By value
+				else:
+
+					# Append value
+					setattr(
+						struct_inst, # struct instance to be modified
+						arg[0], # parameter name (from tuple)
+						arg[1] # value from tuple
+						)
+
+			# Handle structs
+			elif arg_definition_dict['s']:
+
+				# Generate new instance of struct datatype
+				struct_arg = self.datatypes_dict[arg_definition_dict['t']]()
+
+				# Unpack values into struct
+				self.__unpack_arguments_struct__(arg_definition_dict['_fields'], struct_arg, arg[1])
+
+				# Append struct to struct TODO handle pointer to structs!
+				setattr(
+					struct_inst, # struct instance to be modified
+					arg[0], # parameter name (from tuple)
+					struct_arg # value from tuple
+					)
+
+			# Handle everything else ...
+			else:
+
+				# HACK TODO
+				setattr(
+					struct_inst, # struct instance to be modified
+					arg[0], # parameter name (from tuple)
+					0 # least destructive value ...
+					)
+
+
 	def __unpack_type_dict__(self, datatype_dict):
+		"""
+		TODO Optimize for speed!
+		"""
 
 		# Handle fundamental C datatypes (PyCSimpleType)
 		if datatype_dict['f']:
@@ -178,14 +293,14 @@ class routine_server_class():
 	def __unpack_type_struct_dict__(self, datatype_dict):
 
 		# Generate struct class if it does not exist yet
-		if datatype_dict['t'] not in self.datatypes.keys():
+		if datatype_dict['t'] not in self.datatypes_dict.keys():
 			self.__unpack_type_struct_dict_generator__(datatype_dict)
 
 		# Return type class or type pointer
 		if datatype_dict['p']:
-			return ctypes.POINTER(self.datatypes[datatype_dict['t']])
+			return ctypes.POINTER(self.datatypes_dict[datatype_dict['t']])
 		else:
-			return self.datatypes[datatype_dict['t']]
+			return self.datatypes_dict[datatype_dict['t']]
 
 
 	def __unpack_type_struct_dict_generator__(self, datatype_dict):
@@ -225,7 +340,7 @@ class routine_server_class():
 					))
 
 		# Generate actual class
-		self.datatypes[datatype_dict['t']] = type(
+		self.datatypes_dict[datatype_dict['t']] = type(
 			datatype_dict['t'], # Potenial BUG ends up in __main__ namespace, problematic
 			(ctypes.Structure,),
 			{'_fields_': fields}
