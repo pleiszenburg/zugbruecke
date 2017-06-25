@@ -115,6 +115,8 @@ Python code which works under both Unices and Windows.
 
 For more examples and DLL source code check the ``examples`` directory.
 
+For the original documentation of ``ctypes`` go to: https://docs.python.org/3/library/ctypes.html
+
 Speed
 =====
 
