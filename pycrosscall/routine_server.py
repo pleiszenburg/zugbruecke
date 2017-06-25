@@ -70,12 +70,12 @@ class routine_server_class():
 				)
 
 			# Log status
-			self.log.out('[routine-server] ... done.' %)
+			self.log.out('[routine-server] ... done.')
 
 		except:
 
 			# Log status
-			self.log.out('[routine-server] ... failed!' %)
+			self.log.out('[routine-server] ... failed!')
 
 			# Push traceback to log
 			self.log.err(traceback.format_exc())
@@ -89,7 +89,7 @@ class routine_server_class():
 		"""
 
 		# Log status
-		self.log.out('[routine-server] Trying call routine "%s" ...' % routine_name)
+		self.log.out('[routine-server] Trying call routine "%s" ...' % self.name)
 
 		# Unpack passed arguments, handle pointers and structs ...
 		args, kw = self.__unpack_arguments__(arg_message_list)

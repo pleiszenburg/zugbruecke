@@ -146,7 +146,7 @@ class session_class():
 		if not os.path.isfile(full_path_dll):
 
 			# Log status
-			self.log.out('[core] ... does NOT exist!')
+			self.log.out('[core] ... file does NOT exist!')
 
 			raise # TODO
 
