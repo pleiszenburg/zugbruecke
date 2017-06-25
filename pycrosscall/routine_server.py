@@ -104,3 +104,96 @@ class routine_server_class():
 		self.log.out('[routine-server] ... done.')
 
 		return True # Success
+
+
+	def __unpack_type_dict__(self, datatype_dict):
+
+		# Handle fundamental C datatypes (PyCSimpleType)
+		if datatype_dict['f']:
+
+			return self.__unpack_type_fundamental_dict__(datatype_dict)
+
+		# Structures (PyCStructType)
+		elif datatype_dict['s']:
+
+			return self.__unpack_type_struct_dict__(datatype_dict)
+
+		# Undhandled stuff (pointers of pointers etc.) TODO
+		else:
+
+			# Push traceback to log
+			self.log.err('[routine-server] ERROR: Unhandled datatype: %s' % datatype_dict['t'])
+
+			# HACK TODO
+			return ctypes.c_int
+
+
+	def __unpack_type_fundamental_dict__(self, datatype_dict):
+
+		# Return type class or type pointer
+		if datatype_dict['p']:
+			return ctypes.POINTER(getattr(ctypes, datatype_dict['t']))
+		else:
+			return getattr(ctypes, datatype_dict['t'])
+
+
+	def __unpack_type_struct_dict__(self, datatype_dict):
+
+		# Generate struct class if it does not exist yet
+		if datatype_dict['t'] not in self.datatypes.keys():
+			self.__unpack_type_struct_dict_generator__(datatype_dict)
+
+		# Return type class or type pointer
+		if datatype_dict['p']:
+			return ctypes.POINTER(self.datatypes[datatype_dict['t']])
+		else:
+			return self.datatypes[datatype_dict['t']]
+
+
+	def __unpack_type_struct_dict_generator__(self, datatype_dict):
+
+		# Prepare fields
+		fields = []
+
+		# Step through fields
+		for field in datatype_dict['_fields_']:
+
+			# Handle fundamental C datatypes (PyCSimpleType)
+			if field['f']:
+
+				# Add tuple with name and fundamental datatype
+				fields.append((
+					field['n'],
+					self.__unpack_type_fundamental_dict__(field)
+					))
+
+			# Structures (PyCStructType)
+			elif field['s']:
+
+				# Add tuple with name and struct datatype
+				fields.append((
+					field['n'], self.__unpack_struct_dict__(field)
+					))
+
+			# Undhandled stuff (pointers of pointers etc.) TODO
+			else:
+
+				# Push traceback to log
+				self.log.err('[dll-server] ERROR: Unhandled datatype in struct: %s' % datatype_dict['t'])
+
+				# HACK TODO
+				fields.append((
+					field['n'], ctypes.c_int
+					))
+
+		# Generate actual class
+		self.datatypes[datatype_dict['t']] = type(
+			datatype_dict['t'], # Potenial BUG ends up in __main__ namespace, problematic
+			(ctypes.Structure,),
+			{'_fields_': fields}
+			)
+
+		# Log status
+		self.log.out('[dll-server] Generated struct type "%s" with fields %s' % (
+			datatype_dict['t'], pf(fields)
+			))
