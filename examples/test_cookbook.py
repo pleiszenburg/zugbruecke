@@ -35,12 +35,22 @@ specific language governing rights and limitations under the License.
 import sys
 import os
 import time
-from sys import platform
+from sys import argv, platform
+import timeit
+
+# Timing mode?
+TIMING_RUN = False
+try:
+	if argv[1] == 'time':
+		TIMING_RUN = True
+except:
+	pass
 
 if True in [platform.startswith(os_name) for os_name in ['linux', 'darwin', 'freebsd']]:
 
 	from pycrosscall import ctypes
-	ctypes.windll.start_session(parameter = {'log_level': 10})
+	if not TIMING_RUN:
+		ctypes.windll.start_session(parameter = {'log_level': 10})
 
 elif platform.startswith('win'):
 
@@ -159,11 +169,46 @@ if __name__ == '__main__':
 
 	sample = sample_class()
 
+	def time_ROUTINE(routine_name):
+
+		t = timeit.Timer(
+			'time_%s()' % routine_name,
+			setup = "from __main__ import time_%s" % routine_name
+			)
+		print('[TIME %s] %f' % (routine_name, t.timeit(number = 100000)))
+
 	print(7, sample.gcd(35, 42))
+	def time_gdc():
+		returnvalue = sample.gcd(35, 42)
+	if TIMING_RUN:
+		time_ROUTINE('gdc')
+
 	print(1, sample.in_mandel(0, 0, 500))
+	def time_in_mandel_1():
+		returnvalue = sample.in_mandel(0, 0, 500)
+	if TIMING_RUN:
+		time_ROUTINE('in_mandel_1')
+
 	print(0, sample.in_mandel(2.0, 1.0, 500))
+	def time_in_mandel_2():
+		returnvalue = sample.in_mandel(2.0, 1.0, 500)
+	if TIMING_RUN:
+		time_ROUTINE('in_mandel_2')
+
 	print((5, 2), sample.divide(42, 8))
+	def time_divide():
+		returnvalue = sample.divide(42, 8)
+	if TIMING_RUN:
+		time_ROUTINE('divide')
+
 	# print(sample.avg([1, 2, 3]))
+
 	p1 = Point(1, 2)
 	p2 = Point(4, 5)
 	print(4.242640687119285, sample.distance(p1, p2))
+	def time_distance():
+		p1 = Point(1, 2)
+		p2 = Point(4, 5)
+		returnvalue = sample.distance(p1, p2)
+	if TIMING_RUN:
+		time_ROUTINE('distance')
