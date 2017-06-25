@@ -48,7 +48,7 @@ class dll_client_class(): # Representing one idividual dll to be called into, re
 	def __init__(self, full_path_dll, dll_name, dll_type, parent_session):
 
 		# Store dll parameters name, path and type
-		self.__dll_full_path__ = full_path_dll
+		self.full_path = full_path_dll
 		self.__dll_name__ = dll_name
 		self.__dll_type__ = dll_type
 
@@ -65,7 +65,7 @@ class dll_client_class(): # Representing one idividual dll to be called into, re
 		self.__dll_routines__ = {}
 
 		# Translate dll's full path into wine path
-		self.__dll_full_path_wine__ = self.__session__.wineserver_session.translate_path_unix2win(self.__dll_full_path__)
+		self.__dll_full_path_wine__ = self.__session__.wineserver_session.translate_path_unix2win(self.full_path)
 
 		# Status log
 		self.log.out('[00] Telling wine-python about new DLL file: "%s" of type %s' % (
@@ -75,7 +75,7 @@ class dll_client_class(): # Representing one idividual dll to be called into, re
 
 		# Tell wine about the dll and its type
 		result = self.client.access_dll(
-			self.__dll_full_path_wine__, self.__dll_full_path__, self.__dll_name__, self.__dll_type__
+			self.__dll_full_path_wine__, self.full_path, self.__dll_name__, self.__dll_type__
 			)
 
 		# Raise error if last step failed
@@ -95,7 +95,7 @@ class dll_client_class(): # Representing one idividual dll to be called into, re
 			self.log.out('[02] Routine not yet in list. Registering ...')
 
 			# Register routine in wine
-			result = self.client.register_routine(self.__dll_full_path__, name)
+			result = self.client.register_routine(self.full_path, name)
 
 			# Log status
 			self.log.out('[02] Feedback from wine-python: %d' % result)
@@ -156,7 +156,7 @@ class dll_client_class(): # Representing one idividual dll to be called into, re
 
 		# Actually call routine in DLL! TODO Handle structurs and pointers ...
 		return_dict = self.client.call_dll_routine(
-			self.__dll_full_path__, name, arg_message_list
+			self.full_path, name, arg_message_list
 			)
 
 		# Unpack return dict (for pointers and structs)
@@ -306,7 +306,7 @@ class dll_client_class(): # Representing one idividual dll to be called into, re
 
 		# Pass argument and return value types as strings ...
 		result = self.client.register_argtype_and_restype(
-			self.__dll_full_path__, name, arguments, returntype
+			self.full_path, name, arguments, returntype
 			)
 
 		# Handle error
