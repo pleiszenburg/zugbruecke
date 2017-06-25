@@ -265,34 +265,22 @@ class routine_client_class():
 		return arguments_list
 
 
-	def __push_argtype_and_restype__(self, name):
-
-		# Log status
-		self.log.out('[07] Processing & pushing argument and return value types ...')
+	def __push_argtype_and_restype__(self):
 
 		# Prepare list of arguments by parsing them into list of dicts (TODO field name / kw)
-		arguments = [self.__pack_datatype_dict__(arg) for arg in self.routines[name]['argtypes']]
-
-		# Store processed arguments
-		self.routines[name]['argtypes_p'] = arguments
+		self.argtypes_p = [self.__pack_datatype_dict__(arg) for arg in self.argtypes]
 
 		# Parse return type
-		returntype = self.__pack_datatype_dict__(self.routines[name]['restype'])
-
-		# Store processed return type
-		self.routines[name]['restype_p'] = returntype
+		self.restype_p = self.__pack_datatype_dict__(self.restype)
 
 		# Pass argument and return value types as strings ...
 		result = self.client.register_argtype_and_restype(
-			self.full_path, name, arguments, returntype
+			self.dll.full_path, self.name, self.argtypes_p, self.restype_p
 			)
 
 		# Handle error
 		if result == 0:
 			raise # TODO
-
-		# Log status
-		self.log.out('[07] ... done.')
 
 
 	def __set_argtype_and_restype__(self):
