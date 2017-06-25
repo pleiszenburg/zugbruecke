@@ -6,7 +6,7 @@ PYCROSSCALL
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/s-m-e/pycrosscall
 
-	pycrosscall/dll.py: Classes relevant for managing the access to DLLs
+	pycrosscall/dll_client.py: Classes relevant for managing the access to DLLs
 
 	Required to run on platform / side: [UNIX]
 
