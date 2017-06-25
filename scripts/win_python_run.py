@@ -36,7 +36,7 @@ def wine_translate_unix2win(path):
 	return winepath_output.strip()
 
 
-def run_windows_python(win_python_script_name):
+def run_windows_python(win_python_script_name, args):
 
 	# Change the environment for Wine: Architecture
 	os.environ['WINEARCH'] = arch
@@ -53,8 +53,14 @@ def run_windows_python(win_python_script_name):
 	# Translate Python interpreter's Unix path into Wine path
 	pydir_win = wine_translate_unix2win(pydir_unix)
 
+	# Process args
+	if len(args) > 2:
+		arg_str = ' ' + ' '.join(args[2:])
+	else:
+		arg_str = ''
+
 	# Launch Python for Windows with script
-	py_cmd = pydir_win + '\\python.exe ' + win_python_script_name
+	py_cmd = pydir_win + '\\python.exe ' + win_python_script_name + arg_str
 	subprocess.Popen('echo "%s" | wine cmd &' % py_cmd, shell = True)
 
 
@@ -65,4 +71,4 @@ def run_windows_python(win_python_script_name):
 if __name__ == '__main__':
 
 	if len(sys.argv) > 1:
-		run_windows_python(sys.argv[1])
+		run_windows_python(sys.argv[1], sys.argv)

@@ -41,7 +41,7 @@ import timeit
 # Timing mode?
 TIMING_RUN = False
 try:
-	if argv[1] == 'time':
+	if 'time' in argv:
 		TIMING_RUN = True
 except:
 	pass
