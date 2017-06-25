@@ -97,7 +97,7 @@ class routine_client_class():
 
 		# Actually call routine in DLL! TODO Handle kw ...
 		return_dict = self.client.call_dll_routine(
-			self.dll.full_path, name, self.__pack_args__(args)
+			self.dll.full_path, name, self.__pack_args__(self.argtypes_p, args)
 			)
 
 		# Log status
@@ -209,7 +209,7 @@ class routine_client_class():
 			raise # TODO
 
 
-	def __pack_args__(self, method_metainfo_argtypes, args): # TODO kw
+	def __pack_args__(self, argtypes_p_sub, args): # TODO kw
 		"""
 		TODO Optimize for speed!
 		"""
@@ -217,14 +217,8 @@ class routine_client_class():
 		# Shortcut for speed
 		arguments_list = []
 
-		# # Step through arguments
-		# for arg_index, arg in enumerate(args):
-		#
-		# 	# Fetch definition of current argument
-		# 	arg_definition_dict = method_metainfo_argtypes[arg_index]
-
 		# Step through arguments
-		for arg_index, arg_definition_dict in enumerate(method_metainfo_argtypes):
+		for arg_index, arg_definition_dict in enumerate(argtypes_p_sub):
 
 			# Fetch current argument
 			if type(args) is list or type(args) is tuple:
