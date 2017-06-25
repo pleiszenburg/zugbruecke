@@ -35,12 +35,14 @@ import ctypes
 from functools import partial
 from pprint import pformat as pf
 
+from .routine_client import routine_client_class
+
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# LOADLIBRARY CLASS
+# DLL CLIENT CLASS
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-class dll_client_class(): # Mimic ctypes.WinDLL. Representing one idividual dll to be called into, returned by LoadLibrary
+class dll_client_class(): # Representing one idividual dll to be called into, returned by LoadLibrary
 
 
 	def __init__(self, full_path_dll, dll_name, dll_type, parent_session):
@@ -56,6 +58,9 @@ class dll_client_class(): # Mimic ctypes.WinDLL. Representing one idividual dll 
 		# For convenience ...
 		self.__client__ = self.__session__.client
 
+		# Get handle on log
+		self.log = self.__session__.log
+
 		# Start dict for dll routines
 		self.__dll_routines__ = {}
 
@@ -63,10 +68,10 @@ class dll_client_class(): # Mimic ctypes.WinDLL. Representing one idividual dll 
 		self.__dll_full_path_wine__ = self.__session__.wineserver_session.translate_path_unix2win(self.__dll_full_path__)
 
 		# Status log
-		self.__session__.log.out('[00] Telling wine-python about new DLL file: "%s" of type %s' % (
+		self.log.out('[00] Telling wine-python about new DLL file: "%s" of type %s' % (
 			self.__dll_name__, self.__dll_type__
 			))
-		self.__session__.log.out('[00] (%s)' % self.__dll_full_path_wine__)
+		self.log.out('[00] (%s)' % self.__dll_full_path_wine__)
 
 		# Tell wine about the dll and its type
 		result = self.__client__.access_dll(
@@ -81,19 +86,19 @@ class dll_client_class(): # Mimic ctypes.WinDLL. Representing one idividual dll 
 	def __getattr__(self, name): # Handle requests for functions in dll which have yet not been touched
 
 		# Status log
-		self.__session__.log.out('[01] Trying to attach to routine "%s" in DLL file "%s" ...' % (name, self.__dll_name__))
+		self.log.out('[01] Trying to attach to routine "%s" in DLL file "%s" ...' % (name, self.__dll_name__))
 
 		# Is routine unknown?
 		if name not in self.__dll_routines__.keys():
 
 			# Log status
-			self.__session__.log.out('[02] Routine not yet in list. Registering ...')
+			self.log.out('[02] Routine not yet in list. Registering ...')
 
 			# Register routine in wine
 			result = self.__client__.register_routine(self.__dll_full_path__, name)
 
 			# Log status
-			self.__session__.log.out('[02] Feedback from wine-python: %d' % result)
+			self.log.out('[02] Feedback from wine-python: %d' % result)
 
 			# Raise exception if not found
 			if result == 0:
@@ -108,7 +113,7 @@ class dll_client_class(): # Mimic ctypes.WinDLL. Representing one idividual dll 
 				}
 
 		# Log status
-		self.__session__.log.out('[03] Return unconfigured handler for "%s" in DLL file "%s".' % (name, self.__dll_name__))
+		self.log.out('[03] Return unconfigured handler for "%s" in DLL file "%s".' % (name, self.__dll_name__))
 
 		# Return handler
 		return self.__dll_routines__[name]['call_handler']
@@ -126,13 +131,13 @@ class dll_client_class(): # Mimic ctypes.WinDLL. Representing one idividual dll 
 		del kw['__routine_name__']
 
 		# Log status
-		self.__session__.log.out('[04] Trying to call routine "%s" in DLL file "%s" ...' % (name, self.__dll_name__))
+		self.log.out('[04] Trying to call routine "%s" in DLL file "%s" ...' % (name, self.__dll_name__))
 
 		# Has this routine ever been called?
 		if not self.__dll_routines__[name]['called']:
 
 			# Log status
-			self.__session__.log.out('[05] "%s" in DLL file "%s" has not been called before. Configuring ...' % (name, self.__dll_name__))
+			self.log.out('[05] "%s" in DLL file "%s" has not been called before. Configuring ...' % (name, self.__dll_name__))
 
 			# Processing argument and return value types on first call
 			self.__set_argtype_and_restype__(name)
@@ -144,7 +149,7 @@ class dll_client_class(): # Mimic ctypes.WinDLL. Representing one idividual dll 
 			self.__dll_routines__[name]['called'] = True
 
 		# Log status
-		self.__session__.log.out('[08] Call parameters are %r / %r. Pushing to wine-python ...' % (args, kw))
+		self.log.out('[08] Call parameters are %r / %r. Pushing to wine-python ...' % (args, kw))
 
 		# Pack arguments and handle pointers based on parsed argument definition TODO kw!
 		arg_message_list = self.__pack_args__(self.__dll_routines__[name]['argtypes_p'], args)
@@ -158,7 +163,7 @@ class dll_client_class(): # Mimic ctypes.WinDLL. Representing one idividual dll 
 		self.__unpack_return__(name, args, kw, return_dict)
 
 		# Log status
-		self.__session__.log.out('[09] Received feedback from wine-python, returning ...')
+		self.log.out('[09] Received feedback from wine-python, returning ...')
 
 		# Return result. return_value will be None if there was not a result.
 		return return_dict['return_value']
@@ -216,13 +221,13 @@ class dll_client_class(): # Mimic ctypes.WinDLL. Representing one idividual dll 
 		# Pointers of pointers
 		elif group_name == 'PyCPointerType':
 
-			self.__session__.log.err('ERROR: Unhandled pointer of pointer')
+			self.log.err('ERROR: Unhandled pointer of pointer')
 			raise # TODO
 
 		# UNKNOWN stuff
 		else:
 
-			self.__session__.log.err('ERROR: Unknown class of datatype: "%s"', group_name)
+			self.log.err('ERROR: Unknown class of datatype: "%s"', group_name)
 			raise # TODO
 
 
@@ -285,7 +290,7 @@ class dll_client_class(): # Mimic ctypes.WinDLL. Representing one idividual dll 
 	def __push_argtype_and_restype__(self, name):
 
 		# Log status
-		self.__session__.log.out('[07] Processing & pushing argument and return value types ...')
+		self.log.out('[07] Processing & pushing argument and return value types ...')
 
 		# Prepare list of arguments by parsing them into list of dicts (TODO field name / kw)
 		arguments = [self.__pack_datatype_dict__(arg) for arg in self.__dll_routines__[name]['argtypes']]
@@ -309,7 +314,7 @@ class dll_client_class(): # Mimic ctypes.WinDLL. Representing one idividual dll 
 			raise # TODO
 
 		# Log status
-		self.__session__.log.out('[07] ... done.')
+		self.log.out('[07] ... done.')
 
 
 	def __set_argtype_and_restype__(self, name):
@@ -325,8 +330,8 @@ class dll_client_class(): # Mimic ctypes.WinDLL. Representing one idividual dll 
 			pass
 
 		# Log status
-		self.__session__.log.out('[06] Set routine "%s" argtypes: %s' % (name, pf(self.__dll_routines__[name]['argtypes'])))
-		self.__session__.log.out('[06] Set routine "%s" restype: %s' % (name, pf(self.__dll_routines__[name]['restype'])))
+		self.log.out('[06] Set routine "%s" argtypes: %s' % (name, pf(self.__dll_routines__[name]['argtypes'])))
+		self.log.out('[06] Set routine "%s" restype: %s' % (name, pf(self.__dll_routines__[name]['restype'])))
 
 
 	def __unpack_return__(self, function_name, args, kw, return_dict): # TODO kw not yet handled
