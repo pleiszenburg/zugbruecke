@@ -118,10 +118,12 @@ For more examples and DLL source code check the ``examples`` directory.
 Speed
 =====
 
-pycrosscall performs reasonably well given its complexity with less than 0.2 µs
-overhead per call in average on modern hardware.
+pycrosscall performs reasonably well given its complexity with **less than 0.2 µs
+overhead per call** in average on modern hardware.
 
-The inter-process communication via **multiprocessing connection adds overhead** to every function call.
+The inter-process communication via multiprocessing connection adds overhead to
+every function call. Because pycrosscall takes care of packing and unpacking of
+pointers and structure for arguments and return values, this adds another bit of overhead.
 Calls are slow in general, but the first call of an individual routine within
 a session is even slower due to necessary initialization happening beforehand.
 Depending on the use-case, instead of working with pycrosscall, it will be significantly
