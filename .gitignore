@@ -87,3 +87,10 @@ ENV/
 
 # Rope project settings
 .ropeproject
+
+# Wine stuff
+*.dll
+
+# Logging
+*_err.txt
+*_out.txt
