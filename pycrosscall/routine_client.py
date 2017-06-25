@@ -93,7 +93,7 @@ class routine_client_class():
 			self.log.out('[routine-client] ... configured. Proceeding ...')
 
 		# Log status
-		self.log.out('[routine-client] ... parameters are %r / %r. Pushing to server ...' % (args, kw))
+		self.log.out('[routine-client] ... parameters are %r / %r. Packing and pushing to server ...' % (args, kw))
 
 		# Actually call routine in DLL! TODO Handle kw ...
 		return_dict = self.client.call_dll_routine(
@@ -140,3 +140,209 @@ class routine_client_class():
 			self.log.out('[routine-client] ... failed!')
 
 			raise # TODO
+
+
+
+
+
+
+
+	def __pack_datatype_dict__(self, datatype, field_name = None):
+
+		# Pointer status
+		is_pointer = False
+		# Struct status
+		is_struct = False
+
+		# Get name of datatype
+		type_name = datatype.__name__
+		# Get group of datatype
+		group_name = type(datatype).__name__ # 'PyCSimpleType', 'PyCStructType' or 'PyCPointerType'
+
+		# Check for pointer, if yes, flag it and isolate datatype
+		if group_name == 'PyCPointerType':
+			is_pointer = True
+			type_name = datatype._type_.__name__
+			group_name = type(datatype._type_).__name__
+
+		# Fundamental C types
+		if group_name == 'PyCSimpleType':
+
+			return {
+				'n': field_name, # kw
+				'p': is_pointer, # Is a pointer
+				't': type_name, # Type name, such as 'c_int'
+				'f': True, # Is a fundamental type (PyCSimpleType)
+				's': False # Is not a struct
+				}
+
+		# Structs
+		elif group_name == 'PyCStructType':
+
+			# Get fields
+			if is_pointer:
+				struct_fields = datatype._type_._fields_
+			else:
+				struct_fields = datatype._fields_
+
+			return {
+				'n': field_name, # kw
+				'p': is_pointer, # Is a pointer
+				't': type_name, # Type name, such as 'c_int'
+				'f': False, # Is a fundamental type (PyCSimpleType)
+				's': True, # Is not a struct
+				'_fields_': [
+					self.__pack_datatype_dict__(field[1], field[0]) for field in struct_fields
+					]
+				}
+
+		# Pointers of pointers
+		elif group_name == 'PyCPointerType':
+
+			self.log.err('ERROR: Unhandled pointer of pointer')
+			raise # TODO
+
+		# UNKNOWN stuff
+		else:
+
+			self.log.err('ERROR: Unknown class of datatype: "%s"', group_name)
+			raise # TODO
+
+
+	def __pack_args__(self, method_metainfo_argtypes, args): # TODO kw
+		"""
+		TODO Optimize for speed!
+		"""
+
+		# Shortcut for speed
+		arguments_list = []
+
+		# # Step through arguments
+		# for arg_index, arg in enumerate(args):
+		#
+		# 	# Fetch definition of current argument
+		# 	arg_definition_dict = method_metainfo_argtypes[arg_index]
+
+		# Step through arguments
+		for arg_index, arg_definition_dict in enumerate(method_metainfo_argtypes):
+
+			# Fetch current argument
+			if type(args) is list or type(args) is tuple:
+				arg = args[arg_index]
+			else:
+				arg = getattr(args, arg_definition_dict['n'])
+
+			# Handle fundamental types
+			if arg_definition_dict['f']:
+
+				# If pointer
+				if arg_definition_dict['p']:
+
+					# Append value from ctypes datatype (because most of their Python equivalents are immutable)
+					arguments_list.append((arg_definition_dict['n'], arg.value))
+
+				# If value
+				else:
+
+					# Append value
+					arguments_list.append((arg_definition_dict['n'], arg))
+
+			# Handle structs
+			elif arg_definition_dict['s']:
+
+				# Reclusively call this routine for packing structs
+				arguments_list.append((arg_definition_dict['n'], self.__pack_args__(
+					arg_definition_dict['_fields_'], arg
+					)))
+
+			# Handle everything else (structures)
+			else:
+
+				# HACK TODO
+				arguments_list.append(None)
+
+		# Return parameter message list - MUST WORK WITH PICKLE
+		return arguments_list
+
+
+	def __push_argtype_and_restype__(self, name):
+
+		# Log status
+		self.log.out('[07] Processing & pushing argument and return value types ...')
+
+		# Prepare list of arguments by parsing them into list of dicts (TODO field name / kw)
+		arguments = [self.__pack_datatype_dict__(arg) for arg in self.routines[name]['argtypes']]
+
+		# Store processed arguments
+		self.routines[name]['argtypes_p'] = arguments
+
+		# Parse return type
+		returntype = self.__pack_datatype_dict__(self.routines[name]['restype'])
+
+		# Store processed return type
+		self.routines[name]['restype_p'] = returntype
+
+		# Pass argument and return value types as strings ...
+		result = self.client.register_argtype_and_restype(
+			self.full_path, name, arguments, returntype
+			)
+
+		# Handle error
+		if result == 0:
+			raise # TODO
+
+		# Log status
+		self.log.out('[07] ... done.')
+
+
+	def __set_argtype_and_restype__(self):
+
+		# TODO proper sanity check
+		try:
+			self.argtypes = self.handle_call.argtypes
+		except:
+			pass
+		try:
+			self.restype = self.handle_call.restype
+		except:
+			pass
+
+		# Log status
+		self.log.out('[routine-client]  argtypes: %s' % (name, pf(self.argtypes)))
+		self.log.out('[routine-client]  restype: %s' % (name, pf(self.restype)))
+
+
+	def __unpack_return__(self, function_name, args, kw, return_dict): # TODO kw not yet handled
+		"""
+		TODO Optimize for speed!
+		"""
+
+		# Get arguments' list
+		arguments_list = return_dict['args']
+
+		# Make it short
+		method_metainfo_argtypes = self.routines[function_name]['argtypes_p']
+
+		# Step through arguments
+		for arg_index, arg in enumerate(args):
+
+			# Fetch definition of current argument
+			arg_definition_dict = method_metainfo_argtypes[arg_index]
+
+			# Handle fundamental types by value
+			if not arg_definition_dict['p'] and arg_definition_dict['f']:
+
+				# Nothing to do
+				pass
+
+			# Handle fundamental types by reference
+			elif arg_definition_dict['p'] and arg_definition_dict['f']:
+
+				# Put value back into its ctypes datatype
+				args[arg_index].value = arguments_list[arg_index]
+
+			# Handle everything else (structures)
+			else:
+
+				# HACK TODO
+				pass
