@@ -37,7 +37,7 @@ import signal
 import time
 
 from .config import get_module_config
-from .dll import dll_session_class
+from .dll_client import dll_client_class
 from .interpreter import interpreter_session_class
 from .lib import (
 	get_free_port,
@@ -146,7 +146,7 @@ class session_class():
 		if not os.path.isfile(full_path_dll):
 
 			# Log status
-			self.log.out('[core] ... does NOT exist!')
+			self.log.out('[core] ... file does NOT exist!')
 
 			raise # TODO
 
@@ -163,7 +163,7 @@ class session_class():
 			self.log.out('[core] ... not yet touched ...')
 
 			# Fire up new dll object
-			self.dll_dict[full_path_dll] = dll_session_class(
+			self.dll_dict[full_path_dll] = dll_client_class(
 				full_path_dll, dll_name, dll_type, self
 				)
 
