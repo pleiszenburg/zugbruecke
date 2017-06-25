@@ -32,7 +32,6 @@ specific language governing rights and limitations under the License.
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 import ctypes
-from functools import partial
 from pprint import pformat as pf
 
 from .routine_client import routine_client_class
@@ -53,25 +52,25 @@ class dll_client_class(): # Representing one idividual dll to be called into, re
 		self.calling_convention = dll_type
 
 		# Store pointer to pycrosscall session
-		self.__session__ = parent_session
+		self.session = parent_session
 
 		# For convenience ...
-		self.client = self.__session__.client
+		self.client = self.session.client
 
 		# Get handle on log
-		self.log = self.__session__.log
+		self.log = self.session.log
 
 		# Start dict for dll routines
 		self.routines = {}
 
 		# Translate dll's full path into wine path
-		self.full_path_wine = self.__session__.wineserver_session.translate_path_unix2win(self.full_path)
+		self.full_path_wine = self.session.wineserver_session.translate_path_unix2win(self.full_path)
 
 		# Status log
-		self.log.out('[00] Telling wine-python about new DLL file: "%s" of type %s' % (
+		self.log.out('[dll-client] New DLL file "%s" with calling convention "%s" located at' % (
 			self.name, self.calling_convention
 			))
-		self.log.out('[00] (%s)' % self.full_path_wine)
+		self.log.out('[dll-client]  %s' % self.full_path_wine)
 
 		# Tell wine about the dll and its type
 		result = self.client.access_dll(
@@ -86,87 +85,22 @@ class dll_client_class(): # Representing one idividual dll to be called into, re
 	def __getattr__(self, name): # Handle requests for functions in dll which have yet not been touched
 
 		# Status log
-		self.log.out('[01] Trying to attach to routine "%s" in DLL file "%s" ...' % (name, self.name))
+		self.log.out('[dll-client] Trying to attach to routine "%s" in DLL file "%s" ...' % (name, self.name))
 
 		# Is routine unknown?
 		if name not in self.routines.keys():
 
-			# Log status
-			self.log.out('[02] Routine not yet in list. Registering ...')
-
-			# Register routine in wine
-			result = self.client.register_routine(self.full_path, name)
-
-			# Log status
-			self.log.out('[02] Feedback from wine-python: %d' % result)
-
-			# Raise exception if not found
-			if result == 0:
-				raise # TODO
-
-			# Add to routine dict
-			self.routines[name] = {
-				'call_handler': partial(self.__handle_call__, __routine_name__ = name),
-				'called': False,
-				'argtypes': [], # By default, assume no arguments
-				'restype': ctypes.c_int # By default, assume no return value
-				}
+			# Create new instance of routine_client
+			self.routines[name] = routine_client_class(self, name)
 
 		# Log status
-		self.log.out('[03] Return unconfigured handler for "%s" in DLL file "%s".' % (name, self.name))
+		self.log.out('[dll-client] ... return handler for "%s" in DLL file "%s".' % (name, self.name))
 
 		# Return handler
-		return self.routines[name]['call_handler']
+		return self.routines[name].handle_call
 
 
-	def __handle_call__(self, *args, **kw):
-		"""
-		TODO Optimize for speed!
-		"""
-
-		# Store routine name
-		name = kw['__routine_name__']
-
-		# Delete routine name from call parameters
-		del kw['__routine_name__']
-
-		# Log status
-		self.log.out('[04] Trying to call routine "%s" in DLL file "%s" ...' % (name, self.name))
-
-		# Has this routine ever been called?
-		if not self.routines[name]['called']:
-
-			# Log status
-			self.log.out('[05] "%s" in DLL file "%s" has not been called before. Configuring ...' % (name, self.name))
-
-			# Processing argument and return value types on first call
-			self.__set_argtype_and_restype__(name)
-
-			# Tell wine-python about types
-			self.__push_argtype_and_restype__(name)
-
-			# Change status of routine - it has been called once and is therefore configured
-			self.routines[name]['called'] = True
-
-		# Log status
-		self.log.out('[08] Call parameters are %r / %r. Pushing to wine-python ...' % (args, kw))
-
-		# Pack arguments and handle pointers based on parsed argument definition TODO kw!
-		arg_message_list = self.__pack_args__(self.routines[name]['argtypes_p'], args)
-
-		# Actually call routine in DLL! TODO Handle structurs and pointers ...
-		return_dict = self.client.call_dll_routine(
-			self.full_path, name, arg_message_list
-			)
-
-		# Unpack return dict (for pointers and structs)
-		self.__unpack_return__(name, args, kw, return_dict)
-
-		# Log status
-		self.log.out('[09] Received feedback from wine-python, returning ...')
-
-		# Return result. return_value will be None if there was not a result.
-		return return_dict['return_value']
+	
 
 
 	def __pack_datatype_dict__(self, datatype, field_name = None):

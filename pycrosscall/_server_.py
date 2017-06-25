@@ -274,7 +274,7 @@ class wine_server_class:
 			# Log status
 			self.log.out('[_server_] ... done.')
 
-			return 1 # Success
+			return True # Success
 
 		except:
 
@@ -284,7 +284,7 @@ class wine_server_class:
 			# Push traceback to log
 			self.log.err(traceback.format_exc())
 
-			return 0 # Fail
+			return False # Fail
 
 
 	def __terminate__(self):

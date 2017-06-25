@@ -32,7 +32,6 @@ specific language governing rights and limitations under the License.
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 import ctypes
-#from functools import partial
 from pprint import pformat as pf
 
 
@@ -43,6 +42,101 @@ from pprint import pformat as pf
 class routine_client_class():
 
 
-	def __init__(self):
+	def __init__(self, parent_dll, routine_name):
 
-		pass
+		# Store handle on parent dll
+		self.dll = parent_dll
+
+		# Store pointer to pycrosscall session
+		self.session = self.dll.session
+
+		# For convenience ...
+		self.client = self.dll.client
+
+		# Get handle on log
+		self.log = self.dll.log
+
+		# Store my own name
+		self.name = routine_name
+
+		# Set call status
+		self.called = False
+
+		# Tell server about routine
+		self.__register_routine_on_server__()
+
+
+	def handle_call(self, *args, **kw):
+		"""
+		TODO Optimize for speed!
+		"""
+
+		# Log status
+		self.log.out('[routine-client] Trying to call routine "%s" in DLL file "%s" ...' % (self.name, self.dll.name))
+
+		# Has this routine ever been called?
+		if not self.called:
+
+			# Log status
+			self.log.out('[routine-client] ... has not been called before. Configuring ...')
+
+			# Processing argument and return value types on first call
+			self.__set_argtype_and_restype__()
+
+			# Tell wine-python about types
+			self.__push_argtype_and_restype__()
+
+			# Change status of routine - it has been called once and is therefore configured
+			self.called = True
+
+			# Log status
+			self.log.out('[routine-client] ... configured. Proceeding ...')
+
+		# Log status
+		self.log.out('[routine-client] ... parameters are %r / %r. Pushing to server ...' % (args, kw))
+
+		# Actually call routine in DLL! TODO Handle kw ...
+		return_dict = self.client.call_dll_routine(
+			self.dll.full_path, name, self.__pack_args__(args)
+			)
+
+		# Log status
+		self.log.out('[routine-client] ... received feedback from server, unpacking ...')
+
+		# Unpack return dict (for pointers and structs)
+		self.__unpack_return__(args, kw, return_dict)
+
+		# Log status
+		self.log.out('[routine-client] ... unpacked, return.')
+
+		# Return result. return_value will be None if there was not a result.
+		return return_dict['return_value']
+
+
+	def __register_routine_on_server__(self):
+
+		# Log status
+		self.log.out('[routine-client] Registering routine "%s" on server ...' % self.name)
+
+		# Register routine in wine
+		result = self.client.register_routine(self.dll.full_path, self.name)
+
+		# If success ...
+		if result:
+
+			# By default, assume no arguments
+			self.argtypes = []
+
+			# By default, assume c_int return value like ctypes expects
+			self.restype = ctypes.c_int
+
+			# Log status
+			self.log.out('[routine-client] ... done (unconfigured).')
+
+		# If failed ...
+		else:
+
+			# Log status
+			self.log.out('[routine-client] ... failed!')
+
+			raise # TODO
