@@ -56,8 +56,8 @@ class routine_server_class():
 		# Store my own name
 		self.name = routine_name
 
-		# Prepare dict for metainfo
-		self.metainfo = {}
+		# Prepare dict for custom datatypes (structs)
+		self.datatypes = {}
 
 		# Log status
 		self.log.out('[routine-server] Attaching to routine "%s" in DLL file "%s" ...' % (self.name, self.dll.name))
@@ -81,3 +81,26 @@ class routine_server_class():
 			self.log.err(traceback.format_exc())
 
 			raise # TODO
+
+
+	def register_argtype_and_restype(self, argtypes, restype):
+
+		# Log status
+		self.log.out('[routine-server] Set argument and return value types for "%s" ...' % self.name)
+
+		# Parse & store argtype dicts into argtypes
+		self.argtypes = argtypes
+		self.handler.argtypes = [self.__unpack_type_dict__(arg_dict) for arg_dict in self.argtypes]
+
+		# Parse & store return value type
+		self.restype = restype
+		self.handler.restype = self.__unpack_type_dict__(self.restype)
+
+		# Log status
+		self.log.out('[routine-server] ... argtypes: %s ...' % pf(self.handler.argtypes))
+		self.log.out('[routine-server] ... restype: %s ...' % pf(self.handler.restype))
+
+		# Log status
+		self.log.out('[routine-server] ... done.')
+
+		return True # Success

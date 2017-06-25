@@ -219,32 +219,10 @@ class wine_server_class:
 		Exposed interface
 		"""
 
-		# Log status
-		self.log.out('[_server_] Trying to set argument and return value types for "%s" ...' % routine_name)
-
-		# Make it shorter ...
-		method_metainfo = self.dll_dict[full_path_dll_unix]['method_metainfo'][routine_name]
-		method = self.dll_dict[full_path_dll_unix]['method_handlers'][routine_name]
-
-		# Prepare store for struct classes
-		method_metainfo['datatypes'] = {}
-
-		# Parse & store argtype dicts into argtypes
-		method_metainfo['argtypes'] = argtypes
-		method.argtypes = [self.__unpack_type_dict__(arg_dict, method_metainfo['datatypes']) for arg_dict in argtypes]
-
-		# Parse & store return value type
-		method_metainfo['restype'] = restype
-		method.restype = self.__unpack_type_dict__(restype, method_metainfo['datatypes'])
-
-		# Log status
-		self.log.out('[_server_] ... argtypes: %s ...' % pf(method.argtypes))
-		self.log.out('[_server_] ... restype: %s ...' % pf(method.restype))
-
-		# Log status
-		self.log.out('[_server_] ... done.')
-
-		return 1 # Success
+		# Register argtypes and restype of a routine
+		return self.dll_dict[full_path_dll_unix].routines[routine_name].register_argtype_and_restype(
+			argtypes, restype
+			)
 
 
 	def __register_routine__(self, full_path_dll_unix, routine_name):
