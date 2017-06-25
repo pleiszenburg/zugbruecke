@@ -100,43 +100,31 @@ class wine_server_class:
 
 
 	def __access_dll__(self, full_path_dll, full_path_dll_unix, dll_name, dll_type):
+		"""
+		Exposed interface
+		"""
 
 		# Although this should happen only once per dll, lets be on the safe side
-		if full_path_dll not in self.dll_dict.keys():
-
-			# Log status
-			self.log.out('[_server_] Attaching to "%s" of type %s ...' % (dll_name, dll_type))
-			self.log.out('[_server_]  (%s)' % full_path_dll)
+		if full_path_dll_unix not in self.dll_dict.keys():
 
 			try:
 
-				# Load library TODO do this for different types of dlls (cdll, oledll)
-				self.dll_dict[full_path_dll_unix] = {
-					'type': dll_type,
-					'name': dll_name,
-					'full_path': full_path_dll,
-					'dll_handler': ctypes.windll.LoadLibrary(full_path_dll),
-					'method_handlers': {},
-					'method_metainfo': {}
-					}
-
-				# Log status
-				self.log.out('[_server_] ... done.')
+				# Load library
+				self.dll_dict[full_path_dll_unix] = dll_server_class(
+					full_path_dll, full_path_dll_unix, dll_name, dll_type, self
+					)
 
 				return 1 # Success
 
 			except:
 
-				# Log status
-				self.log.out('[_server_] ... failed!')
-
-				# Push traceback to log
-				self.log.err(traceback.format_exc())
-
 				return 0 # Fail
 
-		# Just in case
-		return 1
+		# If its already in the list, just return success
+		else:
+
+			# Just in case
+			return 1
 
 
 	def __call_dll_routine__(self, full_path_dll_unix, routine_name, arg_message_list):

@@ -44,6 +44,43 @@ from routine_server import routine_server_class
 class dll_server_class(): # Representing one idividual dll to be called into
 
 
-	def __init__(self):
+	def __init__(self, full_path_dll, full_path_dll_unix, dll_name, dll_type, parent_session):
 
-		pass
+		# Store dll parameters name, path and type
+		self.full_path = full_path_dll
+		self.full_path_unix = full_path_dll_unix
+		self.name = dll_name
+		self.calling_convention = dll_type
+
+		# Store pointer to _server_ session
+		self.session = parent_session
+
+		# Get handle on log
+		self.log = self.session.log
+
+		# Start dict for dll routines
+		self.routines = {}
+
+		# Status log
+		self.log.out('[dll-server] Attaching to DLL file "%s" with calling convention "%s" located at' % (
+			self.name, self.calling_convention
+			))
+		self.log.out('[dll-server]  %s' % self.full_path)
+
+		try:
+
+			# Attach to DLL with ctypes
+			self.handler = ctypes.windll.LoadLibrary(self.full_path) # TODO handle oledll and cdll
+
+			# Log status
+			self.log.out('[dll-server] ... done.')
+
+		except:
+
+			# Log status
+			self.log.out('[dll-server] ... failed!')
+
+			# Push traceback to log
+			self.log.err(traceback.format_exc())
+
+			raise
