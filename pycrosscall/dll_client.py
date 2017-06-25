@@ -62,7 +62,7 @@ class dll_client_class(): # Representing one idividual dll to be called into, re
 		self.log = self.__session__.log
 
 		# Start dict for dll routines
-		self.__dll_routines__ = {}
+		self.routines = {}
 
 		# Translate dll's full path into wine path
 		self.full_path_wine = self.__session__.wineserver_session.translate_path_unix2win(self.full_path)
@@ -89,7 +89,7 @@ class dll_client_class(): # Representing one idividual dll to be called into, re
 		self.log.out('[01] Trying to attach to routine "%s" in DLL file "%s" ...' % (name, self.name))
 
 		# Is routine unknown?
-		if name not in self.__dll_routines__.keys():
+		if name not in self.routines.keys():
 
 			# Log status
 			self.log.out('[02] Routine not yet in list. Registering ...')
@@ -105,7 +105,7 @@ class dll_client_class(): # Representing one idividual dll to be called into, re
 				raise # TODO
 
 			# Add to routine dict
-			self.__dll_routines__[name] = {
+			self.routines[name] = {
 				'call_handler': partial(self.__handle_call__, __routine_name__ = name),
 				'called': False,
 				'argtypes': [], # By default, assume no arguments
@@ -116,7 +116,7 @@ class dll_client_class(): # Representing one idividual dll to be called into, re
 		self.log.out('[03] Return unconfigured handler for "%s" in DLL file "%s".' % (name, self.name))
 
 		# Return handler
-		return self.__dll_routines__[name]['call_handler']
+		return self.routines[name]['call_handler']
 
 
 	def __handle_call__(self, *args, **kw):
@@ -134,7 +134,7 @@ class dll_client_class(): # Representing one idividual dll to be called into, re
 		self.log.out('[04] Trying to call routine "%s" in DLL file "%s" ...' % (name, self.name))
 
 		# Has this routine ever been called?
-		if not self.__dll_routines__[name]['called']:
+		if not self.routines[name]['called']:
 
 			# Log status
 			self.log.out('[05] "%s" in DLL file "%s" has not been called before. Configuring ...' % (name, self.name))
@@ -146,13 +146,13 @@ class dll_client_class(): # Representing one idividual dll to be called into, re
 			self.__push_argtype_and_restype__(name)
 
 			# Change status of routine - it has been called once and is therefore configured
-			self.__dll_routines__[name]['called'] = True
+			self.routines[name]['called'] = True
 
 		# Log status
 		self.log.out('[08] Call parameters are %r / %r. Pushing to wine-python ...' % (args, kw))
 
 		# Pack arguments and handle pointers based on parsed argument definition TODO kw!
-		arg_message_list = self.__pack_args__(self.__dll_routines__[name]['argtypes_p'], args)
+		arg_message_list = self.__pack_args__(self.routines[name]['argtypes_p'], args)
 
 		# Actually call routine in DLL! TODO Handle structurs and pointers ...
 		return_dict = self.client.call_dll_routine(
@@ -293,16 +293,16 @@ class dll_client_class(): # Representing one idividual dll to be called into, re
 		self.log.out('[07] Processing & pushing argument and return value types ...')
 
 		# Prepare list of arguments by parsing them into list of dicts (TODO field name / kw)
-		arguments = [self.__pack_datatype_dict__(arg) for arg in self.__dll_routines__[name]['argtypes']]
+		arguments = [self.__pack_datatype_dict__(arg) for arg in self.routines[name]['argtypes']]
 
 		# Store processed arguments
-		self.__dll_routines__[name]['argtypes_p'] = arguments
+		self.routines[name]['argtypes_p'] = arguments
 
 		# Parse return type
-		returntype = self.__pack_datatype_dict__(self.__dll_routines__[name]['restype'])
+		returntype = self.__pack_datatype_dict__(self.routines[name]['restype'])
 
 		# Store processed return type
-		self.__dll_routines__[name]['restype_p'] = returntype
+		self.routines[name]['restype_p'] = returntype
 
 		# Pass argument and return value types as strings ...
 		result = self.client.register_argtype_and_restype(
@@ -321,17 +321,17 @@ class dll_client_class(): # Representing one idividual dll to be called into, re
 
 		# TODO proper sanity check
 		try:
-			self.__dll_routines__[name]['argtypes'] = self.__dll_routines__[name]['call_handler'].argtypes
+			self.routines[name]['argtypes'] = self.routines[name]['call_handler'].argtypes
 		except:
 			pass
 		try:
-			self.__dll_routines__[name]['restype'] = self.__dll_routines__[name]['call_handler'].restype
+			self.routines[name]['restype'] = self.routines[name]['call_handler'].restype
 		except:
 			pass
 
 		# Log status
-		self.log.out('[06] Set routine "%s" argtypes: %s' % (name, pf(self.__dll_routines__[name]['argtypes'])))
-		self.log.out('[06] Set routine "%s" restype: %s' % (name, pf(self.__dll_routines__[name]['restype'])))
+		self.log.out('[06] Set routine "%s" argtypes: %s' % (name, pf(self.routines[name]['argtypes'])))
+		self.log.out('[06] Set routine "%s" restype: %s' % (name, pf(self.routines[name]['restype'])))
 
 
 	def __unpack_return__(self, function_name, args, kw, return_dict): # TODO kw not yet handled
@@ -343,7 +343,7 @@ class dll_client_class(): # Representing one idividual dll to be called into, re
 		arguments_list = return_dict['args']
 
 		# Make it short
-		method_metainfo_argtypes = self.__dll_routines__[function_name]['argtypes_p']
+		method_metainfo_argtypes = self.routines[function_name]['argtypes_p']
 
 		# Step through arguments
 		for arg_index, arg in enumerate(args):
