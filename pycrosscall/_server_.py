@@ -252,36 +252,8 @@ class wine_server_class:
 		Exposed interface
 		"""
 
-		# Log status
-		self.log.out('[_server_] Trying to access "%s"' % routine_name)
-
-		try:
-
-			# Just in case this routine is already known
-			if routine_name not in self.dll_dict[full_path_dll_unix]['method_handlers'].keys():
-
-				# Get handler on routine in dll
-				self.dll_dict[full_path_dll_unix]['method_handlers'][routine_name] = getattr(
-					self.dll_dict[full_path_dll_unix]['dll_handler'], routine_name
-					)
-
-				# Prepare dict for metainfo
-				self.dll_dict[full_path_dll_unix]['method_metainfo'][routine_name] = {}
-
-			# Log status
-			self.log.out('[_server_] ... done.')
-
-			return True # Success
-
-		except:
-
-			# Log status
-			self.log.out('[_server_] ... failed!')
-
-			# Push traceback to log
-			self.log.err(traceback.format_exc())
-
-			return False # Fail
+		# Register routine in DLL
+		return self.dll_dict[full_path_dll_unix].register_routine(routine_name)
 
 
 	def __terminate__(self):

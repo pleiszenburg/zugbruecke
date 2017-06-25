@@ -42,6 +42,42 @@ from pprint import pformat as pf
 class routine_server_class():
 
 
-	def __init__(self):
+	def __init__(self, parent_dll, routine_name):
 
-		pass
+		# Store handle on parent dll
+		self.dll = parent_dll
+
+		# Store pointer to pycrosscall session
+		self.session = self.dll.session
+
+		# Get handle on log
+		self.log = self.dll.log
+
+		# Store my own name
+		self.name = routine_name
+
+		# Prepare dict for metainfo
+		self.metainfo = {}
+
+		# Log status
+		self.log.out('[routine-server] Attaching to routine "%s" in DLL file "%s" ...' % (self.name, self.dll.name))
+
+		try:
+
+			# Get handler on routine in dll
+			self.handler = getattr(
+				self.dll.handler, routine_name
+				)
+
+			# Log status
+			self.log.out('[routine-server] ... done.' %)
+
+		except:
+
+			# Log status
+			self.log.out('[routine-server] ... failed!' %)
+
+			# Push traceback to log
+			self.log.err(traceback.format_exc())
+
+			raise # TODO

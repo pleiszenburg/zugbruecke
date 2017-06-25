@@ -84,3 +84,33 @@ class dll_server_class(): # Representing one idividual dll to be called into
 			self.log.err(traceback.format_exc())
 
 			raise
+
+
+	def register_routine(self, routine_name):
+
+		# Log status
+		self.log.out('[dll-server] Trying to access "%s" in DLL file "%s" ...' % (routine_name, self.name))
+
+		# Just in case this routine is already known
+		if routine_name not in self.routines.keys():
+
+			try:
+
+				# Generate new instance of routine class
+				self.routines[routine_name] = routine_server_class(self, routine_name)
+
+				# Log status
+				self.log.out('[dll-server] ... done.')
+
+				return True # Success
+
+			except:
+
+				# Log status
+				self.log.out('[dll-server] ... failed!')
+
+				return False # Fail
+
+		else:
+
+			return True # Success, just in case
