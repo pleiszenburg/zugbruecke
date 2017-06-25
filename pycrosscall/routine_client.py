@@ -32,6 +32,7 @@ specific language governing rights and limitations under the License.
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 import ctypes
+from functools import partial
 from pprint import pformat as pf
 
 
@@ -62,6 +63,9 @@ class routine_client_class():
 		# Set call status
 		self.called = False
 
+		# Turn a bound method into a function ... HACK?
+		self.handle_call = partial(self.__handle_call__)
+
 		# By default, assume no arguments
 		self.handle_call.argtypes = []
 
@@ -72,7 +76,7 @@ class routine_client_class():
 		self.__register_routine_on_server__()
 
 
-	def handle_call(self, *args, **kw):
+	def __handle_call__(self, *args, **kw):
 		"""
 		TODO Optimize for speed!
 		"""
@@ -286,8 +290,8 @@ class routine_client_class():
 			pass
 
 		# Log status
-		self.log.out('[routine-client]  argtypes: %s' % (name, pf(self.argtypes)))
-		self.log.out('[routine-client]  restype: %s' % (name, pf(self.restype)))
+		self.log.out('[routine-client]  argtypes: %s' % pf(self.argtypes))
+		self.log.out('[routine-client]  restype: %s' % pf(self.restype))
 
 
 	def __unpack_return__(self, args, kw, return_dict): # TODO kw not yet handled
