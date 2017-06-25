@@ -49,7 +49,7 @@ class dll_client_class(): # Representing one idividual dll to be called into, re
 
 		# Store dll parameters name, path and type
 		self.full_path = full_path_dll
-		self.__dll_name__ = dll_name
+		self.name = dll_name
 		self.__dll_type__ = dll_type
 
 		# Store pointer to pycrosscall session
@@ -69,13 +69,13 @@ class dll_client_class(): # Representing one idividual dll to be called into, re
 
 		# Status log
 		self.log.out('[00] Telling wine-python about new DLL file: "%s" of type %s' % (
-			self.__dll_name__, self.__dll_type__
+			self.name, self.__dll_type__
 			))
 		self.log.out('[00] (%s)' % self.__dll_full_path_wine__)
 
 		# Tell wine about the dll and its type
 		result = self.client.access_dll(
-			self.__dll_full_path_wine__, self.full_path, self.__dll_name__, self.__dll_type__
+			self.__dll_full_path_wine__, self.full_path, self.name, self.__dll_type__
 			)
 
 		# Raise error if last step failed
@@ -86,7 +86,7 @@ class dll_client_class(): # Representing one idividual dll to be called into, re
 	def __getattr__(self, name): # Handle requests for functions in dll which have yet not been touched
 
 		# Status log
-		self.log.out('[01] Trying to attach to routine "%s" in DLL file "%s" ...' % (name, self.__dll_name__))
+		self.log.out('[01] Trying to attach to routine "%s" in DLL file "%s" ...' % (name, self.name))
 
 		# Is routine unknown?
 		if name not in self.__dll_routines__.keys():
@@ -113,7 +113,7 @@ class dll_client_class(): # Representing one idividual dll to be called into, re
 				}
 
 		# Log status
-		self.log.out('[03] Return unconfigured handler for "%s" in DLL file "%s".' % (name, self.__dll_name__))
+		self.log.out('[03] Return unconfigured handler for "%s" in DLL file "%s".' % (name, self.name))
 
 		# Return handler
 		return self.__dll_routines__[name]['call_handler']
@@ -131,13 +131,13 @@ class dll_client_class(): # Representing one idividual dll to be called into, re
 		del kw['__routine_name__']
 
 		# Log status
-		self.log.out('[04] Trying to call routine "%s" in DLL file "%s" ...' % (name, self.__dll_name__))
+		self.log.out('[04] Trying to call routine "%s" in DLL file "%s" ...' % (name, self.name))
 
 		# Has this routine ever been called?
 		if not self.__dll_routines__[name]['called']:
 
 			# Log status
-			self.log.out('[05] "%s" in DLL file "%s" has not been called before. Configuring ...' % (name, self.__dll_name__))
+			self.log.out('[05] "%s" in DLL file "%s" has not been called before. Configuring ...' % (name, self.name))
 
 			# Processing argument and return value types on first call
 			self.__set_argtype_and_restype__(name)
