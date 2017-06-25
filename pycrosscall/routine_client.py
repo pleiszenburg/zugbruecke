@@ -62,6 +62,12 @@ class routine_client_class():
 		# Set call status
 		self.called = False
 
+		# By default, assume no arguments
+		self.handle_call.argtypes = []
+
+		# By default, assume c_int return value like ctypes expects
+		self.handle_call.restype = ctypes.c_int
+
 		# Tell server about routine
 		self.__register_routine_on_server__()
 
@@ -254,12 +260,6 @@ class routine_client_class():
 
 		# If success ...
 		if result:
-
-			# By default, assume no arguments
-			self.argtypes = []
-
-			# By default, assume c_int return value like ctypes expects
-			self.restype = ctypes.c_int
 
 			# Log status
 			self.log.out('[routine-client] ... done (unconfigured).')
