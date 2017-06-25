@@ -97,7 +97,7 @@ class routine_client_class():
 
 		# Actually call routine in DLL! TODO Handle kw ...
 		return_dict = self.client.call_dll_routine(
-			self.dll.full_path, name, self.__pack_args__(self.argtypes_p, args)
+			self.dll.full_path, self.name, self.__pack_args__(self.argtypes_p, args)
 			)
 
 		# Log status
@@ -294,7 +294,7 @@ class routine_client_class():
 		self.log.out('[routine-client]  restype: %s' % (name, pf(self.restype)))
 
 
-	def __unpack_return__(self, function_name, args, kw, return_dict): # TODO kw not yet handled
+	def __unpack_return__(self, args, kw, return_dict): # TODO kw not yet handled
 		"""
 		TODO Optimize for speed!
 		"""
@@ -302,28 +302,28 @@ class routine_client_class():
 		# Get arguments' list
 		arguments_list = return_dict['args']
 
-		# Make it short
-		method_metainfo_argtypes = self.routines[function_name]['argtypes_p']
-
 		# Step through arguments
 		for arg_index, arg in enumerate(args):
 
 			# Fetch definition of current argument
-			arg_definition_dict = method_metainfo_argtypes[arg_index]
+			arg_definition_dict = self.argtypes_p[arg_index]
 
-			# Handle fundamental types by value
-			if not arg_definition_dict['p'] and arg_definition_dict['f']:
+			# Handle fundamental types
+			if arg_definition_dict['f']:
 
-				# Nothing to do
-				pass
+				# If by reference ...
+				if arg_definition_dict['p']:
 
-			# Handle fundamental types by reference
-			elif arg_definition_dict['p'] and arg_definition_dict['f']:
+					# Put value back into its ctypes datatype
+					args[arg_index].value = arguments_list[arg_index]
 
-				# Put value back into its ctypes datatype
-				args[arg_index].value = arguments_list[arg_index]
+				# If by value
+				else:
 
-			# Handle everything else (structures)
+					# Nothing to do
+					pass
+
+			# Handle everything else (structures and "the other stuff")
 			else:
 
 				# HACK TODO
