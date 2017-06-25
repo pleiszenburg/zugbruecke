@@ -50,7 +50,7 @@ class dll_client_class(): # Representing one idividual dll to be called into, re
 		# Store dll parameters name, path and type
 		self.full_path = full_path_dll
 		self.name = dll_name
-		self.__dll_type__ = dll_type
+		self.calling_convention = dll_type
 
 		# Store pointer to pycrosscall session
 		self.__session__ = parent_session
@@ -69,13 +69,13 @@ class dll_client_class(): # Representing one idividual dll to be called into, re
 
 		# Status log
 		self.log.out('[00] Telling wine-python about new DLL file: "%s" of type %s' % (
-			self.name, self.__dll_type__
+			self.name, self.calling_convention
 			))
 		self.log.out('[00] (%s)' % self.__dll_full_path_wine__)
 
 		# Tell wine about the dll and its type
 		result = self.client.access_dll(
-			self.__dll_full_path_wine__, self.full_path, self.name, self.__dll_type__
+			self.__dll_full_path_wine__, self.full_path, self.name, self.calling_convention
 			)
 
 		# Raise error if last step failed
