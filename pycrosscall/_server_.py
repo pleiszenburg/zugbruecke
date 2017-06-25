@@ -149,42 +149,6 @@ class wine_server_class:
 			return 'down'
 
 
-	def __pack_return__(self, method_metainfo, args, kw, return_value):
-
-		# Start argument list as a list
-		arguments_list = []
-
-		# Step through arguments
-		for arg_index, arg in enumerate(args):
-
-			# Fetch definition of current argument
-			arg_definition_dict = method_metainfo['argtypes'][arg_index]
-
-			# Handle fundamental types by value
-			if not arg_definition_dict['p'] and arg_definition_dict['f']:
-
-				# Nothing to do ...
-				arguments_list.append(None)
-
-			# Handle fundamental types by reference
-			elif arg_definition_dict['p'] and arg_definition_dict['f']:
-
-				# Append value from ctypes datatype (because most of their Python equivalents are immutable)
-				arguments_list.append(arg.value)
-
-			# Handle everything else (structures)
-			else:
-
-				# HACK TODO
-				arguments_list.append(None)
-
-		return {
-			'args': arguments_list,
-			'kw': {}, # TODO not yet handled
-			'return_value': return_value # TODO allow & handle pointers
-			}
-
-
 	def __register_argtype_and_restype__(self, full_path_dll_unix, routine_name, argtypes, restype):
 		"""
 		Exposed interface
