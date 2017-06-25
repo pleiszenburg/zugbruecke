@@ -366,7 +366,7 @@ class wineserver_session_class:
 		# Count attempts
 		tried_this_many_times = 0
 		# Specify max attempts
-		max_attempts = 10
+		max_attempts = 25
 		# Timeout after seconds per attempt
 		time_out_after_seconds = 0.1
 		# Status variable
