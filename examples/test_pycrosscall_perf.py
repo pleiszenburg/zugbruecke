@@ -74,4 +74,4 @@ if __name__ == '__main__':
 		'test_simple_demo_routine()',
 		setup = "from __main__ import test_simple_demo_routine"
 		)
-	print('[TIME] %f' % t.timeit(number = 10000))
+	print('[TIME] %f' % t.timeit(number = 100000))

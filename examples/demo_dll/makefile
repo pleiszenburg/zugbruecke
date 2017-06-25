@@ -23,7 +23,7 @@
 
 CC      = i686-w64-mingw32-gcc
 CFLAGS  = -Wall -Wl,-add-stdcall-alias -shared
-LDFLAGS =
+LDFLAGS = -lm
 
 DEMODLL = demo_dll
 DEMODLL_C = $(DEMODLL).c

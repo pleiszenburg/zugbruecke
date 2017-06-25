@@ -40,16 +40,14 @@ import time
 try:
 	from .lib import get_free_port
 	from .rpc import (
-		xmlrpc_client,
-		xmlrpc_requesthandler,
-		xmlrpc_server
+		mp_client_class,
+		mp_server_class
 		)
 except:
 	from lib import get_free_port
 	from rpc import (
-		xmlrpc_client,
-		xmlrpc_requesthandler,
-		xmlrpc_server
+		mp_client_class,
+		mp_server_class
 		)
 
 
@@ -217,39 +215,33 @@ class log_class:
 
 	def __start_client__(self):
 
-		self.client = xmlrpc_client(('localhost', self.p['port_server_log']))
+		self.client = mp_client_class(
+			('localhost', self.p['port_socket_log_main']),
+			'pycrosscall_log_main'
+			)
 
 
 	def __start_server__(self):
 
-		# Get a free port from the OS
-		self.server_port = get_free_port()
+		# Generate new socket and store it
+		self.p['port_socket_log_main'] = get_free_port()
 
 		# Create server
-		self.server = xmlrpc_server(
-			('localhost', self.server_port),
-			requestHandler = xmlrpc_requesthandler,
-			allow_none = True,
-			logRequests = False
+		self.server = mp_server_class(
+			('localhost', self.p['port_socket_log_main']),
+			'pycrosscall_log_main'
 			)
 
 		# Register functions
-		self.server.register_introspection_functions()
 		self.server.register_function(self.__receive_message_from_client__, 'transfer_message')
 
 		# Run server in its own thread
-		self.thread_server = threading.Thread(
-			target = self.server.serve_forever,
-			args = (),
-			name = 'server'
-			)
-		self.thread_server.daemon = True
-		self.thread_server.start()
+		self.server.server_forever_in_thread()
 
 
 	def __stop_server__(self):
 
-		self.server.shutdown()
+		self.server.terminate()
 
 
 	def __store_message__(self, message):

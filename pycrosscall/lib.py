@@ -35,6 +35,7 @@ import os
 import random
 import shutil
 import socket
+import tempfile
 import urllib.request
 import zipfile
 
@@ -49,7 +50,7 @@ def get_free_port():
 	s.bind(('', 0))
 	port = s.getsockname()[1]
 	s.close()
-	
+
 	return port
 
 

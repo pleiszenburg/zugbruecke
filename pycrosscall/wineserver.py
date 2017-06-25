@@ -366,7 +366,7 @@ class wineserver_session_class:
 		# Count attempts
 		tried_this_many_times = 0
 		# Specify max attempts
-		max_attempts = 10
+		max_attempts = 25
 		# Timeout after seconds per attempt
 		time_out_after_seconds = 0.1
 		# Status variable
@@ -384,7 +384,6 @@ class wineserver_session_class:
 			# Start winepath for tanslating path, catch output from all pipes
 			winepath_p = subprocess.Popen(
 				['winepath', '-w', path],
-				stdin = subprocess.PIPE,
 				stdout = subprocess.PIPE,
 				stderr = subprocess.PIPE
 				)
