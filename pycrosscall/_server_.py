@@ -129,6 +129,7 @@ class wine_server_class:
 
 	def __call_dll_routine__(self, full_path_dll_unix, routine_name, arg_message_list):
 		"""
+		Exposed interface
 		TODO Optimize for speed!
 		"""
 
@@ -167,6 +168,9 @@ class wine_server_class:
 
 
 	def __get_status__(self):
+		"""
+		Exposed interface
+		"""
 
 		if self.up:
 			return 'up'
@@ -211,6 +215,9 @@ class wine_server_class:
 
 
 	def __register_argtype_and_restype__(self, full_path_dll_unix, routine_name, argtypes, restype):
+		"""
+		Exposed interface
+		"""
 
 		# Log status
 		self.log.out('[_server_] Trying to set argument and return value types for "%s" ...' % routine_name)
@@ -241,6 +248,9 @@ class wine_server_class:
 
 
 	def __register_routine__(self, full_path_dll_unix, routine_name):
+		"""
+		Exposed interface
+		"""
 
 		# Log status
 		self.log.out('[_server_] Trying to access "%s"' % routine_name)
@@ -275,6 +285,9 @@ class wine_server_class:
 
 
 	def __terminate__(self):
+		"""
+		Exposed interface
+		"""
 
 		# Run only if session still up
 		if self.up:
