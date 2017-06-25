@@ -40,6 +40,11 @@ from glob import glob
 # SETUP
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+
+with open(os.path.join(os.path.dirname(__file__), 'README.rst')) as f:
+	long_description = f.read()
+
+
 setup(
 	name = 'pycrosscall',
 	packages = ['pycrosscall'],
@@ -52,7 +57,6 @@ setup(
 	download_url = 'https://github.com/s-m-e/pycrosscall/archive/pycrosscall_0.0.1.tar.gz',
 	license = 'LGPLv2',
 	keywords = ['ctypes', 'wine'],
-	install_requires = [],
 	scripts = glob(os.path.join('scripts', '*')),
 	classifiers = [
 		'Development Status :: 3 - Alpha',
