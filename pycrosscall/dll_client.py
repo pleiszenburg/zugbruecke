@@ -56,7 +56,7 @@ class dll_client_class(): # Representing one idividual dll to be called into, re
 		self.__session__ = parent_session
 
 		# For convenience ...
-		self.__client__ = self.__session__.client
+		self.client = self.__session__.client
 
 		# Get handle on log
 		self.log = self.__session__.log
@@ -74,7 +74,7 @@ class dll_client_class(): # Representing one idividual dll to be called into, re
 		self.log.out('[00] (%s)' % self.__dll_full_path_wine__)
 
 		# Tell wine about the dll and its type
-		result = self.__client__.access_dll(
+		result = self.client.access_dll(
 			self.__dll_full_path_wine__, self.__dll_full_path__, self.__dll_name__, self.__dll_type__
 			)
 
@@ -95,7 +95,7 @@ class dll_client_class(): # Representing one idividual dll to be called into, re
 			self.log.out('[02] Routine not yet in list. Registering ...')
 
 			# Register routine in wine
-			result = self.__client__.register_routine(self.__dll_full_path__, name)
+			result = self.client.register_routine(self.__dll_full_path__, name)
 
 			# Log status
 			self.log.out('[02] Feedback from wine-python: %d' % result)
@@ -155,7 +155,7 @@ class dll_client_class(): # Representing one idividual dll to be called into, re
 		arg_message_list = self.__pack_args__(self.__dll_routines__[name]['argtypes_p'], args)
 
 		# Actually call routine in DLL! TODO Handle structurs and pointers ...
-		return_dict = self.__client__.call_dll_routine(
+		return_dict = self.client.call_dll_routine(
 			self.__dll_full_path__, name, arg_message_list
 			)
 
@@ -305,7 +305,7 @@ class dll_client_class(): # Representing one idividual dll to be called into, re
 		self.__dll_routines__[name]['restype_p'] = returntype
 
 		# Pass argument and return value types as strings ...
-		result = self.__client__.register_argtype_and_restype(
+		result = self.client.register_argtype_and_restype(
 			self.__dll_full_path__, name, arguments, returntype
 			)
 
