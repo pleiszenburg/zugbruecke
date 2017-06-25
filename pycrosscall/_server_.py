@@ -130,41 +130,12 @@ class wine_server_class:
 	def __call_dll_routine__(self, full_path_dll_unix, routine_name, arg_message_list):
 		"""
 		Exposed interface
-		TODO Optimize for speed!
 		"""
 
-		# Log status
-		self.log.out('[_server_] Trying call routine "%s" ...' % routine_name)
-
-		# Make it shorter ...
-		method = self.dll_dict[full_path_dll_unix]['method_handlers'][routine_name]
-		method_metainfo = self.dll_dict[full_path_dll_unix]['method_metainfo'][routine_name]
-
-		# Unpack passed arguments, handle pointers and structs ...
-		args, kw = self.__unpack_arguments__(method_metainfo, arg_message_list, method_metainfo['datatypes'])
-
-		# Default return value
-		return_value = None
-
-		# This is risky
-		try:
-
-			# Call into dll
-			return_value = method(*args, **kw)
-
-			# Log status
-			self.log.out('[_server_] ... done.')
-
-		except:
-
-			# Log status
-			self.log.out('[_server_] ... failed!')
-
-			# Push traceback to log
-			self.log.err(traceback.format_exc())
-
-		# Pack return package and return it
-		return self.__pack_return__(method_metainfo, args, kw, return_value)
+		# Register argtypes and restype of a routine
+		return self.dll_dict[full_path_dll_unix].routines[routine_name].call_routine(
+			arg_message_list
+			)
 
 
 	def __get_status__(self):

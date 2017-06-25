@@ -83,6 +83,44 @@ class routine_server_class():
 			raise # TODO
 
 
+	def call_routine(self, arg_message_list):
+		"""
+		TODO: Optimize for speed!
+		"""
+
+		# Log status
+		self.log.out('[routine-server] Trying call routine "%s" ...' % routine_name)
+
+		# Make it shorter ...
+		method_metainfo = self.dll_dict[full_path_dll_unix]['method_metainfo'][routine_name]
+
+		# Unpack passed arguments, handle pointers and structs ...
+		args, kw = self.__unpack_arguments__(method_metainfo, arg_message_list, method_metainfo['datatypes'])
+
+		# Default return value
+		return_value = None
+
+		# This is risky
+		try:
+
+			# Call into dll
+			return_value = self.handler(*args, **kw)
+
+			# Log status
+			self.log.out('[routine-server] ... done.')
+
+		except:
+
+			# Log status
+			self.log.out('[routine-server] ... failed!')
+
+			# Push traceback to log
+			self.log.err(traceback.format_exc())
+
+		# Pack return package and return it
+		return self.__pack_return__(method_metainfo, args, kw, return_value)
+
+
 	def register_argtype_and_restype(self, argtypes, restype):
 
 		# Log status
