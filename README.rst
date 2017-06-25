@@ -278,7 +278,7 @@ From now on, pycrosscall on the "Unix side" acts as a client to its server on th
 them using the regular ``ctypes`` interface for Windows.
 
 Is it secure?
------------
+-------------
 
 No. See "Security" section of this document.
 

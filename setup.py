@@ -40,6 +40,11 @@ from glob import glob
 # SETUP
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+
+with open(os.path.join(os.path.dirname(__file__), 'README.rst')) as f:
+	long_description = f.read()
+
+
 setup(
 	name = 'pycrosscall',
 	packages = ['pycrosscall'],
