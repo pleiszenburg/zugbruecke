@@ -13,6 +13,7 @@ pycrosscall is **built on top of Wine**. A stand-alone Windows Python interprete
 launched in the background is used to execute the called DLL routines.
 Communication between the UNIX-side and the Windows/Wine-side is based on Python's
 build-in multiprocessing connection capability.
+pycrosscall has (limited) support for pointers and struct types.
 pycrosscall comes with extensive logging features allowing to debug problems
 associated with both itself and with Wine.
 pycrosscall is written using **Python 3 syntax** and primarily targets the
@@ -73,13 +74,13 @@ should run just fine with pycrosscall.
 
 	from pycrosscall import ctypes
 
-	_call_demo_routine_ = ctypes.windll.LoadLibrary('demo_dll.dll').simple_demo_routine
-	_call_demo_routine_.argtypes = [
+	simple_demo_routine = ctypes.windll.LoadLibrary('demo_dll.dll').simple_demo_routine
+	simple_demo_routine.argtypes = [
 		ctypes.c_float,
 		ctypes.c_float
 		]
-	_call_demo_routine_.restype = ctypes.c_float
-	return_value = _call_demo_routine_(20.0, 1.07)
+	simple_demo_routine.restype = ctypes.c_float
+	return_value = simple_demo_routine(20.0, 1.07)
 	print('Got "%f".' % return_value)
 
 It will print ``Got "1.308412".`` assuming that the corresponding routine in the DLL
@@ -229,14 +230,14 @@ What are actual use cases for this project?
   running mission critical legacy plugins for legacy ERP software in a modern environment
   comes to mind.
 
-- Calling routines in DLLs which come, for some odd reason (like "developer suddenly
-  disappeared with source code"), without source code.
+- Calling routines in DLLs which come, for some odd reason like "developer suddenly
+  disappeared with source code", without source code.
   DLLs found in company-internal software or R&D projects come to mind.
 
 - More common than one might think, calling routines in DLLs, of which the source code is available but
   can not be (re-)compiled (on another platform) / understood / ported for similarly
-  odd reasons (like "developer retired and nobody knows how to do this" or "developer died
-  and nobody manages to understand the undocumented code"). The latter is especially
+  odd reasons like "developer retired and nobody knows how to do this" or "developer 'went on'
+  and nobody manages to understand the undocumented code". The latter is especially
   prevalent in academic environments, where what is left of years of hard work might
   only be a single "binary blob" - a copy of an old DLL file. All sorts of complicated
   and highly specialized numerical computations come to mind.
@@ -284,14 +285,16 @@ Yes and no. Pointers to simple C data types (int, float, etc.)
 used as function parameters can be handled just fine. Pointers
 to arbitrary data structures are a bit of a problem. Pointers
 returned by a DLL pointing to memory allocated by the DLL are
-problematic, too. pycrosscall offers ways to copy memory from
+problematic, too.
+
+pycrosscall is intended to once offer ways to copy memory from
 the Unix side to the Wine side as well as in the opposite
-direction, but those operations must (a) be triggered by the
+direction, but those operations must likely (a) be triggered by the
 programmer (manually, so to speak) and (b) require knowledge
 of the size of the data structure to be copied.
 
-Missing features (for full ctypes compatibility)
-================================================
+Missing features (for better ctypes compatibility)
+==================================================
 
 The following features have yet not been added to pycrosscall:
 
@@ -314,8 +317,7 @@ can be achieved:
 - pycrosscall must become thread safe so it can be used with modules like ``multiprocessing``.
 - A test-suite covering all features must be developed.
 - Structures and pointers should be handled more appropriately.
-  Especially, structures should be passed in a better, more secure and faster way
-  than via ``/dev/shm`` on Linux. For MacOS and BSD, similar solutions must be implemented.
+  Especially, structures should be passed in a better way.
 - The log should be divided into log-levels with more or less details.
   Higher log-levels should contain details of the current stack frame
   such as line number or calling routine (based on the ``inspect``).
