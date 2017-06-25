@@ -65,17 +65,17 @@ class dll_client_class(): # Representing one idividual dll to be called into, re
 		self.__dll_routines__ = {}
 
 		# Translate dll's full path into wine path
-		self.__dll_full_path_wine__ = self.__session__.wineserver_session.translate_path_unix2win(self.full_path)
+		self.full_path_wine = self.__session__.wineserver_session.translate_path_unix2win(self.full_path)
 
 		# Status log
 		self.log.out('[00] Telling wine-python about new DLL file: "%s" of type %s' % (
 			self.name, self.calling_convention
 			))
-		self.log.out('[00] (%s)' % self.__dll_full_path_wine__)
+		self.log.out('[00] (%s)' % self.full_path_wine)
 
 		# Tell wine about the dll and its type
 		result = self.client.access_dll(
-			self.__dll_full_path_wine__, self.full_path, self.name, self.calling_convention
+			self.full_path_wine, self.full_path, self.name, self.calling_convention
 			)
 
 		# Raise error if last step failed
