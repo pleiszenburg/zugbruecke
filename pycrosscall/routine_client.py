@@ -113,40 +113,6 @@ class routine_client_class():
 		return return_dict['return_value']
 
 
-	def __register_routine_on_server__(self):
-
-		# Log status
-		self.log.out('[routine-client] Registering routine "%s" on server ...' % self.name)
-
-		# Register routine in wine
-		result = self.client.register_routine(self.dll.full_path, self.name)
-
-		# If success ...
-		if result:
-
-			# By default, assume no arguments
-			self.argtypes = []
-
-			# By default, assume c_int return value like ctypes expects
-			self.restype = ctypes.c_int
-
-			# Log status
-			self.log.out('[routine-client] ... done (unconfigured).')
-
-		# If failed ...
-		else:
-
-			# Log status
-			self.log.out('[routine-client] ... failed!')
-
-			raise # TODO
-
-
-
-
-
-
-
 	def __pack_datatype_dict__(self, datatype, field_name = None):
 
 		# Pointer status
@@ -161,6 +127,7 @@ class routine_client_class():
 
 		# Check for pointer, if yes, flag it and isolate datatype
 		if group_name == 'PyCPointerType':
+
 			is_pointer = True
 			type_name = datatype._type_.__name__
 			group_name = type(datatype._type_).__name__
@@ -199,13 +166,13 @@ class routine_client_class():
 		# Pointers of pointers
 		elif group_name == 'PyCPointerType':
 
-			self.log.err('ERROR: Unhandled pointer of pointer')
+			self.log.err('[routine-client] ERROR: Unhandled pointer of pointer')
 			raise # TODO
 
 		# UNKNOWN stuff
 		else:
 
-			self.log.err('ERROR: Unknown class of datatype: "%s"', group_name)
+			self.log.err('[routine-client] ERROR: Unknown class of datatype: "%s"', group_name)
 			raise # TODO
 
 
@@ -274,6 +241,35 @@ class routine_client_class():
 
 		# Handle error
 		if result == 0:
+			raise # TODO
+
+
+	def __register_routine_on_server__(self):
+
+		# Log status
+		self.log.out('[routine-client] Registering routine "%s" on server ...' % self.name)
+
+		# Register routine in wine
+		result = self.client.register_routine(self.dll.full_path, self.name)
+
+		# If success ...
+		if result:
+
+			# By default, assume no arguments
+			self.argtypes = []
+
+			# By default, assume c_int return value like ctypes expects
+			self.restype = ctypes.c_int
+
+			# Log status
+			self.log.out('[routine-client] ... done (unconfigured).')
+
+		# If failed ...
+		else:
+
+			# Log status
+			self.log.out('[routine-client] ... failed!')
+
 			raise # TODO
 
 
