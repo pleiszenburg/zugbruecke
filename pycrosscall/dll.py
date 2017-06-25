@@ -35,8 +35,6 @@ import ctypes
 from functools import partial
 from pprint import pformat as pf
 
-from .lib import FUNDAMENTAL_C_DATATYPES
-
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # LOADLIBRARY CLASS
@@ -117,6 +115,9 @@ class dll_session_class(): # Mimic ctypes.WinDLL. Representing one idividual dll
 
 
 	def __handle_call__(self, *args, **kw):
+		"""
+		TODO Optimize for speed!
+		"""
 
 		# Store routine name
 		name = kw['__routine_name__']
@@ -145,12 +146,12 @@ class dll_session_class(): # Mimic ctypes.WinDLL. Representing one idividual dll
 		# Log status
 		self.__session__.log.out('[08] Call parameters are %r / %r. Pushing to wine-python ...' % (args, kw))
 
-		# Pack arguments and handle pointers
-		arg_message_dict = self.__pack_arguments__(name, args, kw)
+		# Pack arguments and handle pointers based on parsed argument definition TODO kw!
+		arg_message_list = self.__pack_args__(self.__dll_routines__[name]['argtypes_p'], args)
 
 		# Actually call routine in DLL! TODO Handle structurs and pointers ...
 		return_dict = self.__client__.call_dll_routine(
-			self.__dll_full_path__, name, arg_message_dict
+			self.__dll_full_path__, name, arg_message_list
 			)
 
 		# Unpack return dict (for pointers and structs)
@@ -163,58 +164,113 @@ class dll_session_class(): # Mimic ctypes.WinDLL. Representing one idividual dll
 		return return_dict['return_value']
 
 
-	def __pack_datatype_dict__(self, datatype):
+	def __pack_datatype_dict__(self, datatype, field_name = None):
 
 		# Pointer status
 		is_pointer = False
+		# Struct status
+		is_struct = False
 
 		# Get name of datatype
 		type_name = datatype.__name__
+		# Get group of datatype
+		group_name = type(datatype).__name__ # 'PyCSimpleType', 'PyCStructType' or 'PyCPointerType'
 
 		# Check for pointer, if yes, flag it and isolate datatype
-		if type_name.startswith('LP_'):
+		if group_name == 'PyCPointerType':
 			is_pointer = True
-			type_name = type_name[3:]
+			type_name = datatype._type_.__name__
+			group_name = type(datatype._type_).__name__
 
-		# Handle cases
-		if type_name in FUNDAMENTAL_C_DATATYPES:
+		# Fundamental C types
+		if group_name == 'PyCSimpleType':
 
 			return {
+				'n': field_name, # kw
 				'p': is_pointer, # Is a pointer
 				't': type_name, # Type name, such as 'c_int'
-				'f': True # Is a fundamental type
+				'f': True, # Is a fundamental type (PyCSimpleType)
+				's': False # Is not a struct
 				}
 
+		# Structs
+		elif group_name == 'PyCStructType':
+
+			# Get fields
+			if is_pointer:
+				struct_fields = datatype._type_._fields_
+			else:
+				struct_fields = datatype._fields_
+
+			return {
+				'n': field_name, # kw
+				'p': is_pointer, # Is a pointer
+				't': type_name, # Type name, such as 'c_int'
+				'f': False, # Is a fundamental type (PyCSimpleType)
+				's': True, # Is not a struct
+				'_fields_': [
+					self.__pack_datatype_dict__(field[1], field[0]) for field in struct_fields
+					]
+				}
+
+		# Pointers of pointers
+		elif group_name == 'PyCPointerType':
+
+			self.__session__.log.err('ERROR: Unhandled pointer of pointer')
+			raise # TODO
+
+		# UNKNOWN stuff
 		else:
 
+			self.__session__.log.err('ERROR: Unknown class of datatype: "%s"', group_name)
 			raise # TODO
 
 
-	def __pack_arguments__(self, function_name, args, kw):
+	def __pack_args__(self, method_metainfo_argtypes, args): # TODO kw
+		"""
+		TODO Optimize for speed!
+		"""
 
 		# Shortcut for speed
 		arguments_list = []
 
-		# Make it short
-		method_metainfo_argtypes = self.__dll_routines__[function_name]['argtypes_p']
+		# # Step through arguments
+		# for arg_index, arg in enumerate(args):
+		#
+		# 	# Fetch definition of current argument
+		# 	arg_definition_dict = method_metainfo_argtypes[arg_index]
 
 		# Step through arguments
-		for arg_index, arg in enumerate(args):
+		for arg_index, arg_definition_dict in enumerate(method_metainfo_argtypes):
 
-			# Fetch definition of current argument
-			arg_definition_dict = method_metainfo_argtypes[arg_index]
+			# Fetch current argument
+			if type(args) is list or type(args) is tuple:
+				arg = args[arg_index]
+			else:
+				arg = getattr(args, arg_definition_dict['n'])
 
-			# Handle fundamental types by value
-			if not arg_definition_dict['p'] and arg_definition_dict['f']:
+			# Handle fundamental types
+			if arg_definition_dict['f']:
 
-				# Append value
-				arguments_list.append(arg)
+				# If pointer
+				if arg_definition_dict['p']:
 
-			# Handle fundamental types by reference
-			elif arg_definition_dict['p'] and arg_definition_dict['f']:
+					# Append value from ctypes datatype (because most of their Python equivalents are immutable)
+					arguments_list.append((arg_definition_dict['n'], arg.value))
 
-				# Append value from ctypes datatype (because most of their Python equivalents are immutable)
-				arguments_list.append(arg.value)
+				# If value
+				else:
+
+					# Append value
+					arguments_list.append((arg_definition_dict['n'], arg))
+
+			# Handle structs
+			elif arg_definition_dict['s']:
+
+				# Reclusively call this routine for packing structs
+				arguments_list.append((arg_definition_dict['n'], self.__pack_args__(
+					arg_definition_dict['_fields_'], arg
+					)))
 
 			# Handle everything else (structures)
 			else:
@@ -222,11 +278,8 @@ class dll_session_class(): # Mimic ctypes.WinDLL. Representing one idividual dll
 				# HACK TODO
 				arguments_list.append(None)
 
-		# Return parameter message dict - MUST WORK WITH PICKLE
-		return {
-			'args': arguments_list,
-			'kw': {} # TODO not yet handled
-			}
+		# Return parameter message list - MUST WORK WITH PICKLE
+		return arguments_list
 
 
 	def __push_argtype_and_restype__(self, name):
@@ -234,7 +287,7 @@ class dll_session_class(): # Mimic ctypes.WinDLL. Representing one idividual dll
 		# Log status
 		self.__session__.log.out('[07] Processing & pushing argument and return value types ...')
 
-		# Prepare list of arguments by parsing them into list of dicts
+		# Prepare list of arguments by parsing them into list of dicts (TODO field name / kw)
 		arguments = [self.__pack_datatype_dict__(arg) for arg in self.__dll_routines__[name]['argtypes']]
 
 		# Store processed arguments
@@ -277,6 +330,9 @@ class dll_session_class(): # Mimic ctypes.WinDLL. Representing one idividual dll
 
 
 	def __unpack_return__(self, function_name, args, kw, return_dict): # TODO kw not yet handled
+		"""
+		TODO Optimize for speed!
+		"""
 
 		# Get arguments' list
 		arguments_list = return_dict['args']

@@ -39,7 +39,6 @@ from pprint import pformat as pf
 import sys
 import traceback
 
-from lib import FUNDAMENTAL_C_DATATYPES
 from log import log_class
 from rpc import (
 	mp_server_class
@@ -130,10 +129,10 @@ class wine_server_class:
 			except:
 
 				# Log status
-				self.log.out('[_server_] ... failed! Traceback:')
+				self.log.out('[_server_] ... failed!')
 
 				# Push traceback to log
-				self.log.out(traceback.format_exc())
+				self.log.err(traceback.format_exc())
 
 				return 0 # Fail
 
@@ -141,7 +140,10 @@ class wine_server_class:
 		return 1
 
 
-	def __call_dll_routine__(self, full_path_dll_unix, routine_name, arg_message_dict):
+	def __call_dll_routine__(self, full_path_dll_unix, routine_name, arg_message_list):
+		"""
+		TODO Optimize for speed!
+		"""
 
 		# Log status
 		self.log.out('[_server_] Trying call routine "%s" ...' % routine_name)
@@ -151,7 +153,7 @@ class wine_server_class:
 		method_metainfo = self.dll_dict[full_path_dll_unix]['method_metainfo'][routine_name]
 
 		# Unpack passed arguments, handle pointers and structs ...
-		args, kw = self.__unpack_arguments__(method_metainfo, arg_message_dict)
+		args, kw = self.__unpack_arguments__(method_metainfo, arg_message_list, method_metainfo['datatypes'])
 
 		# Default return value
 		return_value = None
@@ -168,10 +170,10 @@ class wine_server_class:
 		except:
 
 			# Log status
-			self.log.out('[_server_] ... failed! Traceback:')
+			self.log.out('[_server_] ... failed!')
 
 			# Push traceback to log
-			self.log.out(traceback.format_exc())
+			self.log.err(traceback.format_exc())
 
 		# Pack return package and return it
 		return self.__pack_return__(method_metainfo, args, kw, return_value)
@@ -227,16 +229,19 @@ class wine_server_class:
 		self.log.out('[_server_] Trying to set argument and return value types for "%s" ...' % routine_name)
 
 		# Make it shorter ...
-		method = self.dll_dict[full_path_dll_unix]['method_handlers'][routine_name]
 		method_metainfo = self.dll_dict[full_path_dll_unix]['method_metainfo'][routine_name]
+		method = self.dll_dict[full_path_dll_unix]['method_handlers'][routine_name]
+
+		# Prepare store for struct classes
+		method_metainfo['datatypes'] = {}
 
 		# Parse & store argtype dicts into argtypes
 		method_metainfo['argtypes'] = argtypes
-		method.argtypes = [self.__unpack_datatype_dict__(arg_dict) for arg_dict in argtypes]
+		method.argtypes = [self.__unpack_type_dict__(arg_dict, method_metainfo['datatypes']) for arg_dict in argtypes]
 
 		# Parse & store return value type
 		method_metainfo['restype'] = restype
-		method.restype = self.__unpack_datatype_dict__(restype)
+		method.restype = self.__unpack_type_dict__(restype, method_metainfo['datatypes'])
 
 		# Log status
 		self.log.out('[_server_] ... argtypes: %s ...' % pf(method.argtypes))
@@ -274,10 +279,10 @@ class wine_server_class:
 		except:
 
 			# Log status
-			self.log.out('[_server_] ... failed! Traceback:')
+			self.log.out('[_server_] ... failed!')
 
 			# Push traceback to log
-			self.log.out(traceback.format_exc())
+			self.log.err(traceback.format_exc())
 
 			return 0 # Fail
 
@@ -300,63 +305,211 @@ class wine_server_class:
 			self.up = False
 
 
-	def __unpack_arguments__(self, method_metainfo, arg_message_dict):
+	def __unpack_arguments__(self, method_metainfo, args_list, datatype_store_dict):
+		"""
+		TODO Optimize for speed!
+		"""
 
-		# Start argument list as a list
+		# Start argument list as a list (will become a tuple)
 		arguments_list = []
 
-		# Get arguments' list
-		args = arg_message_dict['args']
-
 		# Step through arguments
-		for arg_index, arg in enumerate(args):
+		for arg_index, arg in enumerate(args_list):
 
 			# Fetch definition of current argument
 			arg_definition_dict = method_metainfo['argtypes'][arg_index]
 
-			# Handle fundamental types by value
-			if not arg_definition_dict['p'] and arg_definition_dict['f']:
+			# Handle fundamental types
+			if arg_definition_dict['f']:
 
-				# Append value
-				arguments_list.append(arg)
+				# By reference
+				if arg_definition_dict['p']:
 
-			# Handle fundamental types by reference
-			elif arg_definition_dict['p'] and arg_definition_dict['f']:
+					# Put value back into its ctypes datatype
+					arguments_list.append(
+						getattr(ctypes, arg_definition_dict['t'])(arg[1])
+						)
 
-				# Put value back into its ctypes datatype
-				arguments_list.append(
-					getattr(ctypes, arg_definition_dict['t'])(arg)
-					)
+				# By value
+				else:
 
-			# Handle everything else (structures)
+					# Append value
+					arguments_list.append(arg[1])
+
+			# Handle structs
+			elif arg_definition_dict['s']:
+
+				# Generate new instance of struct datatype
+				struct_arg = datatype_store_dict[arg_definition_dict['t']]()
+
+				# Unpack values into struct
+				self.__unpack_arguments_struct__(arg_definition_dict['_fields_'], struct_arg, arg[1], datatype_store_dict)
+
+				# Append struct to list
+				arguments_list.append(struct_arg)
+
+			# Handle everything else ...
 			else:
 
 				# HACK TODO
-				arguments_list.append(None)
+				arguments_list.append(0)
 
 		# Return args as tuple and kw as dict
 		return tuple(arguments_list), {} # TODO kw not yet handled
 
 
-	def __unpack_datatype_dict__(self, datatype_dict):
+	def __unpack_arguments_struct__(self, arg_definition_list, struct_inst, args_list, datatype_store_dict):
+		"""
+		TODO Optimize for speed!
+		"""
 
-		# Handle the 'easy' stuff ...
-		if datatype_dict['t'] in FUNDAMENTAL_C_DATATYPES:
+		# Step through arguments
+		for arg_index, arg in enumerate(args_list):
 
-			# Return type class or type pointer
-			if datatype_dict['p']:
-				return ctypes.POINTER(getattr(ctypes, datatype_dict['t']))
+			# Get current argument definition
+			arg_definition_dict = arg_definition_list[arg_index]
+
+			# Handle fundamental types
+			if arg_definition_dict['f']:
+
+				# By reference
+				if arg_definition_dict['p']:
+
+					# Put value back into its ctypes datatype
+					setattr(
+						struct_inst, # struct instance to be modified
+						arg[0], # parameter name (from tuple)
+						getattr(ctypes, arg_definition_dict['t'])(arg[1]) # ctypes instance of type with value from tuple
+						)
+
+				# By value
+				else:
+
+					# Append value
+					setattr(
+						struct_inst, # struct instance to be modified
+						arg[0], # parameter name (from tuple)
+						arg[1] # value from tuple
+						)
+
+			# Handle structs
+			elif arg_definition_dict['s']:
+
+				# Generate new instance of struct datatype
+				struct_arg = datatype_store_dict[arg_definition_dict['t']]()
+
+				# Unpack values into struct
+				self.__unpack_arguments_struct__(arg_definition_dict['_fields'], struct_arg, arg[1], datatype_store_dict)
+
+				# Append struct to struct TODO handle pointer to structs!
+				setattr(
+					struct_inst, # struct instance to be modified
+					arg[0], # parameter name (from tuple)
+					struct_arg # value from tuple
+					)
+
+			# Handle everything else ...
 			else:
-				return getattr(ctypes, datatype_dict['t'])
 
-		# And now the hard stuff ...
+				# HACK TODO
+				setattr(
+					struct_inst, # struct instance to be modified
+					arg[0], # parameter name (from tuple)
+					0 # least destructive value ...
+					)
+
+
+	def __unpack_type_dict__(self, datatype_dict, datatype_store_dict):
+
+		# Handle fundamental C datatypes (PyCSimpleType)
+		if datatype_dict['f']:
+
+			return self.__unpack_type_fundamental_dict__(datatype_dict)
+
+		# Structures (PyCStructType)
+		elif datatype_dict['s']:
+
+			return self.__unpack_type_struct_dict__(datatype_dict, datatype_store_dict)
+
+		# Undhandled stuff (pointers of pointers etc.) TODO
 		else:
 
 			# Push traceback to log
-			self.log.out('[_server_] ... unhandled datatype: %s ...' % datatype_dict['t'])
+			self.log.err('[_server_] ERROR: Unhandled datatype: %s' % datatype_dict['t'])
 
 			# HACK TODO
 			return ctypes.c_int
+
+
+	def __unpack_type_fundamental_dict__(self, datatype_dict):
+
+		# Return type class or type pointer
+		if datatype_dict['p']:
+			return ctypes.POINTER(getattr(ctypes, datatype_dict['t']))
+		else:
+			return getattr(ctypes, datatype_dict['t'])
+
+
+	def __unpack_type_struct_dict__(self, datatype_dict, datatype_store_dict):
+
+		# Generate struct class if it does not exist yet
+		if datatype_dict['t'] not in datatype_store_dict.keys():
+			self.__unpack_type_struct_dict_generator__(datatype_dict, datatype_store_dict)
+
+		# Return type class or type pointer
+		if datatype_dict['p']:
+			return ctypes.POINTER(datatype_store_dict[datatype_dict['t']])
+		else:
+			return datatype_store_dict[datatype_dict['t']]
+
+
+	def __unpack_type_struct_dict_generator__(self, datatype_dict, datatype_store_dict):
+
+		# Prepare fields
+		fields = []
+
+		# Step through fields
+		for field in datatype_dict['_fields_']:
+
+			# Handle fundamental C datatypes (PyCSimpleType)
+			if field['f']:
+
+				# Add tuple with name and fundamental datatype
+				fields.append((
+					field['n'],
+					self.__unpack_type_fundamental_dict__(field)
+					))
+
+			# Structures (PyCStructType)
+			elif field['s']:
+
+				# Add tuple with name and struct datatype
+				fields.append((
+					field['n'], self.__unpack_struct_dict__(field, datatype_store_dict)
+					))
+
+			# Undhandled stuff (pointers of pointers etc.) TODO
+			else:
+
+				# Push traceback to log
+				self.log.err('[_server_] ERROR: Unhandled datatype in struct: %s' % datatype_dict['t'])
+
+				# HACK TODO
+				fields.append((
+					field['n'], ctypes.c_int
+					))
+
+		# Generate actual class
+		datatype_store_dict[datatype_dict['t']] = type(
+			datatype_dict['t'], # Potenial BUG ends up in __main__ namespace, problematic
+			(ctypes.Structure,),
+			{'_fields_': fields}
+			)
+
+		# Log status
+		self.log.out('[_server_] Generated struct type "%s" with fields %s' % (
+			datatype_dict['t'], pf(fields)
+			))
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

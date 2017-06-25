@@ -6,7 +6,7 @@ PYCROSSCALL
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/s-m-e/pycrosscall
 
-	pycrosscall/_server_.py: Customized XML-RPC classes
+	pycrosscall/_server_.py: Customized RPC classes
 
 	Required to run on platform / side: [UNIX, WINE]
 
