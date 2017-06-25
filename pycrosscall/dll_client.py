@@ -40,7 +40,7 @@ from pprint import pformat as pf
 # LOADLIBRARY CLASS
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-class dll_session_class(): # Mimic ctypes.WinDLL. Representing one idividual dll to be called into, returned by LoadLibrary
+class dll_client_class(): # Mimic ctypes.WinDLL. Representing one idividual dll to be called into, returned by LoadLibrary
 
 
 	def __init__(self, full_path_dll, dll_name, dll_type, parent_session):
