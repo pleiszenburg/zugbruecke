@@ -119,6 +119,9 @@ class routine_server_class():
 
 
 	def __pack_return__(self, args, kw, return_value):
+		"""
+		TODO: Optimize for speed!
+		"""
 
 		# Start argument list as a list
 		arguments_list = []
