@@ -14,19 +14,23 @@ How to release pycrosscall
 #. Tag branch ``master`` with ``pycrosscall_%s`` % version.
 
 	.. code:: bash
+
 		git tag "pycrosscall_0.0.1"
 
 #. Push the tag to Github.
 
 	.. code:: bash
+
 		git push origin --tags
 
 #. Upload package to ``pypitest`` and review result.
 
 	.. code:: bash
+
 		python setup.py sdist upload -r pypitest
 
 #. Upload package to ``pypi``.
 
 	.. code:: bash
+
 		python setup.py sdist upload -r pypi
