@@ -45,9 +45,6 @@ before_install:
   - wine --version
   - sudo apt-get install -y gcc-mingw-w64-i686
   - sudo apt-get install -y gcc-mingw-w64-x86-64
-  - cd examples/demo_dll/
-  - make
-  - cd ../../
 
 # Repository language
 language: python
@@ -58,7 +55,12 @@ python:
   - "3.6"
 
 # command to install dependencies
-#install: "pip install -r requirements.txt"
+# optional: "pip install -r requirements.txt"
+install:
+  - cd examples/demo_dll/
+  - make
+  - cd ../../
+  - pip install .
 
 # command to run tests
 script: pytest
