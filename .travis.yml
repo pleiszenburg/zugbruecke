@@ -16,8 +16,10 @@ before_install:
   - sudo apt-add-repository 'https://dl.winehq.org/wine-builds/ubuntu/'
   - sudo apt-get -qq update
   - sudo apt-get install -y wine-staging
-  - sudo apt-get install -y gcc-mingw-w64-x86-64
+  - export PATH=/opt/wine-staging/bin:$PATH
   - wine --version
+  - sudo apt-get install -y gcc-mingw-w64-i686
+  - sudo apt-get install -y gcc-mingw-w64-x86-64
   - cd examples/demo_dll/
   - make
   - cd ../../
