@@ -66,7 +66,7 @@ setup(
 	author = 'Sebastian M. Ernst',
 	author_email = 'ernst@pleiszenburg.de',
 	url = 'https://github.com/s-m-e/pycrosscall',
-	download_url = 'https://github.com/s-m-e/pycrosscall/archive/pycrosscall_%s.tar.gz',% version
+	download_url = 'https://github.com/s-m-e/pycrosscall/archive/pycrosscall_%s.tar.gz' % version,
 	license = 'LGPLv2',
 	keywords = ['ctypes', 'wine'],
 	scripts = glob(os.path.join('scripts', '*')),
