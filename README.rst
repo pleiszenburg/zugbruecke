@@ -1,13 +1,14 @@
 
-.. figure:: https://travis-ci.org/s-m-e/pycrosscall.svg?branch=master
+.. |branch_master| image:: https://travis-ci.org/s-m-e/pycrosscall.svg?branch=master
     :target: https://travis-ci.org/s-m-e/pycrosscall
 
-    master/release
-
-.. figure:: https://travis-ci.org/s-m-e/pycrosscall.svg?branch=develop
+.. |branch_develop| image:: https://travis-ci.org/s-m-e/pycrosscall.svg?branch=develop
     :target: https://travis-ci.org/s-m-e/pycrosscall
 
-	development branch
++------------------+--------------------+
+| |branch_master|  +  |branch_develop|  +
+| master/release   + development branch +
++------------------+--------------------+
 
 **pycrosscall** - Calling routines in Windows DLLs from Python scripts running under Linux, MacOS or BSD
 
