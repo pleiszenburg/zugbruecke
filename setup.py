@@ -45,6 +45,14 @@ from glob import glob
 version = '0.0.4'
 
 
+# List all versions of Python which are supported
+confirmed_python_versions = [
+	('Programming Language :: Python :: %s' % x)
+	for x in '3.5 3.6'.split()
+	]
+
+
+# Fetch readme file
 with open(os.path.join(os.path.dirname(__file__), 'README.rst')) as f:
 	long_description = f.read()
 
@@ -72,7 +80,8 @@ setup(
 		'Operating System :: MacOS',
 		'Operating System :: POSIX :: BSD',
 		'Operating System :: POSIX :: Linux',
-		'Programming Language :: Python :: 3',
+		'Programming Language :: Python :: 3'
+		] + confirmed_python_versions + [
 		'Programming Language :: Python :: 3 :: Only',
 		'Programming Language :: Python :: Implementation :: CPython',
 		'Topic :: Scientific/Engineering',
