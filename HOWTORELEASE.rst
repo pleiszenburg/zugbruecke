@@ -3,6 +3,8 @@ How to release pycrosscall
 
 #. Merge all relevant changes into branch ``develop`` - this is where development and pre-release testing happens.
 
+#. In branch ``develop``, run tests and examples ...
+
 #. In branch ``develop``, adjust package version in ``setup.py`` by changing the ``version`` string.
 
 #. Push branch ``develop`` to GitHub.
