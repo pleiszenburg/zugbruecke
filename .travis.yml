@@ -24,7 +24,7 @@
 # Check this file at:
 # http://lint.travis-ci.org/
 
-# A virtual machine is required to run wine
+# A virtual machine is required to run wine - is it?
 sudo: enabled
 
 # A 'recent' version of Ubuntu and Wine is required

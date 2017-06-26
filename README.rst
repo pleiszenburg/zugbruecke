@@ -6,7 +6,7 @@
     :target: https://travis-ci.org/s-m-e/pycrosscall
 
 +------------------+--------------------+
-| |branch_master|  +  |branch_develop|  +
+| |branch_master|  + |branch_develop|   +
 | master/release   + development branch +
 +------------------+--------------------+
 
