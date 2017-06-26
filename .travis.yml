@@ -8,6 +8,7 @@ dist: trusty
 # Get wine and mingw cross compiler
 # http://ubuntuhandbook.org/index.php/2017/01/install-wine-2-0-ubuntu-16-04-14-04-16-10/
 # https://launchpad.net/~wine/+archive/ubuntu/wine-builds?field.series_filter=trusty
+# https://dl.winehq.org/wine-builds/ubuntu/
 before_install:
   - sudo dpkg --add-architecture i386
   - wget https://dl.winehq.org/wine-builds/Release.key
@@ -15,6 +16,11 @@ before_install:
   - sudo apt-add-repository 'https://dl.winehq.org/wine-builds/ubuntu/'
   - sudo apt-get -qq update
   - sudo apt-get install -y wine-staging
+  - sudo apt-get install -y gcc-mingw-w64-x86-64
+  - wine --version
+  - cd examples/demo_dll/
+  - make
+  - cd ../../
 
 # Repository language
 language: python
@@ -29,3 +35,11 @@ python:
 
 # command to run tests
 script: pytest
+
+# Notify developers
+notifications:
+  email:
+    recipients:
+      - ernst@pleiszenburg.de
+    on_success: always
+    on_failure: always
