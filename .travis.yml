@@ -1,0 +1,31 @@
+
+# A virtual machine is required to run wine
+sudo: enabled
+
+# A recent version of Ubuntu and Wine is required
+dist: trusty
+
+# Get wine and mingw cross compiler
+# http://ubuntuhandbook.org/index.php/2017/01/install-wine-2-0-ubuntu-16-04-14-04-16-10/
+# https://launchpad.net/~wine/+archive/ubuntu/wine-builds?field.series_filter=trusty
+before_install:
+  - sudo dpkg --add-architecture i386
+  - wget https://dl.winehq.org/wine-builds/Release.key
+  - sudo apt-key add Release.key
+  - sudo apt-add-repository 'https://dl.winehq.org/wine-builds/ubuntu/'
+  - sudo apt-get -qq update
+  - sudo apt-get install -y wine-staging
+
+# Repository language
+language: python
+
+# Python version
+python:
+  - "3.5"
+  - "3.6"
+
+# command to install dependencies
+#install: "pip install -r requirements.txt"
+
+# command to run tests
+script: pytest
