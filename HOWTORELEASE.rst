@@ -17,7 +17,9 @@ How to release pycrosscall
 
 #. Push the tag to Github.
 
-    git push origin --tags
+    .. code:: bash
+
+        git push origin --tags
 
 #. Upload package to ``pypitest`` and review result.
 
