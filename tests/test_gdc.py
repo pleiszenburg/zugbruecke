@@ -34,7 +34,6 @@ specific language governing rights and limitations under the License.
 import pytest
 
 from zugbruecke import ctypes
-ctypes.windll.start_session(parameter = {'log_level': 10})
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

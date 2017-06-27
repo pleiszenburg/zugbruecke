@@ -62,8 +62,6 @@ python:
 install:
   - make dll
   - make install
-  - echo $PWD
-  - find . | grep -vi git
 
 # command to run tests
 script: pytest
