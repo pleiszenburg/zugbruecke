@@ -32,7 +32,13 @@ DEMODLL_LDFLAGS =
 all: $(DEMODLL)
 
 $(DEMODLL): $(DEMODLL_C)
-	$(CC) $(DEMODLL_C) $(CFLAGS) -o ../$(DEMODLL).dll $(LDFLAGS) $(DEMODLL_LDFLAGS)
+	$(CC) $(DEMODLL_C) $(CFLAGS) -o $(DEMODLL).dll $(LDFLAGS) $(DEMODLL_LDFLAGS)
+
+install:
+	ln -s ../$(DEMODLL)/$(DEMODLL).dll ../examples/$(DEMODLL).dll
+	ln -s ../$(DEMODLL)/$(DEMODLL).dll ../tests/$(DEMODLL).dll
+#	ln -s $(PWD)/$(DEMODLL).dll ../examples/$(DEMODLL).dll
+#	ln -s $(PWD)/$(DEMODLL).dll ../tests/$(DEMODLL).dll
 
 clean:
-	rm ../$(DEMODLL).dll
+	rm $(DEMODLL).dll

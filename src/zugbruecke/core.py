@@ -153,7 +153,7 @@ class session_class():
 		# Log status
 		self.log.out('[core] ... exists ...')
 
-		# Simplyfy full path
+		# Simplify full path
 		full_path_dll = os.path.abspath(full_path_dll)
 
 		# Check whether dll has yet not been touched
