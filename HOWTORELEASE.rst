@@ -9,6 +9,8 @@ How to release zugbruecke
 
 #. Push branch ``develop`` to GitHub.
 
+#. Wait for feedback from Travis CI.
+
 #. Change to branch ``master``.
 
 #. Merge branch ``develop`` into branch ``master`` and push it to GitHub.
@@ -25,14 +27,26 @@ How to release zugbruecke
 
 		git push origin --tags
 
+#. Build packages.
+
+	.. code:: bash
+
+		python setup.py sdist bdist_wheel
+
+#. Sign packages.
+
+.. code:: bash
+
+		gpg --detach-sign -a dist/zugbruecke-*
+
 #. Upload package to ``pypitest`` and review result.
 
 	.. code:: bash
 
-		python setup.py sdist upload -r pypitest
+		twine upload dist/* -r testpypi
 
 #. Upload package to ``pypi``.
 
 	.. code:: bash
 
-		python setup.py sdist upload -r pypi
+		twine upload dist/*
