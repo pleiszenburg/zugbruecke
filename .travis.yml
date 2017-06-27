@@ -42,9 +42,13 @@ before_install:
   - sudo apt-get -qq update
   - sudo apt-get install -y wine-staging
   - export PATH=/opt/wine-staging/bin:$PATH
-  - wine --version
   - sudo apt-get install -y gcc-mingw-w64-i686
   - sudo apt-get install -y gcc-mingw-w64-x86-64
+  - wine --version
+  - i686-w64-mingw32-gcc --version
+  - python --version
+  - uname -a
+  - lsb_release -a
 
 # Repository language
 language: python
