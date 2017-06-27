@@ -25,9 +25,11 @@ demo_dll:
 	@(cd demo_dll; make; make install)
 
 release:
-	rm dist/*
+	-rm dist/*
+	-rm -r src/*.egg-info
 	python setup.py sdist bdist_wheel
-	gpg --detach-sign -a dist/zugbruecke-*
+	gpg --detach-sign -a dist/zugbruecke*.whl
+	gpg --detach-sign -a dist/zugbruecke*.tar.gz
 
 install:
 	pip install -r requirements.txt
