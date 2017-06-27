@@ -64,7 +64,7 @@ install:
   - make install
 
 # command to run tests
-script: pytest
+script: make test
 
 # Notify developers
 notifications:
