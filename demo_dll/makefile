@@ -39,4 +39,6 @@ install:
 	ln -s ../$(DEMODLL)/$(DEMODLL).dll ../tests/$(DEMODLL).dll
 
 clean:
-	rm $(DEMODLL).dll
+	-rm $(DEMODLL).dll
+	-rm ../examples/$(DEMODLL).dll
+	-rm ../tests/$(DEMODLL).dll
