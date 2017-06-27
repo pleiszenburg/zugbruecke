@@ -60,7 +60,7 @@ python:
 
 # command to install dependencies
 install:
-  - make dll
+  - make demo_dll
   - make install
 
 # command to run tests
