@@ -136,7 +136,7 @@ class session_class():
 
 	def LoadLibrary(self, dll_name, dll_type = 'windll'):
 
-		# Get full path of dll
+		# Get full path of dll TODO
 		full_path_dll = os.path.join(self.dir_cwd, dll_name)
 
 		# Log status

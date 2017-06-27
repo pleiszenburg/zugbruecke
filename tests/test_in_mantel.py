@@ -45,12 +45,12 @@ class sample_class:
 
 	def __init__(self):
 
-		self.__dll__ = ctypes.windll.LoadLibrary('demo_dll.dll')
+		self.__dll__ = ctypes.windll.LoadLibrary('tests/demo_dll.dll')
 
 		# int in_mandel(double, double, int)
 		self.in_mandel = self.__dll__.cookbook_in_mandel
 		self.in_mandel.argtypes = (ctypes.c_double, ctypes.c_double, ctypes.c_int)
-		self.in_mandel.restype = ctypes.c_ints
+		self.in_mandel.restype = ctypes.c_int
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -68,4 +68,4 @@ def test_in_mantel_outside():
 
 	sample = sample_class()
 
-	assert 0 == sample.in_mandel(2.0, 1.0, 500))
+	assert 0 == sample.in_mandel(2.0, 1.0, 500)

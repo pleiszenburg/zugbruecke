@@ -45,7 +45,7 @@ class sample_class:
 
 	def __init__(self):
 
-		self.__dll__ = ctypes.windll.LoadLibrary('demo_dll.dll')
+		self.__dll__ = ctypes.windll.LoadLibrary('tests/demo_dll.dll')
 
 		# int gcd(int, int)
 		self.gcd = self.__dll__.cookbook_gcd

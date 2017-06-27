@@ -55,7 +55,7 @@ class sample_class:
 
 	def __init__(self):
 
-		self.__dll__ = ctypes.windll.LoadLibrary('demo_dll.dll')
+		self.__dll__ = ctypes.windll.LoadLibrary('tests/demo_dll.dll')
 
 		# double distance(Point *, Point *)
 		self.distance = self.__dll__.cookbook_distance
@@ -73,5 +73,5 @@ def test_distance():
 
 	p1 = Point(1, 2)
 	p2 = Point(4, 5)
-	
+
 	assert pytest.approx(4.242640687119285, 0.0000001) == sample.distance(p1, p2)
