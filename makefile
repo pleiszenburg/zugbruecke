@@ -21,7 +21,7 @@
 # </LICENSE_BLOCK>
 
 
-demo_dll:
+dll:
 	@(cd demo_dll; make clean; make; make install)
 
 release:
@@ -40,6 +40,4 @@ install_link:
 	pip install -e .
 
 test:
-	echo $PWD
-	find . | grep -vi git
 	pytest
