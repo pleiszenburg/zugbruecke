@@ -5,11 +5,11 @@
 .. |branch_develop| image:: https://travis-ci.org/pleiszenburg/zugbruecke.svg?branch=develop
     :target: https://travis-ci.org/pleiszenburg/zugbruecke
 
-+------------------+--------------------+
-| |branch_master|  + |branch_develop|   +
-+------------------+--------------------+
-| master/release   + development branch +
-+------------------+--------------------+
++--------------------+--------------------+
+| master/release     + |branch_master|    +
++--------------------+--------------------+
+| development branch + |branch_develop|   +
++--------------------+--------------------+
 
 **zugbruecke** - Calling routines in Windows DLLs from Python scripts running under Linux, MacOS or BSD
 
