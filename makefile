@@ -2,7 +2,7 @@
 # Calling routines in Windows DLLs from Python scripts running on unixlike systems
 # https://github.com/pleiszenburg/zugbruecke
 #
-#	demo_dll/makefile: GNU makefile for building demo DLL with mingw
+#	makefile: GNU makefile for project management
 #
 #	Required to run on platform / side: [UNIX]
 #
@@ -21,22 +21,13 @@
 # </LICENSE_BLOCK>
 
 
-CC      = i686-w64-mingw32-gcc
-CFLAGS  = -Wall -Wl,-add-stdcall-alias -shared
-LDFLAGS = -lm
+demo_dll:
+	@(cd demo_dll; make; make install)
 
-DEMODLL = demo_dll
-DEMODLL_C = $(DEMODLL).c
-DEMODLL_LDFLAGS =
+release:
+	rm dist/*
+	python setup.py sdist bdist_wheel
+	gpg --detach-sign -a dist/zugbruecke-*
 
-all: $(DEMODLL)
-
-$(DEMODLL): $(DEMODLL_C)
-	$(CC) $(DEMODLL_C) $(CFLAGS) -o $(DEMODLL).dll $(LDFLAGS) $(DEMODLL_LDFLAGS)
-
-install:
-	ln -s ../$(DEMODLL)/$(DEMODLL).dll ../examples/$(DEMODLL).dll
-	ln -s ../$(DEMODLL)/$(DEMODLL).dll ../tests/$(DEMODLL).dll
-
-clean:
-	rm $(DEMODLL).dll
+test:
+	pytest

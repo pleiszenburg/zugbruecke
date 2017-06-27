@@ -4,7 +4,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	examples/demo_dll/demo_dll.c: Routines for testing ctypes interface
+	demo_dll/demo_dll.c: Routines for testing ctypes interface
 
 	Required to run on platform / side: [WINE]
 
