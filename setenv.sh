@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# PYCROSSCALL
+# ZUGBRUECKE
 # Calling routines in Windows DLLs from Python scripts running on unixlike systems
-# https://github.com/s-m-e/pycrosscall
+# https://github.com/pleiszenburg/zugbruecke
 #
 # 	setenv.sh: Adds project folder to PATH (for R&D). Runs with "source".
 #
@@ -15,7 +15,7 @@
 # Version 2.1 ("LGPL" or "License"). You may not use this file except in
 # compliance with the License. You may obtain a copy of the License at
 # https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt
-# https://github.com/s-m-e/pycrosscall/blob/master/LICENSE
+# https://github.com/pleiszenburg/zugbruecke/blob/master/LICENSE
 #
 # Software distributed under the License is distributed on an "AS IS" basis,
 # WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for the

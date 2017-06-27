@@ -3,11 +3,11 @@
 
 """
 
-PYCROSSCALL
+ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
-https://github.com/s-m-e/pycrosscall
+https://github.com/pleiszenburg/zugbruecke
 
-	examples/test_pycrosscall.py: Demonstrates ctypes examples from Cookbook R3
+	examples/test_zugbruecke.py: Demonstrates ctypes examples from Cookbook R3
 
 	Required to run on platform / side: [UNIX, WINE]
 
@@ -18,7 +18,7 @@ The contents of this file are subject to the GNU Lesser General Public License
 Version 2.1 ("LGPL" or "License"). You may not use this file except in
 compliance with the License. You may obtain a copy of the License at
 https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt
-https://github.com/s-m-e/pycrosscall/blob/master/LICENSE
+https://github.com/pleiszenburg/zugbruecke/blob/master/LICENSE
 
 Software distributed under the License is distributed on an "AS IS" basis,
 WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for the
@@ -48,7 +48,7 @@ except:
 
 if True in [platform.startswith(os_name) for os_name in ['linux', 'darwin', 'freebsd']]:
 
-	from pycrosscall import ctypes
+	from zugbruecke import ctypes
 	if not TIMING_RUN:
 		ctypes.windll.start_session(parameter = {'log_level': 10})
 

@@ -1,9 +1,9 @@
 
-.. |branch_master| image:: https://travis-ci.org/s-m-e/pycrosscall.svg?branch=master
-    :target: https://travis-ci.org/s-m-e/pycrosscall
+.. |branch_master| image:: https://travis-ci.org/pleiszenburg/zugbruecke.svg?branch=master
+    :target: https://travis-ci.org/pleiszenburg/zugbruecke
 
-.. |branch_develop| image:: https://travis-ci.org/s-m-e/pycrosscall.svg?branch=develop
-    :target: https://travis-ci.org/s-m-e/pycrosscall
+.. |branch_develop| image:: https://travis-ci.org/pleiszenburg/zugbruecke.svg?branch=develop
+    :target: https://travis-ci.org/pleiszenburg/zugbruecke
 
 +------------------+--------------------+
 | |branch_master|  + |branch_develop|   +
@@ -11,25 +11,25 @@
 | master/release   + development branch +
 +------------------+--------------------+
 
-**pycrosscall** - Calling routines in Windows DLLs from Python scripts running under Linux, MacOS or BSD
+**zugbruecke** - Calling routines in Windows DLLs from Python scripts running under Linux, MacOS or BSD
 
-.. image:: http://www.pleiszenburg.de/pycrosscall_logo.png
+.. image:: http://www.pleiszenburg.de/zugbruecke_logo.png
 
 Synopsis
 ========
 
-**pycrosscall** is an EXPERIMENTAL **Python module** (currently in development **status 3/alpha**).
+**zugbruecke** is an EXPERIMENTAL **Python module** (currently in development **status 3/alpha**).
 It allows to **call routines in Windows DLLs from Python code running on
 Unices / Unix-like systems** such as Linux, MacOS or BSD.
-pycrosscall is designed as a **drop-in replacement for ctypes' windll interface**.
-pycrosscall is **built on top of Wine**. A stand-alone Windows Python interpreter
+zugbruecke is designed as a **drop-in replacement for ctypes' windll interface**.
+zugbruecke is **built on top of Wine**. A stand-alone Windows Python interpreter
 launched in the background is used to execute the called DLL routines.
 Communication between the UNIX-side and the Windows/Wine-side is based on Python's
 build-in multiprocessing connection capability.
-pycrosscall has (limited) support for pointers and struct types.
-pycrosscall comes with extensive logging features allowing to debug problems
+zugbruecke has (limited) support for pointers and struct types.
+zugbruecke comes with extensive logging features allowing to debug problems
 associated with both itself and with Wine.
-pycrosscall is written using **Python 3 syntax** and primarily targets the
+zugbruecke is written using **Python 3 syntax** and primarily targets the
 **CPython** implementation of Python.
 
 *About Wine, from winehq.org: Wine (originally an acronym
@@ -63,13 +63,13 @@ For the latest "stable" (working) **release** run:
 
 .. code:: bash
 
-	pip install pycrosscall
+	pip install zugbruecke
 
 For the latest **development snapshot** (likely broken) run:
 
 .. code:: bash
 
-	pip install git+git://github.com/s-m-e/pycrosscal.git@develop
+	pip install git+git://github.com/pleiszenburg/pycrosscal.git@develop
 
 Because of the use of Wine, which should never be run with root privileges,
 it is highly advisable to install this package with user privileges only into
@@ -78,14 +78,14 @@ a virtual environment.
 Examples
 ========
 
-pycrosscall essentially behaves like a drop-in replacement for ctypes' ``windll`` interface.
+zugbruecke essentially behaves like a drop-in replacement for ctypes' ``windll`` interface.
 In other words, it only covers the "stdcall calling convention" at this point.
 Therefore, most code, which was written with ``windll`` in mind and which runs under Windows,
-should run just fine with pycrosscall.
+should run just fine with zugbruecke.
 
 .. code:: python
 
-	from pycrosscall import ctypes
+	from zugbruecke import ctypes
 
 	simple_demo_routine = ctypes.windll.LoadLibrary('demo_dll.dll').simple_demo_routine
 	simple_demo_routine.argtypes = [
@@ -108,19 +108,19 @@ The following import statement also works:
 
 .. code:: python
 
-	from pycrosscall import windll
+	from zugbruecke import windll
 
-The ``ctypes`` object offered by pycrosscall is just the Python interpreter's
-regular ``ctypes``, which is patched by pycrosscall during import.
+The ``ctypes`` object offered by zugbruecke is just the Python interpreter's
+regular ``ctypes``, which is patched by zugbruecke during import.
 
-Because of the drop-in replacement design of pycrosscall, it is possible to write
+Because of the drop-in replacement design of zugbruecke, it is possible to write
 Python code which works under both Unices and Windows.
 
 .. code:: python
 
 	from sys import platform
 	if True in [platform.startswith(os_name) for os_name in ['linux', 'darwin', 'freebsd']]:
-		from pycrosscall import ctypes
+		from zugbruecke import ctypes
 	elif platform.startswith('win'):
 		import ctypes
 	else:
@@ -133,22 +133,22 @@ For the original documentation of ``ctypes`` go to: https://docs.python.org/3/li
 Speed
 =====
 
-pycrosscall performs reasonably well given its complexity with **less than 0.2 µs
+zugbruecke performs reasonably well given its complexity with **less than 0.2 µs
 overhead per call** in average on modern hardware.
 
 The inter-process communication via multiprocessing connection adds overhead to
-every function call. Because pycrosscall takes care of packing and unpacking of
+every function call. Because zugbruecke takes care of packing and unpacking of
 pointers and structure for arguments and return values, this adds another bit of overhead.
 Calls are slow in general, but the first call of an individual routine within
 a session is even slower due to necessary initialization happening beforehand.
-Depending on the use-case, instead of working with pycrosscall, it will be significantly
+Depending on the use-case, instead of working with zugbruecke, it will be significantly
 faster to isolate functionality depending on DLL calls into a dedicated Python
 script and run it directly with a Windows Python interpreter under Wine.
 
 For comparison and overhead measurements, see the following numbers:
 
 ===================  ==============  =================== ================== ================== ============================
-example call         iterations [#]  w/o pycrosscall [s] w/ pycrosscall [s] overhead/call [ns] parameter features
+example call         iterations [#]  w/o zugbruecke [s] w/ zugbruecke [s] overhead/call [ns] parameter features
 ===================  ==============  =================== ================== ================== ============================
 simple_demo_routine  100k            0.101               11.273             111.7              2x by value
 gdc                  100k            0.104               11.318             112.1              2x by value
@@ -159,7 +159,7 @@ distance             100k            0.230               12.760             125.
 ===================  ==============  =================== ================== ================== ============================
 
 Benchmarks were performed with an i7 3740QM CPU, Linux kernel 4.4.72, Wine 2.10,
-CPython 3.6.1 x86-64 for Linux and CPython 3.5.3 x86-32 for Windows. pycrosscall was
+CPython 3.6.1 x86-64 for Linux and CPython 3.5.3 x86-32 for Windows. zugbruecke was
 configured with log level 0 (logs off) for minimal overhead.
 
 For the corresponding Python code and DLL source code (written in C) check the ``examples`` directory.
@@ -167,15 +167,15 @@ For the corresponding Python code and DLL source code (written in C) check the `
 Security
 ========
 
-pycrosscall is **notoriously insecure by design**.
+zugbruecke is **notoriously insecure by design**.
 
 - **DO NOT** run it on any system directly exposed to the internet! Have a firewall on at all times!
 - **DO NOT** run untrusted code (or DLLs)!
-- **DO NOT** use pycrosscall for any security related tasks such as encryption, decryption,
+- **DO NOT** use zugbruecke for any security related tasks such as encryption, decryption,
   authentication and handling of keys or passwords!
 - **DO NOT** run it with root / super users privileges!
 
-The following problems also directly apply to pycrosscall:
+The following problems also directly apply to zugbruecke:
 
 - Wine can in fact theoretically run (some) Windows malware: https://en.wikipedia.org/wiki/Wine_(software)#Security
 - **NEVER run Wine as root**: https://wiki.winehq.org/FAQ#Should_I_run_Wine_as_root.3F
@@ -183,41 +183,41 @@ The following problems also directly apply to pycrosscall:
 License
 =======
 
-pycrosscall is licensed under **LGPL v2.1**. See ``LICENSE`` file for details.
+zugbruecke is licensed under **LGPL v2.1**. See ``LICENSE`` file for details.
 
 Contribute
 ==========
 
 **Contributions are highly welcomed!**
 
-The source code is hosted on GitHub: https://github.com/s-m-e/pycrosscall/
+The source code is hosted on GitHub: https://github.com/pleiszenburg/zugbruecke/
 Pull requests will be reviewed and, if there is nothing to object, merged promptly.
 Do not break tests (unless there is a justified bug in them)!
 
 Bugs
 ====
 
-Please report bugs in pycrosscall in the pycrosscall GitHub repository: https://github.com/s-m-e/pycrosscall/issues
+Please report bugs in zugbruecke in the zugbruecke GitHub repository: https://github.com/pleiszenburg/zugbruecke/issues
 
 Please report bugs in Wine in the WineHQ Bug Tracking System: https://bugs.winehq.org/
 
-Make sure to separate between pycrosscall-related and Wine-related bugs.
+Make sure to separate between zugbruecke-related and Wine-related bugs.
 Calling routines in DLLs from Windows-executables (executed with Wine) with identical
 parameters for narrowing down the possible sources of an error is a good way to start.
 
 How to bisect issues
 --------------------
 
-pycrosscall is based on a session model. Each session can be launched with
+zugbruecke is based on a session model. Each session can be launched with
 parameters. Instead of leaving the session start with default parameters to
-pycrosscall, the process can be triggered manually instead.
+zugbruecke, the process can be triggered manually instead.
 Right after import and before ``LoadLibrary`` is invoked for the first time,
-start a pycrosscall session as follows and pass parameters like the "log level"
+start a zugbruecke session as follows and pass parameters like the "log level"
 into it.
 
 .. code:: python
 
-	from pycrosscall import ctypes
+	from zugbruecke import ctypes
 	ctypes.windll.start_session(parameter = {'log_level': 10})
 	# proceed as usual ...
 
@@ -226,7 +226,7 @@ The on-screen log is color-coded for readability. The log can also, in addition,
 be written to disk, where every log item with plenty of meta data is represented
 as a one-line JSON object for easy parsing and analysis of larger log files.
 
-Have a look into the routine ``get_default_config`` in ``pycrosscall/config.py`` for
+Have a look into the routine ``get_default_config`` in ``zugbruecke/config.py`` for
 a comprehensive overview over all possible parameters.
 
 FAQ
@@ -242,10 +242,10 @@ mailing lists reaching back well over a decade. The recommended approach so far
 has been (and still is!) to write a Wine application, which links against ``winelib``,
 thus allowing to access DLLs. Wine applications can also access libraries
 on the Unix "host" system, which provides the desired bridge between both worlds.
-Nevertheless, this approach is anything but trivial. pycrosscall is supposed
+Nevertheless, this approach is anything but trivial. zugbruecke is supposed
 to satisfy the desire for a "quick and dirty" solution for calling routines from a
 high level scripting language, Python, directly running on the Unix "host" system.
-With respect to "quick", pycrosscall works just out of the box with Wine installed.
+With respect to "quick", zugbruecke works just out of the box with Wine installed.
 No headers, compilers, cross-compilers or any other configuration is required - one
 import statement followed by well established ``ctypes`` syntax is enough.
 It is pure Python doing its job.
@@ -273,20 +273,20 @@ What are actual use cases for this project?
 How does it work?
 -----------------
 
-During the first import of pycrosscall, a stand-alone Windows-version of the
+During the first import of zugbruecke, a stand-alone Windows-version of the
 CPython interpreter corresponding to the used Unix-version is automatically
 downloaded and placed into the module's configuration folder (by default located at
-``~/.pycrosscall/``). Next to it, also during first import, pycrosscall
+``~/.zugbruecke/``). Next to it, also during first import, zugbruecke
 generates its own Wine-profile directory for being used with a dedicated
 ``WINEPREFIX``. This way, any undesirable interferences with other Wine-profile
 directories containing user settings and unrelated software are avoided.
 
-During every import of pycrosscall, the ``ctypes`` module is patched with an
+During every import of zugbruecke, the ``ctypes`` module is patched with an
 additional ``windll`` "sub-module" that would otherwise only be present under
-Windows. Once ``LoadLibrary`` is invoked for the first time, pycrosscall starts
+Windows. Once ``LoadLibrary`` is invoked for the first time, zugbruecke starts
 its own wineserver and, on top of it, a Windows Python interpreter. The latter is
 used to run a server script (named ``_server_.py``, located in the module's folder).
-From now on, pycrosscall on the "Unix side" acts as a client to its server on the
+From now on, zugbruecke on the "Unix side" acts as a client to its server on the
 "Wine side". The client passes calls with their parameters to the server, which executes
 them using the regular ``ctypes`` interface for Windows.
 
@@ -315,7 +315,7 @@ to arbitrary data structures are a bit of a problem. Pointers
 returned by a DLL pointing to memory allocated by the DLL are
 problematic, too.
 
-pycrosscall is intended to once offer ways to copy memory from
+zugbruecke is intended to once offer ways to copy memory from
 the Unix side to the Wine side as well as in the opposite
 direction, but those operations must likely (a) be triggered by the
 programmer (manually, so to speak) and (b) require knowledge
@@ -324,7 +324,7 @@ of the size of the data structure to be copied.
 Missing features (for better ctypes compatibility)
 ==================================================
 
-The following features have yet not been added to pycrosscall:
+The following features have yet not been added to zugbruecke:
 
 - Access to DLLs using the ``cdll`` and ``oledll`` calling conventions
 - Access to DLL functions exported by ordinal instead of by name
@@ -340,9 +340,9 @@ To do (target: BETA-status)
 The following issues need to be resolved before 'Development Status :: 4 - Beta'
 can be achieved:
 
-- ``wineserver`` start/stop must be implemented in a clean(er) way. pycrosscall is
+- ``wineserver`` start/stop must be implemented in a clean(er) way. zugbruecke is
   currently using a few odd workarounds trying not to trigger bugs in Wine.
-- pycrosscall must become thread safe so it can be used with modules like ``multiprocessing``.
+- zugbruecke must become thread safe so it can be used with modules like ``multiprocessing``.
 - A test-suite covering all features must be developed.
 - Structures and pointers should be handled more appropriately.
   Especially, structures should be passed in a better way.
@@ -364,7 +364,7 @@ Potentially interesting features, which might (or might not) be investigated aft
 Known issues
 ============
 
-The following relevant issues exist in software pycrosscall depends on:
+The following relevant issues exist in software zugbruecke depends on:
 
 - Wine bug #42474 ("Python 3.6 needs function api-ms-win-core-path-l1-1-0.dll.PathCchCombineEx")
   renders CPython 3.6.x for Windows unusable under Wine. 3.5 or prior has to be used instead.
@@ -386,6 +386,6 @@ in a number of unpredictable ways, some of which might not be obvious or might
 not even show any (intermediately) recognizable symptoms at all!
 You might end up with plain wrong, nonsensical results without noticing it!**
 
-If this has not driven you off and you nevertheless want to use pycrosscall in
+If this has not driven you off and you nevertheless want to use zugbruecke in
 individual, well isolated cases in production environments, feel free to contact
 its author for exploring further options: ernst@pleiszenburg.de

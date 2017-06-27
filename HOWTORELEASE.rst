@@ -1,4 +1,4 @@
-How to release pycrosscall
+How to release zugbruecke
 ==========================
 
 #. Merge all relevant changes into branch ``develop`` - this is where development and pre-release testing happens.
@@ -13,11 +13,11 @@ How to release pycrosscall
 
 #. Merge branch ``develop`` into branch ``master`` and push it to GitHub.
 
-#. Tag branch ``master`` with ``pycrosscall_%s`` % version.
+#. Tag branch ``master`` with ``zugbruecke_%s`` % version.
 
 	.. code:: bash
 
-		git tag "pycrosscall_0.0.1"
+		git tag "zugbruecke_0.0.1"
 
 #. Push the tag to Github.
 

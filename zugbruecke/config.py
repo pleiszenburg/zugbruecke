@@ -2,11 +2,11 @@
 
 """
 
-PYCROSSCALL
+ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
-https://github.com/s-m-e/pycrosscall
+https://github.com/pleiszenburg/zugbruecke
 
-	pycrosscall/config.py: Handles the modules configuration
+	zugbruecke/config.py: Handles the modules configuration
 
 	Required to run on platform / side: [UNIX]
 
@@ -17,7 +17,7 @@ The contents of this file are subject to the GNU Lesser General Public License
 Version 2.1 ("LGPL" or "License"). You may not use this file except in
 compliance with the License. You may obtain a copy of the License at
 https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt
-https://github.com/s-m-e/pycrosscall/blob/master/LICENSE
+https://github.com/pleiszenburg/zugbruecke/blob/master/LICENSE
 
 Software distributed under the License is distributed on an "AS IS" basis,
 WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for the
@@ -98,7 +98,7 @@ def get_module_config(override_dict = {}):
 
 def __get_default_config_directory__():
 
-	return os.path.join(os.path.expanduser('~'), '.pycrosscall')
+	return os.path.join(os.path.expanduser('~'), '.zugbruecke')
 
 
 def __join_config_by_priority__(config_dict_list):
@@ -132,9 +132,9 @@ def __locate_and_read_config_files__():
 	# Look for config in the usual spots
 	for file_location in [
 		os.curdir,
-		os.environ.get('PYCROSSCALL'),
+		os.environ.get('ZUGBRUECKE'),
 		__get_default_config_directory__(),
-		'/etc/pycrosscall'
+		'/etc/zugbruecke'
 		]:
 
 		# Compile path

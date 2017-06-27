@@ -2,9 +2,9 @@
 
 """
 
-PYCROSSCALL
+ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
-https://github.com/s-m-e/pycrosscall
+https://github.com/pleiszenburg/zugbruecke
 
 	setup.py: Used for package distribution
 
@@ -17,7 +17,7 @@ The contents of this file are subject to the GNU Lesser General Public License
 Version 2.1 ("LGPL" or "License"). You may not use this file except in
 compliance with the License. You may obtain a copy of the License at
 https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt
-https://github.com/s-m-e/pycrosscall/blob/master/LICENSE
+https://github.com/pleiszenburg/zugbruecke/blob/master/LICENSE
 
 Software distributed under the License is distributed on an "AS IS" basis,
 WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for the
@@ -58,15 +58,15 @@ with open(os.path.join(os.path.dirname(__file__), 'README.rst')) as f:
 
 
 setup(
-	name = 'pycrosscall',
-	packages = ['pycrosscall'],
+	name = 'zugbruecke',
+	packages = ['zugbruecke'],
 	version = version,
 	description = 'Calling routines in Windows DLLs from Python scripts running under Linux, MacOS or BSD',
 	long_description = long_description,
 	author = 'Sebastian M. Ernst',
 	author_email = 'ernst@pleiszenburg.de',
-	url = 'https://github.com/s-m-e/pycrosscall',
-	download_url = 'https://github.com/s-m-e/pycrosscall/archive/pycrosscall_%s.tar.gz' % version,
+	url = 'https://github.com/pleiszenburg/zugbruecke',
+	download_url = 'https://github.com/pleiszenburg/zugbruecke/archive/zugbruecke_%s.tar.gz' % version,
 	license = 'LGPLv2',
 	keywords = ['ctypes', 'wine'],
 	scripts = glob(os.path.join('scripts', '*')),
