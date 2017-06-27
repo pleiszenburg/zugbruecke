@@ -6,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	zugbruecke/core.py: Core classes for managing zugbruecke sessions
+	src/zugbruecke/core.py: Core classes for managing zugbruecke sessions
 
 	Required to run on platform / side: [UNIX]
 

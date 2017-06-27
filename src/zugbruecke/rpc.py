@@ -6,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	zugbruecke/_server_.py: Customized RPC classes
+	src/zugbruecke/_server_.py: Customized RPC classes
 
 	Required to run on platform / side: [UNIX, WINE]
 

@@ -6,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	zugbruecke/log.py: Classes for gathering, managing and displaying logs
+	src/zugbruecke/log.py: Classes for gathering, managing and displaying logs
 
 	Required to run on platform / side: [UNIX, WINE]
 

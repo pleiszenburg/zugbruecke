@@ -6,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	zugbruecke/lib.py: General purpose routines
+	src/zugbruecke/lib.py: General purpose routines
 
 	Required to run on platform / side: [UNIX]
 

@@ -6,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	zugbruecke/__init__.py: Module init file
+	src/zugbruecke/__init__.py: Module init file
 
 	Required to run on platform / side: [UNIX]
 

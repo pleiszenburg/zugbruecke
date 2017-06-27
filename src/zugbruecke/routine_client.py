@@ -6,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	zugbruecke/dll_client.py: Classes relevant for managing routines in DLLs
+	src/zugbruecke/dll_client.py: Classes relevant for managing routines in DLLs
 
 	Required to run on platform / side: [UNIX]
 
