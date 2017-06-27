@@ -61,8 +61,7 @@ python:
 # command to install dependencies
 install:
   - make dll
-  - pip install -r requirements.txt
-  - pip install .
+  - make install
 
 # command to run tests
 script: pytest

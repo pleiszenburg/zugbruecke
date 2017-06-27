@@ -29,5 +29,13 @@ release:
 	python setup.py sdist bdist_wheel
 	gpg --detach-sign -a dist/zugbruecke-*
 
+install:
+	pip install -r requirements.txt
+	pip install .
+
+install_link:
+	pip install -r requirements.txt
+	pip install -e .
+
 test:
 	pytest
