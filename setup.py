@@ -31,7 +31,7 @@ specific language governing rights and limitations under the License.
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-from distutils.core import setup
+from setuptools import setup
 import os
 from glob import glob
 
