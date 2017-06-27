@@ -31,7 +31,10 @@ specific language governing rights and limitations under the License.
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-from setuptools import setup
+from setuptools import (
+	find_packages,
+	setup
+	)
 import os
 from glob import glob
 
@@ -42,7 +45,7 @@ from glob import glob
 
 
 # Bump version HERE!
-version = '0.0.4'
+version = '0.0.1'
 
 
 # List all versions of Python which are supported
@@ -59,7 +62,8 @@ with open(os.path.join(os.path.dirname(__file__), 'README.rst')) as f:
 
 setup(
 	name = 'zugbruecke',
-	packages = ['zugbruecke'],
+	packages = find_packages('src'),
+	package_dir = {'': 'src'},
 	version = version,
 	description = 'Calling routines in Windows DLLs from Python scripts running under Linux, MacOS or BSD',
 	long_description = long_description,
@@ -70,6 +74,11 @@ setup(
 	license = 'LGPLv2',
 	keywords = ['ctypes', 'wine'],
 	scripts = glob(os.path.join('scripts', '*')),
+	include_package_data = True,
+	install_requires = [],
+	zip_safe = False,
+	extras_require = {},
+	entry_points = {},
 	classifiers = [
 		'Development Status :: 3 - Alpha',
 		'Intended Audience :: Developers',
