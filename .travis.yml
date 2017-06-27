@@ -55,7 +55,6 @@ python:
   - "3.6"
 
 # command to install dependencies
-# optional: "pip install -r requirements.txt"
 install:
   - cd examples/demo_dll/
   - make
