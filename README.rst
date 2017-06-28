@@ -126,7 +126,8 @@ Python code which works under both Unices and Windows.
 	else:
 		# Handle unsupported platforms
 
-For more examples and DLL source code check the ``examples`` directory.
+For more examples check the ``examples`` directory.
+For the DLL source code check the ``demo_dll` directory.
 
 For the original documentation of ``ctypes`` go to: https://docs.python.org/3/library/ctypes.html
 
@@ -162,7 +163,8 @@ Benchmarks were performed with an i7 3740QM CPU, Linux kernel 4.4.72, Wine 2.10,
 CPython 3.6.1 x86-64 for Linux and CPython 3.5.3 x86-32 for Windows. zugbruecke was
 configured with log level 0 (logs off) for minimal overhead.
 
-For the corresponding Python code and DLL source code (written in C) check the ``examples`` directory.
+For the corresponding DLL source code (written in C) check the ``demo_dll`` directory.
+For the corresponding Python code check the ``examples`` directory.
 
 Security
 ========
