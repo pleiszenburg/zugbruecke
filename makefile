@@ -35,6 +35,10 @@ upload:
 	twine register dist/*
 	twine upload dist/*
 
+upload_test:
+	twine register dist/* -r testpypi
+	twine upload dist/* -r testpypi
+
 install:
 	pip install -r requirements.txt
 	pip install .

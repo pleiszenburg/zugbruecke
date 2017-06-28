@@ -27,26 +27,20 @@ How to release zugbruecke
 
 		git push origin --tags
 
-#. Build packages.
+#. Build and sign packages.
 
 	.. code:: bash
 
-		python setup.py sdist bdist_wheel
-
-#. Sign packages.
-
-.. code:: bash
-
-		gpg --detach-sign -a dist/zugbruecke-*
+		make release
 
 #. Upload package to ``pypitest`` and review result.
 
 	.. code:: bash
 
-		twine upload dist/* -r testpypi
+		make upload_test
 
 #. Upload package to ``pypi``.
 
 	.. code:: bash
 
-		twine upload dist/*
+		make upload
