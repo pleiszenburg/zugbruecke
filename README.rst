@@ -152,7 +152,7 @@ example call         iterations [#]  w/o zugbruecke [s] w/ zugbruecke [s] overhe
 ===================  ==============  ================== ================= ================== ============================
 simple_demo_routine  100k            0.101              11.273            111.7              2x by value
 gdc                  100k            0.104              11.318            112.1              2x by value
-in_mandel (inside    100k            0.518              11.719            112.0              3x by value
+in_mandel (inside)   100k            0.518              11.719            112.0              3x by value
 in_mandel (outside)  100k            0.131              11.494            113.6              3x by value
 divide               100k            0.174              11.808            116.3              2x by value, 1x by reference
 distance             100k            0.230              12.760            125.3              2x struct by reference

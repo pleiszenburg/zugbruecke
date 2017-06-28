@@ -31,6 +31,10 @@ release:
 	gpg --detach-sign -a dist/zugbruecke*.whl
 	gpg --detach-sign -a dist/zugbruecke*.tar.gz
 
+upload:
+	twine register dist/*
+	twine upload dist/*
+
 install:
 	pip install -r requirements.txt
 	pip install .
