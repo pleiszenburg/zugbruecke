@@ -387,7 +387,3 @@ Being experimental in nature and of alpha quality, it is prone to fail
 in a number of unpredictable ways, some of which might not be obvious or might
 not even show any (intermediately) recognizable symptoms at all!
 You might end up with plain wrong, nonsensical results without noticing it!**
-
-If this has not driven you off and you nevertheless want to use zugbruecke in
-individual, well isolated cases in production environments, feel free to contact
-its author for exploring further options: ernst@pleiszenburg.de
