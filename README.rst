@@ -54,6 +54,8 @@ For using the module:
 
 For examples and tests, in addition:
 
+- pytest
+
 - mingw cross-compiler *(for building DLLs against which examples and tests can be run)*
 
 Installation
