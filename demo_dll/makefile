@@ -1,8 +1,8 @@
-# PYCROSSCALL
+# ZUGBRUECKE
 # Calling routines in Windows DLLs from Python scripts running on unixlike systems
-# https://github.com/s-m-e/pycrosscall
+# https://github.com/pleiszenburg/zugbruecke
 #
-#	examples/demo_dll/makefile: GNU makefile for building demo DLL with mingw
+#	demo_dll/makefile: GNU makefile for building demo DLL with mingw
 #
 #	Required to run on platform / side: [UNIX]
 #
@@ -13,7 +13,7 @@
 # Version 2.1 ("LGPL" or "License"). You may not use this file except in
 # compliance with the License. You may obtain a copy of the License at
 # https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt
-# https://github.com/s-m-e/pycrosscall/blob/master/LICENSE
+# https://github.com/pleiszenburg/zugbruecke/blob/master/LICENSE
 #
 # Software distributed under the License is distributed on an "AS IS" basis,
 # WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for the
@@ -32,7 +32,13 @@ DEMODLL_LDFLAGS =
 all: $(DEMODLL)
 
 $(DEMODLL): $(DEMODLL_C)
-	$(CC) $(DEMODLL_C) $(CFLAGS) -o ../$(DEMODLL).dll $(LDFLAGS) $(DEMODLL_LDFLAGS)
+	$(CC) $(DEMODLL_C) $(CFLAGS) -o $(DEMODLL).dll $(LDFLAGS) $(DEMODLL_LDFLAGS)
+
+install:
+	ln -s ../$(DEMODLL)/$(DEMODLL).dll ../examples/$(DEMODLL).dll
+	ln -s ../$(DEMODLL)/$(DEMODLL).dll ../tests/$(DEMODLL).dll
 
 clean:
-	rm ../$(DEMODLL).dll
+	-rm $(DEMODLL).dll
+	-rm ../examples/$(DEMODLL).dll
+	-rm ../tests/$(DEMODLL).dll

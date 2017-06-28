@@ -42,13 +42,13 @@ def run_windows_python(win_python_script_name, args):
 	os.environ['WINEARCH'] = arch
 
 	# Get location of this script file
-	pycrosscall_cfg_path = os.path.join(os.path.expanduser('~'), '.pycrosscall')
+	zugbruecke_cfg_path = os.path.join(os.path.expanduser('~'), '.zugbruecke')
 
 	# Change the environment for Wine: Wine prefix / profile directory
-	os.environ['WINEPREFIX'] = os.path.join(pycrosscall_cfg_path, arch + '-wine')
+	os.environ['WINEPREFIX'] = os.path.join(zugbruecke_cfg_path, arch + '-wine')
 
 	# Python interpreter's directory seen from this script
-	pydir_unix = os.path.join(pycrosscall_cfg_path, arch + '-python' + version)
+	pydir_unix = os.path.join(zugbruecke_cfg_path, arch + '-python' + version)
 
 	# Translate Python interpreter's Unix path into Wine path
 	pydir_win = wine_translate_unix2win(pydir_unix)

@@ -2,11 +2,11 @@
 
 """
 
-PYCROSSCALL
+ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
-https://github.com/s-m-e/pycrosscall
+https://github.com/pleiszenburg/zugbruecke
 
-	pycrosscall/dll_client.py: Classes relevant for managing the access to DLLs
+	src/zugbruecke/dll_client.py: Classes relevant for managing the access to DLLs
 
 	Required to run on platform / side: [UNIX]
 
@@ -17,7 +17,7 @@ The contents of this file are subject to the GNU Lesser General Public License
 Version 2.1 ("LGPL" or "License"). You may not use this file except in
 compliance with the License. You may obtain a copy of the License at
 https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt
-https://github.com/s-m-e/pycrosscall/blob/master/LICENSE
+https://github.com/pleiszenburg/zugbruecke/blob/master/LICENSE
 
 Software distributed under the License is distributed on an "AS IS" basis,
 WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for the
@@ -51,7 +51,7 @@ class dll_client_class(): # Representing one idividual dll to be called into, re
 		self.name = dll_name
 		self.calling_convention = dll_type
 
-		# Store pointer to pycrosscall session
+		# Store pointer to zugbruecke session
 		self.session = parent_session
 
 		# For convenience ...

@@ -2,11 +2,11 @@
 
 """
 
-PYCROSSCALL
+ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
-https://github.com/s-m-e/pycrosscall
+https://github.com/pleiszenburg/zugbruecke
 
-	pycrosscall/log.py: Classes for gathering, managing and displaying logs
+	src/zugbruecke/log.py: Classes for gathering, managing and displaying logs
 
 	Required to run on platform / side: [UNIX, WINE]
 
@@ -17,7 +17,7 @@ The contents of this file are subject to the GNU Lesser General Public License
 Version 2.1 ("LGPL" or "License"). You may not use this file except in
 compliance with the License. You may obtain a copy of the License at
 https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt
-https://github.com/s-m-e/pycrosscall/blob/master/LICENSE
+https://github.com/pleiszenburg/zugbruecke/blob/master/LICENSE
 
 Software distributed under the License is distributed on an "AS IS" basis,
 WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for the
@@ -217,7 +217,7 @@ class log_class:
 
 		self.client = mp_client_class(
 			('localhost', self.p['port_socket_log_main']),
-			'pycrosscall_log_main'
+			'zugbruecke_log_main'
 			)
 
 
@@ -229,7 +229,7 @@ class log_class:
 		# Create server
 		self.server = mp_server_class(
 			('localhost', self.p['port_socket_log_main']),
-			'pycrosscall_log_main'
+			'zugbruecke_log_main'
 			)
 
 		# Register functions

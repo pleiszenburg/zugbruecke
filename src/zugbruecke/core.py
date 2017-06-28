@@ -2,11 +2,11 @@
 
 """
 
-PYCROSSCALL
+ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
-https://github.com/s-m-e/pycrosscall
+https://github.com/pleiszenburg/zugbruecke
 
-	pycrosscall/core.py: Core classes for managing pycrosscall sessions
+	src/zugbruecke/core.py: Core classes for managing zugbruecke sessions
 
 	Required to run on platform / side: [UNIX]
 
@@ -17,7 +17,7 @@ The contents of this file are subject to the GNU Lesser General Public License
 Version 2.1 ("LGPL" or "License"). You may not use this file except in
 compliance with the License. You may obtain a copy of the License at
 https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt
-https://github.com/s-m-e/pycrosscall/blob/master/LICENSE
+https://github.com/pleiszenburg/zugbruecke/blob/master/LICENSE
 
 Software distributed under the License is distributed on an "AS IS" basis,
 WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for the
@@ -52,7 +52,7 @@ from .rpc import (
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# PYCROSSCALL SESSION CLASS
+# ZUGBRUECKE SESSION CLASS
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 class session_class():
@@ -136,7 +136,7 @@ class session_class():
 
 	def LoadLibrary(self, dll_name, dll_type = 'windll'):
 
-		# Get full path of dll
+		# Get full path of dll TODO
 		full_path_dll = os.path.join(self.dir_cwd, dll_name)
 
 		# Log status
@@ -153,7 +153,7 @@ class session_class():
 		# Log status
 		self.log.out('[core] ... exists ...')
 
-		# Simplyfy full path
+		# Simplify full path
 		full_path_dll = os.path.abspath(full_path_dll)
 
 		# Check whether dll has yet not been touched
@@ -207,7 +207,7 @@ class session_class():
 				# Fire up xmlrpc client
 				self.client = mp_client_class(
 					('localhost', self.p['port_socket_ctypes']),
-					'pycrosscall_server_main'
+					'zugbruecke_server_main'
 					)
 
 				# Get status from server

@@ -2,11 +2,11 @@
 
 """
 
-PYCROSSCALL
+ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
-https://github.com/s-m-e/pycrosscall
+https://github.com/pleiszenburg/zugbruecke
 
-	pycrosscall/wine.py: Class(es) for managing wineserver
+	src/zugbruecke/wine.py: Class(es) for managing wineserver
 
 	Required to run on platform / side: [UNIX]
 
@@ -17,7 +17,7 @@ The contents of this file are subject to the GNU Lesser General Public License
 Version 2.1 ("LGPL" or "License"). You may not use this file except in
 compliance with the License. You may obtain a copy of the License at
 https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt
-https://github.com/s-m-e/pycrosscall/blob/master/LICENSE
+https://github.com/pleiszenburg/zugbruecke/blob/master/LICENSE
 
 Software distributed under the License is distributed on an "AS IS" basis,
 WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for the
@@ -174,17 +174,21 @@ class wineserver_session_class:
 			'server-%x-%x' % (info_wineprefix.st_dev, info_wineprefix.st_ino)
 			)
 
-		# Wait for lock ...
+		# [CHECK #1] Wait for lock ...
 		self.__wait_for_lock__()
 
-		# Wait for socket ...
+		# [CHECK #2] Wait for socket ...
 		# self.__wait_for_socket__()
 
-		# Testing the server by converting a path
+		# [CHECK #3] Testing the server by converting a path
 		dir_cwd_wine = self.translate_path_unix2win(os.getcwd())
 
 
 	def __get_lock_pid__(self, file_descriptor):
+		"""
+		Return process ID responsible for locking a file descriptor.
+		Courtesy of: Sebastian Lackner <sebastian@fds-team.de>
+		"""
 
 		l_type = fcntl.F_WRLCK
 		l_whence = 0 # SEEK_SET
@@ -358,6 +362,11 @@ class wineserver_session_class:
 
 
 	def translate_path_unix2win(self, path):
+		"""
+		*WORKAROUND*
+		Hacked version of "translate_path_unix2win", rerunning the command for
+		until it succeeds (or ``max_attempts`` is reached).
+		"""
 
 		# Pass stderr into log
 		self.log.out('[wine] Translating path ...')
@@ -366,7 +375,7 @@ class wineserver_session_class:
 		# Count attempts
 		tried_this_many_times = 0
 		# Specify max attempts
-		max_attempts = 25
+		max_attempts = 25 # on really slow machines even this fails at the moment BUG
 		# Timeout after seconds per attempt
 		time_out_after_seconds = 0.1
 		# Status variable
@@ -430,6 +439,9 @@ class wineserver_session_class:
 
 
 	def __translate_path_unix2win__(self, path):
+		"""
+		Original, currently unused version of "translate_path_unix2win". Not failsafe.
+		"""
 
 		# Pass stderr into log
 		self.log.out('[wine] Translate path input: "%s"' % path)
