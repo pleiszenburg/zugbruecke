@@ -11,8 +11,6 @@
 | development branch + |branch_develop|   +
 +--------------------+--------------------+
 
-**zugbruecke** - Calling routines in Windows DLLs from Python scripts running under Linux, MacOS or BSD
-
 .. image:: http://www.pleiszenburg.de/zugbruecke_logo.png
 
 Synopsis
