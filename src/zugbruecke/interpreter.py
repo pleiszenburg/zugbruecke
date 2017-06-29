@@ -6,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	src/zugbruecke/_server_.py: Class(es) for managing Python interpreter on Wine
+	src/zugbruecke/interpreter.py: Class(es) for managing Python interpreter on Wine
 
 	Required to run on platform / side: [UNIX]
 

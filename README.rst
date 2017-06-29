@@ -228,7 +228,7 @@ The on-screen log is color-coded for readability. The log can also, in addition,
 be written to disk, where every log item with plenty of meta data is represented
 as a one-line JSON object for easy parsing and analysis of larger log files.
 
-Have a look into the routine ``get_default_config`` in ``zugbruecke/config.py`` for
+Have a look into the routine ``get_default_config`` in ``src/zugbruecke/config.py`` for
 a comprehensive overview over all possible parameters.
 
 FAQ
@@ -350,7 +350,7 @@ can be achieved:
   Especially, structures should be passed in a better way.
 - The log should be divided into log-levels with more or less details.
   Higher log-levels should contain details of the current stack frame
-  such as line number or calling routine (based on the ``inspect``).
+  such as line number or calling routine (based on ``inspect``).
   Log level support exists, though all messages currently use default level 1.
 - Dedicated error types for catching more errors and their details.
 
