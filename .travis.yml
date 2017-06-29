@@ -27,7 +27,7 @@
 # A virtual machine is required to run wine - is it?
 sudo: enabled
 
-# A 'recent' version of Ubuntu and Wine is required
+# A 'recent' version of Ubuntu for a recent version of Wine is required
 dist: trusty
 
 # Get wine and mingw cross compiler
@@ -58,7 +58,7 @@ python:
   - "3.5"
   - "3.6"
 
-# command to install dependencies
+# command to install dependencies and module
 install:
   - make dll
   - make install
