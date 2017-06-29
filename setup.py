@@ -37,6 +37,7 @@ from setuptools import (
 	)
 import os
 from glob import glob
+from sys import platform
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -58,6 +59,11 @@ confirmed_python_versions = [
 # Fetch readme file
 with open(os.path.join(os.path.dirname(__file__), 'README.rst')) as f:
 	long_description = f.read()
+
+
+# Just in case someone is actually running this on Windows ...
+if platform.startswith('win'):
+	raise SystemExit('You are already running Windows. No need for this package!')
 
 
 setup(
