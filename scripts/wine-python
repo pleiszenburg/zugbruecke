@@ -31,6 +31,9 @@ zugbruecke_dir=$(python -c 'from zugbruecke.config import echo_parameter; echo_p
 dir_py=$zugbruecke_dir/$arch-python$version
 dir_wine=$zugbruecke_dir/$arch-wine
 
+# Make sure Python for Wine is installed
+python -c "from zugbruecke.lib import setup_wine_python; setup_wine_python(\"$arch\", \"$version\", \"$zugbruecke_dir\")"
+
 # Set environment variables
 export WINEARCH="$arch"
 export WINEPREFIX="$dir_wine"
