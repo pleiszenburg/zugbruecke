@@ -22,5 +22,4 @@
 # specific language governing rights and limitations under the License.
 # </LICENSE_BLOCK>
 
-
-echo "Hello world!"
+python -c 'from zugbruecke.config import echo_parameter; echo_parameter("arch")'
