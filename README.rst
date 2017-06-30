@@ -126,7 +126,8 @@ Python code which works under both Unices and Windows.
 	else:
 		# Handle unsupported platforms
 
-For more examples and DLL source code check the ``examples`` directory.
+For more examples check the ``examples`` directory.
+For the DLL source code check the ``demo_dll` directory.
 
 For the original documentation of ``ctypes`` go to: https://docs.python.org/3/library/ctypes.html
 
@@ -162,7 +163,8 @@ Benchmarks were performed with an i7 3740QM CPU, Linux kernel 4.4.72, Wine 2.10,
 CPython 3.6.1 x86-64 for Linux and CPython 3.5.3 x86-32 for Windows. zugbruecke was
 configured with log level 0 (logs off) for minimal overhead.
 
-For the corresponding Python code and DLL source code (written in C) check the ``examples`` directory.
+For the corresponding DLL source code (written in C) check the ``demo_dll`` directory.
+For the corresponding Python code check the ``examples`` directory.
 
 Security
 ========
@@ -226,7 +228,7 @@ The on-screen log is color-coded for readability. The log can also, in addition,
 be written to disk, where every log item with plenty of meta data is represented
 as a one-line JSON object for easy parsing and analysis of larger log files.
 
-Have a look into the routine ``get_default_config`` in ``zugbruecke/config.py`` for
+Have a look into the routine ``get_default_config`` in ``src/zugbruecke/config.py`` for
 a comprehensive overview over all possible parameters.
 
 FAQ
@@ -348,7 +350,7 @@ can be achieved:
   Especially, structures should be passed in a better way.
 - The log should be divided into log-levels with more or less details.
   Higher log-levels should contain details of the current stack frame
-  such as line number or calling routine (based on the ``inspect``).
+  such as line number or calling routine (based on ``inspect``).
   Log level support exists, though all messages currently use default level 1.
 - Dedicated error types for catching more errors and their details.
 
