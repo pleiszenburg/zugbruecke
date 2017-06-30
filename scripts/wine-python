@@ -22,4 +22,21 @@
 # specific language governing rights and limitations under the License.
 # </LICENSE_BLOCK>
 
-python -c 'from zugbruecke.config import echo_parameter; echo_parameter("arch")'
+# Get parameters from zugbruecke configuration
+arch=$(python -c 'from zugbruecke.config import echo_parameter; echo_parameter("arch")')
+version=$(python -c 'from zugbruecke.config import echo_parameter; echo_parameter("version")')
+zugbruecke_dir=$(python -c 'from zugbruecke.config import echo_parameter; echo_parameter("dir")')
+
+# Process parameters
+dir_py=$zugbruecke_dir/$arch-python$version
+dir_wine=$zugbruecke_dir/$arch-wine
+
+# Set environment variables
+export WINEARCH="$arch"
+export WINEPREFIX="$dir_wine"
+
+# Silence Wine ...
+export WINEDEBUG=-all
+
+# Fire up Python under Wine, pass cmd line arguments
+wine $dir_py/python.exe $*
