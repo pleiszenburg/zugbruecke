@@ -38,5 +38,10 @@ export WINEPREFIX="$dir_wine"
 # Silence Wine ...
 export WINEDEBUG=-all
 
+# Install pytest if it is not there ...
+if [ ! -f $dir_py/Scripts/pytest.exe ]; then
+	wine-pip install pytest
+fi
+
 # Fire up py.test under Wine, pass cmd line arguments
 wine $dir_py/Scripts/pytest.exe $*
