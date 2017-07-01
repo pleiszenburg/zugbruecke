@@ -144,7 +144,7 @@ class sample_class:
 			{
 				'p': [0], # "path" to argument containing the pointer
 				'l': [1], # "path" to argument containing the length
-				't': ctypes.c_double # type of argument: sizeof(type) * length == bytes
+				't': ctypes.c_double # type of argument (optional, default char/byte): sizeof(type) * length == bytes
 				}
 			]
 		self.__avg__.argtypes = (DoubleArray, ctypes.c_int)
