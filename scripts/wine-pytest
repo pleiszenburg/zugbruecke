@@ -38,5 +38,5 @@ export WINEPREFIX="$dir_wine"
 # Silence Wine ...
 export WINEDEBUG=-all
 
-# Fire up Pip under Wine, pass cmd line arguments
+# Fire up py.test under Wine, pass cmd line arguments
 wine $dir_py/Scripts/pytest.exe $*
