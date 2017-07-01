@@ -74,6 +74,11 @@ def generate_session_id():
 	return get_randhashstr(8)
 
 
+def setup_wine_pip(arch, version, directory, overwrite = False):
+
+	pass
+
+
 def setup_wine_python(arch, version, directory, overwrite = False):
 
 	# File name for python stand-alone zip file
