@@ -41,6 +41,11 @@ from .lib import generate_session_id
 # ROUTINES
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+def echo_parameter(param_name):
+
+	print(get_module_config()[param_name])
+
+
 def get_default_config():
 
 	cfg = {}
