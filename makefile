@@ -49,3 +49,4 @@ install_link:
 
 test:
 	pytest
+	wine-pytest
