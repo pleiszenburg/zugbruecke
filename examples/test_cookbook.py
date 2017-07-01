@@ -140,7 +140,7 @@ class sample_class:
 		# void avg(double *, int n)
 		DoubleArray = DoubleArrayType()
 		self.__avg__ = self.__dll__.cookbook_avg
-		self.__avg__.memsync = [
+		self.__avg__.memsync = [ # Regular ctypes on Windows should ignore this statement
 			{
 				'p': [0], # "path" to argument containing the pointer
 				'l': [1], # "path" to argument containing the length
