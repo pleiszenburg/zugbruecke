@@ -1,0 +1,48 @@
+#!/bin/bash
+
+# ZUGBRUECKE
+# Calling routines in Windows DLLs from Python scripts running on unixlike systems
+# https://github.com/pleiszenburg/zugbruecke
+#
+#	scripts/wine-pip: Running Pip in Wine environment
+#
+#	Required to run on platform / side: [UNIX]
+#
+# 	Copyright (C) 2017 Sebastian M. Ernst <ernst@pleiszenburg.de>
+#
+# <LICENSE_BLOCK>
+# The contents of this file are subject to the GNU Lesser General Public License
+# Version 2.1 ("LGPL" or "License"). You may not use this file except in
+# compliance with the License. You may obtain a copy of the License at
+# https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt
+# https://github.com/pleiszenburg/zugbruecke/blob/master/LICENSE
+#
+# Software distributed under the License is distributed on an "AS IS" basis,
+# WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for the
+# specific language governing rights and limitations under the License.
+# </LICENSE_BLOCK>
+
+# Get parameters from zugbruecke configuration
+arch=$(python -c 'from zugbruecke.config import echo_parameter; echo_parameter("arch")')
+version=$(python -c 'from zugbruecke.config import echo_parameter; echo_parameter("version")')
+zugbruecke_dir=$(python -c 'from zugbruecke.config import echo_parameter; echo_parameter("dir")')
+
+# Process parameters
+dir_py=$zugbruecke_dir/$arch-python$version
+dir_wine=$zugbruecke_dir/$arch-wine
+
+# Make sure Python for Wine is installed
+python -c "from zugbruecke.lib import setup_wine_python; setup_wine_python(\"$arch\", \"$version\", \"$zugbruecke_dir\")"
+
+# Make sure Pip for Wine is installed
+python -c "from zugbruecke.lib import setup_wine_pip; setup_wine_pip(\"$arch\", \"$version\", \"$zugbruecke_dir\")"
+
+# Set environment variables
+export WINEARCH="$arch"
+export WINEPREFIX="$dir_wine"
+
+# Silence Wine ...
+export WINEDEBUG=-all
+
+# Fire up Pip under Wine, pass cmd line arguments
+wine $dir_py/Scripts/pip.exe $*
