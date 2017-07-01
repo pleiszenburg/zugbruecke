@@ -35,6 +35,7 @@ import os
 import random
 import shutil
 import socket
+import subprocess
 import tempfile
 import urllib.request
 import zipfile
@@ -74,9 +75,24 @@ def generate_session_id():
 	return get_randhashstr(8)
 
 
-def setup_wine_pip(arch, version, directory, overwrite = False):
+def setup_wine_pip(arch, version, directory):
 
-	pass
+	# Download get-pip.py
+	getpip_req = urllib.request.urlopen('https://bootstrap.pypa.io/get-pip.py')
+	getpip_bin = getpip_req.read()
+	getpip_req.close()
+
+	# Start Python on top of Wine
+	proc_getpip = subprocess.Popen(
+		['wine-python'],
+		stdin = subprocess.PIPE,
+		stdout = subprocess.PIPE,
+		stderr = subprocess.PIPE,
+		shell = False
+		)
+
+	# Pipe script into interpreter and get feedback
+	getpip_out, getpip_err = proc_getpip.communicate(input = getpip_bin)
 
 
 def setup_wine_python(arch, version, directory, overwrite = False):
