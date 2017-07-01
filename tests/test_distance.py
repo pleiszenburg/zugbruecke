@@ -33,7 +33,11 @@ specific language governing rights and limitations under the License.
 
 import pytest
 
-from zugbruecke import ctypes
+from sys import platform
+if True in [platform.startswith(os_name) for os_name in ['linux', 'darwin', 'freebsd']]:
+	from zugbruecke import ctypes
+elif platform.startswith('win'):
+	import ctypes
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
