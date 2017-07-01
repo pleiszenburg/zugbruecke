@@ -66,6 +66,9 @@ class routine_client_class():
 		# Turn a bound method into a function ... HACK?
 		self.handle_call = partial(self.__handle_call__)
 
+		# By default, there is no memory to sync
+		self.handle_call.memsync = []
+
 		# By default, assume no arguments
 		self.handle_call.argtypes = []
 
