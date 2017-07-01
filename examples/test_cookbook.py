@@ -201,7 +201,11 @@ if __name__ == '__main__':
 	if TIMING_RUN:
 		time_ROUTINE('divide')
 
-	# print(sample.avg([1, 2, 3]))
+	print(2.0, sample.avg([1, 2, 3]))
+	def time_divide():
+		returnvalue = sample.avg([1, 2, 3])
+	if TIMING_RUN:
+		time_ROUTINE('avg')
 
 	p1 = Point(1, 2)
 	p2 = Point(4, 5)
