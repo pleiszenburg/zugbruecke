@@ -33,6 +33,7 @@ specific language governing rights and limitations under the License.
 
 import ctypes
 from pprint import pformat as pf
+import traceback
 
 from memory import (
 	generate_pointer_from_int_list
