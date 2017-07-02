@@ -35,6 +35,13 @@ import ctypes
 from functools import partial
 from pprint import pformat as pf
 
+from .lib import (
+	reduce_dict
+	)
+from .memory import (
+	serialize_pointer_into_int_list
+	)
+
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # DLL CLIENT CLASS
@@ -65,6 +72,9 @@ class routine_client_class():
 
 		# Turn a bound method into a function ... HACK?
 		self.handle_call = partial(self.__handle_call__)
+
+		# By default, there is no memory to sync
+		self.handle_call.memsync = []
 
 		# By default, assume no arguments
 		self.handle_call.argtypes = []
@@ -107,7 +117,7 @@ class routine_client_class():
 
 		# Actually call routine in DLL! TODO Handle kw ...
 		return_dict = self.client.call_dll_routine(
-			self.dll.full_path, self.name, self.__pack_args__(self.argtypes_p, args)
+			self.dll.full_path, self.name, self.__pack_args__(self.argtypes_p, args), self.__pack_memory__(args)
 			)
 
 		# Log status
@@ -130,8 +140,13 @@ class routine_client_class():
 		# Struct status
 		is_struct = False
 
-		# Get name of datatype
-		type_name = datatype.__name__
+		try:
+			# Get name of datatype
+			type_name = datatype.__name__
+		except:
+			# Not all datatypes have a name, let's handle that
+			type_name = None
+
 		# Get group of datatype
 		group_name = type(datatype).__name__ # 'PyCSimpleType', 'PyCStructType' or 'PyCPointerType'
 
@@ -179,11 +194,16 @@ class routine_client_class():
 			self.log.err('[routine-client] ERROR: Unhandled pointer of pointer')
 			raise # TODO
 
-		# UNKNOWN stuff
+		# UNKNOWN stuff, likely pointers - handled without datatype
 		else:
 
-			self.log.err('[routine-client] ERROR: Unknown class of datatype: "%s"', group_name)
-			raise # TODO
+			return {
+				'n': field_name, # kw
+				'p': True, # Is a pointer
+				't': type_name, # Type name, such as 'c_int'
+				'f': False, # Is not a fundamental type (PyCSimpleType)
+				's': False # Is not a struct
+				}
 
 
 	def __pack_args__(self, argtypes_p_sub, args): # TODO kw
@@ -236,6 +256,90 @@ class routine_client_class():
 		return arguments_list
 
 
+	def __pack_memory__(self, args):
+
+		# Start empty package
+		mem_package_list = []
+
+		# Iterate over memory segments, which must be kept in sync
+		for segment_index, segment in enumerate(self.memsync):
+
+			# Reference args - search for pointer
+			pointer = args
+			# Step through path to pointer ...
+			for path_element in segment['p']:
+				# Go deeper ...
+				pointer = pointer[path_element]
+
+			# Reference args - search for length
+			length = args
+			# Step through path to pointer ...
+			for path_element in segment['l']:
+				# Go deeper ...
+				length = length[path_element]
+
+			# Defaut type, of nothing is given, is unsigned byte
+			if '_t' not in segment.keys():
+				segment['_t'] = ctypes.c_ubyte
+
+			# Compute actual length - might come from ctypes or a Python datatype
+			try:
+				length_value = length.value * ctypes.sizeof(segment['_t'])
+			except:
+				length_value = length * ctypes.sizeof(segment['_t'])
+
+			# Convert argument into ctypes datatype TODO more checks needed!
+			if segment['_c'] is not None:
+				arg_value = ctypes.pointer(segment['_c'].from_param(pointer))
+			else:
+				arg_value = ctypes.pointer(segment['_t'](pointer))
+
+			# Serialize the data ...
+			data = serialize_pointer_into_int_list(arg_value, length_value)
+
+			# Append data to package
+			mem_package_list.append(data)
+
+		# TODO remove
+		self.log.out(pf(mem_package_list))
+
+		return mem_package_list
+
+
+	def __process_memsync__(self, memsync, argtypes_p):
+
+		# Reduce memsync so it can be forwarded to server
+		memsync_p = [reduce_dict(sync_element) for sync_element in memsync]
+
+		# Start empty handle list
+		memsync_handle = []
+
+		# Iterate over memory segments, which must be kept in sync
+		for segment in memsync:
+
+			# Reference processed argument types - start with depth 0
+			arg_type = argtypes_p[segment['p'][0]]
+			# Step through path to argument type ...
+			for path_element in segment['p'][1:]:
+				# Go deeper ...
+				arg_type = arg_type['_fields_'][path_element]
+
+			# Reference processed argument types - start with depth 0
+			len_type = argtypes_p[segment['l'][0]]
+			# Step through path to argument type ...
+			for path_element in segment['l'][1:]:
+				# Go deeper ...
+				len_type = len_type['_fields_'][path_element]
+
+			# Add to list
+			memsync_handle.append({
+				'p': arg_type,
+				'l': len_type
+				})
+
+		return memsync_p, memsync_handle
+
+
 	def __push_argtype_and_restype__(self):
 
 		# Prepare list of arguments by parsing them into list of dicts (TODO field name / kw)
@@ -244,9 +348,12 @@ class routine_client_class():
 		# Parse return type
 		self.restype_p = self.__pack_datatype_dict__(self.restype)
 
+		# Reduce memsync
+		self.memsync_p, self.memsync_handle = self.__process_memsync__(self.memsync, self.argtypes_p)
+
 		# Pass argument and return value types as strings ...
 		result = self.client.register_argtype_and_restype(
-			self.dll.full_path, self.name, self.argtypes_p, self.restype_p
+			self.dll.full_path, self.name, self.argtypes_p, self.restype_p, self.memsync_p
 			)
 
 		# Handle error
@@ -281,6 +388,10 @@ class routine_client_class():
 
 		# TODO proper sanity check
 		try:
+			self.memsync = self.handle_call.memsync
+		except:
+			pass
+		try:
 			self.argtypes = self.handle_call.argtypes
 		except:
 			pass
@@ -290,6 +401,7 @@ class routine_client_class():
 			pass
 
 		# Log status
+		self.log.out('[routine-client]  memsync: %s' % pf(self.memsync))
 		self.log.out('[routine-client]  argtypes: %s' % pf(self.argtypes))
 		self.log.out('[routine-client]  restype: %s' % pf(self.restype))
 

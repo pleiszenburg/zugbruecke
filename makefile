@@ -42,10 +42,13 @@ upload_test:
 install:
 	pip install -r requirements.txt
 	pip install .
+	wine-pytest --version
 
 install_link:
 	pip install -r requirements.txt
 	pip install -e .
+	wine-pytest --version
 
 test:
 	pytest
+	wine-pytest

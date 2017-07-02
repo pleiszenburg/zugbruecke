@@ -6,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	test_in_mantel.py: Tests by value argument passing and return value (float)
+	tests/test_in_mantel.py: Tests by value argument passing and return value (float)
 
 	Required to run on platform / side: [UNIX, WINE]
 
