@@ -322,7 +322,7 @@ class routine_client_class():
 				arg_type = arg_type['_fields_'][path_element]
 
 			# Reference processed argument types - start with depth 0
-			len_type = argtypes_p[segment['p'][0]]
+			len_type = argtypes_p[segment['l'][0]]
 			# Step through path to argument type ...
 			for path_element in segment['l'][1:]:
 				# Go deeper ...
