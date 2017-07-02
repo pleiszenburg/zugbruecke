@@ -280,6 +280,8 @@ class routine_client_class():
 				length = length[path_element]
 
 			# Clean up length - might be a ctypes or a Python datatype
+			if '_t' not in segment.keys():
+				segment['_t'] = ctypes.c_ubyte
 			try:
 				length_value = length.value * ctypes.sizeof(segment['_t'])
 			except:
@@ -289,7 +291,7 @@ class routine_client_class():
 			if segment['_c'] is not None:
 				arg_value = ctypes.pointer(segment['_c'].from_param(pointer))
 			else:
-				arg_value = ctypes.pointer(segment['_c'](pointer))
+				arg_value = ctypes.pointer(segment['_t'](pointer))
 
 			# Serialize the data ...
 			data = serialize_pointer_into_int_list(arg_value, length_value)
