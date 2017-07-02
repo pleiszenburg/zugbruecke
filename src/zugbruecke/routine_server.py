@@ -34,6 +34,10 @@ specific language governing rights and limitations under the License.
 import ctypes
 from pprint import pformat as pf
 
+from memory import (
+	generate_pointer_from_int_list
+	)
+
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # DLL SERVER CLASS
@@ -93,6 +97,9 @@ class routine_server_class():
 
 		# Unpack passed arguments, handle pointers and structs ...
 		args, kw = self.__unpack_arguments__(arg_message_list)
+
+		# Unpack pointer data
+		self.__unpack_memory__(args, kw, arg_memory_list)
 
 		# Default return value
 		return_value = None
@@ -300,6 +307,11 @@ class routine_server_class():
 					arg[0], # parameter name (from tuple)
 					0 # least destructive value ...
 					)
+
+
+	def __unpack_memory__(self, args, kw, arg_memory_list):
+
+		pass
 
 
 	def __unpack_type_dict__(self, datatype_dict):
