@@ -279,9 +279,11 @@ class routine_client_class():
 				# Go deeper ...
 				length = length[path_element]
 
-			# Clean up length - might be a ctypes or a Python datatype
+			# Defaut type, of nothing is given, is unsigned byte
 			if '_t' not in segment.keys():
 				segment['_t'] = ctypes.c_ubyte
+
+			# Compute actual length - might come from ctypes or a Python datatype
 			try:
 				length_value = length.value * ctypes.sizeof(segment['_t'])
 			except:
