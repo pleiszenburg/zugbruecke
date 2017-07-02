@@ -109,7 +109,7 @@ class routine_server_class():
 		try:
 
 			# Call into dll
-			return_value = self.handler(*args, **kw)
+			return_value = self.handler(*tuple(args), **kw)
 
 			# Log status
 			self.log.out('[routine-server] ... done.')
@@ -245,7 +245,7 @@ class routine_server_class():
 				arguments_list.append(0)
 
 		# Return args as tuple and kw as dict
-		return tuple(arguments_list), {} # TODO kw not yet handled
+		return arguments_list, {} # TODO kw not yet handled
 
 
 	def __unpack_arguments_struct__(self, arg_definition_list, struct_inst, args_list):
@@ -310,9 +310,20 @@ class routine_server_class():
 					)
 
 
-	def __unpack_memory__(self, args, kw, arg_memory_list):
+	def __unpack_memory__(self, args, kw, arg_memory_list): # TODO kw is not handled
 
-		pass
+		# Iterate over memory segments, which must be kept in sync
+		for segment_index, segment in enumerate(self.memsync):
+
+			# Reference args - search for pointer
+			pointer = args
+			# Step through path to pointer ...
+			for path_element in segment['p'][:-1]:
+				# Go deeper ...
+				pointer = pointer[path_element]
+
+			# Handle deepest instance
+			pointer[segment['p'][-1]] = generate_pointer_from_int_list(arg_memory_list[segment_index])
 
 
 	def __unpack_type_dict__(self, datatype_dict):
