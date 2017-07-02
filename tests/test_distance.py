@@ -6,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	test_distance.py: Tests by value struct type passing and return value
+	tests/test_distance.py: Tests by value struct type passing and return value
 
 	Required to run on platform / side: [UNIX, WINE]
 
