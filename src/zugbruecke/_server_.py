@@ -127,14 +127,14 @@ class wine_server_class:
 			return 1
 
 
-	def __call_dll_routine__(self, full_path_dll_unix, routine_name, arg_message_list):
+	def __call_dll_routine__(self, full_path_dll_unix, routine_name, arg_message_list, arg_memory_list):
 		"""
 		Exposed interface
 		"""
 
 		# Register argtypes and restype of a routine
 		return self.dll_dict[full_path_dll_unix].routines[routine_name].call_routine(
-			arg_message_list
+			arg_message_list, arg_memory_list
 			)
 
 

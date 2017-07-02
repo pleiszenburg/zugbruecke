@@ -76,6 +76,18 @@ def generate_session_id():
 	return get_randhashstr(8)
 
 
+def reduce_dict(input_dict):
+
+	output_dict = {}
+
+	# Keep everything, which is not private (does not start with '_')
+	for key in input_dict.keys():
+		if not key.startswith('_'):
+			output_dict[key] = input_dict[key]
+
+	return output_dict
+
+
 def setup_wine_pip(arch, version, directory):
 
 	# Download get-pip.py into memory

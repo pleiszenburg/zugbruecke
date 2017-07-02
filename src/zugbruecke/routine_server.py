@@ -83,7 +83,7 @@ class routine_server_class():
 			raise # TODO
 
 
-	def call_routine(self, arg_message_list):
+	def call_routine(self, arg_message_list, arg_memory_list):
 		"""
 		TODO: Optimize for speed!
 		"""
