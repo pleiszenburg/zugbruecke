@@ -6,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	tests/test_devide.py: Tests by reference argument passing (int pointer)
+	src/zugbruecke/memory.py: Handles memory transfers between both sides
 
 	Required to run on platform / side: [UNIX, WINE]
 
@@ -26,50 +26,27 @@ specific language governing rights and limitations under the License.
 
 """
 
-
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-import pytest
-
-from sys import platform
-if True in [platform.startswith(os_name) for os_name in ['linux', 'darwin', 'freebsd']]:
-	from zugbruecke import ctypes
-elif platform.startswith('win'):
-	import ctypes
+import ctypes
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# CLASSES AND ROUTINES
+# ROUTINES
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-class sample_class:
+def generate_pointer_from_int_list(int_array):
+
+	return ctypes.pointer((ctypes.c_ubyte * len(int_array))(*int_array))
 
 
-	def __init__(self):
+def overwrite_pointer_with_int_list(ctypes_pointer, size_bytes, int_array):
 
-		self.__dll__ = ctypes.windll.LoadLibrary('tests/demo_dll.dll')
-
-		# int divide(int, int, int *)
-		self.__divide__ = self.__dll__.cookbook_divide
-		self.__divide__.argtypes = (ctypes.c_int, ctypes.c_int, ctypes.POINTER(ctypes.c_int))
-		self.__divide__.restype = ctypes.c_int
+	return None # TODO
 
 
-	def divide(self, x, y):
+def serialize_pointer_into_int_list(ctypes_pointer, size_bytes):
 
-		rem = ctypes.c_int()
-		quot = self.__divide__(x, y, rem)
-		return quot, rem.value
-
-
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# TEST(s)
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-def test_devide():
-
-	sample = sample_class()
-
-	assert (5, 2) == sample.divide(42, 8)
+	return (ctypes.c_ubyte * size_bytes).from_address(ctypes.c_void_p.from_buffer(ctypes_pointer).value)[:]

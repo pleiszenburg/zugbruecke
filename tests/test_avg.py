@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 """
@@ -7,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	examples/test_zugbruecke.py: Demonstrates ctypes examples from Cookbook R3
+	tests/test_avg.py: Test custom datatype argument passing as pointer
 
 	Required to run on platform / side: [UNIX, WINE]
 
@@ -32,33 +31,13 @@ specific language governing rights and limitations under the License.
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-import sys
-import os
-import time
-from sys import argv, platform
-import timeit
+import pytest
 
-# Timing mode?
-TIMING_RUN = False
-try:
-	if 'time' in argv:
-		TIMING_RUN = True
-except:
-	pass
-
+from sys import platform
 if True in [platform.startswith(os_name) for os_name in ['linux', 'darwin', 'freebsd']]:
-
 	from zugbruecke import ctypes
-	if not TIMING_RUN:
-		ctypes.windll.start_session(parameter = {'log_level': 10})
-
 elif platform.startswith('win'):
-
 	import ctypes
-
-else:
-
-	raise # TODO unsupported platform
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -105,37 +84,12 @@ class DoubleArrayType:
 		return param.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
 
 
-# struct Point { }
-class Point(ctypes.Structure):
-
-
-	_fields_ = [
-		('x', ctypes.c_double),
-		('y', ctypes.c_double)
-		]
-
-
 class sample_class:
 
 
 	def __init__(self):
 
-		self.__dll__ = ctypes.windll.LoadLibrary('demo_dll.dll')
-
-		# int gcd(int, int)
-		self.gcd = self.__dll__.cookbook_gcd
-		self.gcd.argtypes = (ctypes.c_int, ctypes.c_int)
-		self.gcd.restype = ctypes.c_int
-
-		# int in_mandel(double, double, int)
-		self.in_mandel = self.__dll__.cookbook_in_mandel
-		self.in_mandel.argtypes = (ctypes.c_double, ctypes.c_double, ctypes.c_int)
-		self.in_mandel.restype = ctypes.c_int
-
-		# int divide(int, int, int *)
-		self.__divide__ = self.__dll__.cookbook_divide
-		self.__divide__.argtypes = (ctypes.c_int, ctypes.c_int, ctypes.POINTER(ctypes.c_int))
-		self.__divide__.restype = ctypes.c_int
+		self.__dll__ = ctypes.windll.LoadLibrary('tests/demo_dll.dll')
 
 		# void avg(double *, int n)
 		DoubleArray = DoubleArrayType()
@@ -151,76 +105,18 @@ class sample_class:
 		self.__avg__.argtypes = (DoubleArray, ctypes.c_int)
 		self.__avg__.restype = ctypes.c_double
 
-		# double distance(Point *, Point *)
-		self.distance = self.__dll__.cookbook_distance
-		self.distance.argtypes = (ctypes.POINTER(Point), ctypes.POINTER(Point))
-		self.distance.restype = ctypes.c_double
-
 
 	def avg(self, values):
 
 		return self.__avg__(values, len(values))
 
 
-	def divide(self, x, y):
-
-		rem = ctypes.c_int()
-		quot = self.__divide__(x, y, rem)
-		return quot, rem.value
-
-
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# RUN
+# TEST(s)
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-if __name__ == '__main__':
+def test_avg():
 
 	sample = sample_class()
 
-	def time_ROUTINE(routine_name):
-
-		t = timeit.Timer(
-			'time_%s()' % routine_name,
-			setup = "from __main__ import time_%s" % routine_name
-			)
-		print('[TIME %s] %f' % (routine_name, t.timeit(number = 100000)))
-
-	print(7, sample.gcd(35, 42))
-	def time_gdc():
-		returnvalue = sample.gcd(35, 42)
-	if TIMING_RUN:
-		time_ROUTINE('gdc')
-
-	print(1, sample.in_mandel(0, 0, 500))
-	def time_in_mandel_1():
-		returnvalue = sample.in_mandel(0, 0, 500)
-	if TIMING_RUN:
-		time_ROUTINE('in_mandel_1')
-
-	print(0, sample.in_mandel(2.0, 1.0, 500))
-	def time_in_mandel_2():
-		returnvalue = sample.in_mandel(2.0, 1.0, 500)
-	if TIMING_RUN:
-		time_ROUTINE('in_mandel_2')
-
-	print((5, 2), sample.divide(42, 8))
-	def time_divide():
-		returnvalue = sample.divide(42, 8)
-	if TIMING_RUN:
-		time_ROUTINE('divide')
-
-	print(2.0, sample.avg([1, 2, 3]))
-	def time_divide():
-		returnvalue = sample.avg([1, 2, 3])
-	if TIMING_RUN:
-		time_ROUTINE('avg')
-
-	p1 = Point(1, 2)
-	p2 = Point(4, 5)
-	print(4.242640687119285, sample.distance(p1, p2))
-	def time_distance():
-		p1 = Point(1, 2)
-		p2 = Point(4, 5)
-		returnvalue = sample.distance(p1, p2)
-	if TIMING_RUN:
-		time_ROUTINE('distance')
+	assert pytest.approx(2.5, 0.0000001) == sample.avg([1, 2, 3, 4])
