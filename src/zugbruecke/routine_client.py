@@ -133,8 +133,13 @@ class routine_client_class():
 		# Struct status
 		is_struct = False
 
-		# Get name of datatype
-		type_name = datatype.__name__
+		try:
+			# Get name of datatype
+			type_name = datatype.__name__
+		except:
+			# Not all datatypes have a name, let's handle that
+			type_name = None
+
 		# Get group of datatype
 		group_name = type(datatype).__name__ # 'PyCSimpleType', 'PyCStructType' or 'PyCPointerType'
 
@@ -182,11 +187,16 @@ class routine_client_class():
 			self.log.err('[routine-client] ERROR: Unhandled pointer of pointer')
 			raise # TODO
 
-		# UNKNOWN stuff
+		# UNKNOWN stuff, likely pointers - handled without datatype
 		else:
 
-			self.log.err('[routine-client] ERROR: Unknown class of datatype: "%s"', group_name)
-			raise # TODO
+			return {
+				'n': field_name, # kw
+				'p': True, # Is a pointer
+				't': type_name, # Type name, such as 'c_int'
+				'f': False, # Is not a fundamental type (PyCSimpleType)
+				's': False # Is not a struct
+				}
 
 
 	def __pack_args__(self, argtypes_p_sub, args): # TODO kw
@@ -249,7 +259,7 @@ class routine_client_class():
 
 		# Pass argument and return value types as strings ...
 		result = self.client.register_argtype_and_restype(
-			self.dll.full_path, self.name, self.argtypes_p, self.restype_p
+			self.dll.full_path, self.name, self.argtypes_p, self.restype_p, self.memsync
 			)
 
 		# Handle error
@@ -284,6 +294,10 @@ class routine_client_class():
 
 		# TODO proper sanity check
 		try:
+			self.memsync = self.handle_call.memsync
+		except:
+			pass
+		try:
 			self.argtypes = self.handle_call.argtypes
 		except:
 			pass
@@ -293,6 +307,7 @@ class routine_client_class():
 			pass
 
 		# Log status
+		self.log.out('[routine-client]  memsync: %s' % pf(self.memsync))
 		self.log.out('[routine-client]  argtypes: %s' % pf(self.argtypes))
 		self.log.out('[routine-client]  restype: %s' % pf(self.restype))
 

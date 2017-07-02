@@ -160,10 +160,13 @@ class routine_server_class():
 			}
 
 
-	def register_argtype_and_restype(self, argtypes, restype):
+	def register_argtype_and_restype(self, argtypes, restype, memsync):
 
 		# Log status
 		self.log.out('[routine-server] Set argument and return value types for "%s" ...' % self.name)
+
+		# Store memory sync instructions
+		self.memsync = memsync
 
 		# Parse & store argtype dicts into argtypes
 		self.argtypes = argtypes
@@ -174,6 +177,7 @@ class routine_server_class():
 		self.handler.restype = self.__unpack_type_dict__(self.restype)
 
 		# Log status
+		self.log.out('[routine-server] ... memsync: %s ...' % pf(self.memsync))
 		self.log.out('[routine-server] ... argtypes: %s ...' % pf(self.handler.argtypes))
 		self.log.out('[routine-server] ... restype: %s ...' % pf(self.handler.restype))
 
@@ -312,6 +316,11 @@ class routine_server_class():
 		elif datatype_dict['s']:
 
 			return self.__unpack_type_struct_dict__(datatype_dict)
+
+		# Handle generic pointers
+		elif datatype_dict['p'] and datatype_dict['t'] is None:
+
+			return ctypes.c_void_p
 
 		# Undhandled stuff (pointers of pointers etc.) TODO
 		else:

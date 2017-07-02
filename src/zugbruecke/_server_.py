@@ -149,14 +149,14 @@ class wine_server_class:
 			return 'down'
 
 
-	def __register_argtype_and_restype__(self, full_path_dll_unix, routine_name, argtypes, restype):
+	def __register_argtype_and_restype__(self, full_path_dll_unix, routine_name, argtypes, restype, memsync):
 		"""
 		Exposed interface
 		"""
 
 		# Register argtypes and restype of a routine
 		return self.dll_dict[full_path_dll_unix].routines[routine_name].register_argtype_and_restype(
-			argtypes, restype
+			argtypes, restype, memsync
 			)
 
 
