@@ -39,6 +39,7 @@ from .lib import (
 	reduce_dict
 	)
 from .memory import (
+	overwrite_pointer_with_int_list,
 	serialize_pointer_into_int_list
 	)
 
@@ -128,6 +129,9 @@ class routine_client_class():
 
 		# Unpack return dict (for pointers and structs)
 		self.__unpack_return__(args, kw, return_dict)
+
+		# Unpack memory
+		self.__unpack_memory__(memory_transport_handle, return_dict['memory'])
 
 		# Log status
 		self.log.out('[routine-client] ... unpacked, return.')
@@ -425,6 +429,13 @@ class routine_client_class():
 		self.log.out('[routine-client]  memsync: %s' % pf(self.memsync))
 		self.log.out('[routine-client]  argtypes: %s' % pf(self.argtypes))
 		self.log.out('[routine-client]  restype: %s' % pf(self.restype))
+
+
+	def __unpack_memory__(self, pointer_list, memory_list):
+
+		# Overwrite the local pointers with new data
+		for pointer_index, pointer in enumerate(pointer_list):
+			overwrite_pointer_with_int_list(pointer, memory_list[pointer_index])
 
 
 	def __unpack_return__(self, args, kw, return_dict): # TODO kw not yet handled
