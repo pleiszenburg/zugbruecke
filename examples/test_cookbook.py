@@ -175,7 +175,6 @@ class sample_class:
 
 	def bubblesort(self, values):
 
-		# return self.__bubblesort__(values, len(values))
 		ctypes_float_values = ((ctypes.c_float)*len(values))(*values)
 		ctypes_float_pointer_firstelement = ctypes.cast(
 			ctypes.pointer(ctypes_float_values), ctypes.POINTER(ctypes.c_float)
