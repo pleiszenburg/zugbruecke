@@ -231,9 +231,9 @@ if __name__ == '__main__':
 	if TIMING_RUN:
 		time_ROUTINE('divide')
 
-	print(2.0, sample.avg([1, 2, 3]))
+	print(3.0, sample.avg([1, 2, 6]))
 	def time_avg():
-		returnvalue = sample.avg([1, 2, 3])
+		returnvalue = sample.avg([1, 2, 6])
 	if TIMING_RUN:
 		time_ROUTINE('avg')
 
