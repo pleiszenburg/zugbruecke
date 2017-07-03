@@ -320,9 +320,6 @@ class routine_client_class():
 			# Append actual pointer to handler list
 			memory_handle.append(arg_value)
 
-		# TODO remove
-		self.log.out(pf(mem_package_list))
-
 		return mem_package_list, memory_handle
 
 
