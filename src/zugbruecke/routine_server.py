@@ -36,7 +36,8 @@ from pprint import pformat as pf
 import traceback
 
 from memory import (
-	generate_pointer_from_int_list
+	generate_pointer_from_int_list,
+	serialize_pointer_into_int_list
 	)
 
 
@@ -100,7 +101,7 @@ class routine_server_class():
 		args, kw = self.__unpack_arguments__(arg_message_list)
 
 		# Unpack pointer data
-		self.__unpack_memory__(args, kw, arg_memory_list)
+		memory_transport_handle = self.__unpack_memory__(args, kw, arg_memory_list)
 
 		# Default return value
 		return_value = None
@@ -122,11 +123,26 @@ class routine_server_class():
 			# Push traceback to log
 			self.log.err(traceback.format_exc())
 
+		# Pack memory for return
+		return_memory_list = self.__pack_memory__(memory_transport_handle)
+
 		# Pack return package and return it
-		return self.__pack_return__(args, kw, return_value)
+		return self.__pack_return__(args, kw, return_value, return_memory_list)
 
 
-	def __pack_return__(self, args, kw, return_value):
+	def __pack_memory__(self, memory_handle):
+
+		# Generate new list for arrays of ints to be shipped back to the client
+		memory_list = []
+
+		# Iterate through pointers and serialize them
+		for pointer in memory_handle:
+			memory_list.append(serialize_pointer_into_int_list(*pointer))
+
+		return memory_list
+
+
+	def __pack_return__(self, args, kw, return_value, return_memory_list):
 		"""
 		TODO: Optimize for speed!
 		"""
@@ -164,7 +180,8 @@ class routine_server_class():
 		return {
 			'args': arguments_list,
 			'kw': {}, # TODO not yet handled
-			'return_value': return_value # TODO allow & handle pointers
+			'return_value': return_value, # TODO allow & handle pointers
+			'memory': return_memory_list
 			}
 
 
@@ -312,6 +329,9 @@ class routine_server_class():
 
 	def __unpack_memory__(self, args, kw, arg_memory_list): # TODO kw is not handled
 
+		# Generate temporary handle for faster packing
+		memory_handle = []
+
 		# Iterate over memory segments, which must be kept in sync
 		for segment_index, segment in enumerate(self.memsync):
 
@@ -324,6 +344,11 @@ class routine_server_class():
 
 			# Handle deepest instance
 			pointer[segment['p'][-1]] = generate_pointer_from_int_list(arg_memory_list[segment_index])
+
+			# Append to handle
+			memory_handle.append((pointer[segment['p'][-1]], len(arg_memory_list[segment_index])))
+
+		return memory_handle
 
 
 	def __unpack_type_dict__(self, datatype_dict):
