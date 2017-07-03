@@ -35,6 +35,12 @@ import ctypes
 from functools import partial
 from pprint import pformat as pf
 
+from .const import (
+	GROUP_VOID,
+	GROUP_FUNDAMENTAL,
+	GROUP_ARRAY,
+	GROUP_STRUCT
+	)
 from .lib import (
 	reduce_dict
 	)
