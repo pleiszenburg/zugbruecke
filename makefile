@@ -50,5 +50,5 @@ install_link:
 	wine-pytest --version
 
 test:
-	pytest
 	wine-pytest
+	pytest
