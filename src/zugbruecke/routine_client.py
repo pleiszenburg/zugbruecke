@@ -115,9 +115,12 @@ class routine_client_class():
 		# Log status
 		self.log.out('[routine-client] ... parameters are %r / %r. Packing and pushing to server ...' % (args, kw))
 
+		# Handle memory
+		mem_package_list, memory_transport_handle = self.__pack_memory__(args)
+
 		# Actually call routine in DLL! TODO Handle kw ...
 		return_dict = self.client.call_dll_routine(
-			self.dll.full_path, self.name, self.__pack_args__(self.argtypes_p, args), self.__pack_memory__(args)
+			self.dll.full_path, self.name, self.__pack_args__(self.argtypes_p, args), mem_package_list
 			)
 
 		# Log status
@@ -268,6 +271,9 @@ class routine_client_class():
 		# Start empty package
 		mem_package_list = []
 
+		# Store pointers so they can eventually be overwritten
+		memory_handle = []
+
 		# Iterate over memory segments, which must be kept in sync
 		for segment_index, segment in enumerate(self.memsync):
 
@@ -307,10 +313,13 @@ class routine_client_class():
 			# Append data to package
 			mem_package_list.append(data)
 
+			# Append actual pointer to handler list
+			memory_handle.append(arg_value)
+
 		# TODO remove
 		self.log.out(pf(mem_package_list))
 
-		return mem_package_list
+		return mem_package_list, memory_handle
 
 
 	def __process_memsync__(self, memsync, argtypes_p):
