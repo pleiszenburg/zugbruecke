@@ -229,8 +229,15 @@ class routine_client_class():
 				# If pointer
 				if arg_definition_dict['p']:
 
-					# Append value from ctypes datatype (because most of their Python equivalents are immutable)
-					arguments_list.append((arg_definition_dict['n'], arg.value))
+					try:
+
+						# Append value from ctypes datatype (because most of their Python equivalents are immutable)
+						arguments_list.append((arg_definition_dict['n'], arg.value))
+
+					except:
+
+						# HACK Append value from ctypes datatype pointer ...
+						arguments_list.append((arg_definition_dict['n'], arg.contents.value))
 
 				# If value
 				else:
