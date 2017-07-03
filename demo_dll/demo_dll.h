@@ -98,6 +98,12 @@ void __stdcall DEMODLL bubblesort(
 	int n
 	);
 
+void __stdcall DEMODLL mix_rgb_colors(
+	int8_t color_a[3],
+	int8_t color_b[3],
+	int8_t *color_mixed
+	);
+
 struct test
 {
 	char el_char;
