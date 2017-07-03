@@ -118,7 +118,7 @@ double __stdcall DEMODLL cookbook_distance(
 
 /* Average values in an array */
 void __stdcall DEMODLL bubblesort(
-	int *a,
+	float *a,
 	int n
 	)
 {
@@ -129,7 +129,7 @@ void __stdcall DEMODLL bubblesort(
 		{
 			if (a[j] > a[j + 1])
 			{
-				int tmp = a[j];
+				float tmp = a[j];
 				a[j] = a[j + 1];
 				a[j + 1] = tmp;
 			}

@@ -94,7 +94,7 @@ double __stdcall DEMODLL cookbook_distance(
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 void __stdcall DEMODLL bubblesort(
-	int *a,
+	float *a,
 	int n
 	);
 
