@@ -35,6 +35,12 @@ import ctypes
 from pprint import pformat as pf
 import traceback
 
+from const import (
+	GROUP_VOID,
+	GROUP_FUNDAMENTAL,
+	GROUP_ARRAY,
+	GROUP_STRUCT
+	)
 from memory import (
 	generate_pointer_from_int_list,
 	serialize_pointer_into_int_list
