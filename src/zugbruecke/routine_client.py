@@ -296,10 +296,10 @@ class routine_client_class():
 				length_value = length * ctypes.sizeof(segment['_t'])
 
 			# Convert argument into ctypes datatype TODO more checks needed!
-			if segment['_c'] is not None:
+			if '_c' in segment.keys():
 				arg_value = ctypes.pointer(segment['_c'].from_param(pointer))
 			else:
-				arg_value = ctypes.pointer(segment['_t'](pointer))
+				arg_value = pointer
 
 			# Serialize the data ...
 			data = serialize_pointer_into_int_list(arg_value, length_value)
