@@ -93,6 +93,11 @@ double __stdcall DEMODLL cookbook_distance(
 // zugbruecke demo
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+void __stdcall DEMODLL bubblesort(
+	int *a,
+	int n
+	);
+
 struct test
 {
 	char el_char;
