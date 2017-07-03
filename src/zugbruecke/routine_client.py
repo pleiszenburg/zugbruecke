@@ -195,6 +195,11 @@ class routine_client_class():
 					]
 				}
 
+		# Arrays
+		elif group_name == 'PyCArrayType':
+
+			self.log.err(' CC: ' + group_name)
+
 		# Pointers of pointers
 		elif group_name == 'PyCPointerType':
 
@@ -366,6 +371,9 @@ class routine_client_class():
 
 		# Prepare list of arguments by parsing them into list of dicts (TODO field name / kw)
 		self.argtypes_p = [self.__pack_datatype_dict__(arg) for arg in self.argtypes]
+
+		self.log.out('   xxx')
+		self.log.out(pf(self.argtypes_p))
 
 		# Parse return type
 		self.restype_p = self.__pack_datatype_dict__(self.restype)
