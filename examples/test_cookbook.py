@@ -151,6 +151,17 @@ class sample_class:
 		self.__avg__.argtypes = (DoubleArray, ctypes.c_int)
 		self.__avg__.restype = ctypes.c_double
 
+		# void bubblesort(float *, int n)
+		self.__bubblesort__ = self.__dll__.bubblesort
+		self.__bubblesort__.memsync = [ # Regular ctypes on Windows should ignore this statement
+			{
+				'p': [0], # "path" to argument containing the pointer
+				'l': [1], # "path" to argument containing the length
+				'_t': ctypes.c_float # type of argument (optional, default char/byte): sizeof(type) * length == bytes
+				}
+			]
+		self.__bubblesort__.argtypes = (ctypes.POINTER(ctypes.c_float), ctypes.c_int)
+
 		# double distance(Point *, Point *)
 		self.distance = self.__dll__.cookbook_distance
 		self.distance.argtypes = (ctypes.POINTER(Point), ctypes.POINTER(Point))
@@ -160,6 +171,17 @@ class sample_class:
 	def avg(self, values):
 
 		return self.__avg__(values, len(values))
+
+
+	def bubblesort(self, values):
+
+		# return self.__bubblesort__(values, len(values))
+		ctypes_float_values = ((ctypes.c_float)*len(values))(*values)
+		ctypes_float_pointer_firstelement = ctypes.cast(
+			ctypes.pointer(ctypes_float_values), ctypes.POINTER(ctypes.c_float)
+			)
+		self.__bubblesort__(ctypes_float_pointer_firstelement, len(values))
+		values[:] = ctypes_float_values[:]
 
 
 	def divide(self, x, y):
@@ -214,6 +236,16 @@ if __name__ == '__main__':
 		returnvalue = sample.avg([1, 2, 3])
 	if TIMING_RUN:
 		time_ROUTINE('avg')
+
+	test_vector = [5.74, 3.72, 6.28, 8.6, 9.34, 6.47, 2.05, 9.09, 4.39, 4.75]
+	sample.bubblesort(test_vector)
+	test_vector = [round(element, 2) for element in test_vector]
+	print([2.05, 3.72, 4.39, 4.75, 5.74, 6.28, 6.47, 8.6, 9.09, 9.34])
+	print(test_vector)
+	def time_bubblesort():
+		sample.bubblesort([5.74, 3.72, 6.28, 8.6, 9.34, 6.47, 2.05, 9.09, 4.39, 4.75])
+	if TIMING_RUN:
+		time_ROUTINE('bubblesort')
 
 	p1 = Point(1, 2)
 	p2 = Point(4, 5)
