@@ -39,6 +39,7 @@ from .lib import (
 	reduce_dict
 	)
 from .memory import (
+	overwrite_pointer_with_int_list,
 	serialize_pointer_into_int_list
 	)
 
@@ -115,9 +116,12 @@ class routine_client_class():
 		# Log status
 		self.log.out('[routine-client] ... parameters are %r / %r. Packing and pushing to server ...' % (args, kw))
 
+		# Handle memory
+		mem_package_list, memory_transport_handle = self.__pack_memory__(args)
+
 		# Actually call routine in DLL! TODO Handle kw ...
 		return_dict = self.client.call_dll_routine(
-			self.dll.full_path, self.name, self.__pack_args__(self.argtypes_p, args), self.__pack_memory__(args)
+			self.dll.full_path, self.name, self.__pack_args__(self.argtypes_p, args), mem_package_list
 			)
 
 		# Log status
@@ -125,6 +129,9 @@ class routine_client_class():
 
 		# Unpack return dict (for pointers and structs)
 		self.__unpack_return__(args, kw, return_dict)
+
+		# Unpack memory
+		self.__unpack_memory__(memory_transport_handle, return_dict['memory'])
 
 		# Log status
 		self.log.out('[routine-client] ... unpacked, return.')
@@ -229,8 +236,15 @@ class routine_client_class():
 				# If pointer
 				if arg_definition_dict['p']:
 
-					# Append value from ctypes datatype (because most of their Python equivalents are immutable)
-					arguments_list.append((arg_definition_dict['n'], arg.value))
+					try:
+
+						# Append value from ctypes datatype (because most of their Python equivalents are immutable)
+						arguments_list.append((arg_definition_dict['n'], arg.value))
+
+					except:
+
+						# HACK Append value from ctypes datatype pointer ...
+						arguments_list.append((arg_definition_dict['n'], arg.contents.value))
 
 				# If value
 				else:
@@ -261,6 +275,9 @@ class routine_client_class():
 		# Start empty package
 		mem_package_list = []
 
+		# Store pointers so they can eventually be overwritten
+		memory_handle = []
+
 		# Iterate over memory segments, which must be kept in sync
 		for segment_index, segment in enumerate(self.memsync):
 
@@ -289,10 +306,10 @@ class routine_client_class():
 				length_value = length * ctypes.sizeof(segment['_t'])
 
 			# Convert argument into ctypes datatype TODO more checks needed!
-			if segment['_c'] is not None:
+			if '_c' in segment.keys():
 				arg_value = ctypes.pointer(segment['_c'].from_param(pointer))
 			else:
-				arg_value = ctypes.pointer(segment['_t'](pointer))
+				arg_value = pointer
 
 			# Serialize the data ...
 			data = serialize_pointer_into_int_list(arg_value, length_value)
@@ -300,10 +317,10 @@ class routine_client_class():
 			# Append data to package
 			mem_package_list.append(data)
 
-		# TODO remove
-		self.log.out(pf(mem_package_list))
+			# Append actual pointer to handler list
+			memory_handle.append(arg_value)
 
-		return mem_package_list
+		return mem_package_list, memory_handle
 
 
 	def __process_memsync__(self, memsync, argtypes_p):
@@ -330,6 +347,11 @@ class routine_client_class():
 			for path_element in segment['l'][1:]:
 				# Go deeper ...
 				len_type = len_type['_fields_'][path_element]
+
+			# HACK make memory sync pointers type agnostic
+			arg_type['f'] = False # no fundamental type
+			arg_type['s'] = False # no struct
+			arg_type['t'] = None # no type string
 
 			# Add to list
 			memsync_handle.append({
@@ -404,6 +426,13 @@ class routine_client_class():
 		self.log.out('[routine-client]  memsync: %s' % pf(self.memsync))
 		self.log.out('[routine-client]  argtypes: %s' % pf(self.argtypes))
 		self.log.out('[routine-client]  restype: %s' % pf(self.restype))
+
+
+	def __unpack_memory__(self, pointer_list, memory_list):
+
+		# Overwrite the local pointers with new data
+		for pointer_index, pointer in enumerate(pointer_list):
+			overwrite_pointer_with_int_list(pointer, memory_list[pointer_index])
 
 
 	def __unpack_return__(self, args, kw, return_dict): # TODO kw not yet handled
