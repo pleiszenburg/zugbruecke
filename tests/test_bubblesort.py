@@ -85,6 +85,6 @@ def test_bubblesort():
 	sample.bubblesort(test_vector)
 	test_vector = [round(element, 2) for element in test_vector]
 	result_vector = [2.05, 3.72, 4.39, 4.75, 5.74, 6.28, 6.47, 8.6, 9.09, 9.34]
-	vector_diff = sum([(test_vector[index] - result_vector[index]) for index in range(len(result_vector))])
+	vector_diff = sum([abs(test_vector[index] - result_vector[index]) for index in range(len(result_vector))])
 
 	assert pytest.approx(0.0, 0.0000001) == vector_diff
