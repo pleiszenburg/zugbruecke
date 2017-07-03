@@ -163,7 +163,7 @@ class routine_server_class():
 			arg_definition_dict = self.argtypes[arg_index]
 
 			# Handle fundamental types by value
-			if arg_definition_dict['f']:
+			if arg_definition_dict['g'] == GROUP_FUNDAMENTAL:
 
 				# If by reference ...
 				if arg_definition_dict['p']:
@@ -233,7 +233,7 @@ class routine_server_class():
 			arg_definition_dict = self.argtypes[arg_index]
 
 			# Handle fundamental types
-			if arg_definition_dict['f']:
+			if arg_definition_dict['g'] == GROUP_FUNDAMENTAL:
 
 				# By reference
 				if arg_definition_dict['p']:
@@ -250,7 +250,7 @@ class routine_server_class():
 					arguments_list.append(arg[1])
 
 			# Handle structs
-			elif arg_definition_dict['s']:
+			elif arg_definition_dict['g'] == GROUP_STRUCT:
 
 				# Generate new instance of struct datatype
 				struct_arg = self.datatypes_dict[arg_definition_dict['t']]()
@@ -284,7 +284,7 @@ class routine_server_class():
 			arg_definition_dict = arg_definition_list[arg_index]
 
 			# Handle fundamental types
-			if arg_definition_dict['f']:
+			if arg_definition_dict['g'] == GROUP_FUNDAMENTAL:
 
 				# By reference
 				if arg_definition_dict['p']:
@@ -307,7 +307,7 @@ class routine_server_class():
 						)
 
 			# Handle structs
-			elif arg_definition_dict['s']:
+			elif arg_definition_dict['g'] == GROUP_STRUCT:
 
 				# Generate new instance of struct datatype
 				struct_arg = self.datatypes_dict[arg_definition_dict['t']]()
@@ -363,17 +363,17 @@ class routine_server_class():
 		"""
 
 		# Handle fundamental C datatypes (PyCSimpleType)
-		if datatype_dict['f']:
+		if datatype_dict['g'] == GROUP_FUNDAMENTAL:
 
 			return self.__unpack_type_fundamental_dict__(datatype_dict)
 
 		# Structures (PyCStructType)
-		elif datatype_dict['s']:
+		elif datatype_dict['g'] == GROUP_STRUCT:
 
 			return self.__unpack_type_struct_dict__(datatype_dict)
 
 		# Handle generic pointers
-		elif datatype_dict['p'] and datatype_dict['t'] is None:
+		elif datatype_dict['g'] == GROUP_VOID:
 
 			return ctypes.c_void_p
 
@@ -418,7 +418,7 @@ class routine_server_class():
 		for field in datatype_dict['_fields_']:
 
 			# Handle fundamental C datatypes (PyCSimpleType)
-			if field['f']:
+			if field['g'] == GROUP_FUNDAMENTAL:
 
 				# Add tuple with name and fundamental datatype
 				fields.append((
@@ -427,7 +427,7 @@ class routine_server_class():
 					))
 
 			# Structures (PyCStructType)
-			elif field['s']:
+			elif field['g'] == GROUP_STRUCT:
 
 				# Add tuple with name and struct datatype
 				fields.append((

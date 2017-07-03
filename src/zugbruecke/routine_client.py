@@ -177,8 +177,7 @@ class routine_client_class():
 				'n': field_name, # kw
 				'p': is_pointer, # Is a pointer
 				't': type_name, # Type name, such as 'c_int'
-				'f': True, # Is a fundamental type (PyCSimpleType)
-				's': False # Is not a struct
+				'g': GROUP_FUNDAMENTAL
 				}
 
 		# Structs
@@ -194,8 +193,7 @@ class routine_client_class():
 				'n': field_name, # kw
 				'p': is_pointer, # Is a pointer
 				't': type_name, # Type name, such as 'c_int'
-				'f': False, # Is a fundamental type (PyCSimpleType)
-				's': True, # Is not a struct
+				'g': GROUP_STRUCT,
 				'_fields_': [
 					self.__pack_datatype_dict__(field[1], field[0]) for field in struct_fields
 					]
@@ -204,6 +202,7 @@ class routine_client_class():
 		# Arrays
 		elif group_name == 'PyCArrayType':
 
+			# GROUP_ARRAY
 			self.log.err(' CC: ' + group_name)
 
 		# Pointers of pointers
@@ -219,8 +218,7 @@ class routine_client_class():
 				'n': field_name, # kw
 				'p': True, # Is a pointer
 				't': type_name, # Type name, such as 'c_int'
-				'f': False, # Is not a fundamental type (PyCSimpleType)
-				's': False # Is not a struct
+				'g': GROUP_VOID
 				}
 
 
@@ -242,7 +240,7 @@ class routine_client_class():
 				arg = getattr(args, arg_definition_dict['n'])
 
 			# Handle fundamental types
-			if arg_definition_dict['f']:
+			if arg_definition_dict['g'] == GROUP_FUNDAMENTAL:
 
 				# If pointer
 				if arg_definition_dict['p']:
@@ -264,7 +262,7 @@ class routine_client_class():
 					arguments_list.append((arg_definition_dict['n'], arg))
 
 			# Handle structs
-			elif arg_definition_dict['s']:
+			elif arg_definition_dict['g'] == GROUP_STRUCT:
 
 				# Reclusively call this routine for packing structs
 				arguments_list.append((arg_definition_dict['n'], self.__pack_args__(
@@ -360,8 +358,7 @@ class routine_client_class():
 				len_type = len_type['_fields_'][path_element]
 
 			# HACK make memory sync pointers type agnostic
-			arg_type['f'] = False # no fundamental type
-			arg_type['s'] = False # no struct
+			arg_type['g'] = GROUP_VOID
 			arg_type['t'] = None # no type string
 
 			# Add to list
@@ -464,7 +461,7 @@ class routine_client_class():
 			arg_definition_dict = self.argtypes_p[arg_index]
 
 			# Handle fundamental types
-			if arg_definition_dict['f']:
+			if arg_definition_dict['g'] == GROUP_FUNDAMENTAL:
 
 				# If by reference ...
 				if arg_definition_dict['p']:
