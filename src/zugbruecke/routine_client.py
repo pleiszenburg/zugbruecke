@@ -338,6 +338,11 @@ class routine_client_class():
 				# Go deeper ...
 				len_type = len_type['_fields_'][path_element]
 
+			# HACK make memory sync pointers type agnostic
+			arg_type['f'] = False # no fundamental type
+			arg_type['s'] = False # no struct
+			arg_type['t'] = None # no type string
+
 			# Add to list
 			memsync_handle.append({
 				'p': arg_type,
