@@ -372,6 +372,11 @@ class routine_server_class():
 
 			return self.__unpack_type_struct_dict__(datatype_dict)
 
+		# Structures (PyCArrayType)
+		elif datatype_dict['g'] == GROUP_ARRAY:
+
+			return self.__unpack_type_array_dict__(datatype_dict)
+
 		# Handle generic pointers
 		elif datatype_dict['g'] == GROUP_VOID:
 
@@ -385,6 +390,19 @@ class routine_server_class():
 
 			# HACK TODO
 			return ctypes.c_int
+
+
+	def __unpack_type_array_dict__(self, datatype_dict):
+
+		step_type = getattr(ctypes, datatype_dict['t'])
+		for length in datatype_dict['d']:
+			step_type = step_type * length
+
+		# Return type class or type pointer
+		if datatype_dict['p']:
+			return ctypes.POINTER(step_type)
+		else:
+			return step_type
 
 
 	def __unpack_type_fundamental_dict__(self, datatype_dict):
