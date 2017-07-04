@@ -280,6 +280,12 @@ class routine_client_class():
 					# Append value
 					arguments_list.append((arg_definition_dict['n'], arg))
 
+			# Handle arrays
+			elif arg_definition_dict['g'] == GROUP_ARRAY:
+
+				self.log.err('  xxx')
+				self.log.err(pf(arg))
+
 			# Handle structs
 			elif arg_definition_dict['g'] == GROUP_STRUCT:
 
@@ -288,10 +294,10 @@ class routine_client_class():
 					arg_definition_dict['_fields_'], arg
 					)))
 
-			# Handle everything else (structures)
+			# Handle everything else ... likely pointers handled by memsync
 			else:
 
-				# HACK TODO
+				# Just return None - will (hopefully) be overwritten by memsync
 				arguments_list.append(None)
 
 		# Return parameter message list - MUST WORK WITH PICKLE
