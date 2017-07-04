@@ -166,9 +166,15 @@ class routine_client_class():
 		# Check for pointer, if yes, flag it and isolate datatype
 		if group_name == 'PyCPointerType':
 
+			# Flag it as pointer
 			is_pointer = True
+
+			# Get the actual type and group names
 			type_name = datatype._type_.__name__
 			group_name = type(datatype._type_).__name__
+
+			# For later use, get actual type
+			datatype = datatype._type_
 
 		# Fundamental C types
 		if group_name == 'PyCSimpleType':
@@ -184,10 +190,7 @@ class routine_client_class():
 		elif group_name == 'PyCStructType':
 
 			# Get fields
-			if is_pointer:
-				struct_fields = datatype._type_._fields_
-			else:
-				struct_fields = datatype._fields_
+			struct_fields = datatype._fields_
 
 			return {
 				'n': field_name, # kw
@@ -202,8 +205,24 @@ class routine_client_class():
 		# Arrays
 		elif group_name == 'PyCArrayType':
 
-			# GROUP_ARRAY
-			self.log.err(' CC: ' + group_name)
+			# Handle multi-dimensional arrays
+			dimensions = []
+
+			# Step through the array type, extract the lengths and get the fundamental type # TODO arrays of structs
+			step = datatype
+			step_name = datatype.__name__
+			while type(step._type_) is not str:
+				dimensions.append(step._length_)
+				step = step._type_
+				step_name = step.__name__
+
+			return {
+				'd': dimensions, # dimensions
+				'n': field_name, # kw
+				'p': is_pointer, # Is a pointer
+				't': step_name, # Type name, such as 'c_int'
+				'g': GROUP_ARRAY
+				}
 
 		# Pointers of pointers
 		elif group_name == 'PyCPointerType':
@@ -374,9 +393,6 @@ class routine_client_class():
 
 		# Prepare list of arguments by parsing them into list of dicts (TODO field name / kw)
 		self.argtypes_p = [self.__pack_datatype_dict__(arg) for arg in self.argtypes]
-
-		self.log.out('   xxx')
-		self.log.out(pf(self.argtypes_p))
 
 		# Parse return type
 		self.restype_p = self.__pack_datatype_dict__(self.restype)
