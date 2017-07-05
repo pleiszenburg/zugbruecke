@@ -31,7 +31,7 @@ specific language governing rights and limitations under the License.
 # TYPES
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+FLAG_POINTER = -1
 GROUP_VOID = 1
 GROUP_FUNDAMENTAL = 2
-GROUP_ARRAY = 4
-GROUP_STRUCT = 8
+GROUP_STRUCT = 4

@@ -36,9 +36,9 @@ from functools import partial
 from pprint import pformat as pf
 
 from .const import (
+	FLAG_POINTER,
 	GROUP_VOID,
 	GROUP_FUNDAMENTAL,
-	GROUP_ARRAY,
 	GROUP_STRUCT
 	)
 from .lib import (
@@ -148,13 +148,8 @@ class routine_client_class():
 
 	def __pack_datatype_dict__(self, datatype, field_name = None):
 
-		# Pointer status
-		is_pointer = False
-		# Struct status
-		is_struct = False
-
 		try:
-			# Get name of datatype
+			# Get name of datatype, such as c_int
 			type_name = datatype.__name__
 		except:
 			# Not all datatypes have a name, let's handle that
@@ -163,25 +158,42 @@ class routine_client_class():
 		# Get group of datatype
 		group_name = type(datatype).__name__ # 'PyCSimpleType', 'PyCStructType', PyCArrayType or 'PyCPointerType'
 
-		# Check for pointer, if yes, flag it and isolate datatype
-		if group_name == 'PyCPointerType':
+		# List of flags: Pointer flag or length of array (one entry per dimension)
+		flag_list = []
 
-			# Flag it as pointer
-			is_pointer = True
+		# Strip away all pointers and arrays until simple type or struct type is left & keep order
+		while group_name in ['PyCPointerType', 'PyCArrayType']:
 
-			# Get the actual type and group names
-			type_name = datatype._type_.__name__
-			group_name = type(datatype._type_).__name__
+			# Catch pointer
+			if group_name == 'PyCPointerType':
 
-			# For later use, get actual type
+				# Append pointer flag to list of flags
+				flag_list.append(FLAG_POINTER)
+
+			# Catch arrays
+			elif group_name == 'PyCArrayType':
+
+				# Append length to flag list
+				flag_list.append(datatype._length_)
+
+			# This is not supposed to happen ...
+			else:
+
+				raise
+
+			# Get next type in sequence
 			datatype = datatype._type_
 
-		# Fundamental C types
+			# Get type and group name of next type in sequence
+			type_name = datatype.__name__
+			group_name = type(datatype).__name__
+
+		# Fundamental ('simple') C types
 		if group_name == 'PyCSimpleType':
 
 			return {
+				'f': flag_list,
 				'n': field_name, # kw
-				'p': is_pointer, # Is a pointer
 				't': type_name, # Type name, such as 'c_int'
 				'g': GROUP_FUNDAMENTAL
 				}
@@ -189,62 +201,26 @@ class routine_client_class():
 		# Structs
 		elif group_name == 'PyCStructType':
 
-			# Get fields
-			struct_fields = datatype._fields_
-
 			return {
+				'f': flag_list,
 				'n': field_name, # kw
-				'p': is_pointer, # Is a pointer
 				't': type_name, # Type name, such as 'c_int'
 				'g': GROUP_STRUCT,
 				'_fields_': [
-					self.__pack_datatype_dict__(field[1], field[0]) for field in struct_fields
+					self.__pack_datatype_dict__(field[1], field[0]) for field in datatype._fields_
 					]
 				}
-
-		# Arrays
-		elif group_name == 'PyCArrayType':
-
-			# Handle multi-dimensional arrays
-			dimensions = []
-
-			# Step through the array type, extract the lengths and get the fundamental type # TODO arrays of structs
-			step = datatype
-			step_name = datatype.__name__
-			while True:
-				# Break if it is a fundamental type
-				if hasattr(step, '_type_'): # catch this because struct does not have _type_ attribute
-					if type(step._type_) is str: # fundamental types have single letter identifiers
-						break
-				# Break if it is struct
-				if hasattr(step, '_fields_'): # only structs have fields
-					break
-				dimensions.append(step._length_)
-				step = step._type_
-				step_name = step.__name__
-
-			return {
-				'd': dimensions, # dimensions
-				'n': field_name, # kw
-				'p': is_pointer, # Is a pointer
-				't': step_name, # Type name, such as 'c_int'
-				'g': GROUP_ARRAY
-				}
-
-		# Pointers of pointers
-		elif group_name == 'PyCPointerType':
-
-			self.log.err('[routine-client] ERROR: Unhandled pointer of pointer')
-			raise # TODO
 
 		# UNKNOWN stuff, likely pointers - handled without datatype
 		else:
 
+			self.log.err('__pack_datatype_dict__: Unknown group_name "%s"' % group_name)
+
 			return {
+				'f': flag_list,
 				'n': field_name, # kw
-				'p': True, # Is a pointer
 				't': type_name, # Type name, such as 'c_int'
-				'g': GROUP_VOID
+				'g': GROUP_VOID # Let's try void
 				}
 
 

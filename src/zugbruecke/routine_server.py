@@ -36,9 +36,9 @@ from pprint import pformat as pf
 import traceback
 
 from const import (
+	FLAG_POINTER,
 	GROUP_VOID,
 	GROUP_FUNDAMENTAL,
-	GROUP_ARRAY,
 	GROUP_STRUCT
 	)
 from memory import (
