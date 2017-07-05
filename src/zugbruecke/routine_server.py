@@ -165,17 +165,17 @@ class routine_server_class():
 			# Handle fundamental types by value
 			if arg_definition_dict['g'] == GROUP_FUNDAMENTAL:
 
-				# If by reference ...
-				if arg_definition_dict['p']:
+				# TODO handle flags from arg_definition_dict['f']
+				arguments_list.append(None)
 
-					# Append value from ctypes datatype (because most of their Python equivalents are immutable)
-					arguments_list.append(arg.value)
-
-				# If by value ...
-				else:
-
-					# Nothing to do ...
-					arguments_list.append(None)
+				# # If by reference ...
+				# if arg_definition_dict['p']:
+				# 	# Append value from ctypes datatype (because most of their Python equivalents are immutable)
+				# 	arguments_list.append(arg.value)
+				# # If by value ...
+				# else:
+				# 	# Nothing to do ...
+				# 	arguments_list.append(None)
 
 			# Handle everything else (structures etc)
 			else:
@@ -235,19 +235,24 @@ class routine_server_class():
 			# Handle fundamental types
 			if arg_definition_dict['g'] == GROUP_FUNDAMENTAL:
 
-				# By reference
-				if arg_definition_dict['p']:
+				# TODO handle flags from arg_definition_dict['f']
 
-					# Put value back into its ctypes datatype
-					arguments_list.append(
-						getattr(ctypes, arg_definition_dict['t'])(arg[1])
-						)
-
-				# By value
-				else:
-
-					# Append value
+				if len(arg_definition_dict['f']) == 0: # No flags, nothing to do
 					arguments_list.append(arg[1])
+				else:
+					raise
+
+				# # By reference
+				# if arg_definition_dict['p']:
+				# 	# Put value back into its ctypes datatype
+				# 	arguments_list.append(
+				# 		getattr(ctypes, arg_definition_dict['t'])(arg[1])
+				# 		)
+				# # By value
+				# else:
+				# 	# Append value
+				# 	arguments_list.append(arg[1])
+
 
 			# Handle structs
 			elif arg_definition_dict['g'] == GROUP_STRUCT:

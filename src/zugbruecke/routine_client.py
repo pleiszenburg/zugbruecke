@@ -235,7 +235,7 @@ class routine_client_class():
 		# Step through arguments
 		for arg_index, arg_definition_dict in enumerate(argtypes_p_sub):
 
-			# Fetch current argument
+			# Fetch current argument by index from tuple or by name from struct/kw
 			if type(args) is list or type(args) is tuple:
 				arg = args[arg_index]
 			else:
@@ -244,30 +244,18 @@ class routine_client_class():
 			# Handle fundamental types
 			if arg_definition_dict['g'] == GROUP_FUNDAMENTAL:
 
-				# If pointer
-				if arg_definition_dict['p']:
+				# TODO:
+				# append tuple to list "arguments_list"
+				# tuple contains: (arg_definition_dict['n'], argument content / value)
+				#  pointer: arg.value or arg.contents.value
+				#  (value: Append value from ctypes datatype, because most of their Python equivalents are immutable)
+				#  (contents.value: Append value from ctypes datatype pointer ...)
+				#  by value: just "arg"
 
-					try:
-
-						# Append value from ctypes datatype (because most of their Python equivalents are immutable)
-						arguments_list.append((arg_definition_dict['n'], arg.value))
-
-					except:
-
-						# HACK Append value from ctypes datatype pointer ...
-						arguments_list.append((arg_definition_dict['n'], arg.contents.value))
-
-				# If value
-				else:
-
-					# Append value
+				if len(arg_definition_dict['f']) == 0: # No flags, nothing to do
 					arguments_list.append((arg_definition_dict['n'], arg))
-
-			# Handle arrays
-			elif arg_definition_dict['g'] == GROUP_ARRAY:
-
-				self.log.err('  xxx')
-				self.log.err(pf(arg))
+				else:
+					raise
 
 			# Handle structs
 			elif arg_definition_dict['g'] == GROUP_STRUCT:
@@ -468,17 +456,17 @@ class routine_client_class():
 			# Handle fundamental types
 			if arg_definition_dict['g'] == GROUP_FUNDAMENTAL:
 
-				# If by reference ...
-				if arg_definition_dict['p']:
+				# TODO handle flags from arg_definition_dict['f']
+				pass
 
-					# Put value back into its ctypes datatype
-					args[arg_index].value = arguments_list[arg_index]
-
-				# If by value
-				else:
-
-					# Nothing to do
-					pass
+				# # If by reference ...
+				# if arg_definition_dict['p']:
+				# 	# Put value back into its ctypes datatype
+				# 	args[arg_index].value = arguments_list[arg_index]
+				# # If by value
+				# else:
+				# 	# Nothing to do
+				# 	pass
 
 			# Handle everything else (structures and "the other stuff")
 			else:
