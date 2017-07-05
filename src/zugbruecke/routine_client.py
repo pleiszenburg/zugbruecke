@@ -161,7 +161,7 @@ class routine_client_class():
 			type_name = None
 
 		# Get group of datatype
-		group_name = type(datatype).__name__ # 'PyCSimpleType', 'PyCStructType' or 'PyCPointerType'
+		group_name = type(datatype).__name__ # 'PyCSimpleType', 'PyCStructType', PyCArrayType or 'PyCPointerType'
 
 		# Check for pointer, if yes, flag it and isolate datatype
 		if group_name == 'PyCPointerType':
@@ -211,7 +211,14 @@ class routine_client_class():
 			# Step through the array type, extract the lengths and get the fundamental type # TODO arrays of structs
 			step = datatype
 			step_name = datatype.__name__
-			while type(step._type_) is not str:
+			while True:
+				# Break if it is a fundamental type
+				if hasattr(step, '_type_'): # catch this because struct does not have _type_ attribute
+					if type(step._type_) is str: # fundamental types have single letter identifiers
+						break
+				# Break if it is struct
+				if hasattr(step, '_fields_'): # only structs have fields
+					break
 				dimensions.append(step._length_)
 				step = step._type_
 				step_name = step.__name__
