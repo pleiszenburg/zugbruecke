@@ -358,9 +358,6 @@ class routine_server_class():
 
 
 	def __unpack_type_dict__(self, datatype_dict):
-		"""
-		TODO Optimize for speed!
-		"""
 
 		# Handle fundamental C datatypes (PyCSimpleType)
 		if datatype_dict['g'] == GROUP_FUNDAMENTAL:
@@ -372,62 +369,52 @@ class routine_server_class():
 
 			return self.__unpack_type_struct_dict__(datatype_dict)
 
-		# Structures (PyCArrayType)
-		elif datatype_dict['g'] == GROUP_ARRAY:
-
-			return self.__unpack_type_array_dict__(datatype_dict)
-
 		# Handle generic pointers
 		elif datatype_dict['g'] == GROUP_VOID:
 
-			return ctypes.c_void_p
+			return self.__unpack_type_flags__(ctypes.c_void_p, datatype_dict['f'])
 
 		# Undhandled stuff (pointers of pointers etc.) TODO
 		else:
 
 			# Push traceback to log
-			self.log.err('[routine-server] ERROR: Unhandled datatype: %s' % datatype_dict['t'])
+			self.log.err('[routine-server] ERROR: Unhandled group_name "%s"' % datatype_dict['g'])
 
 			# HACK TODO
-			return ctypes.c_int
+			return self.__unpack_type_flags__(ctypes.c_int, datatype_dict['f'])
 
 
-	def __unpack_type_array_dict__(self, datatype_dict):
+	def __unpack_type_flags__(self, datatype, flag_list):
 
-		step_type = getattr(ctypes, datatype_dict['t'])
-		for length in datatype_dict['d']:
-			step_type = step_type * length
+		# Re-create arrays and pointers
+		for flag in reversed(flag_list):
+			if flag > 0: # array
+				datatype = datatype * flag
+			elif flag == FLAG_POINTER:
+				datatype = ctypes.POINTER(datatype)
+			else:
+				raise # TODO
 
-		# Return type class or type pointer
-		if datatype_dict['p']:
-			return ctypes.POINTER(step_type)
-		else:
-			return step_type
+		return datatype
 
 
 	def __unpack_type_fundamental_dict__(self, datatype_dict):
 
 		# Return type class or type pointer
-		if datatype_dict['p']:
-			return ctypes.POINTER(getattr(ctypes, datatype_dict['t']))
-		else:
-			return getattr(ctypes, datatype_dict['t'])
+		return self.__unpack_type_flags__(getattr(ctypes, datatype_dict['t']), datatype_dict['f'])
 
 
 	def __unpack_type_struct_dict__(self, datatype_dict):
 
 		# Generate struct class if it does not exist yet
 		if datatype_dict['t'] not in self.datatypes_dict.keys():
-			self.__unpack_type_struct_dict_generator__(datatype_dict)
+			self.__unpack_type_struct_generator__(datatype_dict)
 
 		# Return type class or type pointer
-		if datatype_dict['p']:
-			return ctypes.POINTER(self.datatypes_dict[datatype_dict['t']])
-		else:
-			return self.datatypes_dict[datatype_dict['t']]
+		return self.__unpack_type_flags__(self.datatypes_dict[datatype_dict['t']], datatype_dict['f'])
 
 
-	def __unpack_type_struct_dict_generator__(self, datatype_dict):
+	def __unpack_type_struct_generator__(self, datatype_dict):
 
 		# Prepare fields
 		fields = []
