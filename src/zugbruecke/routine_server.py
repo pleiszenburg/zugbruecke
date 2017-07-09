@@ -424,7 +424,7 @@ class routine_server_class():
 		# Handle generic pointers
 		elif datatype_dict['g'] == GROUP_VOID:
 
-			return self.__unpack_type_flags__(ctypes.c_void_p, datatype_dict['f'])
+			return self.__unpack_type_flags__(ctypes.c_void_p, datatype_dict['f'], True)
 
 		# Undhandled stuff (pointers of pointers etc.) TODO
 		else:
@@ -436,14 +436,15 @@ class routine_server_class():
 			return self.__unpack_type_flags__(ctypes.c_int, datatype_dict['f'])
 
 
-	def __unpack_type_flags__(self, datatype, flag_list):
+	def __unpack_type_flags__(self, datatype, flag_list, is_void_pointer = False):
 
 		# Re-create arrays and pointers
-		for flag in reversed(flag_list):
+		for flag_index, flag in enumerate(reversed(flag_list)):
 			if flag > 0: # array
 				datatype = datatype * flag
 			elif flag == FLAG_POINTER:
-				datatype = ctypes.POINTER(datatype)
+				if not is_void_pointer: # do this only for last flag TODO
+					datatype = ctypes.POINTER(datatype)
 			else:
 				raise # TODO
 
@@ -453,7 +454,11 @@ class routine_server_class():
 	def __unpack_type_fundamental_dict__(self, datatype_dict):
 
 		# Return type class or type pointer
-		return self.__unpack_type_flags__(getattr(ctypes, datatype_dict['t']), datatype_dict['f'])
+		return self.__unpack_type_flags__(
+			getattr(ctypes, datatype_dict['t']),
+			datatype_dict['f'],
+			datatype_dict['t'] is 'c_void_p'
+			)
 
 
 	def __unpack_type_struct_dict__(self, datatype_dict):
