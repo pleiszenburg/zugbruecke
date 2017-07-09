@@ -249,29 +249,34 @@ class routine_client_class():
 			#  (contents.value: Append value from ctypes datatype pointer ...)
 			#  by value: just "arg"
 
-			arg_value = arg # Set up arg for iterative unpacking
-			for flag in arg_definition_dict['f']: # step through flags
+			try:
 
-				# Handle pointers
-				if flag == FLAG_POINTER:
+				arg_value = arg # Set up arg for iterative unpacking
+				for flag in arg_definition_dict['f']: # step through flags
 
-					# There are two ways of getting the actual value
-					if hasattr(arg_value, 'value'):
-						arg_value = arg_value.value
-					elif hasattr(arg_value, 'contents'):
-						arg_value = arg_value.contents
+					# Handle pointers
+					if flag == FLAG_POINTER:
+
+						# There are two ways of getting the actual value
+						if hasattr(arg_value, 'value'):
+							arg_value = arg_value.value
+						elif hasattr(arg_value, 'contents'):
+							arg_value = arg_value.contents
+						else:
+							raise # TODO
+
+					# Handle arrays
+					elif flag > 0:
+
+						arg_value = arg_value[:]
+
+					# Handle unknown flags
 					else:
+
 						raise # TODO
+			except:
 
-				# Handle arrays
-				elif flag > 0:
-
-					arg_value = arg_value[:]
-
-				# Handle unknown flags
-				else:
-
-					raise # TODO
+				self.log.err(pf(arg_value))
 
 			self.log.err('   abc')
 			self.log.err(pf(arg_value))
@@ -481,8 +486,38 @@ class routine_client_class():
 			# Handle fundamental types
 			if arg_definition_dict['g'] == GROUP_FUNDAMENTAL:
 
-				# TODO handle flags from arg_definition_dict['f']
-				pass
+				# Start process with plain old argument
+				arg_value = args[arg_index]
+				# New value is: arguments_list[arg_index]
+
+				# Step through flags
+				for flag in arg_definition_dict['f']:
+
+					# Handle pointers
+					if flag == FLAG_POINTER:
+
+						# There are two ways of getting the actual value
+						# if hasattr(arg_value, 'value'):
+						# 	arg_value = arg_value.value
+						if hasattr(arg_value, 'contents'):
+							arg_value = arg_value.contents
+						else:
+							arg_value = arg_value
+
+					# Handle arrays
+					elif flag > 0:
+
+						arg_value = arg_value
+
+					# Handle unknown flags
+					else:
+
+						raise # TODO
+
+				if hasattr(arg_value, 'value'):
+					arg_value.value = arguments_list[arg_index]
+				else:
+					arg_value = arguments_list[arg_index]
 
 				# # If by reference ...
 				# if arg_definition_dict['p']:

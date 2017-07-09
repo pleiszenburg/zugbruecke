@@ -162,11 +162,39 @@ class routine_server_class():
 			# Fetch definition of current argument
 			arg_definition_dict = self.argtypes[arg_index]
 
+			arg_value = arg # Set up arg for iterative unpacking
+			for flag in arg_definition_dict['f']: # step through flags
+
+				# Handle pointers
+				if flag == FLAG_POINTER:
+
+					# There are two ways of getting the actual value
+					if hasattr(arg_value, 'value'):
+						arg_value = arg_value.value
+					elif hasattr(arg_value, 'contents'):
+						arg_value = arg_value.contents
+					else:
+						raise # TODO
+
+				# Handle arrays
+				elif flag > 0:
+
+					arg_value = arg_value[:]
+
+				# Handle unknown flags
+				else:
+
+					raise # TODO
+
+			self.log.err('   efg')
+			self.log.err(pf(arg_value))
+
 			# Handle fundamental types by value
 			if arg_definition_dict['g'] == GROUP_FUNDAMENTAL:
 
-				# TODO handle flags from arg_definition_dict['f']
-				arguments_list.append(None)
+				if hasattr(arg_value, 'value'):
+					arg_value = arg_value.value
+				arguments_list.append(arg_value)
 
 				# # If by reference ...
 				# if arg_definition_dict['p']:
@@ -235,24 +263,43 @@ class routine_server_class():
 			# Handle fundamental types
 			if arg_definition_dict['g'] == GROUP_FUNDAMENTAL:
 
-				# TODO handle flags from arg_definition_dict['f']
+				try:
 
-				if len(arg_definition_dict['f']) == 0: # No flags, nothing to do
-					arguments_list.append(arg[1])
-				else:
-					raise
+					# Start process with plain argument
+					arg_rebuilt = getattr(ctypes, arg_definition_dict['t'])(arg[1])
 
-				# # By reference
-				# if arg_definition_dict['p']:
-				# 	# Put value back into its ctypes datatype
-				# 	arguments_list.append(
-				# 		getattr(ctypes, arg_definition_dict['t'])(arg[1])
-				# 		)
-				# # By value
-				# else:
-				# 	# Append value
-				# 	arguments_list.append(arg[1])
+					# Step through flags
+					for flag in arg_definition_dict['f']:
 
+						if flag == FLAG_POINTER:
+
+							pass # Nothing to do?
+
+						elif flag > 0:
+
+							raise
+
+						else:
+
+							raise
+
+					# # By reference
+					# if arg_definition_dict['p']:
+					# 	# Put value back into its ctypes datatype
+					# 	arguments_list.append(
+					# 		getattr(ctypes, arg_definition_dict['t'])(arg[1])
+					# 		)
+					# # By value
+					# else:
+					# 	# Append value
+					# 	arguments_list.append(arg[1])
+
+					arguments_list.append(arg_rebuilt)
+
+				except:
+
+					self.log.err('ERROR in __unpack_arguments__, fundamental datatype path')
+					self.log.err(traceback.format_exc())
 
 			# Handle structs
 			elif arg_definition_dict['g'] == GROUP_STRUCT:
