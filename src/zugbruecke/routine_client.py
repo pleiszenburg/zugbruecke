@@ -241,21 +241,46 @@ class routine_client_class():
 			else:
 				arg = getattr(args, arg_definition_dict['n'])
 
+			# TODO:
+			# append tuple to list "arguments_list"
+			# tuple contains: (arg_definition_dict['n'], argument content / value)
+			#  pointer: arg.value or arg.contents.value
+			#  (value: Append value from ctypes datatype, because most of their Python equivalents are immutable)
+			#  (contents.value: Append value from ctypes datatype pointer ...)
+			#  by value: just "arg"
+
+			arg_value = arg # Set up arg for iterative unpacking
+			for flag in arg_definition_dict['f']: # step through flags
+
+				# Handle pointers
+				if flag == FLAG_POINTER:
+
+					# There are two ways of getting the actual value
+					if hasattr(arg_value, 'value'):
+						arg_value = arg_value.value
+					elif hasattr(arg_value, 'contents'):
+						arg_value = arg_value.contents
+					else:
+						raise # TODO
+
+				# Handle arrays
+				elif flag > 0:
+
+					arg_value = arg_value[:]
+
+				# Handle unknown flags
+				else:
+
+					raise # TODO
+
+			self.log.err('   abc')
+			self.log.err(pf(arg_value))
+
 			# Handle fundamental types
 			if arg_definition_dict['g'] == GROUP_FUNDAMENTAL:
 
-				# TODO:
-				# append tuple to list "arguments_list"
-				# tuple contains: (arg_definition_dict['n'], argument content / value)
-				#  pointer: arg.value or arg.contents.value
-				#  (value: Append value from ctypes datatype, because most of their Python equivalents are immutable)
-				#  (contents.value: Append value from ctypes datatype pointer ...)
-				#  by value: just "arg"
-
-				if len(arg_definition_dict['f']) == 0: # No flags, nothing to do
-					arguments_list.append((arg_definition_dict['n'], arg))
-				else:
-					raise
+				# Append argument to list ...
+				arguments_list.append((arg_definition_dict['n'], arg_value))
 
 			# Handle structs
 			elif arg_definition_dict['g'] == GROUP_STRUCT:
