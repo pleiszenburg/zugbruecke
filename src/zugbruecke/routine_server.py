@@ -132,8 +132,12 @@ class routine_server_class():
 		# Pack memory for return
 		return_memory_list = self.__pack_memory__(memory_transport_handle)
 
-		# Pack return package and return it
-		return self.__pack_return__(args, kw, return_value, return_memory_list)
+		try:
+			# Pack return package and return it
+			return self.__pack_return__(args, kw, return_value, return_memory_list)
+		except:
+			# Push traceback to log
+			self.log.err(traceback.format_exc())
 
 
 	def __pack_memory__(self, memory_handle):
@@ -174,7 +178,9 @@ class routine_server_class():
 					elif hasattr(arg_value, 'contents'):
 						arg_value = arg_value.contents
 					else:
-						raise # TODO
+						pass
+						# self.log.err(pf(arg_value))
+						# raise # TODO
 
 				# Handle arrays
 				elif flag > 0:
@@ -184,6 +190,7 @@ class routine_server_class():
 				# Handle unknown flags
 				else:
 
+					self.log.err('ERROR in __pack_return__, flag %d' % flag)
 					raise # TODO
 
 			self.log.err('   efg')
@@ -338,25 +345,14 @@ class routine_server_class():
 			# Handle fundamental types
 			if arg_definition_dict['g'] == GROUP_FUNDAMENTAL:
 
-				# By reference
-				if arg_definition_dict['p']:
+				# Put value back into its ctypes datatype
+				setattr(
+					struct_inst, # struct instance to be modified
+					arg[0], # parameter name (from tuple)
+					getattr(ctypes, arg_definition_dict['t'])(arg[1]) # ctypes instance of type with value from tuple
+					)
 
-					# Put value back into its ctypes datatype
-					setattr(
-						struct_inst, # struct instance to be modified
-						arg[0], # parameter name (from tuple)
-						getattr(ctypes, arg_definition_dict['t'])(arg[1]) # ctypes instance of type with value from tuple
-						)
-
-				# By value
-				else:
-
-					# Append value
-					setattr(
-						struct_inst, # struct instance to be modified
-						arg[0], # parameter name (from tuple)
-						arg[1] # value from tuple
-						)
+				# TODO pointers and arrays
 
 			# Handle structs
 			elif arg_definition_dict['g'] == GROUP_STRUCT:
