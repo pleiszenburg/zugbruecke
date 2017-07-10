@@ -63,6 +63,16 @@ def pack_definition_returntype(restype):
 	return __pack_definition_dict__(restype)
 
 
+def unpack_definition_argtypes(argtypes_p):
+
+	return [self.__unpack_type_dict__(arg_dict) for arg_dict in self.argtypes_p]
+
+
+def unpack_definition_returntype(restype_p):
+
+	return self.__unpack_type_dict__(self.restype)
+
+
 def __pack_definition_dict__(datatype, field_name = None):
 
 	# Not all datatypes have a name, let's handle that

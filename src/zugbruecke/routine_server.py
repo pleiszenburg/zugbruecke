@@ -35,6 +35,10 @@ import ctypes
 from pprint import pformat as pf
 import traceback
 
+from arguments import (
+	unpack_definition_argtypes,
+	unpack_definition_returntype
+	)
 from const import (
 	FLAG_POINTER,
 	GROUP_VOID,
@@ -164,7 +168,7 @@ class routine_server_class():
 		for arg_index, arg in enumerate(args):
 
 			# Fetch definition of current argument
-			arg_definition_dict = self.argtypes[arg_index]
+			arg_definition_dict = self.argtypes_p[arg_index]
 
 			arg_value = arg # Set up arg for iterative unpacking
 			for flag in arg_definition_dict['f']: # step through flags
@@ -226,7 +230,7 @@ class routine_server_class():
 			}
 
 
-	def register_argtype_and_restype(self, argtypes, restype, memsync):
+	def register_argtype_and_restype(self, argtypes_p, restype_p, memsync):
 
 		# Log status
 		self.log.out('[routine-server] Set argument and return value types for "%s" ...' % self.name)
@@ -235,12 +239,12 @@ class routine_server_class():
 		self.memsync = memsync
 
 		# Parse & store argtype dicts into argtypes
-		self.argtypes = argtypes
-		self.handler.argtypes = [self.__unpack_type_dict__(arg_dict) for arg_dict in self.argtypes]
+		self.argtypes_p = argtypes_p
+		self.handler.argtypes = unpack_definition_argtypes(argtypes_p)
 
 		# Parse & store return value type
-		self.restype = restype
-		self.handler.restype = self.__unpack_type_dict__(self.restype)
+		self.restype_p = restype_p
+		self.handler.restype = unpack_definition_returntype(restype_p)
 
 		# Log status
 		self.log.out('[routine-server] ... memsync: %s ...' % pf(self.memsync))
@@ -265,7 +269,7 @@ class routine_server_class():
 		for arg_index, arg in enumerate(args_list):
 
 			# Fetch definition of current argument
-			arg_definition_dict = self.argtypes[arg_index]
+			arg_definition_dict = self.argtypes_p[arg_index]
 
 			# Handle fundamental types
 			if arg_definition_dict['g'] == GROUP_FUNDAMENTAL:
