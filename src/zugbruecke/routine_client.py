@@ -35,6 +35,11 @@ import ctypes
 from functools import partial
 from pprint import pformat as pf
 
+from .arguments import (
+	pack_definition_argtypes,
+	pack_definition_returntype
+	)
+
 from .const import (
 	FLAG_POINTER,
 	GROUP_VOID,
@@ -107,8 +112,18 @@ class routine_client_class():
 			# Log status
 			self.log.out('[routine-client] ... has not been called before. Configuring ...')
 
-			# Processing argument and return value types on first call
-			self.__set_argtype_and_restype__()
+			# Processing argument and return value types on first call TODO proper sanity check
+			if hasattr(self.handle_call, 'memsync'):
+				self.memsync = self.handle_call.memsync
+			if hasattr(self.handle_call, 'argtypes'):
+				self.argtypes = self.handle_call.argtypes
+			if hasattr(self.handle_call, 'restype'):
+				self.restype = self.handle_call.restype
+
+			# Log status
+			self.log.out('[routine-client]  memsync: %s' % pf(self.memsync))
+			self.log.out('[routine-client]  argtypes: %s' % pf(self.argtypes))
+			self.log.out('[routine-client]  restype: %s' % pf(self.restype))
 
 			# Tell wine-python about types
 			self.__push_argtype_and_restype__()
@@ -144,84 +159,6 @@ class routine_client_class():
 
 		# Return result. return_value will be None if there was not a result.
 		return return_dict['return_value']
-
-
-	def __pack_datatype_dict__(self, datatype, field_name = None):
-
-		try:
-			# Get name of datatype, such as c_int
-			type_name = datatype.__name__
-		except:
-			# Not all datatypes have a name, let's handle that
-			type_name = None
-
-		# Get group of datatype
-		group_name = type(datatype).__name__ # 'PyCSimpleType', 'PyCStructType', PyCArrayType or 'PyCPointerType'
-
-		# List of flags: Pointer flag or length of array (one entry per dimension)
-		flag_list = []
-
-		# Strip away all pointers and arrays until simple type or struct type is left & keep order
-		while group_name in ['PyCPointerType', 'PyCArrayType']:
-
-			# Catch pointer
-			if group_name == 'PyCPointerType':
-
-				# Append pointer flag to list of flags
-				flag_list.append(FLAG_POINTER)
-
-			# Catch arrays
-			elif group_name == 'PyCArrayType':
-
-				# Append length to flag list
-				flag_list.append(datatype._length_)
-
-			# This is not supposed to happen ...
-			else:
-
-				raise
-
-			# Get next type in sequence
-			datatype = datatype._type_
-
-			# Get type and group name of next type in sequence
-			type_name = datatype.__name__
-			group_name = type(datatype).__name__
-
-		# Fundamental ('simple') C types
-		if group_name == 'PyCSimpleType':
-
-			return {
-				'f': flag_list,
-				'n': field_name, # kw
-				't': type_name, # Type name, such as 'c_int'
-				'g': GROUP_FUNDAMENTAL
-				}
-
-		# Structs
-		elif group_name == 'PyCStructType':
-
-			return {
-				'f': flag_list,
-				'n': field_name, # kw
-				't': type_name, # Type name, such as 'c_int'
-				'g': GROUP_STRUCT,
-				'_fields_': [
-					self.__pack_datatype_dict__(field[1], field[0]) for field in datatype._fields_
-					]
-				}
-
-		# UNKNOWN stuff, likely pointers - handled without datatype
-		else:
-
-			self.log.err('__pack_datatype_dict__: Unknown group_name "%s"' % group_name)
-
-			return {
-				'f': flag_list,
-				'n': field_name, # kw
-				't': type_name, # Type name, such as 'c_int'
-				'g': GROUP_VOID # Let's try void
-				}
 
 
 	def __pack_args__(self, argtypes_p_sub, args): # TODO kw
@@ -399,10 +336,10 @@ class routine_client_class():
 	def __push_argtype_and_restype__(self):
 
 		# Prepare list of arguments by parsing them into list of dicts (TODO field name / kw)
-		self.argtypes_p = [self.__pack_datatype_dict__(arg) for arg in self.argtypes]
+		self.argtypes_p = pack_definition_argtypes(self.argtypes)
 
 		# Parse return type
-		self.restype_p = self.__pack_datatype_dict__(self.restype)
+		self.restype_p = pack_definition_returntype(self.restype)
 
 		# Reduce memsync
 		self.memsync_p, self.memsync_handle = self.__process_memsync__(self.memsync, self.argtypes_p)
@@ -438,28 +375,6 @@ class routine_client_class():
 			self.log.out('[routine-client] ... failed!')
 
 			raise # TODO
-
-
-	def __set_argtype_and_restype__(self):
-
-		# TODO proper sanity check
-		try:
-			self.memsync = self.handle_call.memsync
-		except:
-			pass
-		try:
-			self.argtypes = self.handle_call.argtypes
-		except:
-			pass
-		try:
-			self.restype = self.handle_call.restype
-		except:
-			pass
-
-		# Log status
-		self.log.out('[routine-client]  memsync: %s' % pf(self.memsync))
-		self.log.out('[routine-client]  argtypes: %s' % pf(self.argtypes))
-		self.log.out('[routine-client]  restype: %s' % pf(self.restype))
 
 
 	def __unpack_memory__(self, pointer_list, memory_list):
