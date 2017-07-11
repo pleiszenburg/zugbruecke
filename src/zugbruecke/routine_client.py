@@ -142,7 +142,7 @@ class routine_client_class():
 
 		# Actually call routine in DLL! TODO Handle kw ...
 		return_dict = self.client.call_dll_routine(
-			self.dll.full_path, self.name, self.__pack_args__(self.argtypes_p, args), mem_package_list
+			self.dll.full_path, self.name, self.__pack_args__(self.argtypes_d, args), mem_package_list
 			)
 
 		# Log status
@@ -336,17 +336,17 @@ class routine_client_class():
 	def __push_argtype_and_restype__(self):
 
 		# Prepare list of arguments by parsing them into list of dicts (TODO field name / kw)
-		self.argtypes_p = pack_definition_argtypes(self.argtypes)
+		self.argtypes_d = pack_definition_argtypes(self.argtypes)
 
 		# Parse return type
-		self.restype_p = pack_definition_returntype(self.restype)
+		self.restype_d = pack_definition_returntype(self.restype)
 
 		# Reduce memsync
-		self.memsync_p, self.memsync_handle = self.__process_memsync__(self.memsync, self.argtypes_p)
+		self.memsync_d, self.memsync_handle = self.__process_memsync__(self.memsync, self.argtypes_d)
 
 		# Pass argument and return value types as strings ...
 		result = self.client.register_argtype_and_restype(
-			self.dll.full_path, self.name, self.argtypes_p, self.restype_p, self.memsync_p
+			self.dll.full_path, self.name, self.argtypes_d, self.restype_d, self.memsync_d
 			)
 
 		# Handle error
@@ -396,7 +396,7 @@ class routine_client_class():
 		for arg_index, arg in enumerate(args):
 
 			# Fetch definition of current argument
-			arg_definition_dict = self.argtypes_p[arg_index]
+			arg_definition_dict = self.argtypes_d[arg_index]
 
 			# Handle fundamental types
 			if arg_definition_dict['g'] == GROUP_FUNDAMENTAL:

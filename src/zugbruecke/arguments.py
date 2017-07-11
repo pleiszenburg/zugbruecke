@@ -63,14 +63,14 @@ def pack_definition_returntype(restype):
 	return __pack_definition_dict__(restype)
 
 
-def unpack_definition_argtypes(argtypes_p):
+def unpack_definition_argtypes(argtypes_d):
 
-	return [self.__unpack_type_dict__(arg_dict) for arg_dict in self.argtypes_p]
+	return [__unpack_type_dict__(arg_dict) for arg_dict in argtypes_d]
 
 
-def unpack_definition_returntype(restype_p):
+def unpack_definition_returntype(restype_d):
 
-	return self.__unpack_type_dict__(self.restype)
+	return __unpack_type_dict__(restype_d)
 
 
 def __pack_definition_dict__(datatype, field_name = None):
