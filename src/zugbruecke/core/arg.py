@@ -41,7 +41,7 @@ from .const import (
 	GROUP_STRUCT
 	)
 from .memory import (
-	# overwrite_pointer_with_int_list,
+	overwrite_pointer_with_int_list,
 	serialize_pointer_into_int_list
 	)
 
@@ -105,3 +105,10 @@ class arg_class():
 			memory_handle.append(arg_value)
 
 		return mem_package_list, memory_handle
+
+
+	def unpack_memory(self, mem_package_list, memory_handle):
+
+		# Overwrite the local pointers with new data
+		for pointer_index, pointer in enumerate(memory_handle):
+			overwrite_pointer_with_int_list(pointer, mem_package_list[pointer_index])
