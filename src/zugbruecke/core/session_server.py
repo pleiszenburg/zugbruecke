@@ -37,9 +37,9 @@ from pprint import pformat as pf
 import sys
 import traceback
 
-from core.dll_server import dll_server_class
-from core.log import log_class
-from core.rpc import mp_server_class
+from .dll_server import dll_server_class
+from .log import log_class
+from .rpc import mp_server_class
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
