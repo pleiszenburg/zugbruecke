@@ -36,6 +36,7 @@ from functools import partial
 from pprint import pformat as pf
 
 from .arg_definition import (
+	apply_memsync_to_argtypes_definition,
 	pack_definition_argtypes,
 	pack_definition_memsync,
 	pack_definition_returntype
@@ -292,41 +293,6 @@ class routine_client_class():
 		return mem_package_list, memory_handle
 
 
-	def __process_memsync__(self, memsync, argtypes_d):
-
-		# Start empty handle list
-		memsync_handle = []
-
-		# Iterate over memory segments, which must be kept in sync
-		for segment in memsync:
-
-			# Reference processed argument types - start with depth 0
-			arg_type = argtypes_d[segment['p'][0]]
-			# Step through path to argument type ...
-			for path_element in segment['p'][1:]:
-				# Go deeper ...
-				arg_type = arg_type['_fields_'][path_element]
-
-			# Reference processed argument types - start with depth 0
-			len_type = argtypes_d[segment['l'][0]]
-			# Step through path to argument type ...
-			for path_element in segment['l'][1:]:
-				# Go deeper ...
-				len_type = len_type['_fields_'][path_element]
-
-			# HACK make memory sync pointers type agnostic
-			arg_type['g'] = GROUP_VOID
-			arg_type['t'] = None # no type string
-
-			# Add to list
-			memsync_handle.append({
-				'p': arg_type, # Handle on pointer argument definition
-				'l': len_type # Handle on length argument definition
-				})
-
-		return memsync_handle
-
-
 	def __push_argtype_and_restype__(self):
 
 		# Prepare list of arguments by parsing them into list of dicts (TODO field name / kw)
@@ -337,7 +303,7 @@ class routine_client_class():
 
 		# Reduce memsync
 		self.memsync_d = pack_definition_memsync(self.memsync)
-		self.memsync_handle = self.__process_memsync__(self.memsync, self.argtypes_d)
+		self.memsync_handle = apply_memsync_to_argtypes_definition(self.memsync, self.argtypes_d)
 
 		# Pass argument and return value types as strings ...
 		result = self.client.register_argtype_and_restype(
