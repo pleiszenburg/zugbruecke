@@ -35,6 +35,7 @@ import ctypes
 from pprint import pformat as pf
 import traceback
 
+from .arg import arg_class
 from .arg_definition import arg_definition_class
 from .const import (
 	FLAG_POINTER,
@@ -71,6 +72,9 @@ class routine_server_class():
 
 		# Set up parser for argtype and restype definitions
 		self.d = arg_definition_class(self.log)
+
+		# Set up parser for argument value transfer
+		self.a = arg_class(self.log)
 
 		# Log status
 		self.log.out('[routine-server] Attaching to routine "%s" in DLL file "%s" ...' % (self.name, self.dll.name))

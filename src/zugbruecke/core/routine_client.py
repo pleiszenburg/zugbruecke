@@ -35,6 +35,7 @@ import ctypes
 from functools import partial
 from pprint import pformat as pf
 
+from .arg import arg_class
 from .arg_definition import arg_definition_class
 from .const import (
 	FLAG_POINTER,
@@ -89,6 +90,9 @@ class routine_client_class():
 
 		# Set up parser for argtype and restype definitions
 		self.d = arg_definition_class(self.log)
+
+		# Set up parser for argument value transfer
+		self.a = arg_class(self.log)
 
 		# Tell server about routine
 		self.__register_routine_on_server__()

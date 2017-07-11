@@ -42,5 +42,12 @@ from .const import (
 	)
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# ROUTINES: Content packing and unpacking
+# CLASS: Content packing and unpacking
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+class arg_class():
+
+
+	def __init__(self, log):
+
+		self.log = log
