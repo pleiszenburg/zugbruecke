@@ -35,10 +35,7 @@ import ctypes
 from pprint import pformat as pf
 import traceback
 
-from .arg_definition import (
-	unpack_definition_argtypes,
-	unpack_definition_returntype
-	)
+from .arg_definition import arg_definition_class
 from .const import (
 	FLAG_POINTER,
 	GROUP_VOID,
@@ -72,8 +69,8 @@ class routine_server_class():
 		# Store my own name
 		self.name = routine_name
 
-		# Prepare dict for custom datatypes (structs)
-		self.datatypes_dict = {}
+		# Set up parser for argtype and restype definitions
+		self.d = arg_definition_class(self.log)
 
 		# Log status
 		self.log.out('[routine-server] Attaching to routine "%s" in DLL file "%s" ...' % (self.name, self.dll.name))
@@ -238,13 +235,17 @@ class routine_server_class():
 		# Store memory sync instructions
 		self.memsync = memsync
 
-		# Parse & store argtype dicts into argtypes
+		# Store argtype definition dict
 		self.argtypes_p = argtypes_p
-		self.handler.argtypes = unpack_definition_argtypes(argtypes_p)
 
-		# Parse & store return value type
+		# Parse and apply argtype definition dict to actual ctypes routine
+		self.handler.argtypes = self.d.unpack_definition_argtypes(argtypes_p)
+
+		# Store return value definition dict
 		self.restype_p = restype_p
-		self.handler.restype = unpack_definition_returntype(restype_p)
+
+		# Parse and apply restype definition dict to actual ctypes routine
+		self.handler.restype = self.d.unpack_definition_returntype(restype_p)
 
 		# Log status
 		self.log.out('[routine-server] ... memsync: %s ...' % pf(self.memsync))
@@ -316,7 +317,7 @@ class routine_server_class():
 			elif arg_definition_dict['g'] == GROUP_STRUCT:
 
 				# Generate new instance of struct datatype
-				struct_arg = self.datatypes_dict[arg_definition_dict['t']]()
+				struct_arg = self.d.struct_type_dict[arg_definition_dict['t']]()
 
 				# Unpack values into struct
 				self.__unpack_arguments_struct__(arg_definition_dict['_fields_'], struct_arg, arg[1])
@@ -362,7 +363,7 @@ class routine_server_class():
 			elif arg_definition_dict['g'] == GROUP_STRUCT:
 
 				# Generate new instance of struct datatype
-				struct_arg = self.datatypes_dict[arg_definition_dict['t']]()
+				struct_arg = self.d.struct_type_dict[arg_definition_dict['t']]()
 
 				# Unpack values into struct
 				self.__unpack_arguments_struct__(arg_definition_dict['_fields'], struct_arg, arg[1])

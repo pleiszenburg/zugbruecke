@@ -46,250 +46,259 @@ from .lib import (
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# DYNAMIC CLASSES
+# CLASS: Definition packing and unpacking
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-DATATYPES_DICT = {}
+class arg_definition_class():
 
 
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# ROUTINES: Definition packing and unpacking
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	def __init__(self, log):
 
-def apply_memsync_to_argtypes_definition(memsync, argtypes_d):
-
-	# Start empty handle list
-	memsync_handle = []
-
-	# Iterate over memory segments, which must be kept in sync
-	for segment in memsync:
-
-		# Reference processed argument types - start with depth 0
-		arg_type = argtypes_d[segment['p'][0]]
-		# Step through path to argument type ...
-		for path_element in segment['p'][1:]:
-			# Go deeper ...
-			arg_type = arg_type['_fields_'][path_element]
-
-		# Reference processed argument types - start with depth 0
-		len_type = argtypes_d[segment['l'][0]]
-		# Step through path to argument type ...
-		for path_element in segment['l'][1:]:
-			# Go deeper ...
-			len_type = len_type['_fields_'][path_element]
-
-		# HACK make memory sync pointers type agnostic
-		arg_type['g'] = GROUP_VOID
-		arg_type['t'] = None # no type string
-
-		# Add to list
-		memsync_handle.append({
-			'p': arg_type, # Handle on pointer argument definition
-			'l': len_type # Handle on length argument definition
-			})
-
-	return memsync_handle
+		self.log = log
+		self.struct_type_dict = {}
 
 
-def pack_definition_argtypes(argtypes):
+	def apply_memsync_to_argtypes_definition(self, memsync, argtypes_d):
 
-	return [__pack_definition_dict__(arg) for arg in argtypes]
+		# Start empty handle list
+		memsync_handle = []
+
+		# Iterate over memory segments, which must be kept in sync
+		for segment in memsync:
+
+			# Reference processed argument types - start with depth 0
+			arg_type = argtypes_d[segment['p'][0]]
+			# Step through path to argument type ...
+			for path_element in segment['p'][1:]:
+				# Go deeper ...
+				arg_type = arg_type['_fields_'][path_element]
+
+			# Reference processed argument types - start with depth 0
+			len_type = argtypes_d[segment['l'][0]]
+			# Step through path to argument type ...
+			for path_element in segment['l'][1:]:
+				# Go deeper ...
+				len_type = len_type['_fields_'][path_element]
+
+			# HACK make memory sync pointers type agnostic
+			arg_type['g'] = GROUP_VOID
+			arg_type['t'] = None # no type string
+
+			# Add to list
+			memsync_handle.append({
+				'p': arg_type, # Handle on pointer argument definition
+				'l': len_type # Handle on length argument definition
+				})
+
+		return memsync_handle
 
 
-def pack_definition_memsync(memsync):
+	def pack_definition_argtypes(self, argtypes):
 
-	return [reduce_dict(sync_element) for sync_element in memsync]
-
-
-def pack_definition_returntype(restype):
-
-	return __pack_definition_dict__(restype)
+		return [self.__pack_definition_dict__(arg) for arg in argtypes]
 
 
-def unpack_definition_argtypes(argtypes_d):
+	def pack_definition_memsync(self, memsync):
 
-	return [__unpack_definition_dict__(arg_d_dict) for arg_d_dict in argtypes_d]
-
-
-def unpack_definition_returntype(restype_d):
-
-	return __unpack_definition_dict__(restype_d)
+		return [reduce_dict(sync_element) for sync_element in memsync]
 
 
-def __pack_definition_dict__(datatype, field_name = None):
+	def pack_definition_returntype(self, restype):
 
-	# Not all datatypes have a name, let's handle that
-	type_name = None
-	# Get name of datatype, such as c_int, if there is one
-	if hasattr(datatype, '__name__'):
-		type_name = datatype.__name__
+		return self.__pack_definition_dict__(restype)
 
-	# Get group of datatype
-	group_name = type(datatype).__name__
-	# Can be: 'PyCSimpleType', 'PyCStructType', PyCArrayType or 'PyCPointerType'
 
-	# List of flags: Pointer flag or length of array (one entry per dimension)
-	flag_list = []
+	def unpack_definition_argtypes(self, argtypes_d):
 
-	# Strip away all pointers and arrays until simple type or struct type is left & keep order
-	while group_name in ['PyCPointerType', 'PyCArrayType']:
+		return [self.__unpack_definition_dict__(arg_d_dict) for arg_d_dict in argtypes_d]
 
-		# Catch pointer
-		if group_name == 'PyCPointerType':
 
-			# Append pointer flag to list of flags
-			flag_list.append(FLAG_POINTER)
+	def unpack_definition_returntype(self, restype_d):
 
-		# Catch arrays
-		elif group_name == 'PyCArrayType':
+		return self.__unpack_definition_dict__(restype_d)
 
-			# Append length to flag list
-			flag_list.append(datatype._length_)
 
-		# This is not supposed to happen ...
-		else:
+	def __generate_struct_from_definition__(self, struct_d_dict):
 
-			raise
+		# Prepare fields
+		fields = []
 
-		# Get next type in sequence
-		datatype = datatype._type_
+		# Step through fields
+		for field in struct_d_dict['_fields_']:
 
-		# Get type and group name of next type in sequence
-		type_name = datatype.__name__
+			# Handle fundamental C datatypes (PyCSimpleType)
+			if field['g'] == GROUP_FUNDAMENTAL:
+
+				# Add tuple with name and fundamental datatype
+				fields.append((
+					field['n'],
+					self.__unpack_definition_fundamental_dict__(field)
+					))
+
+			# Structures (PyCStructType)
+			elif field['g'] == GROUP_STRUCT:
+
+				# Add tuple with name and struct datatype
+				fields.append((
+					field['n'], self.__unpack_definition_struct_dict__(field)
+					))
+
+			# Undhandled stuff (pointers of pointers etc.) TODO
+			else:
+
+				# HACK TODO
+				fields.append((
+					field['n'], ctypes.c_int
+					))
+
+		# Generate actual class
+		self.struct_type_dict[struct_d_dict['t']] = type(
+			struct_d_dict['t'], # Potenial BUG: Ends up in __main__ scope, problematic?
+			(ctypes.Structure,),
+			{'_fields_': fields}
+			)
+
+
+	def __pack_definition_dict__(self, datatype, field_name = None):
+
+		# Not all datatypes have a name, let's handle that
+		type_name = None
+		# Get name of datatype, such as c_int, if there is one
+		if hasattr(datatype, '__name__'):
+			type_name = datatype.__name__
+
+		# Get group of datatype
 		group_name = type(datatype).__name__
+		# Can be: 'PyCSimpleType', 'PyCStructType', PyCArrayType or 'PyCPointerType'
 
-	# Fundamental ('simple') C types
-	if group_name == 'PyCSimpleType':
+		# List of flags: Pointer flag or length of array (one entry per dimension)
+		flag_list = []
 
-		return {
-			'f': flag_list,
-			'n': field_name, # kw
-			't': type_name, # Type name, such as 'c_int'
-			'g': GROUP_FUNDAMENTAL
-			}
+		# Strip away all pointers and arrays until simple type or struct type is left & keep order
+		while group_name in ['PyCPointerType', 'PyCArrayType']:
 
-	# Structs
-	elif group_name == 'PyCStructType':
+			# Catch pointer
+			if group_name == 'PyCPointerType':
 
-		return {
-			'f': flag_list,
-			'n': field_name, # kw
-			't': type_name, # Type name, such as 'c_int'
-			'g': GROUP_STRUCT,
-			'_fields_': [
-				__pack_definition_dict__(field[1], field[0]) for field in datatype._fields_
-				]
-			}
+				# Append pointer flag to list of flags
+				flag_list.append(FLAG_POINTER)
 
-	# UNKNOWN stuff, likely pointers - handled without datatype
-	else:
+			# Catch arrays
+			elif group_name == 'PyCArrayType':
 
-		return {
-			'f': flag_list,
-			'n': field_name, # kw
-			't': type_name, # Type name, such as 'c_int'
-			'g': GROUP_VOID # Let's try void
-			}
+				# Append length to flag list
+				flag_list.append(datatype._length_)
 
+			# This is not supposed to happen ...
+			else:
 
-def __unpack_definition_dict__(datatype_dict):
+				raise
 
-	# Handle fundamental C datatypes (PyCSimpleType)
-	if datatype_dict['g'] == GROUP_FUNDAMENTAL:
+			# Get next type in sequence
+			datatype = datatype._type_
 
-		return __unpack_definition_fundamental_dict__(datatype_dict)
+			# Get type and group name of next type in sequence
+			type_name = datatype.__name__
+			group_name = type(datatype).__name__
 
-	# Structures (PyCStructType)
-	elif datatype_dict['g'] == GROUP_STRUCT:
+		# Fundamental ('simple') C types
+		if group_name == 'PyCSimpleType':
 
-		return __unpack_definition_struct_dict__(datatype_dict)
+			return {
+				'f': flag_list,
+				'n': field_name, # kw
+				't': type_name, # Type name, such as 'c_int'
+				'g': GROUP_FUNDAMENTAL
+				}
 
-	# Handle generic pointers
-	elif datatype_dict['g'] == GROUP_VOID:
+		# Structs
+		elif group_name == 'PyCStructType':
 
-		return __unpack_definition_flags__(ctypes.c_void_p, datatype_dict['f'], True)
+			return {
+				'f': flag_list,
+				'n': field_name, # kw
+				't': type_name, # Type name, such as 'c_int'
+				'g': GROUP_STRUCT,
+				'_fields_': [
+					self.__pack_definition_dict__(field[1], field[0]) for field in datatype._fields_
+					]
+				}
 
-	# Undhandled stuff (pointers of pointers etc.) TODO
-	else:
-
-		# HACK TODO
-		return __unpack_definition_flags__(ctypes.c_int, datatype_dict['f'])
-
-
-def __unpack_definition_flags__(datatype, flag_list, is_void_pointer = False):
-
-	# Re-create arrays and pointers
-	for flag_index, flag in enumerate(reversed(flag_list)):
-		if flag > 0: # array
-			datatype = datatype * flag
-		elif flag == FLAG_POINTER:
-			if not is_void_pointer: # do this only for last flag TODO
-				datatype = ctypes.POINTER(datatype)
+		# UNKNOWN stuff, likely pointers - handled without datatype
 		else:
-			raise # TODO
 
-	return datatype
-
-
-def __unpack_definition_fundamental_dict__(datatype_dict):
-
-	# Return type class or type pointer
-	return __unpack_definition_flags__(
-		getattr(ctypes, datatype_dict['t']),
-		datatype_dict['f'],
-		datatype_dict['t'] is 'c_void_p'
-		)
+			return {
+				'f': flag_list,
+				'n': field_name, # kw
+				't': type_name, # Type name, such as 'c_int'
+				'g': GROUP_VOID # Let's try void
+				}
 
 
-def __unpack_definition_struct_dict__(datatype_dict):
-
-	# Generate struct class if it does not exist yet
-	if datatype_dict['t'] not in DATATYPES_DICT.keys():
-		__unpack_definition_struct_generator__(datatype_dict)
-
-	# Return type class or type pointer
-	return __unpack_definition_flags__(DATATYPES_DICT[datatype_dict['t']], datatype_dict['f'])
-
-
-def __unpack_definition_struct_generator__(datatype_dict):
-
-	# Prepare fields
-	fields = []
-
-	# Step through fields
-	for field in datatype_dict['_fields_']:
+	def __unpack_definition_dict__(self, datatype_d_dict):
 
 		# Handle fundamental C datatypes (PyCSimpleType)
-		if field['g'] == GROUP_FUNDAMENTAL:
+		if datatype_d_dict['g'] == GROUP_FUNDAMENTAL:
 
-			# Add tuple with name and fundamental datatype
-			fields.append((
-				field['n'],
-				__unpack_definition_fundamental_dict__(field)
-				))
+			return self.__unpack_definition_fundamental_dict__(datatype_d_dict)
 
 		# Structures (PyCStructType)
-		elif field['g'] == GROUP_STRUCT:
+		elif datatype_d_dict['g'] == GROUP_STRUCT:
 
-			# Add tuple with name and struct datatype
-			fields.append((
-				field['n'], __unpack_struct_dict__(field)
-				))
+			return self.__unpack_definition_struct_dict__(datatype_d_dict)
+
+		# Handle generic pointers
+		elif datatype_d_dict['g'] == GROUP_VOID:
+
+			return self.__unpack_definition_flags__(
+				ctypes.c_void_p,
+				datatype_d_dict['f'],
+				is_void_pointer = True
+				)
 
 		# Undhandled stuff (pointers of pointers etc.) TODO
 		else:
 
 			# HACK TODO
-			fields.append((
-				field['n'], ctypes.c_int
-				))
+			return self.__unpack_definition_flags__(
+				ctypes.c_int, # HACK let's assume int
+				datatype_d_dict['f'] # flags
+				)
 
-	# Make global datatype dict writable
-	global DATATYPES_DICT
 
-	# Generate actual class
-	DATATYPES_DICT[datatype_dict['t']] = type(
-		datatype_dict['t'], # Potenial BUG: Ends up in __main__ scope, problematic?
-		(ctypes.Structure,),
-		{'_fields_': fields}
-		)
+	def __unpack_definition_flags__(self, datatype, flag_list, is_void_pointer = False):
+
+		# Re-create arrays and pointers
+		for flag_index, flag in enumerate(reversed(flag_list)):
+			if flag > 0: # array
+				datatype = datatype * flag
+			elif flag == FLAG_POINTER:
+				if not is_void_pointer: # do this only for last flag TODO
+					datatype = ctypes.POINTER(datatype)
+			else:
+				raise # TODO
+
+		return datatype
+
+
+	def __unpack_definition_fundamental_dict__(self, datatype_d_dict):
+
+		# Return type class or type pointer
+		return self.__unpack_definition_flags__(
+			getattr(ctypes, datatype_d_dict['t']),
+			datatype_d_dict['f'],
+			datatype_d_dict['t'] is 'c_void_p'
+			)
+
+
+	def __unpack_definition_struct_dict__(self, datatype_d_dict):
+
+		# Generate struct class if it does not exist yet
+		if datatype_d_dict['t'] not in self.struct_type_dict.keys():
+			self.__generate_struct_from_definition__(datatype_d_dict)
+
+		# Return type class or type pointer
+		return self.__unpack_definition_flags__(
+			self.struct_type_dict[datatype_d_dict['t']], # struct class
+			datatype_d_dict['f'] # flags
+			)
