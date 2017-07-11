@@ -37,6 +37,7 @@ from pprint import pformat as pf
 
 from .arg_definition import (
 	pack_definition_argtypes,
+	pack_definition_memsync,
 	pack_definition_returntype
 	)
 from .const import (
@@ -44,9 +45,6 @@ from .const import (
 	GROUP_VOID,
 	GROUP_FUNDAMENTAL,
 	GROUP_STRUCT
-	)
-from .lib import (
-	reduce_dict
 	)
 from .memory import (
 	overwrite_pointer_with_int_list,
@@ -266,7 +264,7 @@ class routine_client_class():
 				# Go deeper ...
 				length = length[path_element]
 
-			# Defaut type, of nothing is given, is unsigned byte
+			# Defaut type, if nothing is given, is unsigned byte
 			if '_t' not in segment.keys():
 				segment['_t'] = ctypes.c_ubyte
 
@@ -296,9 +294,6 @@ class routine_client_class():
 
 	def __process_memsync__(self, memsync, argtypes_p):
 
-		# Reduce memsync so it can be forwarded to server
-		memsync_p = [reduce_dict(sync_element) for sync_element in memsync]
-
 		# Start empty handle list
 		memsync_handle = []
 
@@ -325,11 +320,11 @@ class routine_client_class():
 
 			# Add to list
 			memsync_handle.append({
-				'p': arg_type,
-				'l': len_type
+				'p': arg_type, # Handle on pointer argument definition
+				'l': len_type # Handle on length argument definition
 				})
 
-		return memsync_p, memsync_handle
+		return memsync_handle
 
 
 	def __push_argtype_and_restype__(self):
@@ -341,7 +336,8 @@ class routine_client_class():
 		self.restype_d = pack_definition_returntype(self.restype)
 
 		# Reduce memsync
-		self.memsync_d, self.memsync_handle = self.__process_memsync__(self.memsync, self.argtypes_d)
+		self.memsync_d = pack_definition_memsync(self.memsync)
+		self.memsync_handle = self.__process_memsync__(self.memsync, self.argtypes_d)
 
 		# Pass argument and return value types as strings ...
 		result = self.client.register_argtype_and_restype(

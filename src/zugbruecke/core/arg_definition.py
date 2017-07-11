@@ -40,6 +40,9 @@ from .const import (
 	GROUP_FUNDAMENTAL,
 	GROUP_STRUCT
 	)
+from .lib import (
+	reduce_dict
+	)
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -56,6 +59,11 @@ DATATYPES_DICT = {}
 def pack_definition_argtypes(argtypes):
 
 	return [__pack_definition_dict__(arg) for arg in argtypes]
+
+
+def pack_definition_memsync(memsync):
+
+	return [reduce_dict(sync_element) for sync_element in memsync]
 
 
 def pack_definition_returntype(restype):
