@@ -41,14 +41,14 @@ from .dll_client import dll_client_class
 from .interpreter import interpreter_session_class
 from .lib import (
 	get_free_port,
-	get_location_of_file,
-	setup_wine_python
+	get_location_of_file
 	)
 from .log import log_class
-from .wineserver import wineserver_session_class
 from .rpc import (
 	mp_client_class
 	)
+from .wineenv import setup_wine_python
+from .wineserver import wineserver_session_class
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

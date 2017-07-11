@@ -8,7 +8,7 @@ https://github.com/pleiszenburg/zugbruecke
 
 	src/zugbruecke/core/lib.py: General purpose routines
 
-	Required to run on platform / side: [UNIX]
+	Required to run on platform / side: [UNIX, WINE]
 
 	Copyright (C) 2017 Sebastian M. Ernst <ernst@pleiszenburg.de>
 
@@ -31,15 +31,9 @@ specific language governing rights and limitations under the License.
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-from io import BytesIO
 import os
 import random
-import shutil
 import socket
-import subprocess
-import tempfile
-import urllib.request
-import zipfile
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -86,69 +80,3 @@ def reduce_dict(input_dict):
 			output_dict[key] = input_dict[key]
 
 	return output_dict
-
-
-def setup_wine_pip(arch, version, directory):
-
-	# Download get-pip.py into memory
-	getpip_req = urllib.request.urlopen('https://bootstrap.pypa.io/get-pip.py')
-	getpip_bin = getpip_req.read()
-	getpip_req.close()
-
-	# Start Python on top of Wine
-	proc_getpip = subprocess.Popen(
-		['wine-python'],
-		stdin = subprocess.PIPE,
-		stdout = subprocess.PIPE,
-		stderr = subprocess.PIPE,
-		shell = False
-		)
-
-	# Pipe script into interpreter and get feedback
-	getpip_out, getpip_err = proc_getpip.communicate(input = getpip_bin)
-
-
-def setup_wine_python(arch, version, directory, overwrite = False):
-
-	# File name for python stand-alone zip file
-	pyarchive = 'python-%s-embed-%s.zip' % (version, arch)
-
-	# Name of target subfolder
-	pydir = '%s-python%s' % (arch, version)
-
-	# Target directory
-	target_directory = os.path.join(directory, pydir)
-
-	# Target location of python.exe
-	python_exe_path = os.path.join(target_directory, 'python.exe')
-
-	# Is there a pre-existing Python installation with identical parameters?
-	preexisting = os.path.isfile(python_exe_path)
-
-	# Is there a preexisting installation and should it be overwritten?
-	if preexisting and overwrite:
-
-		# Delete folder
-		shutil.rmtree(path)
-
-	# Make sure the target directory exists
-	if not os.path.exists(directory):
-		os.makedirs(directory)
-
-	# Only do if Python is not there OR if should be overwritten
-	if overwrite or not preexisting:
-
-		# Generate in-memory file-like-object
-		archive_zip = BytesIO()
-
-		# Download zip file from Python website into directory
-		archive_req = urllib.request.urlopen(
-			'https://www.python.org/ftp/python/%s/%s' % (version, pyarchive)
-			)
-		archive_zip.write(archive_req.read())
-		archive_req.close()
-
-		# Unpack from memory to disk
-		f = zipfile.ZipFile(archive_zip)
-		f.extractall(path = target_directory)
-		f.close()
