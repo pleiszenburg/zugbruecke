@@ -27,7 +27,7 @@ specific language governing rights and limitations under the License.
 """
 
 # Load windll_class for mimicing ctypes.windll eventually, make it private
-from .windll import windll_class as __windll_class__
+from ._windll_ import windll_class as __windll_class__
 
 # Set up and expose windll, prepare (but do not start) session while doing so
 windll = __windll_class__()

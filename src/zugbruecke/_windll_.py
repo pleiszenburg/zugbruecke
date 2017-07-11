@@ -6,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	src/zugbruecke/windll.py: Classes representing ctypes.windll on Unix side
+	src/zugbruecke/_windll_.py: Classes representing ctypes.windll on Unix side
 
 	Required to run on platform / side: [UNIX]
 
