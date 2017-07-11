@@ -292,7 +292,7 @@ class routine_client_class():
 		return mem_package_list, memory_handle
 
 
-	def __process_memsync__(self, memsync, argtypes_p):
+	def __process_memsync__(self, memsync, argtypes_d):
 
 		# Start empty handle list
 		memsync_handle = []
@@ -301,14 +301,14 @@ class routine_client_class():
 		for segment in memsync:
 
 			# Reference processed argument types - start with depth 0
-			arg_type = argtypes_p[segment['p'][0]]
+			arg_type = argtypes_d[segment['p'][0]]
 			# Step through path to argument type ...
 			for path_element in segment['p'][1:]:
 				# Go deeper ...
 				arg_type = arg_type['_fields_'][path_element]
 
 			# Reference processed argument types - start with depth 0
-			len_type = argtypes_p[segment['l'][0]]
+			len_type = argtypes_d[segment['l'][0]]
 			# Step through path to argument type ...
 			for path_element in segment['l'][1:]:
 				# Go deeper ...
