@@ -6,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	src/zugbruecke/arguments.py: (Un-) packing of arguments & their definitions
+	src/zugbruecke/core/arguments.py: (Un-) packing of arguments / definitions
 
 	Required to run on platform / side: [UNIX, WINE]
 
@@ -34,20 +34,12 @@ specific language governing rights and limitations under the License.
 import ctypes
 #from pprint import pformat as pf
 
-try:
-	from .const import (
-		FLAG_POINTER,
-		GROUP_VOID,
-		GROUP_FUNDAMENTAL,
-		GROUP_STRUCT
-		)
-except:
-	from const import (
-		FLAG_POINTER,
-		GROUP_VOID,
-		GROUP_FUNDAMENTAL,
-		GROUP_STRUCT
-		)
+from .const import (
+	FLAG_POINTER,
+	GROUP_VOID,
+	GROUP_FUNDAMENTAL,
+	GROUP_STRUCT
+	)
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

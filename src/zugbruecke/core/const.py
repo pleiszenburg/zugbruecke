@@ -6,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	src/zugbruecke/const.py: Holds constant values, flags, types
+	src/zugbruecke/core/const.py: Holds constant values, flags, types
 
 	Required to run on platform / side: [UNIX, WINE]
 

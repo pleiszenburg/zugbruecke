@@ -6,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	src/zugbruecke/wineserver.py: Class(es) for managing wineserver
+	src/zugbruecke/core/wineserver.py: Class(es) for managing wineserver
 
 	Required to run on platform / side: [UNIX]
 

@@ -6,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	src/zugbruecke/routine_server.py: Classes relevant for managing routines in DLLs
+	src/zugbruecke/core/routine_server.py: Classes for managing routines in DLLs
 
 	Required to run on platform / side: [WINE]
 
@@ -35,17 +35,17 @@ import ctypes
 from pprint import pformat as pf
 import traceback
 
-from arguments import (
+from .arguments import (
 	unpack_definition_argtypes,
 	unpack_definition_returntype
 	)
-from const import (
+from .const import (
 	FLAG_POINTER,
 	GROUP_VOID,
 	GROUP_FUNDAMENTAL,
 	GROUP_STRUCT
 	)
-from memory import (
+from .memory import (
 	generate_pointer_from_int_list,
 	serialize_pointer_into_int_list
 	)

@@ -6,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	src/zugbruecke/core.py: Core classes for managing zugbruecke sessions
+	src/zugbruecke/core/session.py: Classes for managing zugbruecke sessions
 
 	Required to run on platform / side: [UNIX]
 
@@ -253,46 +253,11 @@ class session_class():
 
 		# Prepare command with minimal meta info. All other info can be passed via sockets.
 		self.p['command_dict'] = [
-			'%s\\_server_.py' % self.wineserver_session.translate_path_unix2win(get_location_of_file(__file__)),
+			'%s\\_server_.py' % self.wineserver_session.translate_path_unix2win(
+				os.path.abspath(os.path.join(get_location_of_file(__file__), os.pardir))
+				),
 			'--id', self.id,
 			'--port_socket_ctypes', str(self.p['port_socket_ctypes']),
 			'--port_socket_log_main', str(self.p['port_socket_log_main']),
 			'--log_level', str(self.p['log_level'])
 			]
-
-
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# WINDLL CLASS
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-class windll_class(): # Mimic ctypes.windll
-
-
-	def __init__(self):
-
-		# Session not yet up
-		self.up = False
-
-
-	def start_session(self, parameter = {}):
-
-		# Session not yet up?
-		if not self.up:
-
-			# Fire up a new session
-			self.__session__ = session_class(parameter)
-
-			# Mark session as up
-			self.up = True
-
-
-	def LoadLibrary(self, name):
-
-		# Session not yet up?
-		if not self.up:
-
-			# Fire up session
-			self.start_session()
-
-		# Return a DLL instance object from within the session
-		return self.__session__.LoadLibrary(dll_name = name, dll_type = 'windll')
