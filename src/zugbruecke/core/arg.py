@@ -40,6 +40,11 @@ from .const import (
 	GROUP_FUNDAMENTAL,
 	GROUP_STRUCT
 	)
+from .memory import (
+	# overwrite_pointer_with_int_list,
+	serialize_pointer_into_int_list
+	)
+
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # CLASS: Content packing and unpacking
@@ -51,3 +56,52 @@ class arg_class():
 	def __init__(self, log):
 
 		self.log = log
+
+
+	def pack_memory(self, args, memsync):
+
+		# Start empty package for transfer
+		mem_package_list = []
+
+		# Store pointers locally so their memory can eventually be overwritten
+		memory_handle = []
+
+		# Iterate over memory segments, which must be kept in sync
+		for segment_index, segment in enumerate(memsync):
+
+			# Reference args - search for pointer
+			pointer = args
+			# Step through path to pointer ...
+			for path_element in segment['p']:
+				# Go deeper ...
+				pointer = pointer[path_element]
+
+			# Reference args - search for length
+			length = args
+			# Step through path to pointer ...
+			for path_element in segment['l']:
+				# Go deeper ...
+				length = length[path_element]
+
+			# Compute actual length - might come from ctypes or a Python datatype
+			if hasattr(length, 'value'):
+				length_value = length.value * ctypes.sizeof(segment['_t'])
+			else:
+				length_value = length * ctypes.sizeof(segment['_t'])
+
+			# Convert argument into ctypes datatype TODO more checks needed!
+			if '_c' in segment.keys():
+				arg_value = ctypes.pointer(segment['_c'].from_param(pointer))
+			else:
+				arg_value = pointer
+
+			# Serialize the data ...
+			data = serialize_pointer_into_int_list(arg_value, length_value)
+
+			# Append data to package
+			mem_package_list.append(data)
+
+			# Append actual pointer to handler list
+			memory_handle.append(arg_value)
+
+		return mem_package_list, memory_handle

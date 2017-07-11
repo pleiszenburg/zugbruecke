@@ -45,7 +45,7 @@ from .const import (
 	)
 from .memory import (
 	overwrite_pointer_with_int_list,
-	serialize_pointer_into_int_list
+	# serialize_pointer_into_int_list
 	)
 
 
@@ -138,7 +138,7 @@ class routine_client_class():
 		self.log.out('[routine-client] ... parameters are %r / %r. Packing and pushing to server ...' % (args, kw))
 
 		# Handle memory
-		mem_package_list, memory_transport_handle = self.__pack_memory__(args)
+		mem_package_list, memory_transport_handle = self.a.pack_memory(args, self.memsync)
 
 		# Actually call routine in DLL! TODO Handle kw ...
 		return_dict = self.client.call_dll_routine(
@@ -242,59 +242,6 @@ class routine_client_class():
 		return arguments_list
 
 
-	def __pack_memory__(self, args):
-
-		# Start empty package
-		mem_package_list = []
-
-		# Store pointers so they can eventually be overwritten
-		memory_handle = []
-
-		# Iterate over memory segments, which must be kept in sync
-		for segment_index, segment in enumerate(self.memsync):
-
-			# Reference args - search for pointer
-			pointer = args
-			# Step through path to pointer ...
-			for path_element in segment['p']:
-				# Go deeper ...
-				pointer = pointer[path_element]
-
-			# Reference args - search for length
-			length = args
-			# Step through path to pointer ...
-			for path_element in segment['l']:
-				# Go deeper ...
-				length = length[path_element]
-
-			# Defaut type, if nothing is given, is unsigned byte
-			if '_t' not in segment.keys():
-				segment['_t'] = ctypes.c_ubyte
-
-			# Compute actual length - might come from ctypes or a Python datatype
-			try:
-				length_value = length.value * ctypes.sizeof(segment['_t'])
-			except:
-				length_value = length * ctypes.sizeof(segment['_t'])
-
-			# Convert argument into ctypes datatype TODO more checks needed!
-			if '_c' in segment.keys():
-				arg_value = ctypes.pointer(segment['_c'].from_param(pointer))
-			else:
-				arg_value = pointer
-
-			# Serialize the data ...
-			data = serialize_pointer_into_int_list(arg_value, length_value)
-
-			# Append data to package
-			mem_package_list.append(data)
-
-			# Append actual pointer to handler list
-			memory_handle.append(arg_value)
-
-		return mem_package_list, memory_handle
-
-
 	def __push_argtype_and_restype__(self):
 
 		# Prepare list of arguments by parsing them into list of dicts (TODO field name / kw)
@@ -302,6 +249,9 @@ class routine_client_class():
 
 		# Parse return type
 		self.restype_d = self.d.pack_definition_returntype(self.restype)
+
+		# Fix missing ctypes in memsync
+		self.d.fix_memsync_ctypes(self.memsync)
 
 		# Reduce memsync for transfer
 		self.memsync_d = self.d.pack_definition_memsync(self.memsync)
