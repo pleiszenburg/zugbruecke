@@ -31,7 +31,6 @@ specific language governing rights and limitations under the License.
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-import argparse
 import ctypes
 import os
 from pprint import pformat as pf
@@ -187,43 +186,3 @@ class session_server_class:
 
 			# Session down
 			self.up = False
-
-
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# INIT
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-if __name__ == '__main__':
-
-	# Parse arguments comming from unix side
-	parser = argparse.ArgumentParser()
-	parser.add_argument(
-		'--id', type = str, nargs = 1
-		)
-	parser.add_argument(
-		'--port_socket_ctypes', type = int, nargs = 1
-		)
-	parser.add_argument(
-		'--port_socket_log_main', type = int, nargs = 1
-		)
-	parser.add_argument(
-		'--log_level', type = int, nargs = 1
-		)
-	args = parser.parse_args()
-
-	# Generate parameter dict
-	parameter = {
-		'id': args.id[0],
-		'platform': 'WINE',
-		'stdout': False,
-		'stderr': False,
-		'logwrite': True,
-		'remote_log': True,
-		'log_level': args.log_level[0],
-		'log_server': False,
-		'port_socket_ctypes': args.port_socket_ctypes[0],
-		'port_socket_log_main': args.port_socket_log_main[0]
-		}
-
-	# Fire up wine server session with parsed parameters
-	session = wine_server_class(parameter['id'], parameter)
