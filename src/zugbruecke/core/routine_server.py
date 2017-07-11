@@ -35,7 +35,7 @@ import ctypes
 from pprint import pformat as pf
 import traceback
 
-from .arguments import (
+from .arg_definition import (
 	unpack_definition_argtypes,
 	unpack_definition_returntype
 	)

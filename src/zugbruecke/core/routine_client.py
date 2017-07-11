@@ -35,7 +35,7 @@ import ctypes
 from functools import partial
 from pprint import pformat as pf
 
-from .arguments import (
+from .arg_definition import (
 	pack_definition_argtypes,
 	pack_definition_returntype
 	)
