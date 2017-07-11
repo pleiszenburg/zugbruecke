@@ -31,7 +31,7 @@ specific language governing rights and limitations under the License.
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-from .core.session import session_class
+from .core.session_client import session_client_class
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -53,7 +53,7 @@ class windll_class(): # Mimic ctypes.windll
 		if not self.up:
 
 			# Fire up a new session
-			self.__session__ = session_class(parameter)
+			self.__session__ = session_client_class(parameter)
 
 			# Mark session as up
 			self.up = True

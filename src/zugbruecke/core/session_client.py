@@ -55,7 +55,7 @@ from .rpc import (
 # ZUGBRUECKE SESSION CLASS
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-class session_class():
+class session_client_class():
 
 
 	def __init__(self, parameter = {}):

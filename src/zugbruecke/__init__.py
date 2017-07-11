@@ -39,4 +39,4 @@ import ctypes
 ctypes.windll = windll
 
 # Expose session class for advanced users and tests
-from .core.session import session_class as session
+from .core.session_client import session_client_class as session
