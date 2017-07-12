@@ -132,7 +132,7 @@ class routine_server_class(
 			self.log.err(traceback.format_exc())
 
 		# Pack memory for return
-		return_memory_list = self.__pack_memory__(memory_transport_handle)
+		return_memory_list = self.server_pack_memory_list(memory_transport_handle)
 
 		try:
 			# Pack return package and return it
@@ -140,18 +140,6 @@ class routine_server_class(
 		except:
 			# Push traceback to log
 			self.log.err(traceback.format_exc())
-
-
-	def __pack_memory__(self, memory_handle):
-
-		# Generate new list for arrays of ints to be shipped back to the client
-		memory_list = []
-
-		# Iterate through pointers and serialize them
-		for pointer in memory_handle:
-			memory_list.append(serialize_pointer_into_int_list(*pointer))
-
-		return memory_list
 
 
 	def __pack_return__(self, args, kw, return_value, return_memory_list):

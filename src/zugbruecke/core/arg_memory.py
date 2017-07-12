@@ -120,6 +120,18 @@ class arg_memory_class():
 				segment['_t'] = ctypes.c_ubyte
 
 
+	def server_pack_memory_list(self, memory_handle):
+
+		# Generate new list for arrays of ints to be shipped back to the client
+		mem_package_list = []
+
+		# Iterate through pointers and serialize them
+		for pointer in memory_handle:
+			mem_package_list.append(serialize_pointer_into_int_list(*pointer))
+
+		return mem_package_list
+
+
 	def server_unpack_memory_list(self, args, arg_memory_list, memsync):
 
 		# Generate temporary handle for faster packing
