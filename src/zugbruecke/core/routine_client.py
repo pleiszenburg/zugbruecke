@@ -93,7 +93,7 @@ class routine_client_class(
 		self.__register_routine_on_server__()
 
 
-	def __handle_call__(self, *args, **kw):
+	def __handle_call__(self, *args):
 		"""
 		TODO Optimize for speed!
 		"""
@@ -130,7 +130,7 @@ class routine_client_class(
 			self.log.out('[routine-client] ... configured. Proceeding ...')
 
 		# Log status
-		self.log.out('[routine-client] ... parameters are %r / %r. Packing and pushing to server ...' % (args, kw))
+		self.log.out('[routine-client] ... parameters are "%r". Packing and pushing to server ...' % (args,))
 
 		# Handle memory
 		mem_package_list, memory_transport_handle = self.client_pack_memory_list(args, self.memsync)
@@ -144,7 +144,7 @@ class routine_client_class(
 		self.log.out('[routine-client] ... received feedback from server, unpacking ...')
 
 		# Unpack return dict (for pointers and structs)
-		self.__unpack_return__(args, kw, return_dict)
+		self.__unpack_return__(args, return_dict)
 
 		# Unpack memory
 		self.client_unpack_memory_list(return_dict['memory'], memory_transport_handle)
@@ -287,7 +287,7 @@ class routine_client_class(
 			raise # TODO
 
 
-	def __unpack_return__(self, args, kw, return_dict): # TODO kw not yet handled
+	def __unpack_return__(self, args, return_dict):
 		"""
 		TODO Optimize for speed!
 		"""
