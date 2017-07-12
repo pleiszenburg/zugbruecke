@@ -41,6 +41,7 @@ import ctypes
 # 	GROUP_STRUCT
 # 	)
 from .memory import (
+	generate_pointer_from_int_list,
 	overwrite_pointer_with_int_list,
 	serialize_pointer_into_int_list
 	)
@@ -53,7 +54,7 @@ from .memory import (
 class arg_memory_class():
 
 
-	def client_pack_memory(self, args, memsync):
+	def client_pack_memory_list(self, args, memsync):
 
 		# Start empty package for transfer
 		mem_package_list = []
@@ -102,7 +103,7 @@ class arg_memory_class():
 		return mem_package_list, memory_handle
 
 
-	def client_unpack_memory(self, mem_package_list, memory_handle):
+	def client_unpack_memory_list(self, mem_package_list, memory_handle):
 
 		# Overwrite the local pointers with new data
 		for pointer_index, pointer in enumerate(memory_handle):
@@ -117,3 +118,27 @@ class arg_memory_class():
 			# Defaut type, if nothing is given, is unsigned byte
 			if '_t' not in segment.keys():
 				segment['_t'] = ctypes.c_ubyte
+
+
+	def server_unpack_memory_list(self, args, arg_memory_list, memsync):
+
+		# Generate temporary handle for faster packing
+		memory_handle = []
+
+		# Iterate over memory segments, which must be kept in sync
+		for segment_index, segment in enumerate(memsync):
+
+			# Reference args - search for pointer
+			pointer = args
+			# Step through path to pointer ...
+			for path_element in segment['p'][:-1]:
+				# Go deeper ...
+				pointer = pointer[path_element]
+
+			# Handle deepest instance
+			pointer[segment['p'][-1]] = generate_pointer_from_int_list(arg_memory_list[segment_index])
+
+			# Append to handle
+			memory_handle.append((pointer[segment['p'][-1]], len(arg_memory_list[segment_index])))
+
+		return memory_handle

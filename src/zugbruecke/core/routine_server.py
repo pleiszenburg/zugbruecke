@@ -44,7 +44,7 @@ from .const import (
 	GROUP_STRUCT
 	)
 from .memory import (
-	generate_pointer_from_int_list,
+	# generate_pointer_from_int_list,
 	serialize_pointer_into_int_list
 	)
 
@@ -109,7 +109,7 @@ class routine_server_class(
 		args, kw = self.__unpack_arguments__(arg_message_list)
 
 		# Unpack pointer data
-		memory_transport_handle = self.__unpack_memory__(args, kw, arg_memory_list)
+		memory_transport_handle = self.server_unpack_memory_list(args, arg_memory_list, self.memsync)
 
 		# Default return value
 		return_value = None
@@ -385,27 +385,3 @@ class routine_server_class(
 					arg[0], # parameter name (from tuple)
 					0 # least destructive value ...
 					)
-
-
-	def __unpack_memory__(self, args, kw, arg_memory_list): # TODO kw is not handled
-
-		# Generate temporary handle for faster packing
-		memory_handle = []
-
-		# Iterate over memory segments, which must be kept in sync
-		for segment_index, segment in enumerate(self.memsync):
-
-			# Reference args - search for pointer
-			pointer = args
-			# Step through path to pointer ...
-			for path_element in segment['p'][:-1]:
-				# Go deeper ...
-				pointer = pointer[path_element]
-
-			# Handle deepest instance
-			pointer[segment['p'][-1]] = generate_pointer_from_int_list(arg_memory_list[segment_index])
-
-			# Append to handle
-			memory_handle.append((pointer[segment['p'][-1]], len(arg_memory_list[segment_index])))
-
-		return memory_handle
