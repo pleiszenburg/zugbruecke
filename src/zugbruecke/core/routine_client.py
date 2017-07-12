@@ -131,7 +131,7 @@ class routine_client_class(
 		self.log.out('[routine-client] ... parameters are %r / %r. Packing and pushing to server ...' % (args, kw))
 
 		# Handle memory
-		mem_package_list, memory_transport_handle = self.pack_memory(args, self.memsync)
+		mem_package_list, memory_transport_handle = self.client_pack_memory(args, self.memsync)
 
 		# Actually call routine in DLL! TODO Handle kw ...
 		return_dict = self.client.call_dll_routine(
@@ -145,7 +145,7 @@ class routine_client_class(
 		self.__unpack_return__(args, kw, return_dict)
 
 		# Unpack memory
-		self.unpack_memory(return_dict['memory'], memory_transport_handle)
+		self.client_unpack_memory(return_dict['memory'], memory_transport_handle)
 
 		# Log status
 		self.log.out('[routine-client] ... unpacked, return.')

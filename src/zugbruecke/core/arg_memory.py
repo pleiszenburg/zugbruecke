@@ -34,12 +34,12 @@ specific language governing rights and limitations under the License.
 import ctypes
 #from pprint import pformat as pf
 
-from .const import (
-	FLAG_POINTER,
-	GROUP_VOID,
-	GROUP_FUNDAMENTAL,
-	GROUP_STRUCT
-	)
+# from .const import (
+# 	FLAG_POINTER,
+# 	GROUP_VOID,
+# 	GROUP_FUNDAMENTAL,
+# 	GROUP_STRUCT
+# 	)
 from .memory import (
 	overwrite_pointer_with_int_list,
 	serialize_pointer_into_int_list
@@ -53,7 +53,7 @@ from .memory import (
 class arg_memory_class():
 
 
-	def pack_memory(self, args, memsync):
+	def client_pack_memory(self, args, memsync):
 
 		# Start empty package for transfer
 		mem_package_list = []
@@ -102,7 +102,7 @@ class arg_memory_class():
 		return mem_package_list, memory_handle
 
 
-	def unpack_memory(self, mem_package_list, memory_handle):
+	def client_unpack_memory(self, mem_package_list, memory_handle):
 
 		# Overwrite the local pointers with new data
 		for pointer_index, pointer in enumerate(memory_handle):
