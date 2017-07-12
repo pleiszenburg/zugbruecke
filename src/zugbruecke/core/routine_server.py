@@ -43,10 +43,6 @@ from .const import (
 	GROUP_FUNDAMENTAL,
 	GROUP_STRUCT
 	)
-from .memory import (
-	# generate_pointer_from_int_list,
-	serialize_pointer_into_int_list
-	)
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

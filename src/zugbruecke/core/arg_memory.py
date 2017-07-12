@@ -34,12 +34,6 @@ specific language governing rights and limitations under the License.
 import ctypes
 #from pprint import pformat as pf
 
-# from .const import (
-# 	FLAG_POINTER,
-# 	GROUP_VOID,
-# 	GROUP_FUNDAMENTAL,
-# 	GROUP_STRUCT
-# 	)
 from .memory import (
 	generate_pointer_from_int_list,
 	overwrite_pointer_with_int_list,
