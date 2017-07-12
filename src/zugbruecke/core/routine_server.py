@@ -35,8 +35,8 @@ import ctypes
 from pprint import pformat as pf
 import traceback
 
-from .arg import arg_class
 from .arg_definition import arg_definition_class
+from .arg_memory import arg_memory_class
 from .const import (
 	FLAG_POINTER,
 	GROUP_VOID,
@@ -53,7 +53,10 @@ from .memory import (
 # DLL SERVER CLASS
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-class routine_server_class(arg_definition_class):
+class routine_server_class(
+	arg_definition_class,
+	arg_memory_class
+	):
 
 
 	def __init__(self, parent_dll, routine_name):
@@ -69,9 +72,6 @@ class routine_server_class(arg_definition_class):
 
 		# Store my own name
 		self.name = routine_name
-
-		# Set up parser for argument value transfer
-		self.a = arg_class(self.log)
 
 		# Log status
 		self.log.out('[routine-server] Attaching to routine "%s" in DLL file "%s" ...' % (self.name, self.dll.name))

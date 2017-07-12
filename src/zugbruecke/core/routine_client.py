@@ -35,8 +35,8 @@ import ctypes
 from functools import partial
 from pprint import pformat as pf
 
-from .arg import arg_class
 from .arg_definition import arg_definition_class
+from .arg_memory import arg_memory_class
 from .const import (
 	FLAG_POINTER,
 	GROUP_VOID,
@@ -49,7 +49,10 @@ from .const import (
 # DLL CLIENT CLASS
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-class routine_client_class(arg_definition_class):
+class routine_client_class(
+	arg_definition_class,
+	arg_memory_class
+	):
 
 
 	def __init__(self, parent_dll, routine_name):
@@ -83,9 +86,6 @@ class routine_client_class(arg_definition_class):
 
 		# By default, assume c_int return value like ctypes expects
 		self.handle_call.restype = ctypes.c_int
-
-		# Set up parser for argument value transfer
-		self.a = arg_class(self.log)
 
 		# Tell server about routine
 		self.__register_routine_on_server__()
@@ -131,7 +131,7 @@ class routine_client_class(arg_definition_class):
 		self.log.out('[routine-client] ... parameters are %r / %r. Packing and pushing to server ...' % (args, kw))
 
 		# Handle memory
-		mem_package_list, memory_transport_handle = self.a.pack_memory(args, self.memsync)
+		mem_package_list, memory_transport_handle = self.pack_memory(args, self.memsync)
 
 		# Actually call routine in DLL! TODO Handle kw ...
 		return_dict = self.client.call_dll_routine(
@@ -145,7 +145,7 @@ class routine_client_class(arg_definition_class):
 		self.__unpack_return__(args, kw, return_dict)
 
 		# Unpack memory
-		self.a.unpack_memory(return_dict['memory'], memory_transport_handle)
+		self.unpack_memory(return_dict['memory'], memory_transport_handle)
 
 		# Log status
 		self.log.out('[routine-client] ... unpacked, return.')

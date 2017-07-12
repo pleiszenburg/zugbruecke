@@ -6,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	src/zugbruecke/core/arg.py: (Un-) packing of argument contents
+	src/zugbruecke/core/arg_memory.py: (Un-) packing of argument pointers
 
 	Required to run on platform / side: [UNIX, WINE]
 
@@ -50,12 +50,7 @@ from .memory import (
 # CLASS: Content packing and unpacking
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-class arg_class():
-
-
-	def __init__(self, log):
-
-		self.log = log
+class arg_memory_class():
 
 
 	def pack_memory(self, args, memsync):
