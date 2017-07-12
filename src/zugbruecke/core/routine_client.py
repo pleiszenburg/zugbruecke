@@ -137,7 +137,7 @@ class routine_client_class(
 
 		# Actually call routine in DLL! TODO Handle kw ...
 		return_dict = self.client.call_dll_routine(
-			self.dll.full_path, self.name, self.__pack_args__(self.argtypes_d, args), mem_package_list
+			self.dll.full_path, self.name, self.client_pack_arg_list(self.argtypes_d, args), mem_package_list
 			)
 
 		# Log status
@@ -154,87 +154,6 @@ class routine_client_class(
 
 		# Return result. return_value will be None if there was not a result.
 		return return_dict['return_value']
-
-
-	def __pack_args__(self, argtypes_p_sub, args): # TODO kw
-		"""
-		TODO Optimize for speed!
-		"""
-
-		# Shortcut for speed
-		arguments_list = []
-
-		# Step through arguments
-		for arg_index, arg_definition_dict in enumerate(argtypes_p_sub):
-
-			# Fetch current argument by index from tuple or by name from struct/kw
-			if type(args) is list or type(args) is tuple:
-				arg = args[arg_index]
-			else:
-				arg = getattr(args, arg_definition_dict['n'])
-
-			# TODO:
-			# append tuple to list "arguments_list"
-			# tuple contains: (arg_definition_dict['n'], argument content / value)
-			#  pointer: arg.value or arg.contents.value
-			#  (value: Append value from ctypes datatype, because most of their Python equivalents are immutable)
-			#  (contents.value: Append value from ctypes datatype pointer ...)
-			#  by value: just "arg"
-
-			try:
-
-				arg_value = arg # Set up arg for iterative unpacking
-				for flag in arg_definition_dict['f']: # step through flags
-
-					# Handle pointers
-					if flag == FLAG_POINTER:
-
-						# There are two ways of getting the actual value
-						if hasattr(arg_value, 'value'):
-							arg_value = arg_value.value
-						elif hasattr(arg_value, 'contents'):
-							arg_value = arg_value.contents
-						else:
-							raise # TODO
-
-					# Handle arrays
-					elif flag > 0:
-
-						arg_value = arg_value[:]
-
-					# Handle unknown flags
-					else:
-
-						raise # TODO
-			except:
-
-				self.log.err(pf(arg_value))
-
-			self.log.err('   abc')
-			self.log.err(pf(arg_value))
-
-			# Handle fundamental types
-			if arg_definition_dict['g'] == GROUP_FUNDAMENTAL:
-
-				# Append argument to list ...
-				arguments_list.append((arg_definition_dict['n'], arg_value))
-
-			# Handle structs
-			elif arg_definition_dict['g'] == GROUP_STRUCT:
-
-				# Reclusively call this routine for packing structs
-				arguments_list.append((arg_definition_dict['n'], self.__pack_args__(
-					arg_definition_dict['_fields_'], arg
-					)))
-
-			# Handle everything else ... likely pointers handled by memsync
-			else:
-
-				# Just return None - will (hopefully) be overwritten by memsync
-				arguments_list.append(None)
-
-		# Return parameter message list - MUST WORK WITH PICKLE
-		return arguments_list
 
 
 	def __push_argtype_and_restype__(self):
