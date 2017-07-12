@@ -53,7 +53,7 @@ from .memory import (
 # DLL SERVER CLASS
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-class routine_server_class():
+class routine_server_class(arg_definition_class):
 
 
 	def __init__(self, parent_dll, routine_name):
@@ -69,9 +69,6 @@ class routine_server_class():
 
 		# Store my own name
 		self.name = routine_name
-
-		# Set up parser for argtype and restype definitions
-		self.d = arg_definition_class(self.log)
 
 		# Set up parser for argument value transfer
 		self.a = arg_class(self.log)
@@ -243,13 +240,13 @@ class routine_server_class():
 		self.argtypes_p = argtypes_p
 
 		# Parse and apply argtype definition dict to actual ctypes routine
-		self.handler.argtypes = self.d.unpack_definition_argtypes(argtypes_p)
+		self.handler.argtypes = self.unpack_definition_argtypes(argtypes_p)
 
 		# Store return value definition dict
 		self.restype_p = restype_p
 
 		# Parse and apply restype definition dict to actual ctypes routine
-		self.handler.restype = self.d.unpack_definition_returntype(restype_p)
+		self.handler.restype = self.unpack_definition_returntype(restype_p)
 
 		# Log status
 		self.log.out('[routine-server] ... memsync: %s ...' % pf(self.memsync))
@@ -321,7 +318,7 @@ class routine_server_class():
 			elif arg_definition_dict['g'] == GROUP_STRUCT:
 
 				# Generate new instance of struct datatype
-				struct_arg = self.d.struct_type_dict[arg_definition_dict['t']]()
+				struct_arg = self.struct_type_dict[arg_definition_dict['t']]()
 
 				# Unpack values into struct
 				self.__unpack_arguments_struct__(arg_definition_dict['_fields_'], struct_arg, arg[1])
@@ -367,7 +364,7 @@ class routine_server_class():
 			elif arg_definition_dict['g'] == GROUP_STRUCT:
 
 				# Generate new instance of struct datatype
-				struct_arg = self.d.struct_type_dict[arg_definition_dict['t']]()
+				struct_arg = self.struct_type_dict[arg_definition_dict['t']]()
 
 				# Unpack values into struct
 				self.__unpack_arguments_struct__(arg_definition_dict['_fields'], struct_arg, arg[1])

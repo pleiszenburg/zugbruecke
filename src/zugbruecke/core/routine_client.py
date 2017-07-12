@@ -49,7 +49,7 @@ from .const import (
 # DLL CLIENT CLASS
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-class routine_client_class():
+class routine_client_class(arg_definition_class):
 
 
 	def __init__(self, parent_dll, routine_name):
@@ -83,9 +83,6 @@ class routine_client_class():
 
 		# By default, assume c_int return value like ctypes expects
 		self.handle_call.restype = ctypes.c_int
-
-		# Set up parser for argtype and restype definitions
-		self.d = arg_definition_class(self.log)
 
 		# Set up parser for argument value transfer
 		self.a = arg_class(self.log)
@@ -241,19 +238,19 @@ class routine_client_class():
 	def __push_argtype_and_restype__(self):
 
 		# Prepare list of arguments by parsing them into list of dicts (TODO field name / kw)
-		self.argtypes_d = self.d.pack_definition_argtypes(self.argtypes)
+		self.argtypes_d = self.pack_definition_argtypes(self.argtypes)
 
 		# Parse return type
-		self.restype_d = self.d.pack_definition_returntype(self.restype)
+		self.restype_d = self.pack_definition_returntype(self.restype)
 
 		# Fix missing ctypes in memsync
-		self.d.fix_memsync_ctypes(self.memsync)
+		self.fix_memsync_ctypes(self.memsync)
 
 		# Reduce memsync for transfer
-		self.memsync_d = self.d.pack_definition_memsync(self.memsync)
+		self.memsync_d = self.pack_definition_memsync(self.memsync)
 
 		# Generate handles on relevant argtype definitions for memsync, adjust definitions with void pointers
-		self.memsync_handle = self.d.apply_memsync_to_argtypes_definition(self.memsync, self.argtypes_d)
+		self.memsync_handle = self.apply_memsync_to_argtypes_definition(self.memsync, self.argtypes_d)
 
 		# Pass argument and return value types as strings ...
 		result = self.client.register_argtype_and_restype(

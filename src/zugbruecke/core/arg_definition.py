@@ -52,10 +52,7 @@ from .lib import (
 class arg_definition_class():
 
 
-	def __init__(self, log):
-
-		self.log = log
-		self.struct_type_dict = {}
+	struct_type_dict = {}
 
 
 	def apply_memsync_to_argtypes_definition(self, memsync, argtypes_d):
