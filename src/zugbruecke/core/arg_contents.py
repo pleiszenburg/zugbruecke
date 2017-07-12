@@ -195,3 +195,80 @@ class arg_contents_class():
 
 				# HACK TODO
 				pass
+
+
+	def server_unpack_arg_list(self, argtypes_d, args_package_list):
+		"""
+		TODO Optimize for speed!
+		"""
+
+		# Start argument list as a list (will become a tuple)
+		arguments_list = []
+
+		# Step through arguments
+		for arg_index, arg in enumerate(args_package_list):
+
+			# Fetch definition of current argument
+			arg_definition_dict = argtypes_d[arg_index]
+
+			# Handle fundamental types
+			if arg_definition_dict['g'] == GROUP_FUNDAMENTAL:
+
+				try:
+
+					# Start process with plain argument
+					arg_rebuilt = getattr(ctypes, arg_definition_dict['t'])(arg[1])
+
+					# Step through flags
+					for flag in arg_definition_dict['f']:
+
+						if flag == FLAG_POINTER:
+
+							pass # Nothing to do?
+
+						elif flag > 0:
+
+							raise
+
+						else:
+
+							raise
+
+					# # By reference
+					# if arg_definition_dict['p']:
+					# 	# Put value back into its ctypes datatype
+					# 	arguments_list.append(
+					# 		getattr(ctypes, arg_definition_dict['t'])(arg[1])
+					# 		)
+					# # By value
+					# else:
+					# 	# Append value
+					# 	arguments_list.append(arg[1])
+
+					arguments_list.append(arg_rebuilt)
+
+				except:
+
+					self.log.err('ERROR in __unpack_arguments__, fundamental datatype path')
+					self.log.err(traceback.format_exc())
+
+			# Handle structs
+			elif arg_definition_dict['g'] == GROUP_STRUCT:
+
+				# Generate new instance of struct datatype
+				struct_arg = self.struct_type_dict[arg_definition_dict['t']]()
+
+				# Unpack values into struct
+				self.__unpack_arguments_struct__(arg_definition_dict['_fields_'], struct_arg, arg[1])
+
+				# Append struct to list
+				arguments_list.append(struct_arg)
+
+			# Handle everything else ...
+			else:
+
+				# HACK TODO
+				arguments_list.append(0)
+
+		# Return args as tuple and kw as dict
+		return arguments_list

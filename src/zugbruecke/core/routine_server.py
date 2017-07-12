@@ -104,10 +104,10 @@ class routine_server_class(
 		self.log.out('[routine-server] Trying call routine "%s" ...' % self.name)
 
 		# Unpack passed arguments, handle pointers and structs ...
-		args, kw = self.__unpack_arguments__(arg_message_list)
+		args_list = self.server_unpack_arg_list(self.argtypes_d, arg_message_list)
 
 		# Unpack pointer data
-		memory_transport_handle = self.server_unpack_memory_list(args, arg_memory_list, self.memsync)
+		memory_transport_handle = self.server_unpack_memory_list(args_list, arg_memory_list, self.memsync)
 
 		# Default return value
 		return_value = None
@@ -116,7 +116,7 @@ class routine_server_class(
 		try:
 
 			# Call into dll
-			return_value = self.handler(*tuple(args), **kw)
+			return_value = self.handler(*tuple(args_list))
 
 			# Log status
 			self.log.out('[routine-server] ... done.')
@@ -134,13 +134,13 @@ class routine_server_class(
 
 		try:
 			# Pack return package and return it
-			return self.__pack_return__(args, kw, return_value, return_memory_list)
+			return self.__pack_return__(args_list, return_value, return_memory_list)
 		except:
 			# Push traceback to log
 			self.log.err(traceback.format_exc())
 
 
-	def __pack_return__(self, args, kw, return_value, return_memory_list):
+	def __pack_return__(self, args, return_value, return_memory_list):
 		"""
 		TODO: Optimize for speed!
 		"""
@@ -208,34 +208,33 @@ class routine_server_class(
 
 		return {
 			'args': arguments_list,
-			'kw': {}, # TODO not yet handled
 			'return_value': return_value, # TODO allow & handle pointers
 			'memory': return_memory_list
 			}
 
 
-	def register_argtype_and_restype(self, argtypes_p, restype_p, memsync):
+	def register_argtype_and_restype(self, argtypes_d, restype_d, memsync_d):
 
 		# Log status
 		self.log.out('[routine-server] Set argument and return value types for "%s" ...' % self.name)
 
 		# Store memory sync instructions
-		self.memsync = memsync
+		self.memsync_d = memsync_d
 
 		# Store argtype definition dict
-		self.argtypes_p = argtypes_p
+		self.argtypes_d = argtypes_d
 
 		# Parse and apply argtype definition dict to actual ctypes routine
-		self.handler.argtypes = self.unpack_definition_argtypes(argtypes_p)
+		self.handler.argtypes = self.unpack_definition_argtypes(argtypes_d)
 
 		# Store return value definition dict
-		self.restype_p = restype_p
+		self.restype_d = restype_d
 
 		# Parse and apply restype definition dict to actual ctypes routine
 		self.handler.restype = self.unpack_definition_returntype(restype_p)
 
 		# Log status
-		self.log.out('[routine-server] ... memsync: %s ...' % pf(self.memsync))
+		self.log.out('[routine-server] ... memsync: %s ...' % pf(self.memsync_d))
 		self.log.out('[routine-server] ... argtypes: %s ...' % pf(self.handler.argtypes))
 		self.log.out('[routine-server] ... restype: %s ...' % pf(self.handler.restype))
 
@@ -243,83 +242,6 @@ class routine_server_class(
 		self.log.out('[routine-server] ... done.')
 
 		return True # Success
-
-
-	def __unpack_arguments__(self, args_list):
-		"""
-		TODO Optimize for speed!
-		"""
-
-		# Start argument list as a list (will become a tuple)
-		arguments_list = []
-
-		# Step through arguments
-		for arg_index, arg in enumerate(args_list):
-
-			# Fetch definition of current argument
-			arg_definition_dict = self.argtypes_p[arg_index]
-
-			# Handle fundamental types
-			if arg_definition_dict['g'] == GROUP_FUNDAMENTAL:
-
-				try:
-
-					# Start process with plain argument
-					arg_rebuilt = getattr(ctypes, arg_definition_dict['t'])(arg[1])
-
-					# Step through flags
-					for flag in arg_definition_dict['f']:
-
-						if flag == FLAG_POINTER:
-
-							pass # Nothing to do?
-
-						elif flag > 0:
-
-							raise
-
-						else:
-
-							raise
-
-					# # By reference
-					# if arg_definition_dict['p']:
-					# 	# Put value back into its ctypes datatype
-					# 	arguments_list.append(
-					# 		getattr(ctypes, arg_definition_dict['t'])(arg[1])
-					# 		)
-					# # By value
-					# else:
-					# 	# Append value
-					# 	arguments_list.append(arg[1])
-
-					arguments_list.append(arg_rebuilt)
-
-				except:
-
-					self.log.err('ERROR in __unpack_arguments__, fundamental datatype path')
-					self.log.err(traceback.format_exc())
-
-			# Handle structs
-			elif arg_definition_dict['g'] == GROUP_STRUCT:
-
-				# Generate new instance of struct datatype
-				struct_arg = self.struct_type_dict[arg_definition_dict['t']]()
-
-				# Unpack values into struct
-				self.__unpack_arguments_struct__(arg_definition_dict['_fields_'], struct_arg, arg[1])
-
-				# Append struct to list
-				arguments_list.append(struct_arg)
-
-			# Handle everything else ...
-			else:
-
-				# HACK TODO
-				arguments_list.append(0)
-
-		# Return args as tuple and kw as dict
-		return arguments_list, {} # TODO kw not yet handled
 
 
 	def __unpack_arguments_struct__(self, arg_definition_list, struct_inst, args_list):
