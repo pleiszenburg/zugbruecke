@@ -90,16 +90,6 @@ class arg_definition_class():
 		return memsync_handle
 
 
-	def fix_memsync_ctypes(self, memsync):
-
-		# Iterate over memory segments, which must be kept in sync
-		for segment in memsync:
-
-			# Defaut type, if nothing is given, is unsigned byte
-			if '_t' not in segment.keys():
-				segment['_t'] = ctypes.c_ubyte
-
-
 	def pack_definition_argtypes(self, argtypes):
 
 		return [self.__pack_definition_dict__(arg) for arg in argtypes]
