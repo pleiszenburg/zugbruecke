@@ -48,6 +48,16 @@ from .memory import (
 class arg_memory_class():
 
 
+	def client_fix_memsync_ctypes(self, memsync):
+
+		# Iterate over memory segments, which must be kept in sync
+		for segment in memsync:
+
+			# Defaut type, if nothing is given, is unsigned byte
+			if '_t' not in segment.keys():
+				segment['_t'] = ctypes.c_ubyte
+
+
 	def client_pack_memory_list(self, args, memsync):
 
 		# Start empty package for transfer
@@ -102,16 +112,6 @@ class arg_memory_class():
 		# Overwrite the local pointers with new data
 		for pointer_index, pointer in enumerate(memory_handle):
 			overwrite_pointer_with_int_list(pointer, mem_package_list[pointer_index])
-
-
-	def fix_memsync_ctypes(self, memsync):
-
-		# Iterate over memory segments, which must be kept in sync
-		for segment in memsync:
-
-			# Defaut type, if nothing is given, is unsigned byte
-			if '_t' not in segment.keys():
-				segment['_t'] = ctypes.c_ubyte
 
 
 	def server_pack_memory_list(self, memory_handle):

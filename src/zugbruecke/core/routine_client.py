@@ -246,7 +246,7 @@ class routine_client_class(
 		self.restype_d = self.pack_definition_returntype(self.restype)
 
 		# Fix missing ctypes in memsync
-		self.fix_memsync_ctypes(self.memsync)
+		self.client_fix_memsync_ctypes(self.memsync)
 
 		# Reduce memsync for transfer
 		self.memsync_d = self.pack_definition_memsync(self.memsync)
