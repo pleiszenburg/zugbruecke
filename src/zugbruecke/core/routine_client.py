@@ -144,7 +144,7 @@ class routine_client_class(
 		self.log.out('[routine-client] ... received feedback from server, unpacking ...')
 
 		# Unpack return dict (for pointers and structs)
-		self.__unpack_return__(args, return_dict)
+		self.client_unpack_arg_list(self.argtypes_d, args, return_dict)
 
 		# Unpack memory
 		self.client_unpack_memory_list(return_dict['memory'], memory_transport_handle)
@@ -204,69 +204,3 @@ class routine_client_class(
 			self.log.out('[routine-client] ... failed!')
 
 			raise # TODO
-
-
-	def __unpack_return__(self, args, return_dict):
-		"""
-		TODO Optimize for speed!
-		"""
-
-		# Get arguments' list
-		arguments_list = return_dict['args']
-
-		# Step through arguments
-		for arg_index, arg in enumerate(args):
-
-			# Fetch definition of current argument
-			arg_definition_dict = self.argtypes_d[arg_index]
-
-			# Handle fundamental types
-			if arg_definition_dict['g'] == GROUP_FUNDAMENTAL:
-
-				# Start process with plain old argument
-				arg_value = args[arg_index]
-				# New value is: arguments_list[arg_index]
-
-				# Step through flags
-				for flag in arg_definition_dict['f']:
-
-					# Handle pointers
-					if flag == FLAG_POINTER:
-
-						# There are two ways of getting the actual value
-						# if hasattr(arg_value, 'value'):
-						# 	arg_value = arg_value.value
-						if hasattr(arg_value, 'contents'):
-							arg_value = arg_value.contents
-						else:
-							arg_value = arg_value
-
-					# Handle arrays
-					elif flag > 0:
-
-						arg_value = arg_value
-
-					# Handle unknown flags
-					else:
-
-						raise # TODO
-
-				if hasattr(arg_value, 'value'):
-					arg_value.value = arguments_list[arg_index]
-				else:
-					arg_value = arguments_list[arg_index]
-
-				# # If by reference ...
-				# if arg_definition_dict['p']:
-				# 	# Put value back into its ctypes datatype
-				# 	args[arg_index].value = arguments_list[arg_index]
-				# # If by value
-				# else:
-				# 	# Nothing to do
-				# 	pass
-
-			# Handle everything else (structures and "the other stuff")
-			else:
-
-				# HACK TODO
-				pass

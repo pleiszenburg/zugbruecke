@@ -49,9 +49,10 @@ from .const import (
 class arg_contents_class():
 
 
-	def client_pack_arg_list(self, argtypes_d_sub, args): # TODO kw
+	def client_pack_arg_list(self, argtypes_d_sub, args):
 		"""
 		TODO Optimize for speed!
+		Can call itself recursively!
 		"""
 
 		# Shortcut for speed
@@ -128,3 +129,69 @@ class arg_contents_class():
 
 		# Return parameter message list - MUST WORK WITH PICKLE
 		return args_package_list
+
+
+	def client_unpack_arg_list(self, argtypes_d, args, return_dict):
+		"""
+		TODO Optimize for speed!
+		"""
+
+		# Get arguments' list
+		arguments_list = return_dict['args']
+
+		# Step through arguments
+		for arg_index, arg in enumerate(args):
+
+			# Fetch definition of current argument
+			arg_definition_dict = argtypes_d[arg_index]
+
+			# Handle fundamental types
+			if arg_definition_dict['g'] == GROUP_FUNDAMENTAL:
+
+				# Start process with plain old argument
+				arg_value = args[arg_index]
+				# New value is: arguments_list[arg_index]
+
+				# Step through flags
+				for flag in arg_definition_dict['f']:
+
+					# Handle pointers
+					if flag == FLAG_POINTER:
+
+						# There are two ways of getting the actual value
+						# if hasattr(arg_value, 'value'):
+						# 	arg_value = arg_value.value
+						if hasattr(arg_value, 'contents'):
+							arg_value = arg_value.contents
+						else:
+							arg_value = arg_value
+
+					# Handle arrays
+					elif flag > 0:
+
+						arg_value = arg_value
+
+					# Handle unknown flags
+					else:
+
+						raise # TODO
+
+				if hasattr(arg_value, 'value'):
+					arg_value.value = arguments_list[arg_index]
+				else:
+					arg_value = arguments_list[arg_index]
+
+				# # If by reference ...
+				# if arg_definition_dict['p']:
+				# 	# Put value back into its ctypes datatype
+				# 	args[arg_index].value = arguments_list[arg_index]
+				# # If by value
+				# else:
+				# 	# Nothing to do
+				# 	pass
+
+			# Handle everything else (structures and "the other stuff")
+			else:
+
+				# HACK TODO
+				pass
