@@ -35,6 +35,7 @@ import ctypes
 from functools import partial
 from pprint import pformat as pf
 
+from .arg_contents import arg_contents_class
 from .arg_definition import arg_definition_class
 from .arg_memory import arg_memory_class
 from .const import (
@@ -50,6 +51,7 @@ from .const import (
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 class routine_client_class(
+	arg_contents_class,
 	arg_definition_class,
 	arg_memory_class
 	):
