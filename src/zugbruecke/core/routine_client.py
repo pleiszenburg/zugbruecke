@@ -144,7 +144,7 @@ class routine_client_class(
 		self.log.out('[routine-client] ... received feedback from server, unpacking ...')
 
 		# Unpack return dict (for pointers and structs)
-		self.client_unpack_arg_list(self.argtypes_d, args, return_dict)
+		self.client_unpack_return_list(self.argtypes_d, args, return_dict)
 
 		# Unpack memory
 		self.client_unpack_memory_list(return_dict['memory'], memory_transport_handle)

@@ -131,7 +131,7 @@ class arg_contents_class():
 		return args_package_list
 
 
-	def client_unpack_arg_list(self, argtypes_d, args, return_dict):
+	def client_unpack_return_list(self, argtypes_d, args, return_dict):
 		"""
 		TODO Optimize for speed!
 		"""
