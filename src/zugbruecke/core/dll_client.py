@@ -44,7 +44,7 @@ from .routine_client import routine_client_class
 class dll_client_class(): # Representing one idividual dll to be called into, returned by LoadLibrary
 
 
-	def __init__(self, full_path_dll, dll_name, dll_type, parent_session):
+	def __init__(self, parent_session, full_path_dll, dll_name, dll_type, hash_id):
 
 		# Store dll parameters name, path and type
 		self.full_path = full_path_dll
@@ -60,29 +60,11 @@ class dll_client_class(): # Representing one idividual dll to be called into, re
 		# Get handle on log
 		self.log = self.session.log
 
-		# Start dict for dll routines
-		self.routines = {}
-
-		# Translate dll's full path into wine path
-		self.full_path_wine = self.session.wineserver_session.translate_path_unix2win(self.full_path)
-
-		# Status log
-		self.log.out('[dll-client] New DLL file "%s" with calling convention "%s" located at' % (
-			self.name, self.calling_convention
-			))
-		self.log.out('[dll-client]  %s' % self.full_path_wine)
-
-		# Tell wine about the dll and its type TODO implement some sort of find_library
-		(success, hash_id) = self.client.load_library(
-			self.full_path_wine, self.full_path, self.name, self.calling_convention
-			)
-
-		# Raise error if last step failed
-		if not success:
-			raise # TODO
-
 		# Store my hash id
 		self.hash_id = hash_id
+
+		# Start dict for dll routines
+		self.routines = {}
 
 		# Expose routine registration
 		self.__register_routine_on_server__ = getattr(self.client, self.hash_id + '_register_routine')

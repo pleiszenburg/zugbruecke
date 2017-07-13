@@ -140,7 +140,7 @@ class session_client_class():
 		full_path_dll = os.path.join(self.dir_cwd, dll_name)
 
 		# Log status
-		self.log.out('[core] Trying to access DLL "%s" ...' % full_path_dll)
+		self.log.out('[core] Trying to access DLL "%s" of type "%s" ...' % (full_path_dll, dll_type))
 
 		# Check if dll file exists
 		if not os.path.isfile(full_path_dll):
@@ -162,9 +162,21 @@ class session_client_class():
 			# Log status
 			self.log.out('[core] ... not yet touched ...')
 
+			# Translate dll's full path into wine path
+			full_path_dll_wine = self.wineserver_session.translate_path_unix2win(full_path_dll)
+
+			# Tell wine about the dll and its type TODO implement some sort of find_library
+			(success, hash_id) = self.__load_library_on_server__(
+				full_path_dll_wine, full_path_dll, dll_name, dll_type
+				)
+
+			# If it failed, raise an error
+			if not success:
+				raise # TODO
+
 			# Fire up new dll object
 			self.dll_dict[full_path_dll] = dll_client_class(
-				full_path_dll, dll_name, dll_type, self
+				self, full_path_dll, dll_name, dll_type, hash_id
 				)
 
 			# Log status
@@ -239,6 +251,9 @@ class session_client_class():
 			raise # TODO
 
 		else:
+
+			# Generate handles on server-side routines
+			self.__load_library_on_server__ = self.client.load_library
 
 			# Log status
 			self.log.out('[core] ... connected (after %0.2f seconds & %d attempts).' %
