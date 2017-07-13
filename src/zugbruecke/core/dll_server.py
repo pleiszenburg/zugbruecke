@@ -34,6 +34,7 @@ specific language governing rights and limitations under the License.
 import ctypes
 from pprint import pformat as pf
 
+from .lib import get_hash_of_string
 from .routine_server import routine_server_class
 
 
@@ -71,6 +72,15 @@ class dll_server_class(): # Representing one idividual dll to be called into
 
 			# Attach to DLL with ctypes
 			self.handler = ctypes.windll.LoadLibrary(self.full_path) # TODO handle oledll and cdll
+
+			# Hash my own path as unique ID
+			self.hash_id = get_hash_of_string(self.full_path_unix)
+
+			# Export registration of my functions directly
+			self.session.server.register_function(
+				self.register_routine,
+				self.hash_id + '_register_routine'
+				)
 
 			# Log status
 			self.log.out('[dll-server] ... done.')

@@ -89,9 +89,6 @@ class routine_client_class(
 		# By default, assume c_int return value like ctypes expects
 		self.handle_call.restype = ctypes.c_int
 
-		# Tell server about routine
-		self.__register_routine_on_server__()
-
 
 	def __handle_call__(self, *args):
 		"""
@@ -180,27 +177,4 @@ class routine_client_class(
 
 		# Handle error
 		if result == 0:
-			raise # TODO
-
-
-	def __register_routine_on_server__(self):
-
-		# Log status
-		self.log.out('[routine-client] Registering routine "%s" on server ...' % self.name)
-
-		# Register routine in wine
-		result = self.client.register_routine(self.dll.full_path, self.name)
-
-		# If success ...
-		if result:
-
-			# Log status
-			self.log.out('[routine-client] ... done (unconfigured).')
-
-		# If failed ...
-		else:
-
-			# Log status
-			self.log.out('[routine-client] ... failed!')
-
 			raise # TODO

@@ -31,6 +31,7 @@ specific language governing rights and limitations under the License.
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+import hashlib
 import os
 import random
 import socket
@@ -48,6 +49,11 @@ def get_free_port():
 	s.close()
 
 	return port
+
+
+def get_hash_of_string(str_in):
+
+	return hashlib.sha256(str_in.encode('utf-8')).hexdigest()
 
 
 def get_location_of_file(filename = ''):

@@ -73,13 +73,19 @@ class dll_client_class(): # Representing one idividual dll to be called into, re
 		self.log.out('[dll-client]  %s' % self.full_path_wine)
 
 		# Tell wine about the dll and its type TODO implement some sort of find_library
-		result = self.client.access_dll(
+		(success, hash_id) = self.client.access_dll(
 			self.full_path_wine, self.full_path, self.name, self.calling_convention
 			)
 
 		# Raise error if last step failed
-		if result == 0:
+		if not success:
 			raise # TODO
+
+		# Store my hash id
+		self.hash_id = hash_id
+
+		# Expose routine registration
+		self.__register_routine__ = getattr(self.client, self.hash_id + '_register_routine')
 
 
 	def __getattr__(self, name): # Handle requests for functions in dll which have yet not been touched
@@ -90,11 +96,31 @@ class dll_client_class(): # Representing one idividual dll to be called into, re
 		# Is routine unknown?
 		if name not in self.routines.keys():
 
-			# Create new instance of routine_client
-			self.routines[name] = routine_client_class(self, name)
+			# Log status
+			self.log.out('[dll-client] ... unknown, registering  ...')
+
+			# Register routine in wine
+			success = self.__register_routine__(name)
+
+			# If success ...
+			if success:
+
+				# Create new instance of routine_client
+				self.routines[name] = routine_client_class(self, name)
+
+				# Log status
+				self.log.out('[dll-client] ... registered (unconfigured) ...')
+
+			# If failed ...
+			else:
+
+				# Log status
+				self.log.out('[dll-client] ... failed!')
+
+				raise # TODO
 
 		# Log status
-		self.log.out('[dll-client] ... return handler for "%s" in DLL file "%s".' % (name, self.name))
+		self.log.out('[dll-client] ... return handler.')
 
 		# Return handler
 		return self.routines[name].handle_call
