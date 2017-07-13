@@ -38,12 +38,6 @@ from pprint import pformat as pf
 from .arg_contents import arg_contents_class
 from .arg_definition import arg_definition_class
 from .arg_memory import arg_memory_class
-from .const import (
-	FLAG_POINTER,
-	GROUP_VOID,
-	GROUP_FUNDAMENTAL,
-	GROUP_STRUCT
-	)
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
