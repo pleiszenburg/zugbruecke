@@ -59,7 +59,7 @@ class session_server_class:
 		self.log = log_class(self.id, self.p)
 
 		# Status log
-		self.log.out('[_server_] STARTING ...')
+		self.log.out('[session-server] STARTING ...')
 
 		# Mark session as up
 		self.up = True
@@ -83,9 +83,9 @@ class session_server_class:
 		self.server.register_function(self.server.terminate, 'terminate')
 
 		# Status log
-		self.log.out('[_server_] ctypes server is listening on port %d.' % self.p['port_socket_ctypes'])
-		self.log.out('[_server_] STARTED.')
-		self.log.out('[_server_] Serve forever ...')
+		self.log.out('[session-server] ctypes server is listening on port %d.' % self.p['port_socket_ctypes'])
+		self.log.out('[session-server] STARTED.')
+		self.log.out('[session-server] Serve forever ...')
 
 		# Run server ...
 		self.server.serve_forever()
@@ -140,13 +140,13 @@ class session_server_class:
 		if self.up:
 
 			# Status log
-			self.log.out('[_server_] TERMINATING ...')
+			self.log.out('[session-server] TERMINATING ...')
 
 			# Terminate log
 			self.log.terminate()
 
 			# Status log
-			self.log.out('[_server_] TERMINATED.')
+			self.log.out('[session-server] TERMINATED.')
 
 			# Session down
 			self.up = False
