@@ -133,84 +133,18 @@ class routine_server_class(
 		return_memory_list = self.server_pack_memory_list(memory_transport_handle)
 
 		try:
+
 			# Pack return package and return it
-			return self.__pack_return__(args_list, return_value, return_memory_list)
+			return {
+				'args': self.server_pack_return_list(self.argtypes_d, args_list),
+				'return_value': return_value, # TODO allow & handle pointers
+				'memory': return_memory_list
+				}
+
 		except:
+
 			# Push traceback to log
 			self.log.err(traceback.format_exc())
-
-
-	def __pack_return__(self, args, return_value, return_memory_list):
-		"""
-		TODO: Optimize for speed!
-		"""
-
-		# Start argument list as a list
-		arguments_list = []
-
-		# Step through arguments
-		for arg_index, arg in enumerate(args):
-
-			# Fetch definition of current argument
-			arg_definition_dict = self.argtypes_d[arg_index]
-
-			arg_value = arg # Set up arg for iterative unpacking
-			for flag in arg_definition_dict['f']: # step through flags
-
-				# Handle pointers
-				if flag == FLAG_POINTER:
-
-					# There are two ways of getting the actual value
-					if hasattr(arg_value, 'value'):
-						arg_value = arg_value.value
-					elif hasattr(arg_value, 'contents'):
-						arg_value = arg_value.contents
-					else:
-						pass
-						# self.log.err(pf(arg_value))
-						# raise # TODO
-
-				# Handle arrays
-				elif flag > 0:
-
-					arg_value = arg_value[:]
-
-				# Handle unknown flags
-				else:
-
-					self.log.err('ERROR in __pack_return__, flag %d' % flag)
-					raise # TODO
-
-			self.log.err('   efg')
-			self.log.err(pf(arg_value))
-
-			# Handle fundamental types by value
-			if arg_definition_dict['g'] == GROUP_FUNDAMENTAL:
-
-				if hasattr(arg_value, 'value'):
-					arg_value = arg_value.value
-				arguments_list.append(arg_value)
-
-				# # If by reference ...
-				# if arg_definition_dict['p']:
-				# 	# Append value from ctypes datatype (because most of their Python equivalents are immutable)
-				# 	arguments_list.append(arg.value)
-				# # If by value ...
-				# else:
-				# 	# Nothing to do ...
-				# 	arguments_list.append(None)
-
-			# Handle everything else (structures etc)
-			else:
-
-				# HACK TODO
-				arguments_list.append(None)
-
-		return {
-			'args': arguments_list,
-			'return_value': return_value, # TODO allow & handle pointers
-			'memory': return_memory_list
-			}
 
 
 	def register_argtype_and_restype(self, argtypes_d, restype_d, memsync_d):
