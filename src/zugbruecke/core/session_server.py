@@ -108,27 +108,40 @@ class session_server_class:
 		"""
 
 		# Although this should happen only once per dll, lets be on the safe side
-		if full_path_dll_unix not in self.dll_dict.keys():
+		if full_path_dll_unix in self.dll_dict.keys():
+			return (True, self.dll_dict[full_path_dll_unix].hash_id) # Success & dll hash_id
 
-			try:
+		# Status log
+		self.log.out('[session-server] Attaching to DLL file "%s" with calling convention "%s" located at' % (
+			dll_name, dll_type
+			))
+		self.log.out('[session-server]  %s' % full_path_dll)
 
-				# Load library
-				self.dll_dict[full_path_dll_unix] = dll_server_class(
-					full_path_dll, full_path_dll_unix, dll_name, dll_type, self
-					)
+		try:
 
-				# Return success and dll's hash id
-				return (True, self.dll_dict[full_path_dll_unix].hash_id) # Success
+			# Attach to DLL with ctypes
+			handler = ctypes.windll.LoadLibrary(full_path_dll) # TODO handle oledll and cdll
 
-			except:
+			# Load library
+			self.dll_dict[full_path_dll_unix] = dll_server_class(
+				self, full_path_dll, full_path_dll_unix, dll_name, dll_type, handler
+				)
 
-				return (False, None) # Fail
+			# Log status
+			self.log.out('[session-server] ... done.')
 
-		# If its already in the list, just return success
-		else:
+			# Return success and dll's hash id
+			return (True, self.dll_dict[full_path_dll_unix].hash_id) # Success
 
-			# Just in case
-			return (True, self.hash)
+		except:
+
+			# Log status
+			self.log.out('[session-server] ... failed!')
+
+			# Push traceback to log
+			self.log.err(traceback.format_exc())
+
+			return (False, None) # Fail
 
 
 	def __terminate__(self):

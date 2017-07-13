@@ -45,7 +45,7 @@ from .routine_server import routine_server_class
 class dll_server_class(): # Representing one idividual dll to be called into
 
 
-	def __init__(self, full_path_dll, full_path_dll_unix, dll_name, dll_type, parent_session):
+	def __init__(self, parent_session, full_path_dll, full_path_dll_unix, dll_name, dll_type, handler):
 
 		# Store dll parameters name, path and type
 		self.full_path = full_path_dll
@@ -59,41 +59,20 @@ class dll_server_class(): # Representing one idividual dll to be called into
 		# Get handle on log
 		self.log = self.session.log
 
+		# Store handler on dll
+		self.handler = handler
+
 		# Start dict for dll routines
 		self.routines = {}
 
-		# Status log
-		self.log.out('[dll-server] Attaching to DLL file "%s" with calling convention "%s" located at' % (
-			self.name, self.calling_convention
-			))
-		self.log.out('[dll-server]  %s' % self.full_path)
+		# Hash my own path as unique ID
+		self.hash_id = get_hash_of_string(self.full_path_unix)
 
-		try:
-
-			# Attach to DLL with ctypes
-			self.handler = ctypes.windll.LoadLibrary(self.full_path) # TODO handle oledll and cdll
-
-			# Hash my own path as unique ID
-			self.hash_id = get_hash_of_string(self.full_path_unix)
-
-			# Export registration of my functions directly
-			self.session.server.register_function(
-				self.register_routine,
-				self.hash_id + '_register_routine'
-				)
-
-			# Log status
-			self.log.out('[dll-server] ... done.')
-
-		except:
-
-			# Log status
-			self.log.out('[dll-server] ... failed!')
-
-			# Push traceback to log
-			self.log.err(traceback.format_exc())
-
-			raise
+		# Export registration of my functions directly
+		self.session.server.register_function(
+			self.register_routine,
+			self.hash_id + '_register_routine'
+			)
 
 
 	def register_routine(self, routine_name):
