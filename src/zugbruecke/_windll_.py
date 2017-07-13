@@ -68,4 +68,4 @@ class windll_class(): # Mimic ctypes.windll
 			self.start_session()
 
 		# Return a DLL instance object from within the session
-		return self.__session__.LoadLibrary(dll_name = name, dll_type = 'windll')
+		return self.__session__.load_library(dll_name = name, dll_type = 'windll')
