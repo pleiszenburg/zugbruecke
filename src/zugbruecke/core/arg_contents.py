@@ -143,17 +143,17 @@ class arg_contents_class():
 		for arg_index, arg in enumerate(args):
 
 			# Fetch definition of current argument
-			arg_definition_dict = argtypes_d[arg_index]
+			argtype_d = argtypes_d[arg_index]
 
 			# Handle fundamental types
-			if arg_definition_dict['g'] == GROUP_FUNDAMENTAL:
+			if argtype_d['g'] == GROUP_FUNDAMENTAL:
 
 				# Start process with plain old argument
 				arg_value = args[arg_index]
 				# New value is: arguments_list[arg_index]
 
 				# Step through flags
-				for flag in arg_definition_dict['f']:
+				for flag in argtype_d['f']:
 
 					# Handle pointers
 					if flag == FLAG_POINTER:
@@ -182,7 +182,7 @@ class arg_contents_class():
 					arg_value = arguments_list[arg_index]
 
 				# # If by reference ...
-				# if arg_definition_dict['p']:
+				# if argtype_d['p']:
 				# 	# Put value back into its ctypes datatype
 				# 	args[arg_index].value = arguments_list[arg_index]
 				# # If by value
@@ -209,18 +209,18 @@ class arg_contents_class():
 		for arg_index, arg in enumerate(args_package_list):
 
 			# Fetch definition of current argument
-			arg_definition_dict = argtypes_d[arg_index]
+			argtype_d = argtypes_d[arg_index]
 
 			# Handle fundamental types
-			if arg_definition_dict['g'] == GROUP_FUNDAMENTAL:
+			if argtype_d['g'] == GROUP_FUNDAMENTAL:
 
 				try:
 
 					# Start process with plain argument
-					arg_rebuilt = getattr(ctypes, arg_definition_dict['t'])(arg[1])
+					arg_rebuilt = getattr(ctypes, argtype_d['t'])(arg[1])
 
 					# Step through flags
-					for flag in arg_definition_dict['f']:
+					for flag in argtype_d['f']:
 
 						if flag == FLAG_POINTER:
 
@@ -235,10 +235,10 @@ class arg_contents_class():
 							raise
 
 					# # By reference
-					# if arg_definition_dict['p']:
+					# if argtype_d['p']:
 					# 	# Put value back into its ctypes datatype
 					# 	arguments_list.append(
-					# 		getattr(ctypes, arg_definition_dict['t'])(arg[1])
+					# 		getattr(ctypes, argtype_d['t'])(arg[1])
 					# 		)
 					# # By value
 					# else:
@@ -253,13 +253,13 @@ class arg_contents_class():
 					self.log.err(traceback.format_exc())
 
 			# Handle structs
-			elif arg_definition_dict['g'] == GROUP_STRUCT:
+			elif argtype_d['g'] == GROUP_STRUCT:
 
 				# Generate new instance of struct datatype
-				struct_arg = self.struct_type_dict[arg_definition_dict['t']]()
+				struct_arg = self.struct_type_dict[argtype_d['t']]()
 
 				# Unpack values into struct
-				self.__unpack_arguments_struct__(arg_definition_dict['_fields_'], struct_arg, arg[1])
+				self.__unpack_arguments_struct__(argtype_d['_fields_'], struct_arg, arg[1])
 
 				# Append struct to list
 				arguments_list.append(struct_arg)
@@ -270,5 +270,5 @@ class arg_contents_class():
 				# HACK TODO
 				arguments_list.append(0)
 
-		# Return args as tuple and kw as dict
+		# Return args as list, will be converted into tuple on call
 		return arguments_list

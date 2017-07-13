@@ -107,7 +107,7 @@ class routine_server_class(
 		args_list = self.server_unpack_arg_list(self.argtypes_d, arg_message_list)
 
 		# Unpack pointer data
-		memory_transport_handle = self.server_unpack_memory_list(args_list, arg_memory_list, self.memsync)
+		memory_transport_handle = self.server_unpack_memory_list(args_list, arg_memory_list, self.memsync_d)
 
 		# Default return value
 		return_value = None
@@ -152,7 +152,7 @@ class routine_server_class(
 		for arg_index, arg in enumerate(args):
 
 			# Fetch definition of current argument
-			arg_definition_dict = self.argtypes_p[arg_index]
+			arg_definition_dict = self.argtypes_d[arg_index]
 
 			arg_value = arg # Set up arg for iterative unpacking
 			for flag in arg_definition_dict['f']: # step through flags
@@ -231,7 +231,7 @@ class routine_server_class(
 		self.restype_d = restype_d
 
 		# Parse and apply restype definition dict to actual ctypes routine
-		self.handler.restype = self.unpack_definition_returntype(restype_p)
+		self.handler.restype = self.unpack_definition_returntype(restype_d)
 
 		# Log status
 		self.log.out('[routine-server] ... memsync: %s ...' % pf(self.memsync_d))
