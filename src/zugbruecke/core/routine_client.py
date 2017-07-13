@@ -108,19 +108,6 @@ class routine_client_class(
 			# Log status
 			self.log.out('[routine-client] ... has not been called before. Configuring ...')
 
-			# Processing argument and return value types on first call TODO proper sanity check
-			if hasattr(self.handle_call, 'memsync'):
-				self.memsync = self.handle_call.memsync
-			if hasattr(self.handle_call, 'argtypes'):
-				self.argtypes = self.handle_call.argtypes
-			if hasattr(self.handle_call, 'restype'):
-				self.restype = self.handle_call.restype
-
-			# Log status
-			self.log.out('[routine-client]  memsync: %s' % pf(self.memsync))
-			self.log.out('[routine-client]  argtypes: %s' % pf(self.argtypes))
-			self.log.out('[routine-client]  restype: %s' % pf(self.restype))
-
 			# Tell wine-python about types
 			self.__configure__()
 
@@ -159,6 +146,14 @@ class routine_client_class(
 
 	def __configure__(self):
 
+		# Processing argument and return value types on first call TODO proper sanity check
+		if hasattr(self.handle_call, 'memsync'):
+			self.memsync = self.handle_call.memsync
+		if hasattr(self.handle_call, 'argtypes'):
+			self.argtypes = self.handle_call.argtypes
+		if hasattr(self.handle_call, 'restype'):
+			self.restype = self.handle_call.restype
+
 		# Prepare list of arguments by parsing them into list of dicts (TODO field name / kw)
 		self.argtypes_d = self.pack_definition_argtypes(self.argtypes)
 
@@ -174,11 +169,14 @@ class routine_client_class(
 		# Generate handles on relevant argtype definitions for memsync, adjust definitions with void pointers
 		self.memsync_handle = self.apply_memsync_to_argtypes_definition(self.memsync, self.argtypes_d)
 
+		# Log status
+		self.log.out(' memsync: \n%s' % pf(self.memsync))
+		self.log.out(' argtypes: \n%s' % pf(self.argtypes))
+		self.log.out(' argtypes_d: \n%s' % pf(self.argtypes_d))
+		self.log.out(' restype: \n%s' % pf(self.restype))
+		self.log.out(' restype_d: \n%s' % pf(self.restype_d))
+
 		# Pass argument and return value types as strings ...
 		result = self.__configure_on_server__(
 			self.argtypes_d, self.restype_d, self.memsync_d
 			)
-
-		# Handle error
-		if result == 0:
-			raise # TODO

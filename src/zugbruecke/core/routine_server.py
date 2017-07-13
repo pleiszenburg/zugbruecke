@@ -81,7 +81,7 @@ class routine_server_class(
 		args_list = self.server_unpack_arg_list(self.argtypes_d, arg_message_list)
 
 		# Unpack pointer data
-		memory_transport_handle = self.server_unpack_memory_list(args_list, arg_memory_list, self.memsync_d)
+		memory_handle = self.server_unpack_memory_list(args_list, arg_memory_list, self.memsync_d)
 
 		# Default return value
 		return_value = None
@@ -92,8 +92,22 @@ class routine_server_class(
 			# Call into dll
 			return_value = self.handler(*tuple(args_list))
 
+			# Pack memory for return
+			arg_memory_list = self.server_pack_memory_list(memory_handle)
+
+			# Get new arg message list
+			arg_message_list = self.server_pack_return_list(self.argtypes_d, args_list)
+
 			# Log status
 			self.log.out('[routine-server] ... done.')
+
+			# Pack return package and return it
+			return {
+				'args': arg_message_list,
+				'return_value': return_value, # TODO allow & handle pointers
+				'memory': arg_memory_list,
+				'success': True
+				}
 
 		except:
 
@@ -103,28 +117,8 @@ class routine_server_class(
 			# Push traceback to log
 			self.log.err(traceback.format_exc())
 
-		# Pack memory for return
-		return_memory_list = self.server_pack_memory_list(memory_transport_handle)
-
-		try:
-
-			# Pack return package and return it
-			return {
-				'args': self.server_pack_return_list(self.argtypes_d, args_list),
-				'return_value': return_value, # TODO allow & handle pointers
-				'memory': return_memory_list
-				}
-
-		except:
-
-			# Push traceback to log
-			self.log.err(traceback.format_exc())
-
 
 	def __configure__(self, argtypes_d, restype_d, memsync_d):
-
-		# Log status
-		self.log.out('[routine-server] Set argument and return value types for "%s" ...' % self.name)
 
 		# Store memory sync instructions
 		self.memsync_d = memsync_d
@@ -142,11 +136,8 @@ class routine_server_class(
 		self.handler.restype = self.unpack_definition_returntype(restype_d)
 
 		# Log status
-		self.log.out('[routine-server] ... memsync: %s ...' % pf(self.memsync_d))
-		self.log.out('[routine-server] ... argtypes: %s ...' % pf(self.handler.argtypes))
-		self.log.out('[routine-server] ... restype: %s ...' % pf(self.handler.restype))
-
-		# Log status
-		self.log.out('[routine-server] ... done.')
-
-		return True # Success
+		self.log.out(' memsync: \n%s' % pf(self.memsync_d))
+		self.log.out(' argtypes: \n%s' % pf(self.handler.argtypes))
+		self.log.out(' argtypes_d: \n%s' % pf(self.argtypes_d))
+		self.log.out(' restype: \n%s' % pf(self.handler.restype))
+		self.log.out(' restype_d: \n%s' % pf(self.restype_d))
