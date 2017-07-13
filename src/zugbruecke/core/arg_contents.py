@@ -33,6 +33,7 @@ specific language governing rights and limitations under the License.
 
 import ctypes
 from pprint import pformat as pf
+import traceback
 
 from .const import (
 	FLAG_POINTER,
