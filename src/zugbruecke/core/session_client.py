@@ -70,9 +70,9 @@ class session_client_class():
 		self.log = log_class(self.id, self.p)
 
 		# Log status
-		self.log.out('[core] STARTING ...')
-		self.log.out('[core] Configured Wine-Python version is %s for %s.' % (self.p['version'], self.p['arch']))
-		self.log.out('[core] Log socket port: %d.' % self.p['port_socket_log_main'])
+		self.log.out('[session-client] STARTING ...')
+		self.log.out('[session-client] Configured Wine-Python version is %s for %s.' % (self.p['version'], self.p['arch']))
+		self.log.out('[session-client] Log socket port: %d.' % self.p['port_socket_log_main'])
 
 		# Store current working directory
 		self.dir_cwd = os.getcwd()
@@ -104,7 +104,7 @@ class session_client_class():
 		signal.signal(signal.SIGTERM, self.terminate)
 
 		# Log status
-		self.log.out('[core] STARTED.')
+		self.log.out('[session-client] STARTED.')
 
 
 	def terminate(self):
@@ -113,7 +113,7 @@ class session_client_class():
 		if self.up:
 
 			# Log status
-			self.log.out('[core] TERMINATING ...')
+			self.log.out('[session-client] TERMINATING ...')
 
 			# Tell server via message to terminate
 			self.client.terminate()
@@ -125,7 +125,7 @@ class session_client_class():
 			self.wineserver_session.terminate()
 
 			# Log status
-			self.log.out('[core] TERMINATED.')
+			self.log.out('[session-client] TERMINATED.')
 
 			# Terminate log
 			self.log.terminate()
@@ -140,18 +140,18 @@ class session_client_class():
 		full_path_dll = os.path.join(self.dir_cwd, dll_name)
 
 		# Log status
-		self.log.out('[core] Trying to access DLL "%s" of type "%s" ...' % (full_path_dll, dll_type))
+		self.log.out('[session-client] Trying to access DLL "%s" of type "%s" ...' % (full_path_dll, dll_type))
 
 		# Check if dll file exists
 		if not os.path.isfile(full_path_dll):
 
 			# Log status
-			self.log.out('[core] ... file does NOT exist!')
+			self.log.out('[session-client] ... file does NOT exist!')
 
 			raise # TODO
 
 		# Log status
-		self.log.out('[core] ... exists ...')
+		self.log.out('[session-client] ... exists ...')
 
 		# Simplify full path
 		full_path_dll = os.path.abspath(full_path_dll)
@@ -160,7 +160,7 @@ class session_client_class():
 		if full_path_dll not in self.dll_dict.keys():
 
 			# Log status
-			self.log.out('[core] ... not yet touched ...')
+			self.log.out('[session-client] ... not yet touched ...')
 
 			# Translate dll's full path into wine path
 			full_path_dll_wine = self.wineserver_session.translate_path_unix2win(full_path_dll)
@@ -180,12 +180,12 @@ class session_client_class():
 				)
 
 			# Log status
-			self.log.out('[core] ... touched and added to list.')
+			self.log.out('[session-client] ... touched and added to list.')
 
 		else:
 
 			# Log status
-			self.log.out('[core] ... already touched and in list.')
+			self.log.out('[session-client] ... already touched and in list.')
 
 		# Return reference on existing dll object
 		return self.dll_dict[full_path_dll]
@@ -194,7 +194,7 @@ class session_client_class():
 	def __start_ctypes_client__(self):
 
 		# Log status
-		self.log.out('[core] ctypes client connecting ...')
+		self.log.out('[session-client] ctypes client connecting ...')
 
 		# Status variable
 		ctypes_server_up = False
@@ -245,7 +245,7 @@ class session_client_class():
 		if not ctypes_server_up:
 
 			# Log status
-			self.log.out('[core] ... could not connect (after %0.2f seconds & %d attempts)! Error.' %
+			self.log.out('[session-client] ... could not connect (after %0.2f seconds & %d attempts)! Error.' %
 				(time.time() - started_waiting_at, tried_this_many_times)
 				)
 			raise # TODO
@@ -256,7 +256,7 @@ class session_client_class():
 			self.__load_library_on_server__ = self.client.load_library
 
 			# Log status
-			self.log.out('[core] ... connected (after %0.2f seconds & %d attempts).' %
+			self.log.out('[session-client] ... connected (after %0.2f seconds & %d attempts).' %
 				(time.time() - started_waiting_at, tried_this_many_times)
 				)
 
