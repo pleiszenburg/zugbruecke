@@ -57,7 +57,7 @@ class routine_server_class(
 	):
 
 
-	def __init__(self, parent_dll, routine_name):
+	def __init__(self, parent_dll, routine_name, routine_handler):
 
 		# Store handle on parent dll
 		self.dll = parent_dll
@@ -71,28 +71,8 @@ class routine_server_class(
 		# Store my own name
 		self.name = routine_name
 
-		# Log status
-		self.log.out('[routine-server] Attaching to routine "%s" in DLL file "%s" ...' % (self.name, self.dll.name))
-
-		try:
-
-			# Get handler on routine in dll
-			self.handler = getattr(
-				self.dll.handler, routine_name
-				)
-
-			# Log status
-			self.log.out('[routine-server] ... done.')
-
-		except:
-
-			# Log status
-			self.log.out('[routine-server] ... failed!')
-
-			# Push traceback to log
-			self.log.err(traceback.format_exc())
-
-			raise # TODO
+		# Set routine handler
+		self.handler = routine_handler
 
 
 	def call_routine(self, arg_message_list, arg_memory_list):

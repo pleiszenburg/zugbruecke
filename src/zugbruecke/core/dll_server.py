@@ -106,8 +106,13 @@ class dll_server_class(): # Representing one idividual dll to be called into
 
 			try:
 
+				# Get handler on routine in dll
+				routine_handler = getattr(
+					self.handler, routine_name
+					)
+
 				# Generate new instance of routine class
-				self.routines[routine_name] = routine_server_class(self, routine_name)
+				self.routines[routine_name] = routine_server_class(self, routine_name, routine_handler)
 
 				# Log status
 				self.log.out('[dll-server] ... done.')
@@ -118,6 +123,9 @@ class dll_server_class(): # Representing one idividual dll to be called into
 
 				# Log status
 				self.log.out('[dll-server] ... failed!')
+
+				# Push traceback to log
+				self.log.err(traceback.format_exc())
 
 				return False # Fail
 
