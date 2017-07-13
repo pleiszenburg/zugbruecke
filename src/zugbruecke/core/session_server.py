@@ -75,10 +75,10 @@ class session_server_class:
 			terminate_function = self.__terminate__
 			)
 
-		# Register call: Accessing a dll
-		self.server.register_function(self.__access_dll__, 'access_dll')
 		# Return status of server
 		self.server.register_function(self.__get_status__, 'get_status')
+		# Register call: Accessing a dll
+		self.server.register_function(self.__load_library__, 'load_library')
 		# Register destructur: Call goes into xmlrpc-server first, which then terminates parent
 		self.server.register_function(self.server.terminate, 'terminate')
 
@@ -91,7 +91,18 @@ class session_server_class:
 		self.server.serve_forever()
 
 
-	def __access_dll__(self, full_path_dll, full_path_dll_unix, dll_name, dll_type):
+	def __get_status__(self):
+		"""
+		Exposed interface
+		"""
+
+		if self.up:
+			return 'up'
+		else:
+			return 'down'
+
+
+	def __load_library__(self, full_path_dll, full_path_dll_unix, dll_name, dll_type):
 		"""
 		Exposed interface
 		"""
@@ -118,17 +129,6 @@ class session_server_class:
 
 			# Just in case
 			return (True, self.hash)
-
-
-	def __get_status__(self):
-		"""
-		Exposed interface
-		"""
-
-		if self.up:
-			return 'up'
-		else:
-			return 'down'
 
 
 	def __terminate__(self):

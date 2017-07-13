@@ -73,7 +73,7 @@ class dll_client_class(): # Representing one idividual dll to be called into, re
 		self.log.out('[dll-client]  %s' % self.full_path_wine)
 
 		# Tell wine about the dll and its type TODO implement some sort of find_library
-		(success, hash_id) = self.client.access_dll(
+		(success, hash_id) = self.client.load_library(
 			self.full_path_wine, self.full_path, self.name, self.calling_convention
 			)
 
