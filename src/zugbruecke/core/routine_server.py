@@ -117,6 +117,14 @@ class routine_server_class(
 			# Push traceback to log
 			self.log.err(traceback.format_exc())
 
+			# Pack return package and return it
+			return {
+				'args': arg_message_list,
+				'return_value': return_value, # TODO allow & handle pointers
+				'memory': arg_memory_list,
+				'success': False
+				}
+
 
 	def __configure__(self, argtypes_d, restype_d, memsync_d):
 
