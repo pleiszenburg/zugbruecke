@@ -83,6 +83,16 @@ class routine_client_class(
 		# By default, assume c_int return value like ctypes expects
 		self.handle_call.restype = ctypes.c_int
 
+		# Get handle on server-side configure
+		self.__configure_on_server__ = getattr(
+			self.client, self.dll.hash_id + '_' + self.name + '_configure'
+			)
+
+		# Get handle on server-side handle_call
+		self.__handle_call_on_server__ = getattr(
+			self.client, self.dll.hash_id + '_' + self.name + '_handle_call'
+			)
+
 
 	def __handle_call__(self, *args):
 		"""
@@ -112,7 +122,7 @@ class routine_client_class(
 			self.log.out('[routine-client]  restype: %s' % pf(self.restype))
 
 			# Tell wine-python about types
-			self.__push_argtype_and_restype__()
+			self.__configure__()
 
 			# Change status of routine - it has been called once and is therefore configured
 			self.called = True
@@ -127,8 +137,8 @@ class routine_client_class(
 		mem_package_list, memory_transport_handle = self.client_pack_memory_list(args, self.memsync)
 
 		# Actually call routine in DLL! TODO Handle kw ...
-		return_dict = self.client.call_dll_routine(
-			self.dll.full_path, self.name, self.client_pack_arg_list(self.argtypes_d, args), mem_package_list
+		return_dict = self.__handle_call_on_server__(
+			self.client_pack_arg_list(self.argtypes_d, args), mem_package_list
 			)
 
 		# Log status
@@ -147,7 +157,7 @@ class routine_client_class(
 		return return_dict['return_value']
 
 
-	def __push_argtype_and_restype__(self):
+	def __configure__(self):
 
 		# Prepare list of arguments by parsing them into list of dicts (TODO field name / kw)
 		self.argtypes_d = self.pack_definition_argtypes(self.argtypes)
@@ -165,8 +175,8 @@ class routine_client_class(
 		self.memsync_handle = self.apply_memsync_to_argtypes_definition(self.memsync, self.argtypes_d)
 
 		# Pass argument and return value types as strings ...
-		result = self.client.register_argtype_and_restype(
-			self.dll.full_path, self.name, self.argtypes_d, self.restype_d, self.memsync_d
+		result = self.__configure_on_server__(
+			self.argtypes_d, self.restype_d, self.memsync_d
 			)
 
 		# Handle error

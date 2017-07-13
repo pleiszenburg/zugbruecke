@@ -77,12 +77,8 @@ class session_server_class:
 
 		# Register call: Accessing a dll
 		self.server.register_function(self.__access_dll__, 'access_dll')
-		# Call routine with parameters and, optionally, return value
-		self.server.register_function(self.__call_dll_routine__, 'call_dll_routine')
 		# Return status of server
 		self.server.register_function(self.__get_status__, 'get_status')
-		# Register call: Registering arguments and return value types
-		self.server.register_function(self.__register_argtype_and_restype__, 'register_argtype_and_restype')
 		# Register destructur: Call goes into xmlrpc-server first, which then terminates parent
 		self.server.register_function(self.server.terminate, 'terminate')
 
@@ -124,17 +120,6 @@ class session_server_class:
 			return (True, self.hash)
 
 
-	def __call_dll_routine__(self, full_path_dll_unix, routine_name, arg_message_list, arg_memory_list):
-		"""
-		Exposed interface
-		"""
-
-		# Register argtypes and restype of a routine
-		return self.dll_dict[full_path_dll_unix].routines[routine_name].call_routine(
-			arg_message_list, arg_memory_list
-			)
-
-
 	def __get_status__(self):
 		"""
 		Exposed interface
@@ -144,17 +129,6 @@ class session_server_class:
 			return 'up'
 		else:
 			return 'down'
-
-
-	def __register_argtype_and_restype__(self, full_path_dll_unix, routine_name, argtypes, restype, memsync):
-		"""
-		Exposed interface
-		"""
-
-		# Register argtypes and restype of a routine
-		return self.dll_dict[full_path_dll_unix].routines[routine_name].register_argtype_and_restype(
-			argtypes, restype, memsync
-			)
 
 
 	def __terminate__(self):

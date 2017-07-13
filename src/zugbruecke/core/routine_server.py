@@ -69,7 +69,7 @@ class routine_server_class(
 		self.handler = routine_handler
 
 
-	def call_routine(self, arg_message_list, arg_memory_list):
+	def __handle_call__(self, arg_message_list, arg_memory_list):
 		"""
 		TODO: Optimize for speed!
 		"""
@@ -121,7 +121,7 @@ class routine_server_class(
 			self.log.err(traceback.format_exc())
 
 
-	def register_argtype_and_restype(self, argtypes_d, restype_d, memsync_d):
+	def __configure__(self, argtypes_d, restype_d, memsync_d):
 
 		# Log status
 		self.log.out('[routine-server] Set argument and return value types for "%s" ...' % self.name)

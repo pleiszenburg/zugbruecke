@@ -98,37 +98,45 @@ class dll_server_class(): # Representing one idividual dll to be called into
 
 	def register_routine(self, routine_name):
 
+		# Just in case this routine is already known
+		if routine_name in self.routines.keys():
+			return True # Success
+
 		# Log status
 		self.log.out('[dll-server] Trying to access "%s" in DLL file "%s" ...' % (routine_name, self.name))
 
-		# Just in case this routine is already known
-		if routine_name not in self.routines.keys():
+		# Try to attach to routine with ctypes
+		try:
 
-			try:
+			# Get handler on routine in dll
+			routine_handler = getattr(
+				self.handler, routine_name
+				)
 
-				# Get handler on routine in dll
-				routine_handler = getattr(
-					self.handler, routine_name
-					)
+		except:
 
-				# Generate new instance of routine class
-				self.routines[routine_name] = routine_server_class(self, routine_name, routine_handler)
+			# Log status
+			self.log.out('[dll-server] ... failed!')
 
-				# Log status
-				self.log.out('[dll-server] ... done.')
+			# Push traceback to log
+			self.log.err(traceback.format_exc())
 
-				return True # Success
+			return False # Fail
 
-			except:
+		# Generate new instance of routine class
+		self.routines[routine_name] = routine_server_class(self, routine_name, routine_handler)
 
-				# Log status
-				self.log.out('[dll-server] ... failed!')
+		# Export call and configration directly
+		self.session.server.register_function(
+			self.routines[routine_name].__handle_call__,
+			self.hash_id + '_' + routine_name + '_handle_call'
+			)
+		self.session.server.register_function(
+			self.routines[routine_name].__configure__,
+			self.hash_id + '_' + routine_name + '_configure'
+			)
 
-				# Push traceback to log
-				self.log.err(traceback.format_exc())
+		# Log status
+		self.log.out('[dll-server] ... done.')
 
-				return False # Fail
-
-		else:
-
-			return True # Success, just in case
+		return True # Success

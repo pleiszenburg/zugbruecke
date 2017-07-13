@@ -85,7 +85,7 @@ class dll_client_class(): # Representing one idividual dll to be called into, re
 		self.hash_id = hash_id
 
 		# Expose routine registration
-		self.__register_routine__ = getattr(self.client, self.hash_id + '_register_routine')
+		self.__register_routine_on_server__ = getattr(self.client, self.hash_id + '_register_routine')
 
 
 	def __getattr__(self, name): # Handle requests for functions in dll which have yet not been touched
@@ -100,7 +100,7 @@ class dll_client_class(): # Representing one idividual dll to be called into, re
 			self.log.out('[dll-client] ... unknown, registering  ...')
 
 			# Register routine in wine
-			success = self.__register_routine__(name)
+			success = self.__register_routine_on_server__(name)
 
 			# If success ...
 			if success:
