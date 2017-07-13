@@ -256,13 +256,13 @@ class arg_contents_class():
 			elif argtype_d['g'] == GROUP_STRUCT:
 
 				# Generate new instance of struct datatype
-				struct_arg = self.struct_type_dict[argtype_d['t']]()
+				struct_inst = self.struct_type_dict[argtype_d['t']]()
 
 				# Unpack values into struct
-				self.__unpack_arguments_struct__(argtype_d['_fields_'], struct_arg, arg[1])
+				self.server_unpack_arg_struct_dict(argtype_d['_fields_'], struct_inst, arg[1])
 
 				# Append struct to list
-				arguments_list.append(struct_arg)
+				arguments_list.append(struct_inst)
 
 			# Handle everything else ...
 			else:
@@ -272,3 +272,54 @@ class arg_contents_class():
 
 		# Return args as list, will be converted into tuple on call
 		return arguments_list
+
+
+	def server_unpack_arg_struct_dict(self, argtypes_d_sub, struct_inst, args_list):
+		"""
+		TODO Optimize for speed!
+		Can be called recursively!
+		"""
+
+		# Step through arguments
+		for arg_index, arg in enumerate(args_list):
+
+			# Get current argument definition
+			argtype_d = argtypes_d_sub[arg_index]
+
+			# Handle fundamental types
+			if argtype_d['g'] == GROUP_FUNDAMENTAL:
+
+				# Put value back into its ctypes datatype
+				setattr(
+					struct_inst, # struct instance to be modified
+					arg[0], # parameter name (from tuple)
+					getattr(ctypes, argtype_d['t'])(arg[1]) # ctypes instance of type with value from tuple
+					)
+
+				# TODO pointers and arrays
+
+			# Handle structs
+			elif argtype_d['g'] == GROUP_STRUCT:
+
+				# Generate new instance of struct datatype
+				struct_sub_inst = self.struct_type_dict[argtype_d['t']]()
+
+				# Unpack values into struct
+				self.__unpack_arguments_struct__(argtype_d['_fields'], struct_sub_inst, arg[1])
+
+				# Append struct to struct TODO handle pointer to structs!
+				setattr(
+					struct_inst, # struct instance to be modified
+					arg[0], # parameter name (from tuple)
+					struct_sub_inst # value from tuple
+					)
+
+			# Handle everything else ...
+			else:
+
+				# HACK TODO
+				setattr(
+					struct_inst, # struct instance to be modified
+					arg[0], # parameter name (from tuple)
+					0 # least destructive value ...
+					)
