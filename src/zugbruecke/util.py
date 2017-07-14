@@ -40,8 +40,38 @@ from ctypes.util import find_library as __find_library_unix__
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# CROSS-PLATFORM FIND LIBRARY
+# CROSS-PLATFORM FIND LIBRARY ROUTINES
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+def find_msvcrt():
+	"""
+	Likely useless and will return None, see https://bugs.python.org/issue23606
+	Offered for full compatibility, though.
+	"""
+
+	# Compile Python command for wine-python
+	command = '"from ctypes.util import find_msvcrt; print(find_msvcrt())"'
+
+	# Start wine-python
+	winepython_p = subprocess.Popen(
+		'wine-python -c' + command,
+		stdout = subprocess.PIPE,
+		stderr = subprocess.PIPE,
+		shell = True
+		)
+
+	# Get stdout and stderr
+	winepython_out, winepython_err = winepython_p.communicate()
+
+	# Change encoding
+	winepython_out = winepython_out.decode(encoding = 'UTF-8').strip()
+
+	# Handle None values
+	if winepython_out in ['', 'None']:
+		winepython_out = None
+
+	return winepython_out
+
 
 def find_library(name):
 
