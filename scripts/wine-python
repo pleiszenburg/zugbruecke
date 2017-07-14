@@ -42,4 +42,4 @@ export WINEPREFIX="$dir_wine"
 export WINEDEBUG=-all
 
 # Fire up Python under Wine, pass cmd line arguments
-wine $dir_py/python.exe $*
+wine $dir_py/python.exe "$@"

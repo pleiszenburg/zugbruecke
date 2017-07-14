@@ -44,4 +44,4 @@ if [ ! -f $dir_py/Scripts/pytest.exe ]; then
 fi
 
 # Fire up py.test under Wine, pass cmd line arguments
-wine $dir_py/Scripts/pytest.exe $*
+wine $dir_py/Scripts/pytest.exe "$@"
