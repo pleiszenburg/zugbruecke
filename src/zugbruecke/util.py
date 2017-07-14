@@ -61,7 +61,7 @@ def find_library(name):
 		# Compile Python command for wine-python
 		command = '"from ctypes.util import find_library; print(find_library(\'%s\'))"' % name
 
-		# Start winepath for tanslating path, catch output from all pipes
+		# Start wine-python
 		winepython_p = subprocess.Popen(
 			'wine-python -c' + command,
 			stdout = subprocess.PIPE,
@@ -75,6 +75,7 @@ def find_library(name):
 		# Change encoding
 		winepython_out = winepython_out.decode(encoding = 'UTF-8').strip()
 
+		# Check result, handle None value
 		if winepython_out not in ['', 'None']:
 			result = winepython_out
 
