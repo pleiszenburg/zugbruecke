@@ -6,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	src/zugbruecke/dll_client.py: Classes relevant for managing the access to DLLs
+	src/zugbruecke/core/dll_client.py: Classes for managing the access to DLLs
 
 	Required to run on platform / side: [UNIX]
 
@@ -44,7 +44,7 @@ from .routine_client import routine_client_class
 class dll_client_class(): # Representing one idividual dll to be called into, returned by LoadLibrary
 
 
-	def __init__(self, full_path_dll, dll_name, dll_type, parent_session):
+	def __init__(self, parent_session, full_path_dll, dll_name, dll_type, hash_id):
 
 		# Store dll parameters name, path and type
 		self.full_path = full_path_dll
@@ -60,26 +60,14 @@ class dll_client_class(): # Representing one idividual dll to be called into, re
 		# Get handle on log
 		self.log = self.session.log
 
+		# Store my hash id
+		self.hash_id = hash_id
+
 		# Start dict for dll routines
 		self.routines = {}
 
-		# Translate dll's full path into wine path
-		self.full_path_wine = self.session.wineserver_session.translate_path_unix2win(self.full_path)
-
-		# Status log
-		self.log.out('[dll-client] New DLL file "%s" with calling convention "%s" located at' % (
-			self.name, self.calling_convention
-			))
-		self.log.out('[dll-client]  %s' % self.full_path_wine)
-
-		# Tell wine about the dll and its type TODO implement some sort of find_library
-		result = self.client.access_dll(
-			self.full_path_wine, self.full_path, self.name, self.calling_convention
-			)
-
-		# Raise error if last step failed
-		if result == 0:
-			raise # TODO
+		# Expose routine registration
+		self.__register_routine_on_server__ = getattr(self.client, self.hash_id + '_register_routine')
 
 
 	def __getattr__(self, name): # Handle requests for functions in dll which have yet not been touched
@@ -90,11 +78,31 @@ class dll_client_class(): # Representing one idividual dll to be called into, re
 		# Is routine unknown?
 		if name not in self.routines.keys():
 
-			# Create new instance of routine_client
-			self.routines[name] = routine_client_class(self, name)
+			# Log status
+			self.log.out('[dll-client] ... unknown, registering  ...')
+
+			# Register routine in wine
+			success = self.__register_routine_on_server__(name)
+
+			# If success ...
+			if success:
+
+				# Create new instance of routine_client
+				self.routines[name] = routine_client_class(self, name)
+
+				# Log status
+				self.log.out('[dll-client] ... registered (unconfigured) ...')
+
+			# If failed ...
+			else:
+
+				# Log status
+				self.log.out('[dll-client] ... failed!')
+
+				raise # TODO
 
 		# Log status
-		self.log.out('[dll-client] ... return handler for "%s" in DLL file "%s".' % (name, self.name))
+		self.log.out('[dll-client] ... return handler.')
 
 		# Return handler
 		return self.routines[name].handle_call

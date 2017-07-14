@@ -138,6 +138,20 @@ void __stdcall DEMODLL bubblesort(
 }
 
 
+void __stdcall DEMODLL mix_rgb_colors(
+	int8_t color_a[3],
+	int8_t color_b[3],
+	int8_t *color_mixed
+	)
+{
+	int i;
+	for (i = 0; i < 3; i++)
+	{
+		color_mixed[i] = (color_a[i] + color_b[i]) / 2;
+	}
+}
+
+
 float __stdcall DEMODLL simple_demo_routine(
 	float param_a,
 	float param_b

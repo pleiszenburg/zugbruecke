@@ -6,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	src/zugbruecke/memory.py: Handles memory transfers between both sides
+	src/zugbruecke/core/const.py: Holds constant values, flags, types
 
 	Required to run on platform / side: [UNIX, WINE]
 
@@ -26,27 +26,12 @@ specific language governing rights and limitations under the License.
 
 """
 
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# IMPORT
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-import ctypes
-
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# ROUTINES
+# TYPES
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-def generate_pointer_from_int_list(int_array):
-
-	return ctypes.pointer((ctypes.c_ubyte * len(int_array))(*int_array))
-
-
-def overwrite_pointer_with_int_list(ctypes_pointer, int_array):
-
-	(ctypes.c_ubyte * len(int_array)).from_address(ctypes.c_void_p.from_buffer(ctypes_pointer).value)[:] = int_array[:]
-
-
-def serialize_pointer_into_int_list(ctypes_pointer, size_bytes):
-
-	return (ctypes.c_ubyte * size_bytes).from_address(ctypes.c_void_p.from_buffer(ctypes_pointer).value)[:]
+FLAG_POINTER = -1
+GROUP_VOID = 1
+GROUP_FUNDAMENTAL = 2
+GROUP_STRUCT = 4

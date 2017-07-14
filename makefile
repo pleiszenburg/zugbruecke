@@ -50,5 +50,7 @@ install_link:
 	wine-pytest --version
 
 test:
+	-rm tests/__pycache__/*.pyc
 	wine-pytest
+	-rm tests/__pycache__/*.pyc
 	pytest

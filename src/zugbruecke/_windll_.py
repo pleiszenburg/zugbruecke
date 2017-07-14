@@ -1,4 +1,3 @@
-#!/usr/bin/env wine-python
 # -*- coding: utf-8 -*-
 
 """
@@ -7,9 +6,9 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	src/zugbruecke/_server_.py: Started with Python on Wine, executing DLL calls
+	src/zugbruecke/_windll_.py: Classes representing ctypes.windll on Unix side
 
-	Required to run on platform / side: [WINE]
+	Required to run on platform / side: [UNIX]
 
 	Copyright (C) 2017 Sebastian M. Ernst <ernst@pleiszenburg.de>
 
@@ -27,50 +26,46 @@ specific language governing rights and limitations under the License.
 
 """
 
+
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-import argparse
-
-from core.session_server import session_server_class
+from .core.session_client import session_client_class
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# INIT
+# WINDLL CLASS
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-if __name__ == '__main__':
+class windll_class(): # Mimic ctypes.windll
 
-	# Parse arguments comming from unix side
-	parser = argparse.ArgumentParser()
-	parser.add_argument(
-		'--id', type = str, nargs = 1
-		)
-	parser.add_argument(
-		'--port_socket_ctypes', type = int, nargs = 1
-		)
-	parser.add_argument(
-		'--port_socket_log_main', type = int, nargs = 1
-		)
-	parser.add_argument(
-		'--log_level', type = int, nargs = 1
-		)
-	args = parser.parse_args()
 
-	# Generate parameter dict
-	parameter = {
-		'id': args.id[0],
-		'platform': 'WINE',
-		'stdout': False,
-		'stderr': False,
-		'logwrite': True,
-		'remote_log': True,
-		'log_level': args.log_level[0],
-		'log_server': False,
-		'port_socket_ctypes': args.port_socket_ctypes[0],
-		'port_socket_log_main': args.port_socket_log_main[0]
-		}
+	def __init__(self):
 
-	# Fire up wine server session with parsed parameters
-	session = session_server_class(parameter['id'], parameter)
+		# Session not yet up
+		self.up = False
+
+
+	def start_session(self, parameter = {}):
+
+		# Session not yet up?
+		if not self.up:
+
+			# Fire up a new session
+			self.__session__ = session_client_class(parameter)
+
+			# Mark session as up
+			self.up = True
+
+
+	def LoadLibrary(self, name):
+
+		# Session not yet up?
+		if not self.up:
+
+			# Fire up session
+			self.start_session()
+
+		# Return a DLL instance object from within the session
+		return self.__session__.load_library(dll_name = name, dll_type = 'windll')
