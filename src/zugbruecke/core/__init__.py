@@ -6,9 +6,9 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	src/zugbruecke/__init__.py: Module init file
+	src/zugbruecke/core/__init__.py: Core module
 
-	Required to run on platform / side: [UNIX]
+	Required to run on platform / side: [UNIX, WINE]
 
 	Copyright (C) 2017 Sebastian M. Ernst <ernst@pleiszenburg.de>
 
@@ -25,18 +25,3 @@ specific language governing rights and limitations under the License.
 </LICENSE_BLOCK>
 
 """
-
-# Load windll_class for mimicing ctypes.windll eventually, make it private
-from ._windll_ import windll_class as __windll_class__
-
-# Set up and expose windll, prepare (but do not start) session while doing so
-windll = __windll_class__()
-
-# Import and expose ctypes
-import ctypes
-
-# Patching ctypes
-ctypes.windll = windll
-
-# Expose session class for advanced users and tests
-from .core.session_client import session_client_class as session

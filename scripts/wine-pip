@@ -23,19 +23,19 @@
 # </LICENSE_BLOCK>
 
 # Get parameters from zugbruecke configuration
-arch=$(python -c 'from zugbruecke.config import echo_parameter; echo_parameter("arch")')
-version=$(python -c 'from zugbruecke.config import echo_parameter; echo_parameter("version")')
-zugbruecke_dir=$(python -c 'from zugbruecke.config import echo_parameter; echo_parameter("dir")')
+arch=$(python -c 'from zugbruecke.core.config import echo_parameter; echo_parameter("arch")')
+version=$(python -c 'from zugbruecke.core.config import echo_parameter; echo_parameter("version")')
+zugbruecke_dir=$(python -c 'from zugbruecke.core.config import echo_parameter; echo_parameter("dir")')
 
 # Process parameters
 dir_py=$zugbruecke_dir/$arch-python$version
 dir_wine=$zugbruecke_dir/$arch-wine
 
 # Make sure Python for Wine is installed
-python -c "from zugbruecke.lib import setup_wine_python; setup_wine_python(\"$arch\", \"$version\", \"$zugbruecke_dir\")"
+python -c "from zugbruecke.core.wineenv import setup_wine_python; setup_wine_python(\"$arch\", \"$version\", \"$zugbruecke_dir\")"
 
 # Make sure Pip for Wine is installed
-python -c "from zugbruecke.lib import setup_wine_pip; setup_wine_pip(\"$arch\", \"$version\", \"$zugbruecke_dir\")"
+python -c "from zugbruecke.core.wineenv import setup_wine_pip; setup_wine_pip(\"$arch\", \"$version\", \"$zugbruecke_dir\")"
 
 # Set environment variables
 export WINEARCH="$arch"

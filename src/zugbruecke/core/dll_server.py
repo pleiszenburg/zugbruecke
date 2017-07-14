@@ -6,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	src/zugbruecke/dll_server.py: Classes relevant for managing the access to DLLs
+	src/zugbruecke/core/dll_server.py: Classes for managing the access to DLLs
 
 	Required to run on platform / side: [WINE]
 
@@ -34,7 +34,8 @@ specific language governing rights and limitations under the License.
 import ctypes
 from pprint import pformat as pf
 
-from routine_server import routine_server_class
+from .lib import get_hash_of_string
+from .routine_server import routine_server_class
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -44,7 +45,7 @@ from routine_server import routine_server_class
 class dll_server_class(): # Representing one idividual dll to be called into
 
 
-	def __init__(self, full_path_dll, full_path_dll_unix, dll_name, dll_type, parent_session):
+	def __init__(self, parent_session, full_path_dll, full_path_dll_unix, dll_name, dll_type, handler):
 
 		# Store dll parameters name, path and type
 		self.full_path = full_path_dll
@@ -58,22 +59,38 @@ class dll_server_class(): # Representing one idividual dll to be called into
 		# Get handle on log
 		self.log = self.session.log
 
+		# Store handler on dll
+		self.handler = handler
+
 		# Start dict for dll routines
 		self.routines = {}
 
-		# Status log
-		self.log.out('[dll-server] Attaching to DLL file "%s" with calling convention "%s" located at' % (
-			self.name, self.calling_convention
-			))
-		self.log.out('[dll-server]  %s' % self.full_path)
+		# Hash my own path as unique ID
+		self.hash_id = get_hash_of_string(self.full_path_unix)
 
+		# Export registration of my functions directly
+		self.session.server.register_function(
+			self.register_routine,
+			self.hash_id + '_register_routine'
+			)
+
+
+	def register_routine(self, routine_name):
+
+		# Just in case this routine is already known
+		if routine_name in self.routines.keys():
+			return True # Success
+
+		# Log status
+		self.log.out('[dll-server] Trying to access "%s" in DLL file "%s" ...' % (routine_name, self.name))
+
+		# Try to attach to routine with ctypes
 		try:
 
-			# Attach to DLL with ctypes
-			self.handler = ctypes.windll.LoadLibrary(self.full_path) # TODO handle oledll and cdll
-
-			# Log status
-			self.log.out('[dll-server] ... done.')
+			# Get handler on routine in dll
+			routine_handler = getattr(
+				self.handler, routine_name
+				)
 
 		except:
 
@@ -83,34 +100,22 @@ class dll_server_class(): # Representing one idividual dll to be called into
 			# Push traceback to log
 			self.log.err(traceback.format_exc())
 
-			raise
+			return False # Fail
 
+		# Generate new instance of routine class
+		self.routines[routine_name] = routine_server_class(self, routine_name, routine_handler)
 
-	def register_routine(self, routine_name):
+		# Export call and configration directly
+		self.session.server.register_function(
+			self.routines[routine_name].__handle_call__,
+			self.hash_id + '_' + routine_name + '_handle_call'
+			)
+		self.session.server.register_function(
+			self.routines[routine_name].__configure__,
+			self.hash_id + '_' + routine_name + '_configure'
+			)
 
 		# Log status
-		self.log.out('[dll-server] Trying to access "%s" in DLL file "%s" ...' % (routine_name, self.name))
+		self.log.out('[dll-server] ... done.')
 
-		# Just in case this routine is already known
-		if routine_name not in self.routines.keys():
-
-			try:
-
-				# Generate new instance of routine class
-				self.routines[routine_name] = routine_server_class(self, routine_name)
-
-				# Log status
-				self.log.out('[dll-server] ... done.')
-
-				return True # Success
-
-			except:
-
-				# Log status
-				self.log.out('[dll-server] ... failed!')
-
-				return False # Fail
-
-		else:
-
-			return True # Success, just in case
+		return True # Success

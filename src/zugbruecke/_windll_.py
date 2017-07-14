@@ -6,9 +6,9 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	src/zugbruecke/memory.py: Handles memory transfers between both sides
+	src/zugbruecke/_windll_.py: Classes representing ctypes.windll on Unix side
 
-	Required to run on platform / side: [UNIX, WINE]
+	Required to run on platform / side: [UNIX]
 
 	Copyright (C) 2017 Sebastian M. Ernst <ernst@pleiszenburg.de>
 
@@ -26,27 +26,46 @@ specific language governing rights and limitations under the License.
 
 """
 
+
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-import ctypes
+from .core.session_client import session_client_class
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# ROUTINES
+# WINDLL CLASS
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-def generate_pointer_from_int_list(int_array):
-
-	return ctypes.pointer((ctypes.c_ubyte * len(int_array))(*int_array))
+class windll_class(): # Mimic ctypes.windll
 
 
-def overwrite_pointer_with_int_list(ctypes_pointer, int_array):
+	def __init__(self):
 
-	(ctypes.c_ubyte * len(int_array)).from_address(ctypes.c_void_p.from_buffer(ctypes_pointer).value)[:] = int_array[:]
+		# Session not yet up
+		self.up = False
 
 
-def serialize_pointer_into_int_list(ctypes_pointer, size_bytes):
+	def start_session(self, parameter = {}):
 
-	return (ctypes.c_ubyte * size_bytes).from_address(ctypes.c_void_p.from_buffer(ctypes_pointer).value)[:]
+		# Session not yet up?
+		if not self.up:
+
+			# Fire up a new session
+			self.__session__ = session_client_class(parameter)
+
+			# Mark session as up
+			self.up = True
+
+
+	def LoadLibrary(self, name):
+
+		# Session not yet up?
+		if not self.up:
+
+			# Fire up session
+			self.start_session()
+
+		# Return a DLL instance object from within the session
+		return self.__session__.load_library(dll_name = name, dll_type = 'windll')
