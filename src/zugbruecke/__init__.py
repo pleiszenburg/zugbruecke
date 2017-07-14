@@ -26,6 +26,9 @@ specific language governing rights and limitations under the License.
 
 """
 
+# Indicate version if ctypes we're compatible with
+__version__ = '1.1.0'
+
 # Load windll_class for mimicing ctypes.windll eventually, make it private
 from ._windll_ import windll_class as __windll_class__
 
