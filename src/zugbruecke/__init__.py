@@ -31,6 +31,8 @@ specific language governing rights and limitations under the License.
 # IMPORT: Unix ctypes members, which will NOT be modified
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+from ctypes import __version__
+
 from ctypes import (
 	_CFuncPtr,
 	_FUNCFLAG_CDECL,
@@ -39,14 +41,13 @@ from ctypes import (
 	_FUNCFLAG_USE_LASTERROR,
 	_Pointer,
 	_SimpleCData,
-	__version__,
 	_c_functype_cache,
 	_calcsize,
 	_cast,
 	_cast_addr,
 	_check_size,
 	_ctypes_version,
-	_dlopen,
+	_dlopen, # behaviour depends on platform
 	_endian,
 	_memmove_addr,
 	_memset_addr,
@@ -59,21 +60,19 @@ from ctypes import (
 	)
 
 from ctypes import (
-	ARRAY,
+	ARRAY, # Python 3.6: Deprecated XXX
 	ArgumentError,
 	Array,
 	BigEndianStructure,
-	CDLL,
 	CFUNCTYPE,
 	DEFAULT_MODE,
-	LibraryLoader,
 	LittleEndianStructure,
 	POINTER,
 	PYFUNCTYPE,
 	PyDLL,
 	RTLD_GLOBAL,
 	RTLD_LOCAL,
-	SetPointerType,
+	SetPointerType, # Python 3.6: Deprecated XXX
 	Structure,
 	Union,
 	addressof,
@@ -111,7 +110,6 @@ from ctypes import (
 	c_wchar,
 	c_wchar_p,
 	cast,
-	cdll,
 	create_string_buffer,
 	create_unicode_buffer,
 	get_errno,
@@ -128,6 +126,14 @@ from ctypes import (
 	wstring_at
 	)
 
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# IMPORT: Unix ctypes members, which WILL be modified
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+from ctypes import cdll as __cdll__
+from ctypes import CDLL as __CDLL__
+from ctypes import LibraryLoader as __LibraryLoader__
+
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # IMPORT: Wine ctypes from zugbruecke core
@@ -141,8 +147,65 @@ from .core.session_client import session_client_class as session
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# IMPORT: Unix Ctypes
+# Routines only availabe on Wine / Windows, currently stubbed in zugbruecke
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+def DllCanUnloadNow():
+	pass # TODO stub
+
+def DllGetClassObject(rclsid, riid, ppv):
+	pass # TODO stub
+
+def FormatError(error_code = None):
+	pass # TODO stub
+
+def GetLastError():
+	pass # TODO stub
+
+class HRESULT:
+	pass # TODO stub
+
+def WINFUNCTYPE(restype, *argtypes, **kw):
+	pass # TODO stub
+
+def WinError(code = None, descr = None):
+	pass # TODO stub
+
+def _check_HRESULT(result):
+	pass # TODO stub
+
+# Used in ctypes __init__.py by WINFUNCTYPE. Needs to be exposed?
+_win_functype_cache = {} # TODO stub
+
+def get_last_error():
+	pass # TODO stub
+
+def set_last_error(last_error):
+	pass # TODO stub
+
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# Routines only availabe on Wine / Windows, provided via zugbruecke
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+# Just in case ...
+_FUNCFLAG_STDCALL = 0
+
+# CDLL
+cdll = __cdll__
+CDLL = __CDLL__ # stub, needs to figure out whether it is called with DLL or Unix lib
+
+class oledll:
+	pass # TODO stub
+
+class OleDLL:
+	pass # TODO stub
 
 # Set up and expose windll, prepare (but do not start) session while doing so
 windll = __windll_class__()
+
+class WinDLL:
+	pass # TODO stub
+
+# LibraryLoader
+LibraryLoader = __LibraryLoader__ # stub
