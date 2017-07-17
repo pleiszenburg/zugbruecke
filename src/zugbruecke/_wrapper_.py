@@ -35,6 +35,9 @@ from ctypes import cdll as __cdll__
 from ctypes import CDLL as __CDLL__
 from ctypes import LibraryLoader as __LibraryLoader__
 
+from ctypes import CFUNCTYPE as __CFUNCTYPE__
+from ctypes import _c_functype_cache as __c_functype_cache__
+
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # IMPORT: zugbruecke core
@@ -84,6 +87,10 @@ def set_last_error(last_error): # EXPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # Routines only availabe on Wine / Windows, provided via zugbruecke
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+# Need to handle c functions in DLLs
+CFUNCTYPE = __CFUNCTYPE__
+_c_functype_cache = __c_functype_cache__
 
 # Just in case ...
 _FUNCFLAG_STDCALL = 0 # EXPORT
