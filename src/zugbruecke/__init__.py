@@ -28,7 +28,7 @@ specific language governing rights and limitations under the License.
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# IMPORT: Unix ctypes members, which will NOT be modified
+# IMPORT: Unix ctypes members, which will not be modified - directly from ctypes
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 from ctypes import __version__
@@ -127,85 +127,35 @@ from ctypes import (
 	)
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# IMPORT: Unix ctypes members, which WILL be modified
+# IMPORT: ctypes members, which will be modified - from zugbruecke wrapper
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-from ctypes import cdll as __cdll__
-from ctypes import CDLL as __CDLL__
-from ctypes import LibraryLoader as __LibraryLoader__
+from ._wrapper_ import (
+	_FUNCFLAG_STDCALL,
+	cdll,
+	CDLL,
+	oledll,
+	OleDLL,
+	windll,
+	WinDLL,
+	LibraryLoader,
+	DllCanUnloadNow,
+	DllGetClassObject,
+	FormatError,
+	GetLastError,
+	HRESULT,
+	WINFUNCTYPE,
+	WinError,
+	_check_HRESULT,
+	_win_functype_cache,
+	get_last_error,
+	set_last_error
+	)
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# IMPORT: Wine ctypes from zugbruecke core
+# IMPORT: zugbruecke core
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-# Load windll_class for mimicing ctypes.windll eventually, make it private
-from ._windll_ import windll_class as __windll_class__
 
 # Expose session class for advanced users and tests
 from .core.session_client import session_client_class as session
-
-
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# Routines only availabe on Wine / Windows, currently stubbed in zugbruecke
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-def DllCanUnloadNow():
-	pass # TODO stub
-
-def DllGetClassObject(rclsid, riid, ppv):
-	pass # TODO stub
-
-def FormatError(error_code = None):
-	pass # TODO stub
-
-def GetLastError():
-	pass # TODO stub
-
-class HRESULT:
-	pass # TODO stub
-
-def WINFUNCTYPE(restype, *argtypes, **kw):
-	pass # TODO stub
-
-def WinError(code = None, descr = None):
-	pass # TODO stub
-
-def _check_HRESULT(result):
-	pass # TODO stub
-
-# Used in ctypes __init__.py by WINFUNCTYPE. Needs to be exposed?
-_win_functype_cache = {} # TODO stub
-
-def get_last_error():
-	pass # TODO stub
-
-def set_last_error(last_error):
-	pass # TODO stub
-
-
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# Routines only availabe on Wine / Windows, provided via zugbruecke
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-# Just in case ...
-_FUNCFLAG_STDCALL = 0
-
-# CDLL
-cdll = __cdll__
-CDLL = __CDLL__ # stub, needs to figure out whether it is called with DLL or Unix lib
-
-class oledll:
-	pass # TODO stub
-
-class OleDLL:
-	pass # TODO stub
-
-# Set up and expose windll, prepare (but do not start) session while doing so
-windll = __windll_class__()
-
-class WinDLL:
-	pass # TODO stub
-
-# LibraryLoader
-LibraryLoader = __LibraryLoader__ # stub
