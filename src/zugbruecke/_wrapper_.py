@@ -47,37 +47,37 @@ from ._windll_ import windll_class as __windll_class__
 # Routines only availabe on Wine / Windows, currently stubbed in zugbruecke
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-def DllCanUnloadNow():
+def DllCanUnloadNow(): # EXPORT
 	pass # TODO stub
 
-def DllGetClassObject(rclsid, riid, ppv):
+def DllGetClassObject(rclsid, riid, ppv): # EXPORT
 	pass # TODO stub
 
-def FormatError(error_code = None):
+def FormatError(error_code = None): # EXPORT
 	pass # TODO stub
 
-def GetLastError():
+def GetLastError(): # EXPORT
 	pass # TODO stub
 
-class HRESULT:
+class HRESULT: # EXPORT
 	pass # TODO stub
 
-def WINFUNCTYPE(restype, *argtypes, **kw):
+def WINFUNCTYPE(restype, *argtypes, **kw): # EXPORT
 	pass # TODO stub
 
-def WinError(code = None, descr = None):
+def WinError(code = None, descr = None): # EXPORT
 	pass # TODO stub
 
-def _check_HRESULT(result):
+def _check_HRESULT(result): # EXPORT
 	pass # TODO stub
 
 # Used in ctypes __init__.py by WINFUNCTYPE. Needs to be exposed?
-_win_functype_cache = {} # TODO stub
+_win_functype_cache = {} # EXPORT # TODO stub
 
-def get_last_error():
+def get_last_error(): # EXPORT
 	pass # TODO stub
 
-def set_last_error(last_error):
+def set_last_error(last_error): # EXPORT
 	pass # TODO stub
 
 
@@ -86,23 +86,23 @@ def set_last_error(last_error):
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 # Just in case ...
-_FUNCFLAG_STDCALL = 0
+_FUNCFLAG_STDCALL = 0 # EXPORT
 
 # CDLL
-cdll = __cdll__
-CDLL = __CDLL__ # stub, needs to figure out whether it is called with DLL or Unix lib
+cdll = __cdll__ # EXPORT
+CDLL = __CDLL__ # EXPORT # stub, needs to figure out whether it is called with DLL or Unix lib
 
-class oledll:
+class oledll: # EXPORT
 	pass # TODO stub
 
-class OleDLL:
+class OleDLL: # EXPORT
 	pass # TODO stub
 
 # Set up and expose windll, prepare (but do not start) session while doing so
-windll = __windll_class__()
+windll = __windll_class__() # EXPORT
 
-class WinDLL:
+class WinDLL: # EXPORT
 	pass # TODO stub
 
 # LibraryLoader
-LibraryLoader = __LibraryLoader__ # stub
+LibraryLoader = __LibraryLoader__ # EXPORT # stub
