@@ -127,7 +127,7 @@ Python code which works under both Unices and Windows.
 		# Handle unsupported platforms
 
 For more examples check the ``examples`` directory.
-For the DLL source code check the ``demo_dll` directory.
+For the DLL source code check the ``demo_dll`` directory.
 
 For the original documentation of ``ctypes`` go to: https://docs.python.org/3/library/ctypes.html
 
