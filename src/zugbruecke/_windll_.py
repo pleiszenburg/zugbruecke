@@ -37,35 +37,3 @@ from .core.session_client import session_client_class
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # WINDLL CLASS
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-class windll_class(): # Mimic ctypes.windll
-
-
-	def __init__(self):
-
-		# Session not yet up
-		self.up = False
-
-
-	def start_session(self, parameter = {}):
-
-		# Session not yet up?
-		if not self.up:
-
-			# Fire up a new session
-			self.__session__ = session_client_class(parameter)
-
-			# Mark session as up
-			self.up = True
-
-
-	def LoadLibrary(self, name):
-
-		# Session not yet up?
-		if not self.up:
-
-			# Fire up session
-			self.start_session()
-
-		# Return a DLL instance object from within the session
-		return self.__session__.load_library(dll_name = name, dll_type = 'windll')

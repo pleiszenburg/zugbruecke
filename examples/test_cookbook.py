@@ -50,8 +50,8 @@ if True in [platform.startswith(os_name) for os_name in ['linux', 'darwin', 'fre
 
 	import zugbruecke
 	ctypes = zugbruecke
-	if not TIMING_RUN:
-		ctypes.windll.start_session(parameter = {'log_level': 10})
+	# if not TIMING_RUN: # TODO replace by writing config file before import
+	# 	ctypes.windll.start_session(parameter = {'log_level': 10})
 
 elif platform.startswith('win'):
 

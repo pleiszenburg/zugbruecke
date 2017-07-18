@@ -43,7 +43,7 @@ from ctypes import _c_functype_cache as __c_functype_cache__
 # IMPORT: zugbruecke core
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-from ._windll_ import windll_class as __windll_class__
+from .core.session_client import session_client_class
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -88,6 +88,9 @@ def set_last_error(last_error): # EXPORT
 # Routines only availabe on Wine / Windows, provided via zugbruecke
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+# Start new zugbruecke session
+current_session = session_client_class()
+
 # Need to handle c functions in DLLs
 CFUNCTYPE = __CFUNCTYPE__
 _c_functype_cache = __c_functype_cache__
@@ -99,6 +102,20 @@ _FUNCFLAG_STDCALL = 0 # EXPORT
 cdll = __cdll__ # EXPORT
 CDLL = __CDLL__ # EXPORT # stub, needs to figure out whether it is called with DLL or Unix lib
 
+class windll_class(): # Mimic ctypes.windll
+
+
+	def __init__(self, session):
+
+		self.__session__ = session
+
+
+	def LoadLibrary(self, name):
+
+		# Return a DLL instance object from within the session
+		return self.__session__.load_library(dll_name = name, dll_type = 'windll')
+
+
 class oledll: # EXPORT
 	pass # TODO stub
 
@@ -106,7 +123,7 @@ class OleDLL: # EXPORT
 	pass # TODO stub
 
 # Set up and expose windll, prepare (but do not start) session while doing so
-windll = __windll_class__() # EXPORT
+windll = windll_class(current_session) # EXPORT
 
 class WinDLL: # EXPORT
 	pass # TODO stub

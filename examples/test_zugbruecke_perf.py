@@ -42,7 +42,7 @@ if True in [platform.startswith(os_name) for os_name in ['linux', 'darwin', 'fre
 
 	import zugbruecke
 	ctypes = zugbruecke
-	ctypes.windll.start_session(parameter = {'log_level': 0})
+	# ctypes.windll.start_session(parameter = {'log_level': 0}) # TODO replace by writing config file before import
 
 elif platform.startswith('win'):
 
