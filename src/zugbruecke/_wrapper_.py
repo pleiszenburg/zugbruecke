@@ -37,9 +37,9 @@ from ctypes import DEFAULT_MODE
 # IMPORT: Unix ctypes members, which will be modified
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-from ctypes import cdll as __cdll__
-from ctypes import CDLL as __CDLL__
-from ctypes import LibraryLoader as __LibraryLoader__
+from ctypes import cdll as ctypes_cdll_obj
+from ctypes import CDLL as ctypes_CDLL_class
+from ctypes import LibraryLoader as ctypes_LibraryLoader_class
 
 from ctypes import CFUNCTYPE as __CFUNCTYPE__
 from ctypes import _c_functype_cache as __c_functype_cache__
@@ -121,11 +121,11 @@ def CDLL(
 		pass
 	else:
 		# If Unix library, return CDLL class instance
-		return __CDLL__(name, mode, handle, use_errno, use_last_error)
+		return ctypes_CDLL_class(name, mode, handle, use_errno, use_last_error)
 
 
 # CDLL
-cdll = __cdll__ # EXPORT
+cdll = ctypes_cdll_obj # EXPORT
 
 class zugbruecke_cdll_class():
 
@@ -160,4 +160,4 @@ class WinDLL: # EXPORT
 	pass # TODO stub
 
 # LibraryLoader
-LibraryLoader = __LibraryLoader__ # EXPORT # stub
+LibraryLoader = ctypes_LibraryLoader_class # EXPORT # stub
