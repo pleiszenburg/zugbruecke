@@ -26,6 +26,12 @@ specific language governing rights and limitations under the License.
 
 """
 
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# IMPORT: Unix ctypes members required by wrapper
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+from ctypes import DEFAULT_MODE
+
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # IMPORT: Unix ctypes members, which will be modified
@@ -92,17 +98,42 @@ def set_last_error(last_error): # EXPORT
 current_session = session_client_class()
 
 # Need to handle c functions in DLLs
-CFUNCTYPE = __CFUNCTYPE__
-_c_functype_cache = __c_functype_cache__
+CFUNCTYPE = __CFUNCTYPE__ # EXPORT
+_c_functype_cache = __c_functype_cache__ # EXPORT
 
 # Just in case ...
 _FUNCFLAG_STDCALL = 0 # EXPORT
 
+# EXPORT: Wrapper for CDLL class
+def CDLL(
+	name, mode = DEFAULT_MODE, handle = None,
+	use_errno = False,
+	use_last_error = False
+	):
+
+	# If there is a handle to a zugbruecke session, return session
+	if handle is not None:
+		if type(handle).__name__.startswith('zugbruecke'):
+			return handle
+
+	if handle is None and False: # TODO
+		# If handle is none and name points to Wine library
+		pass
+	else:
+		# If Unix library, return CDLL class instance
+		return __CDLL__(name, mode, handle, use_errno, use_last_error)
+
+
 # CDLL
 cdll = __cdll__ # EXPORT
-CDLL = __CDLL__ # EXPORT # stub, needs to figure out whether it is called with DLL or Unix lib
 
-class windll_class(): # Mimic ctypes.windll
+class zugbruecke_cdll_class():
+
+
+	pass
+
+
+class zugbruecke_windll_class(): # Mimic ctypes.windll
 
 
 	def __init__(self, session):
@@ -123,7 +154,7 @@ class OleDLL: # EXPORT
 	pass # TODO stub
 
 # Set up and expose windll, prepare (but do not start) session while doing so
-windll = windll_class(current_session) # EXPORT
+windll = zugbruecke_windll_class(current_session) # EXPORT
 
 class WinDLL: # EXPORT
 	pass # TODO stub
