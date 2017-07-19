@@ -139,7 +139,13 @@ class session_client_class():
 			self.up = False
 
 
-	def load_library(self, dll_name, dll_type = 'windll'):
+	def load_library(self, dll_name, dll_type, dll_param = {}):
+
+		# Is DLL type known?
+		if dll_type not in ['cdll', 'windll', 'oledll']:
+
+			# Raise error if unknown
+			raise # TODO
 
 		# Get full path of dll TODO it does not need to be in CWD ...
 		full_path_dll = os.path.join(self.dir_cwd, dll_name)

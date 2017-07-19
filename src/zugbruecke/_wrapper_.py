@@ -125,16 +125,32 @@ def CDLL(
 
 	# If there is a handle to a zugbruecke session, return session
 	if handle is not None:
+
+		# Handle zugbruecke handle
 		if type(handle).__name__.startswith('zugbruecke'):
+
+			# Return it as-is TODO what about a new name?
 			return handle
 
-	if handle is None and False: # TODO replace False with test for Wine library
-		# If handle is none and name points to Wine library
-		# Use current_session
-		pass
+		# Handle ctypes handle
+		else:
+
+			# Return ctypes DLL class instance, let it handle the handle as it would
+			return ctypes_CDLL_class(name, mode, handle, use_errno, use_last_error)
+
+	# If no handle was passed, it's a new library
 	else:
-		# If Unix library, return CDLL class instance
-		return ctypes_CDLL_class(name, mode, handle, use_errno, use_last_error)
+
+		# Let's try the Windows side first
+		try:
+
+			pass #
+
+		# Well, it might be a Unix library after all
+		except:
+
+			# If Unix library, return CDLL class instance
+			return ctypes_CDLL_class(name, mode, handle, use_errno, use_last_error)
 
 
 def WinDLL(
@@ -143,7 +159,11 @@ def WinDLL(
 	use_last_error = False
 	): # EXPORT
 
-	return current_session.load_library(dll_name = name, dll_type = 'windll')
+	return current_session.load_library(
+		dll_name = name, dll_type = 'windll', dll_param = {
+			'mode': mode, 'use_errno': use_errno, 'use_last_error': use_last_error
+			}
+		)
 
 
 def OleDLL(
@@ -152,7 +172,11 @@ def OleDLL(
 	use_last_error = False
 	): # EXPORT
 
-	pass # TODO stub
+	return current_session.load_library(
+		dll_name = name, dll_type = 'oledll', dll_param = {
+			'mode': mode, 'use_errno': use_errno, 'use_last_error': use_last_error
+			}
+		)
 
 
 # Set up and expose dll library loader objects
