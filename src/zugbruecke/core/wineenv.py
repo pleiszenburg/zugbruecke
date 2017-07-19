@@ -44,6 +44,24 @@ import zipfile
 # SETUP ROUTINES
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+def create_wine_prefix(dir_wineprefix):
+
+	# Does it exist?
+	if not os.path.exists(dir_wineprefix):
+
+		# Start wine server into prepared environment
+		proc_winecfg = subprocess.Popen(
+			['wineboot', '-i'],
+			stdin = subprocess.PIPE,
+			stdout = subprocess.PIPE,
+			stderr = subprocess.PIPE,
+			shell = False
+			)
+
+		# Get feedback
+		cfg_out, cfg_err = proc_winecfg.communicate()
+
+
 def setup_wine_pip(arch, version, directory):
 
 	# Download get-pip.py into memory
@@ -108,3 +126,17 @@ def setup_wine_python(arch, version, directory, overwrite = False):
 		f = zipfile.ZipFile(archive_zip)
 		f.extractall(path = target_directory)
 		f.close()
+
+
+def set_wine_env(cfg_dir, arch):
+
+	# Change the environment for Wine: Architecture
+	os.environ['WINEARCH'] = arch
+
+	# Change the environment for Wine: Wine prefix / profile directory
+	dir_wineprefix = os.path.join(
+		cfg_dir, arch + '-wine'
+		)
+	os.environ['WINEPREFIX'] = dir_wineprefix
+
+	return dir_wineprefix

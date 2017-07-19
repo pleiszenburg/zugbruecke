@@ -47,8 +47,11 @@ from .log import log_class
 from .rpc import (
 	mp_client_class
 	)
-from .wineenv import setup_wine_python
-from .wineserver import wineserver_session_class
+from .wineenv import (
+	create_wine_prefix,
+	setup_wine_python,
+	set_wine_env
+	)
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -81,13 +84,14 @@ class session_client_class():
 		setup_wine_python(self.p['arch'], self.p['version'], self.p['dir'])
 
 		# Initialize Wine session
-		self.wineserver_session = wineserver_session_class(self.id, self.p, self.log)
+		self.dir_wineprefix = set_wine_env(self.p['dir'], self.p['arch'])
+		create_wine_prefix(self.dir_wineprefix)
 
 		# Prepare python command for ctypes server or interpreter
 		self.__prepare_python_command__()
 
 		# Initialize interpreter session
-		self.interpreter_session = interpreter_session_class(self.id, self.p, self.log, self.wineserver_session)
+		self.interpreter_session = interpreter_session_class(self.id, self.p, self.log)
 
 		# Set up a dict for loaded dlls
 		self.dll_dict = {}
@@ -124,9 +128,6 @@ class session_client_class():
 
 			# Destruct interpreter session
 			self.interpreter_session.terminate()
-
-			# Destruct Wine session, quit wine processes
-			self.wineserver_session.terminate()
 
 			# Log status
 			self.log.out('[session-client] TERMINATED.')
