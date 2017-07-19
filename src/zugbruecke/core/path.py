@@ -92,6 +92,21 @@ class path_class:
 		# https://github.com/wine-mirror/wine/blob/master/include/winternl.h
 		self.FILE_OPEN_IF = 3
 
+		# BOOLEAN WINAPI RtlDosPathNameToNtPathName_U(
+		#	PCWSTR dos_path,
+		#	PUNICODE_STRING ntpath,
+		#	PWSTR* file_part,
+		#	CURDIR* cd
+		#	)
+		self.__dos_to_nt__ = ctypes.windll.ntdll.RtlDosPathNameToNtPathName_U
+		self.__dos_to_nt__.argtypes = (
+			ctypes.c_void_p,
+			ctypes.c_void_p,
+			ctypes.c_void_p,
+			ctypes.c_void_p
+			)
+		self.__dos_to_nt__.restype = wintypes.BOOLEAN
+
 		# NTSTATUS CDECL wine_unix_to_nt_file_name(
 		#	const ANSI_STRING *name, UNICODE_STRING *nt
 		#	)
@@ -99,7 +114,7 @@ class path_class:
 		self.__unix_to_wine__.argtypes = (
 			ctypes.POINTER(ANSI_STRING), ctypes.POINTER(UNICODE_STRING)
 			)
-		self.__unix_to_wine__.restype = ctypes.c_int32 # NTSTATUS https://msdn.microsoft.com/en-us/library/cc704588.aspx
+		self.__unix_to_wine__.restype = wintypes.LONG # NTSTATUS https://msdn.microsoft.com/en-us/library/cc704588.aspx
 
 		# @ cdecl wine_nt_to_unix_file_name(ptr ptr long long)
 		# NTSYSAPI NTSTATUS CDECL wine_nt_to_unix_file_name(
@@ -111,7 +126,7 @@ class path_class:
 			ctypes.POINTER(UNICODE_STRING), ctypes.POINTER(ANSI_STRING),
 			wintypes.UINT, wintypes.BOOLEAN
 			)
-		self.__wine_to_unix__.restype = ctypes.c_int32 # NTSTATUS https://msdn.microsoft.com/en-us/library/cc704588.aspx
+		self.__wine_to_unix__.restype = wintypes.LONG # NTSTATUS https://msdn.microsoft.com/en-us/library/cc704588.aspx
 
 
 	def unix_to_wine(self, in_path):
@@ -124,13 +139,23 @@ class path_class:
 			raise # TODO
 
 		in_path_astr_p = ctypes.pointer(self.__str_to_winastr__(in_path))
-		out_oath_ustr_p = ctypes.pointer(UNICODE_STRING())
+		out_path_ustr_p = ctypes.pointer(UNICODE_STRING())
 
 		ntstatus = self.__unix_to_wine__(
-			in_path_astr_p, out_oath_ustr_p
+			in_path_astr_p, out_path_ustr_p
 			)
 
-		return(self.__winustr_to_str__(out_oath_ustr_p.contents))
+		if ntstatus != 0:
+			raise # TODO
+
+		out_path = self.__winustr_to_str__(out_path_ustr_p.contents)
+
+		# https://github.com/wine-mirror/wine/blob/07cf14dc928a1a00baecbbc7ca5a6f3fe680238c/dlls/kernel32/path.c#L1955
+		if out_path[5] == ':':
+			return out_path[4:]
+		else:
+			out_path[1] = '\\'
+			return out_path
 
 
 	def wine_to_unix(self, in_path):
@@ -142,7 +167,22 @@ class path_class:
 		if len(in_path) > MAX_PATH:
 			raise # TODO
 
-		pass
+		in_path_buffer_p = ctypes.pointer(ctypes.create_unicode_buffer(in_path + '\0'))
+		in_path_ustr_p = ctypes.pointer(UNICODE_STRING())
+
+		self.__dos_to_nt__(in_path_buffer_p, in_path_ustr_p, None, None)
+
+		out_path_astr_p = ctypes.pointer(ANSI_STRING())
+
+		ntstatus = self.__wine_to_unix__(
+			in_path_ustr_p, out_path_astr_p,
+			self.FILE_OPEN_IF, int(False)
+			)
+
+		if ntstatus != 0:
+			raise # TODO
+
+		return self.__winastr_to_str__(out_path_astr_p.contents)
 
 
 	def __str_to_winastr__(self, in_str_u):
@@ -166,9 +206,10 @@ class path_class:
 		Out: UNICODE_STRING
 		"""
 
-		in_ustr = self.__generate_ustr__()
+		in_ustr = UNICODE_STRING()
 		in_ustr.Length = len(in_str_u)
-		in_ustr.Buffer.contents[0:in_str_u.Length] = in_str_u[:]
+		in_ustr.MaximumLength = len(in_str_u) + 2
+		in_ustr.Buffer = wintypes.LPWSTR(in_str_u)
 
 		return in_ustr
 
@@ -179,7 +220,7 @@ class path_class:
 		Out: Python unicode string
 		"""
 
-		return in_astr.Buffer.contents[0:in_astr.Length].decode('utf-8')
+		return in_astr.Buffer.decode('utf-8')
 
 
 	def __winustr_to_str__(self, in_ustr):
