@@ -144,7 +144,7 @@ def __locate_and_read_config_files__():
 
 		# Compile path
 		try:
-			try_path = os.path.join(file_location, 'config.json')
+			try_path = os.path.join(file_location, '.zugbruecke.json')
 		except:
 			try_path = None
 
