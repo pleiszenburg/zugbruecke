@@ -34,12 +34,18 @@ from ctypes import DEFAULT_MODE
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# IMPORT: Unix ctypes members, which will exported as they are
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+from ctypes import LibraryLoader # EXPORT
+
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # IMPORT: Unix ctypes members, which will be modified
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 from ctypes import cdll as ctypes_cdll_obj
 from ctypes import CDLL as ctypes_CDLL_class
-from ctypes import LibraryLoader as ctypes_LibraryLoader_class
 
 from ctypes import CFUNCTYPE as __CFUNCTYPE__
 from ctypes import _c_functype_cache as __c_functype_cache__
@@ -116,48 +122,34 @@ def CDLL(
 		if type(handle).__name__.startswith('zugbruecke'):
 			return handle
 
-	if handle is None and False: # TODO
+	if handle is None and False: # TODO replace False with test for Wine library
 		# If handle is none and name points to Wine library
+		# Use current_session
 		pass
 	else:
 		# If Unix library, return CDLL class instance
 		return ctypes_CDLL_class(name, mode, handle, use_errno, use_last_error)
 
 
-# CDLL
-cdll = ctypes_cdll_obj # EXPORT
+def WinDLL(
+	name, mode = DEFAULT_MODE, handle = None,
+	use_errno = False,
+	use_last_error = False
+	): # EXPORT
 
-class zugbruecke_cdll_class():
-
-
-	pass
-
-
-class zugbruecke_windll_class(): # Mimic ctypes.windll
+	return current_session.load_library(dll_name = name, dll_type = 'windll')
 
 
-	def __init__(self, session):
+def OleDLL(
+	name, mode = DEFAULT_MODE, handle = None,
+	use_errno = False,
+	use_last_error = False
+	): # EXPORT
 
-		self.__session__ = session
-
-
-	def LoadLibrary(self, name):
-
-		# Return a DLL instance object from within the session
-		return self.__session__.load_library(dll_name = name, dll_type = 'windll')
-
-
-class oledll: # EXPORT
 	pass # TODO stub
 
-class OleDLL: # EXPORT
-	pass # TODO stub
 
-# Set up and expose windll, prepare (but do not start) session while doing so
-windll = zugbruecke_windll_class(current_session) # EXPORT
-
-class WinDLL: # EXPORT
-	pass # TODO stub
-
-# LibraryLoader
-LibraryLoader = ctypes_LibraryLoader_class # EXPORT # stub
+# Set up and expose dll library loader objects
+cdll = LibraryLoader(CDLL) # EXPORT
+windll = LibraryLoader(WinDLL) # EXPORT
+oledll = LibraryLoader(OleDLL) # EXPORT
