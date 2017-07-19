@@ -98,6 +98,10 @@ class session_client_class():
 		# Mark session as up
 		self.up = True
 
+		# Get handles on methods for converting paths
+		self.path_unix_to_wine = self.client.path_unix_to_wine
+		self.path_wine_to_unix = self.client.path_wine_to_unix
+
 		# Register session destructur
 		atexit.register(self.terminate)
 		signal.signal(signal.SIGINT, self.terminate)
@@ -163,7 +167,7 @@ class session_client_class():
 			self.log.out('[session-client] ... not yet touched ...')
 
 			# Translate dll's full path into wine path
-			full_path_dll_wine = self.wineserver_session.translate_path_unix2win(full_path_dll)
+			full_path_dll_wine = self.path_unix_to_wine(full_path_dll)
 
 			# Tell wine about the dll and its type TODO implement some sort of find_library
 			(success, hash_id) = self.__load_library_on_server__(

@@ -39,6 +39,7 @@ import traceback
 
 from .dll_server import dll_server_class
 from .log import log_class
+from .path import path_class
 from .rpc import mp_server_class
 
 
@@ -64,6 +65,11 @@ class session_server_class:
 		# Mark session as up
 		self.up = True
 
+		# Offer methods for converting paths
+		path = path_class()
+		self.path_unix_to_wine = path.unix_to_wine
+		self.path_wine_to_unix = path.wine_to_unix
+
 		# Start dict for dll files and routines
 		self.dll_dict = {}
 
@@ -81,6 +87,10 @@ class session_server_class:
 		self.server.register_function(self.__load_library__, 'load_library')
 		# Register destructur: Call goes into xmlrpc-server first, which then terminates parent
 		self.server.register_function(self.server.terminate, 'terminate')
+		# Convert path: Unix to Wine
+		self.server.register_function(self.path_unix_to_wine, 'path_unix_to_wine')
+		# Convert path: Wine to Unix
+		self.server.register_function(self.path_wine_to_unix, 'path_wine_to_unix')
 
 		# Status log
 		self.log.out('[session-server] ctypes server is listening on port %d.' % self.p['port_socket_ctypes'])
