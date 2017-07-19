@@ -40,9 +40,12 @@ from sys import platform
 
 if True in [platform.startswith(os_name) for os_name in ['linux', 'darwin', 'freebsd']]:
 
+	f = open('.zugbruecke.json', 'w')
+	f.write('{}')
+	f.close()
+
 	import zugbruecke
 	ctypes = zugbruecke
-	# ctypes.windll.start_session(parameter = {'log_level': 0}) # TODO replace by writing config file before import
 
 elif platform.startswith('win'):
 
