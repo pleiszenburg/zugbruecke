@@ -97,11 +97,8 @@ def set_last_error(last_error): # EXPORT
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# Routines only availabe on Wine / Windows, provided via zugbruecke
+# Compatibility to CFUNCTYPE on Wine side must be implemented
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-# Start new zugbruecke session
-current_session = session_client_class()
 
 # Need to handle c functions in DLLs
 CFUNCTYPE = __CFUNCTYPE__ # EXPORT
@@ -109,6 +106,15 @@ _c_functype_cache = __c_functype_cache__ # EXPORT
 
 # Just in case ...
 _FUNCFLAG_STDCALL = 0 # EXPORT
+
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# Routines only availabe on Wine / Windows, provided via zugbruecke
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+# Start new zugbruecke session
+current_session = session_client_class()
+
 
 # EXPORT: Wrapper for CDLL class
 def CDLL(
