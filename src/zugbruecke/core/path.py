@@ -39,6 +39,10 @@ from ctypes import wintypes
 # WINDOWS DATATYPES
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+# Define MaximumLength TODO does it make sense?
+# https://msdn.microsoft.com/en-us/library/aa365247.aspx#maxpath
+MAX_PATH = 260
+
 
 class ANSI_STRING(ctypes.Structure):
 	"""
@@ -85,10 +89,6 @@ class path_class:
 
 	def __init__(self):
 
-		# Define MaximumLength TODO does it make sense?
-		# https://msdn.microsoft.com/en-us/library/aa365247.aspx#maxpath
-		self.MAX_PATH = 260
-
 		# https://github.com/wine-mirror/wine/blob/master/include/winternl.h
 		self.FILE_OPEN_IF = 3
 
@@ -120,11 +120,11 @@ class path_class:
 		Out: Absolute Wine path
 		"""
 
-		if len(in_path) > self.MAX_PATH:
+		if len(in_path) > MAX_PATH:
 			raise # TODO
 
 		in_path_astr_p = ctypes.pointer(self.__str_to_winastr__(in_path))
-		out_oath_ustr_p = ctypes.pointer(self.__generate_ustr__())
+		out_oath_ustr_p = ctypes.pointer(UNICODE_STRING())
 
 		ntstatus = self.__unix_to_wine__(
 			in_path_astr_p, out_oath_ustr_p
@@ -139,24 +139,10 @@ class path_class:
 		Out: Absolute Unix path
 		"""
 
-		if len(in_path) > self.MAX_PATH:
+		if len(in_path) > MAX_PATH:
 			raise # TODO
 
 		pass
-
-
-	def __generate_astr__(self):
-
-		return ANSI_STRING(
-			0, self.MAX_PATH, ctypes.pointer(ctypes.create_string_buffer(self.MAX_PATH))
-			)
-
-
-	def __generate_ustr__(self):
-
-		return UNICODE_STRING(
-			0, self.MAX_PATH, ctypes.pointer(ctypes.create_unicode_buffer(self.MAX_PATH))
-			)
 
 
 	def __str_to_winastr__(self, in_str_u):
@@ -166,9 +152,10 @@ class path_class:
 		"""
 
 		in_str_a = in_str_u.encode('utf-8')
-		in_astr = self.__generate_astr__()
+		in_astr = ANSI_STRING()
 		in_astr.Length = len(in_str_a)
-		in_astr.Buffer.contents[0:in_astr.Length] = in_str_a[:]
+		in_astr.MaximumLength = len(in_str_a) + 2
+		in_astr.Buffer = wintypes.LPSTR(in_str_a)
 
 		return in_astr
 
@@ -192,7 +179,7 @@ class path_class:
 		Out: Python unicode string
 		"""
 
-		return in_astr[0:in_astr.Length].decode('utf-8')
+		return in_astr.Buffer.contents[0:in_astr.Length].decode('utf-8')
 
 
 	def __winustr_to_str__(self, in_ustr):
@@ -201,4 +188,4 @@ class path_class:
 		Out: Python unicode string
 		"""
 
-		return in_ustr[0:in_ustr.Length]
+		return in_ustr.Buffer
