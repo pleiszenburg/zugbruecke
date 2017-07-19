@@ -268,8 +268,9 @@ class session_client_class():
 
 		# Prepare command with minimal meta info. All other info can be passed via sockets.
 		self.p['command_dict'] = [
-			'%s\\_server_.py' % self.wineserver_session.translate_path_unix2win(
-				os.path.abspath(os.path.join(get_location_of_file(__file__), os.pardir))
+			os.path.join(
+				os.path.abspath(os.path.join(get_location_of_file(__file__), os.pardir)),
+				'_server_.py'
 				),
 			'--id', self.id,
 			'--port_socket_ctypes', str(self.p['port_socket_ctypes']),
