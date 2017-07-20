@@ -141,6 +141,12 @@ class session_client_class():
 
 	def load_library(self, dll_name, dll_type, dll_param = {}):
 
+		# Check whether dll has already been touched
+		if dll_name in self.dll_dict.keys():
+
+			# Return reference on existing dll object
+			return self.dll_dict[dll_name]
+
 		# Is DLL type known?
 		if dll_type not in ['cdll', 'windll', 'oledll']:
 
@@ -150,33 +156,24 @@ class session_client_class():
 		# Log status
 		self.log.out('[session-client] Trying to access DLL "%s" of type "%s" ...' % (dll_name, dll_type))
 
-		# Check whether dll has yet not been touched
-		if dll_name not in self.dll_dict.keys():
+		# Tell wine about the dll and its type TODO implement some sort of find_library
+		(success, hash_id) = self.__load_library_on_server__(
+			dll_name, dll_type, dll_param
+			)
 
-			# Log status
-			self.log.out('[session-client] ... not yet touched ...')
+		# If it failed, raise an error
+		if not success:
 
-			# Tell wine about the dll and its type TODO implement some sort of find_library
-			(success, hash_id) = self.__load_library_on_server__(
-				dll_name, dll_type, dll_param
-				)
+			# (Re-) raise an OSError if the above returned an error
+			raise # TODO
 
-			# If it failed, raise an error
-			if not success:
-				raise # TODO
+		# Fire up new dll object
+		self.dll_dict[dll_name] = dll_client_class(
+			self, dll_name, dll_type, hash_id
+			)
 
-			# Fire up new dll object
-			self.dll_dict[dll_name] = dll_client_class(
-				self, dll_name, dll_type, hash_id
-				)
-
-			# Log status
-			self.log.out('[session-client] ... touched and added to list.')
-
-		else:
-
-			# Log status
-			self.log.out('[session-client] ... already touched and in list.')
+		# Log status
+		self.log.out('[session-client] ... touched and added to list.')
 
 		# Return reference on existing dll object
 		return self.dll_dict[dll_name]
