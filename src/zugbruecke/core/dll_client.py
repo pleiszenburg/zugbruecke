@@ -68,6 +68,9 @@ class dll_client_class(): # Representing one idividual dll to be called into, re
 		# Expose routine registration
 		self.__register_routine_on_server__ = getattr(self.client, self.hash_id + '_register_routine')
 
+		# Expose string reprentation of dll object
+		self.__get_repr__ = getattr(self.client, self.hash_id + '_repr')
+
 
 	def __getattr__(self, name): # Handle requests for functions in dll which have yet not been touched
 
@@ -105,3 +108,8 @@ class dll_client_class(): # Representing one idividual dll to be called into, re
 
 		# Return handler
 		return self.routines[name].handle_call
+
+
+	def __repr__(self):
+
+		return self.__get_repr__()

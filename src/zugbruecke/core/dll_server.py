@@ -68,12 +68,24 @@ class dll_server_class(): # Representing one idividual dll to be called into
 
 		# Export registration of my functions directly
 		self.session.server.register_function(
-			self.register_routine,
+			self.__get_repr__,
+			self.hash_id + '_repr'
+			)
+		self.session.server.register_function(
+			self.__register_routine__,
 			self.hash_id + '_register_routine'
 			)
 
 
-	def register_routine(self, routine_name):
+	def __get_repr__(self):
+
+		return self.handler.__repr__()
+
+
+	def __register_routine__(self, routine_name):
+		"""
+		Exposed interface
+		"""
 
 		# Just in case this routine is already known
 		if routine_name in self.routines.keys():
