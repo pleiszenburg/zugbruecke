@@ -99,6 +99,9 @@ class session_server_class:
 		# Convert path: Wine to Unix
 		self.server.register_function(self.path_wine_to_unix, 'path_wine_to_unix')
 
+		# Expose ctypes stuff
+		self.__expose_ctypes_routines__()
+
 		# Status log
 		self.log.out('[session-server] ctypes server is listening on port %d.' % self.p['port_socket_ctypes'])
 		self.log.out('[session-server] STARTED.')
@@ -106,6 +109,19 @@ class session_server_class:
 
 		# Run server ...
 		self.server.serve_forever()
+
+
+	def __expose_ctypes_routines__(self):
+
+		# As-is exported platform-specific routines from ctypes
+		for routine in [
+			'get_last_error',
+			'GetLastError',
+			'WinError',
+			'set_last_error'
+			]:
+
+			self.server.register_function(getattr(ctypes, routine), 'ctypes_' + routine)
 
 
 	def __get_status__(self):

@@ -71,16 +71,10 @@ def DllGetClassObject(rclsid, riid, ppv): # EXPORT
 def FormatError(error_code = None): # EXPORT
 	pass # TODO stub
 
-def GetLastError(): # EXPORT
-	pass # TODO stub
-
 class HRESULT: # EXPORT
 	pass # TODO stub
 
 def WINFUNCTYPE(restype, *argtypes, **kw): # EXPORT
-	pass # TODO stub
-
-def WinError(code = None, descr = None): # EXPORT
 	pass # TODO stub
 
 def _check_HRESULT(result): # EXPORT
@@ -89,11 +83,26 @@ def _check_HRESULT(result): # EXPORT
 # Used in ctypes __init__.py by WINFUNCTYPE. Needs to be exposed?
 _win_functype_cache = {} # EXPORT # TODO stub
 
-def get_last_error(): # EXPORT
-	pass # TODO stub
 
-def set_last_error(last_error): # EXPORT
-	pass # TODO stub
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# zugbruecke session
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+# Start new zugbruecke session
+current_session = session_client_class() # EXPORT
+
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# Routines only availabe on Wine / Windows - accessed via server
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+get_last_error = current_session.client.ctypes_get_last_error # EXPORT
+
+GetLastError = current_session.client.ctypes_GetLastError # EXPORT
+
+set_last_error = current_session.client.ctypes_set_last_error # EXPORT
+
+WinError = current_session.client.ctypes_WinError # EXPORT
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -106,14 +115,6 @@ _c_functype_cache = __c_functype_cache__ # EXPORT
 
 # Just in case ...
 _FUNCFLAG_STDCALL = 0 # EXPORT
-
-
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# zugbruecke session
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-# Start new zugbruecke session
-current_session = session_client_class() # EXPORT
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
