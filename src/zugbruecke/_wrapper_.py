@@ -63,18 +63,18 @@ from .core.session_client import session_client_class
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 def DllCanUnloadNow(): # EXPORT
-	pass # TODO stub
+	pass # TODO stub - required for COM
 
 def DllGetClassObject(rclsid, riid, ppv): # EXPORT
-	pass # TODO stub
+	pass # TODO stub - required for COM
 
 class HRESULT: # EXPORT
-	pass # TODO stub
-
-def WINFUNCTYPE(restype, *argtypes, **kw): # EXPORT
-	pass # TODO stub
+	pass # TODO stub - special form of c_long, will require changes to argument parser
 
 def _check_HRESULT(result): # EXPORT
+	pass # TODO stub - method for HRESULT, checks error bit, raises error if true. Needs reimplementation.
+
+def WINFUNCTYPE(restype, *argtypes, **kw): # EXPORT
 	pass # TODO stub
 
 # Used in ctypes __init__.py by WINFUNCTYPE. Needs to be exposed?
