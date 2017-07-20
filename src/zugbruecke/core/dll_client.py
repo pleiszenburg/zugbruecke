@@ -83,6 +83,10 @@ class dll_client_class(): # Representing one idividual dll to be called into, re
 			# Log status
 			self.log.out('[dll-client] ... unknown, registering  ...')
 
+			# Original ctypes does that
+			if name.startswith('__') and name.endswith('__'):
+				raise AttributeError(name)
+
 			# Register routine in wine
 			success = self.__register_routine_on_server__(name)
 
