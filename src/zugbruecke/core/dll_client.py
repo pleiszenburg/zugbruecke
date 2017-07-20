@@ -77,41 +77,50 @@ class dll_client_class(): # Representing one idividual dll to be called into, re
 		# Status log
 		self.log.out('[dll-client] Trying to attach to routine "%s" in DLL file "%s" ...' % (name, self.name))
 
-		# Is routine unknown?
-		if name not in self.routines.keys():
+		# Log status
+		self.log.out('[dll-client] ... unknown, registering  ...')
+
+		# Original ctypes does that
+		if name.startswith('__') and name.endswith('__'):
+			raise AttributeError(name)
+
+		# Register routine in wine
+		success = self.__register_routine_on_server__(name)
+
+		# If success ...
+		if success:
+
+			# Create new instance of routine_client
+			self.routines[name] = routine_client_class(self, name)
 
 			# Log status
-			self.log.out('[dll-client] ... unknown, registering  ...')
+			self.log.out('[dll-client] ... registered (unconfigured) ...')
 
-			# Original ctypes does that
-			if name.startswith('__') and name.endswith('__'):
-				raise AttributeError(name)
+		# If failed ...
+		else:
 
-			# Register routine in wine
-			success = self.__register_routine_on_server__(name)
+			# Log status
+			self.log.out('[dll-client] ... failed!')
 
-			# If success ...
-			if success:
+			raise # TODO
 
-				# Create new instance of routine_client
-				self.routines[name] = routine_client_class(self, name)
-
-				# Log status
-				self.log.out('[dll-client] ... registered (unconfigured) ...')
-
-			# If failed ...
-			else:
-
-				# Log status
-				self.log.out('[dll-client] ... failed!')
-
-				raise # TODO
+		# Set attribute for future use
+		setattr(self, name, self.routines[name].handle_call)
 
 		# Log status
 		self.log.out('[dll-client] ... return handler.')
 
 		# Return handler
 		return self.routines[name].handle_call
+
+
+	# def __getitem__(self, name_or_ordinal):
+	#
+	# 	func = self._FuncPtr((name_or_ordinal, self))
+	# 	if not isinstance(name_or_ordinal, int):
+	# 		func.__name__ = name_or_ordinal
+	#
+	# 	return func
 
 
 	def __repr__(self):
