@@ -73,6 +73,13 @@ class session_server_class:
 		# Start dict for dll files and routines
 		self.dll_dict = {}
 
+		# Organize all DLL types
+		self.dll_types = {
+			'cdll': ctypes.CDLL,
+			'windll': ctypes.WinDLL,
+			'oledll': ctypes.OleDLL
+			}
+
 		# Create server
 		self.server = mp_server_class(
 			('localhost', self.p['port_socket_ctypes']),
@@ -112,14 +119,14 @@ class session_server_class:
 			return 'down'
 
 
-	def __load_library__(self, full_path_dll, full_path_dll_unix, dll_name, dll_type):
+	def __load_library__(self, full_path_dll, full_path_dll_unix, dll_name, dll_type, dll_param):
 		"""
 		Exposed interface
 		"""
 
 		# Although this should happen only once per dll, lets be on the safe side
-		if full_path_dll_unix in self.dll_dict.keys():
-			return (True, self.dll_dict[full_path_dll_unix].hash_id) # Success & dll hash_id
+		if dll_name in self.dll_dict.keys():
+			return (True, self.dll_dict[dll_name].hash_id) # Success & dll hash_id
 
 		# Status log
 		self.log.out('[session-server] Attaching to DLL file "%s" with calling convention "%s" located at' % (
@@ -130,10 +137,14 @@ class session_server_class:
 		try:
 
 			# Attach to DLL with ctypes
-			handler = ctypes.windll.LoadLibrary(full_path_dll) # TODO handle oledll and cdll
+			handler = self.dll_types[dll_type](
+				dll_name, mode = dll_param['mode'], handle = None,
+				use_errno = dll_param['use_errno'],
+				use_last_error = dll_param['use_last_error']
+				)
 
 			# Load library
-			self.dll_dict[full_path_dll_unix] = dll_server_class(
+			self.dll_dict[dll_name] = dll_server_class(
 				self, full_path_dll, full_path_dll_unix, dll_name, dll_type, handler
 				)
 
@@ -141,7 +152,7 @@ class session_server_class:
 			self.log.out('[session-server] ... done.')
 
 			# Return success and dll's hash id
-			return (True, self.dll_dict[full_path_dll_unix].hash_id) # Success
+			return (True, self.dll_dict[dll_name].hash_id) # Success
 
 		except:
 

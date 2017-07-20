@@ -153,16 +153,16 @@ class session_client_class():
 		# Log status
 		self.log.out('[session-client] Trying to access DLL "%s" of type "%s" ...' % (full_path_dll, dll_type))
 
-		# Check if dll file exists
-		if not os.path.isfile(full_path_dll):
-
-			# Log status
-			self.log.out('[session-client] ... file does NOT exist!')
-
-			raise # TODO
-
-		# Log status
-		self.log.out('[session-client] ... exists ...')
+		# # Check if dll file exists
+		# if not os.path.isfile(full_path_dll):
+		#
+		# 	# Log status
+		# 	self.log.out('[session-client] ... file does NOT exist!')
+		#
+		# 	raise # TODO
+		#
+		# # Log status
+		# self.log.out('[session-client] ... exists ...')
 
 		# Simplify full path
 		full_path_dll = os.path.abspath(full_path_dll)
@@ -178,7 +178,7 @@ class session_client_class():
 
 			# Tell wine about the dll and its type TODO implement some sort of find_library
 			(success, hash_id) = self.__load_library_on_server__(
-				full_path_dll_wine, full_path_dll, dll_name, dll_type
+				full_path_dll_wine, full_path_dll, dll_name, dll_type, dll_param
 				)
 
 			# If it failed, raise an error
