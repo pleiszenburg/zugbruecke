@@ -72,17 +72,20 @@ class dll_client_class(): # Representing one idividual dll to be called into, re
 		self.__get_repr__ = getattr(self.client, self.hash_id + '_repr')
 
 
-	def __getattr__(self, name): # Handle requests for functions in dll which have yet not been touched
+	def __attach_to_routine__(self, name):
 
 		# Status log
-		self.log.out('[dll-client] Trying to attach to routine "%s" in DLL file "%s" ...' % (name, self.name))
+		self.log.out('[dll-client] Trying to attach to routine "%s" in DLL file "%s" ...' % (str(name), self.name))
 
 		# Log status
 		self.log.out('[dll-client] ... unknown, registering  ...')
 
-		# Original ctypes does that
-		if name.startswith('__') and name.endswith('__'):
-			raise AttributeError(name)
+		# Only if name is a string ...
+		if isinstance(name, str):
+
+			# Original ctypes does that
+			if name.startswith('__') and name.endswith('__'):
+				raise AttributeError(name)
 
 		# Register routine in wine
 		success = self.__register_routine_on_server__(name)
@@ -104,8 +107,11 @@ class dll_client_class(): # Representing one idividual dll to be called into, re
 
 			raise # TODO
 
-		# Set attribute for future use
-		setattr(self, name, self.routines[name].handle_call)
+		# If name is a string ...
+		if isinstance(name, str):
+
+			# Set attribute for future use
+			setattr(self, name, self.routines[name].handle_call)
 
 		# Log status
 		self.log.out('[dll-client] ... return handler.')
@@ -114,13 +120,24 @@ class dll_client_class(): # Representing one idividual dll to be called into, re
 		return self.routines[name].handle_call
 
 
-	# def __getitem__(self, name_or_ordinal):
-	#
-	# 	func = self._FuncPtr((name_or_ordinal, self))
-	# 	if not isinstance(name_or_ordinal, int):
-	# 		func.__name__ = name_or_ordinal
-	#
-	# 	return func
+	def __getattr__(self, name):
+
+		return self.__attach_to_routine__(name)
+
+
+	def __getitem__(self, name_or_ordinal):
+
+		# Is it in dict?
+		if name_or_ordinal in self.routines.keys():
+
+			# Return handle
+			return self.routines[name_or_ordinal].handle_call
+
+		# Is is unknown?
+		else:
+
+			# Generate new handle
+			return self.__attach_to_routine__(name_or_ordinal)
 
 
 	def __repr__(self):

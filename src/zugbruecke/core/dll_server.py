@@ -92,15 +92,24 @@ class dll_server_class(): # Representing one idividual dll to be called into
 			return True # Success
 
 		# Log status
-		self.log.out('[dll-server] Trying to access "%s" in DLL file "%s" ...' % (routine_name, self.name))
+		self.log.out('[dll-server] Trying to access "%s" in DLL file "%s" ...' % (str(routine_name), self.name))
 
 		# Try to attach to routine with ctypes
 		try:
 
-			# Get handler on routine in dll
-			routine_handler = getattr(
-				self.handler, routine_name
-				)
+			# If name is a string
+			if isinstance(routine_name, str):
+
+				# Get handler on routine in dll as attribute
+				routine_handler = getattr(
+					self.handler, routine_name
+					)
+
+			# If name is an integer
+			else:
+
+				# Get handler on routine in dll as item
+				routine_handler = self.handler[routine_name]
 
 		except:
 
@@ -118,11 +127,11 @@ class dll_server_class(): # Representing one idividual dll to be called into
 		# Export call and configration directly
 		self.session.server.register_function(
 			self.routines[routine_name].__handle_call__,
-			self.hash_id + '_' + routine_name + '_handle_call'
+			self.hash_id + '_' + str(routine_name) + '_handle_call'
 			)
 		self.session.server.register_function(
 			self.routines[routine_name].__configure__,
-			self.hash_id + '_' + routine_name + '_configure'
+			self.hash_id + '_' + str(routine_name) + '_configure'
 			)
 
 		# Log status
