@@ -19,7 +19,7 @@ Synopsis
 **zugbruecke** is an EXPERIMENTAL **Python module** (currently in development **status 3/alpha**).
 It allows to **call routines in Windows DLLs from Python code running on
 Unices / Unix-like systems** such as Linux, MacOS or BSD.
-zugbruecke is designed as a **drop-in replacement for ctypes' windll interface**.
+zugbruecke is designed as a **drop-in replacement for Python's standard library's ctypes module**.
 zugbruecke is **built on top of Wine**. A stand-alone Windows Python interpreter
 launched in the background is used to execute the called DLL routines.
 Communication between the UNIX-side and the Windows/Wine-side is based on Python's
@@ -46,15 +46,19 @@ Prerequisites
 
 For using the module:
 
-- **CPython 3.x** *(tested with 3.5 and 3.6)* - No additional Python packages are required.
+- **CPython 3.x** *(tested with 3.{5,6})* - No additional Python packages are required.
 
-- **Wine 2.x** *(tested with 2.5, 2.6(-staging), 2.10(-staging))* - Expected to be in the user's PATH.
+- **Wine 2.x** *(tested with 2.{5,6,10,12}{,-staging})* - Expected to be in the user's PATH.
 
 For examples and tests, in addition:
 
 - pytest
 
 - mingw cross-compiler *(for building DLLs against which examples and tests can be run)*
+
+For documentation:
+
+- Sphinx
 
 Installation
 ============
@@ -78,21 +82,17 @@ a virtual environment.
 Examples
 ========
 
-zugbruecke essentially behaves like a drop-in replacement for ctypes' ``windll`` interface.
-In other words, it only covers the "stdcall calling convention" at this point.
-Therefore, most code, which was written with ``windll`` in mind and which runs under Windows,
-should run just fine with zugbruecke.
+zugbruecke essentially behaves like a drop-in replacement for ctypes.
+Most code, which was written with ``cdll``, ``windll`` or ``oledll``
+in mind and which runs under Windows, should run just fine with zugbruecke.
 
 .. code:: python
 
-	from zugbruecke import ctypes
+	from zugbruecke import windll, c_float
 
-	simple_demo_routine = ctypes.windll.LoadLibrary('demo_dll.dll').simple_demo_routine
-	simple_demo_routine.argtypes = [
-		ctypes.c_float,
-		ctypes.c_float
-		]
-	simple_demo_routine.restype = ctypes.c_float
+	simple_demo_routine = windll.LoadLibrary('demo_dll.dll').simple_demo_routine
+	simple_demo_routine.argtypes = [c_float, c_float]
+	simple_demo_routine.restype = c_float
 	return_value = simple_demo_routine(20.0, 1.07)
 	print('Got "%f".' % return_value)
 
@@ -104,15 +104,6 @@ looks somewhat like this:
 	float __stdcall __declspec(dllimport) simple_demo_routine(float param_a, float param_b)
 	{ return param_a - (param_a / param_b); }
 
-The following import statement also works:
-
-.. code:: python
-
-	from zugbruecke import windll
-
-The ``ctypes`` object offered by zugbruecke is just the Python interpreter's
-regular ``ctypes``, which is patched by zugbruecke during import.
-
 Because of the drop-in replacement design of zugbruecke, it is possible to write
 Python code which works under both Unices and Windows.
 
@@ -120,9 +111,9 @@ Python code which works under both Unices and Windows.
 
 	from sys import platform
 	if True in [platform.startswith(os_name) for os_name in ['linux', 'darwin', 'freebsd']]:
-		from zugbruecke import ctypes
+		from zugbruecke import cdll
 	elif platform.startswith('win'):
-		import ctypes
+		from ctypes import cdll
 	else:
 		# Handle unsupported platforms
 
@@ -211,17 +202,22 @@ How to bisect issues
 --------------------
 
 zugbruecke is based on a session model. Each session can be launched with
-parameters. Instead of leaving the session start with default parameters to
-zugbruecke, the process can be triggered manually instead.
-Right after import and before ``LoadLibrary`` is invoked for the first time,
-start a zugbruecke session as follows and pass parameters like the "log level"
-into it.
+parameters, which can either be passed into or picked up from a configuration file
+by the session constructor. It is also possible to change parameters during run-time.
+
+If you want to increase the log level during run-time, you can do the following:
 
 .. code:: python
 
-	from zugbruecke import ctypes
-	ctypes.windll.start_session(parameter = {'log_level': 10})
-	# proceed as usual ...
+	import zugbruecke
+	# work with zugbruecke
+	zugbruecke.current_session.set_parameter({'log_level': 10})
+	# proceed as usual - with a lot more verbosity
+
+Alternatively, you can drop a configuration file named ``.zugbruecke.json`` into
+your current working directory or zugbruecke's configuration directory (likely
+``~/.zugbruecke``) and add configuration parameters to it like
+``{"log_level": 10, "logwrite": true}``.
 
 The higher the log level, the more output you will get. Default is 0 for no logs.
 The on-screen log is color-coded for readability. The log can also, in addition,
@@ -283,14 +279,17 @@ generates its own Wine-profile directory for being used with a dedicated
 ``WINEPREFIX``. This way, any undesirable interferences with other Wine-profile
 directories containing user settings and unrelated software are avoided.
 
-During every import of zugbruecke, the ``ctypes`` module is patched with an
-additional ``windll`` "sub-module" that would otherwise only be present under
-Windows. Once ``LoadLibrary`` is invoked for the first time, zugbruecke starts
-its own wineserver and, on top of it, a Windows Python interpreter. The latter is
-used to run a server script (named ``_server_.py``, located in the module's folder).
-From now on, zugbruecke on the "Unix side" acts as a client to its server on the
-"Wine side". The client passes calls with their parameters to the server, which executes
-them using the regular ``ctypes`` interface for Windows.
+During every import, zugbruecke starts the Windows Python interpreter on top of Wine.
+It is used to run a server script named ``_server_.py``, located in the module's folder.
+
+zugbruecke offers everything ctypes would on the Unix system it is running on
+plus everything ctypes would offer if it was imported under Windows. Functions
+and classes, which have a platform-specific behavior, are replaced with dispatchers.
+The dispatchers decide whether the Unix or the Windows behavior should be used
+depending on the context of how they were invoked and what parameters where passed
+into them. If Windows specific behavior is chosen, calls are passed from
+zugbruecke's client code running on Unix to the server component of zugbruecke
+running on Wine.
 
 Is it secure?
 -------------
@@ -305,36 +304,57 @@ It performs reasonably well. See "Speed" section of this document.
 Can it handle structures?
 -------------------------
 
-Yes, in principle. But avoid pointers within structures, if you
-can. See next question for details.
+Yes, in principle. Though, limitations apply. See next question for details.
 
 Can it handle pointers?
 -----------------------
 
-Yes and no. Pointers to simple C data types (int, float, etc.)
-used as function parameters can be handled just fine. Pointers
-to arbitrary data structures are a bit of a problem. Pointers
-returned by a DLL pointing to memory allocated by the DLL are
-problematic, too.
+Yes and no.
 
-zugbruecke is intended to once offer ways to copy memory from
-the Unix side to the Wine side as well as in the opposite
-direction, but those operations must likely (a) be triggered by the
-programmer (manually, so to speak) and (b) require knowledge
-of the size of the data structure to be copied.
+Pointers to simple C data types (int, float, etc.) used as function
+parameters or within structures can be handled just fine.
+
+Pointers to arbitrary data structures can be handled if another parameter of
+the call contains the length of the memory section the pointer is pointing to.
+zugbruecke uses a special ``memsync`` protocol for indicating which memory
+sections must be kept in sync between the Unix and the Wine side of the code.
+If run on Windows, the regular ``ctypes`` will just ignore any ``memsync``
+directive in the code.
+
+Pointers returned by a DLL pointing to memory allocated by the DLL are
+currently not handled. Null-terminated strings are not handled yet, too.
+
+Is it thread-safe?
+------------------
+
+Probably (yes). More extensive tests are required.
+
+If you want to be on the safe side, start one zugbruecke session per thread
+in your code manually. You can do this as follows:
+
+.. code:: python
+
+	from zugbruecke import session
+	# start new thread - then, inside, do:
+	a = session()
+	# now you can do stuff like
+	kernel32 = a.load_library(
+		'kernel32', 'cdll', {'mode': 0, 'use_errno': False, 'use_last_error': False}
+		)
+	# do not forget to terminate the session (i.e. the Windows Python interpreter)
+	a.terminate()
 
 Missing features (for better ctypes compatibility)
 ==================================================
 
 The following features have yet not been added to zugbruecke:
 
-- Access to DLLs using the ``cdll`` and ``oledll`` calling conventions
-- Access to DLL functions exported by ordinal instead of by name
-- Windows data types (``wintypes``)
-- Related functions for handling DLLs and routines (``WINFUNCTYPE``, ``DllCanUnloadNow``, ``DllGetClassObject``)
-- Error-handling, Windows-style (``FormatError``, ``GetLastError``, ``get_last_error``, ``set_last_error``, ``WinError``)
-- Access to default Windows APIs e.g. from kernel32.dll (as far as Wine offers them)
-- Explicitly differentiating between ANSI and Unicode versions of routines
+- Two (important) Windows data types: ``HRESULT`` and ``VARIANT_BOOL``
+- Function prototyping with ``CFUNCTYPE`` and ``WINFUNCTYPE``
+- COM: ``DllCanUnloadNow`` and ``DllGetClassObject``
+
+All the above routines and classes can in fact be imported from zugbruecke
+for compatibility with ctypes, but they are stubs only.
 
 To do (target: BETA-status)
 ===========================
@@ -342,9 +362,6 @@ To do (target: BETA-status)
 The following issues need to be resolved before 'Development Status :: 4 - Beta'
 can be achieved:
 
-- ``wineserver`` start/stop must be implemented in a clean(er) way. zugbruecke is
-  currently using a few odd workarounds trying not to trigger bugs in Wine.
-- zugbruecke must become thread safe so it can be used with modules like ``multiprocessing``.
 - A test-suite covering all features must be developed.
 - Structures and pointers should be handled more appropriately.
   Especially, structures should be passed in a better way.

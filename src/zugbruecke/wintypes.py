@@ -67,6 +67,8 @@ BOOL = ctypes.c_long
 # 	_type_ = "v"
 # 	def __repr__(self):
 # 		return "%s(%r)" % (self.__class__.__name__, self.value)
+class VARIANT_BOOL:
+	pass # TODO stub
 
 ULONG = ctypes.c_ulong
 LONG = ctypes.c_long

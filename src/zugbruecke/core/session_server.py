@@ -92,6 +92,8 @@ class session_server_class:
 		self.server.register_function(self.__get_status__, 'get_status')
 		# Register call: Accessing a dll
 		self.server.register_function(self.__load_library__, 'load_library')
+		# Expose routine for updating parameters
+		self.server.register_function(self.__set_parameter__, 'set_parameter')
 		# Register destructur: Call goes into xmlrpc-server first, which then terminates parent
 		self.server.register_function(self.server.terminate, 'terminate')
 		# Convert path: Unix to Wine
@@ -179,6 +181,11 @@ class session_server_class:
 			self.log.err(traceback.format_exc())
 
 			return (False, None) # Fail
+
+
+	def __set_parameter__(self, parameter):
+
+		self.p.update(parameter)
 
 
 	def __terminate__(self):

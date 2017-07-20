@@ -115,6 +115,12 @@ class session_client_class():
 		self.log.out('[session-client] STARTED.')
 
 
+	def set_parameter(self, parameter):
+
+		self.p.update(parameter)
+		self.client.set_parameter(parameter)
+
+
 	def terminate(self):
 
 		# Run only if session is still up
