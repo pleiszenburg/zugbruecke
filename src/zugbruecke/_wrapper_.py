@@ -127,7 +127,7 @@ def CDLL(
 	if handle is not None:
 
 		# Handle zugbruecke handle
-		if type(handle).__name__.startswith('zugbruecke'):
+		if type(handle).__name__ == 'dll_client_class':
 
 			# Return it as-is TODO what about a new name?
 			return handle
@@ -141,10 +141,15 @@ def CDLL(
 	# If no handle was passed, it's a new library
 	else:
 
-		# Let's try the Windows side first
+		# Let's try the Wine side first
 		try:
 
-			pass #
+			# Return a handle on dll_client object
+			return current_session.load_library(
+				dll_name = name, dll_type = 'cdll', dll_param = {
+					'mode': mode, 'use_errno': use_errno, 'use_last_error': use_last_error
+					}
+				)
 
 		# Well, it might be a Unix library after all
 		except:
