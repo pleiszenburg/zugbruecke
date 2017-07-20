@@ -44,10 +44,9 @@ from .routine_client import routine_client_class
 class dll_client_class(): # Representing one idividual dll to be called into, returned by LoadLibrary
 
 
-	def __init__(self, parent_session, full_path_dll, dll_name, dll_type, hash_id):
+	def __init__(self, parent_session, dll_name, dll_type, hash_id):
 
 		# Store dll parameters name, path and type
-		self.full_path = full_path_dll
 		self.name = dll_name
 		self.calling_convention = dll_type
 

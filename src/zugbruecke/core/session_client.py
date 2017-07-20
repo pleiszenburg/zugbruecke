@@ -147,38 +147,18 @@ class session_client_class():
 			# Raise error if unknown
 			raise # TODO
 
-		# Get full path of dll TODO it does not need to be in CWD ...
-		full_path_dll = os.path.join(self.dir_cwd, dll_name)
-
 		# Log status
-		self.log.out('[session-client] Trying to access DLL "%s" of type "%s" ...' % (full_path_dll, dll_type))
-
-		# # Check if dll file exists
-		# if not os.path.isfile(full_path_dll):
-		#
-		# 	# Log status
-		# 	self.log.out('[session-client] ... file does NOT exist!')
-		#
-		# 	raise # TODO
-		#
-		# # Log status
-		# self.log.out('[session-client] ... exists ...')
-
-		# Simplify full path
-		full_path_dll = os.path.abspath(full_path_dll)
+		self.log.out('[session-client] Trying to access DLL "%s" of type "%s" ...' % (dll_name, dll_type))
 
 		# Check whether dll has yet not been touched
-		if full_path_dll not in self.dll_dict.keys():
+		if dll_name not in self.dll_dict.keys():
 
 			# Log status
 			self.log.out('[session-client] ... not yet touched ...')
 
-			# Translate dll's full path into wine path
-			full_path_dll_wine = self.path_unix_to_wine(full_path_dll)
-
 			# Tell wine about the dll and its type TODO implement some sort of find_library
 			(success, hash_id) = self.__load_library_on_server__(
-				full_path_dll_wine, full_path_dll, dll_name, dll_type, dll_param
+				dll_name, dll_type, dll_param
 				)
 
 			# If it failed, raise an error
@@ -186,8 +166,8 @@ class session_client_class():
 				raise # TODO
 
 			# Fire up new dll object
-			self.dll_dict[full_path_dll] = dll_client_class(
-				self, full_path_dll, dll_name, dll_type, hash_id
+			self.dll_dict[dll_name] = dll_client_class(
+				self, dll_name, dll_type, hash_id
 				)
 
 			# Log status
@@ -199,7 +179,7 @@ class session_client_class():
 			self.log.out('[session-client] ... already touched and in list.')
 
 		# Return reference on existing dll object
-		return self.dll_dict[full_path_dll]
+		return self.dll_dict[dll_name]
 
 
 	def __start_ctypes_client__(self):

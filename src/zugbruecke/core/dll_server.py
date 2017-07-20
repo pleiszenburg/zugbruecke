@@ -45,11 +45,9 @@ from .routine_server import routine_server_class
 class dll_server_class(): # Representing one idividual dll to be called into
 
 
-	def __init__(self, parent_session, full_path_dll, full_path_dll_unix, dll_name, dll_type, handler):
+	def __init__(self, parent_session, dll_name, dll_type, handler):
 
 		# Store dll parameters name, path and type
-		self.full_path = full_path_dll
-		self.full_path_unix = full_path_dll_unix
 		self.name = dll_name
 		self.calling_convention = dll_type
 
@@ -66,7 +64,7 @@ class dll_server_class(): # Representing one idividual dll to be called into
 		self.routines = {}
 
 		# Hash my own path as unique ID
-		self.hash_id = get_hash_of_string(self.full_path_unix)
+		self.hash_id = get_hash_of_string(self.name)
 
 		# Export registration of my functions directly
 		self.session.server.register_function(

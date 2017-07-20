@@ -119,7 +119,7 @@ class session_server_class:
 			return 'down'
 
 
-	def __load_library__(self, full_path_dll, full_path_dll_unix, dll_name, dll_type, dll_param):
+	def __load_library__(self, dll_name, dll_type, dll_param):
 		"""
 		Exposed interface
 		"""
@@ -129,10 +129,9 @@ class session_server_class:
 			return (True, self.dll_dict[dll_name].hash_id) # Success & dll hash_id
 
 		# Status log
-		self.log.out('[session-server] Attaching to DLL file "%s" with calling convention "%s" located at' % (
+		self.log.out('[session-server] Attaching to DLL file "%s" with calling convention "%s" ...' % (
 			dll_name, dll_type
 			))
-		self.log.out('[session-server]  %s' % full_path_dll)
 
 		try:
 
@@ -145,7 +144,7 @@ class session_server_class:
 
 			# Load library
 			self.dll_dict[dll_name] = dll_server_class(
-				self, full_path_dll, full_path_dll_unix, dll_name, dll_type, handler
+				self, dll_name, dll_type, handler
 				)
 
 			# Log status
