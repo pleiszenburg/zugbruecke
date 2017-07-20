@@ -68,9 +68,6 @@ def DllCanUnloadNow(): # EXPORT
 def DllGetClassObject(rclsid, riid, ppv): # EXPORT
 	pass # TODO stub
 
-def FormatError(error_code = None): # EXPORT
-	pass # TODO stub
-
 class HRESULT: # EXPORT
 	pass # TODO stub
 
@@ -95,6 +92,8 @@ current_session = session_client_class() # EXPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # Routines only availabe on Wine / Windows - accessed via server
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+FormatError = current_session.client.ctypes_FormatError # EXPORT
 
 get_last_error = current_session.client.ctypes_get_last_error # EXPORT
 

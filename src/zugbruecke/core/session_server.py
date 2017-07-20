@@ -115,6 +115,7 @@ class session_server_class:
 
 		# As-is exported platform-specific routines from ctypes
 		for routine in [
+			'FormatError',
 			'get_last_error',
 			'GetLastError',
 			'WinError',
