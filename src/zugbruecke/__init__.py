@@ -160,5 +160,8 @@ from ._wrapper_ import (
 # Expose session class for advanced users and tests
 from .core.session_client import session_client_class as session
 
-# Expose current session
-from ._wrapper_ import current_session
+# Expose current session and Wine API
+from ._wrapper_ import (
+	current_session,
+	wine
+	)

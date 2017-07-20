@@ -109,11 +109,26 @@ _FUNCFLAG_STDCALL = 0 # EXPORT
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# Routines only availabe on Wine / Windows, provided via zugbruecke
+# zugbruecke session
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 # Start new zugbruecke session
-current_session = session_client_class()
+current_session = session_client_class() # EXPORT
+
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# Wine-related stuff
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+class wine:
+
+	unix_to_wine = current_session.path_unix_to_wine
+	wine_to_unix = current_session.path_wine_to_unix
+
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# Routines only availabe on Wine / Windows, provided via zugbruecke
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
 # EXPORT: Wrapper for CDLL class
