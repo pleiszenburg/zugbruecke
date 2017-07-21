@@ -40,13 +40,13 @@ allowing you to cleanly integrate Windows applications into your desktop.*
 
 **This project is NEITHER associated NOR affiliated in any way or form with the Wine project.**
 
-.. _About Wine, from winehq.org: https://www.winehq.org/
+.. _winehq.org: https://www.winehq.org/
 
 Prerequisites
 =============
 
-- `CPython`_ 3.x (tested with 3.{5,6}) - No additional Python packages are required.
-- `Wine`_ 2.x (tested with 2.{5,6,10,12} regular & `staging`_) - Expected to be in the user's `PATH`_.
+- `CPython`_ 3.x (tested with 3.{5,6}) - no additional Python packages required
+- `Wine`_ 2.x (tested with 2.{5,6,10,12} regular & `staging`_) - expected to be in the user's `PATH`_
 
 For examples and tests, in addition:
 
