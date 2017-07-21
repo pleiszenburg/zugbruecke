@@ -1,11 +1,13 @@
-How to contribute to zugbruecke
-===============================
+How to contribute to *zugbruecke*
+=================================
 
 Thank you for considering contributing to *zugbruecke*!
 **Contributions are highly welcomed!**
 
 Reporting issues
 ----------------
+
+Issues are tracked on `Gitbub`_.
 
 - Describe what you expected to happen.
 - If possible, include a `minimal, complete, and verifiable example`_ to help
@@ -19,6 +21,7 @@ Reporting issues
   possible, check if this issue is already fixed in the repository
   (development branch).
 
+.. _zugbruecke issues: https://github.com/pleiszenburg/zugbruecke/issues
 .. _minimal, complete, and verifiable example: https://stackoverflow.com/help/mcve
 
 Project philosophy
