@@ -1,9 +1,11 @@
+.. _examples:
+
 Examples
 ========
 
-zugbruecke is a drop-in replacement for ctypes.
 A lot of code, which was written with ``cdll``, ``windll`` or ``oledll``
-in mind and which runs under Windows, should run just fine with zugbruecke.
+in mind and which runs under *Windows*, should run just fine with *zugbruecke*
+on Unix.
 
 .. code:: python
 
@@ -36,7 +38,12 @@ Python code which works under both Unices and Windows.
 	else:
 		# Handle unsupported platforms
 
-For more examples check the ``examples`` directory.
-For the DLL source code check the ``demo_dll`` directory.
+For more examples check the `examples directory`_ of this project.
+For the full DLL source code check the `demo_dll directory`_ of this project.
 
-For the original documentation of ``ctypes`` go to: https://docs.python.org/3/library/ctypes.html
+.. _examples directory: https://github.com/pleiszenburg/zugbruecke/tree/master/examples
+.. _demo_dll directory: https://github.com/pleiszenburg/zugbruecke/tree/master/demo_dll
+
+Please also consult the `documentation of ctypes`_.
+
+.. _documentation of ctypes: https://docs.python.org/3/library/ctypes.html

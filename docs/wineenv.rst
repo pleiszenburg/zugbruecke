@@ -1,3 +1,5 @@
+.. _wineenv:
+
 Wine Python environment
 =======================
 
