@@ -68,6 +68,16 @@ For building the documentation:
 Installation
 ============
 
++--------------------+------------------++++++++++++++++++++++++++++++++++++++++++++++++++++--+
+| master / release   + .. code:: bash                                                         +
+|                    +                                                                        +
+|                    + 	pip install zugbruecke                                                +
++--------------------+------------------++++++++++++++++++++++++++++++++++++++++++++++++++++--+
+| development branch + .. code:: bash                                                         +
+|                    +                                                                        +
+|                    + 	pip install git+git://github.com/pleiszenburg/zugbruecke.git@develop  +
++--------------------+------------------++++++++++++++++++++++++++++++++++++++++++++++++++++--+
+
 For the latest "stable" (working) **release** run:
 
 .. code:: bash
@@ -140,6 +150,7 @@ Miscellaneous
 - `LICENSE`_ (**LGPL v2.1**)
 - `CONTRIBUTING`_ (**Contributions are highly welcomed!**)
 - `FAQ`_
+- `AUTHORS`_
 - `Missing features`_ (for full ctypes compatibility)
 - `Long-term ideas`_
 - `Upstream issues`_ (relevant bugs in dependencies)
@@ -147,6 +158,7 @@ Miscellaneous
 .. _LICENSE: LICENSE
 .. _CONTRIBUTING: CONTRIBUTING.rst
 .. _FAQ: docs/faq.rst
+.. _AUTHORS: AUTHORS.rst
 .. _Missing features: https://github.com/pleiszenburg/zugbruecke/issues?q=is%3Aissue+is%3Aopen+label%3A%22missing+ctypes+feature%22
 .. _Long-term ideas: https://github.com/pleiszenburg/zugbruecke/milestone/2
 .. _Upstream issues: https://github.com/pleiszenburg/zugbruecke/issues?q=is%3Aissue+is%3Aopen+label%3Aupstream
