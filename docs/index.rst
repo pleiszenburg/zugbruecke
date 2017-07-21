@@ -8,6 +8,7 @@ Welcome to zugbruecke!
    :caption: Contents:
 
    examples
+   wineenv
    benchmarks
    security
    bugs
