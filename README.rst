@@ -181,11 +181,9 @@ zugbruecke is licensed under **LGPL v2.1**. See ``LICENSE`` file for details.
 Contribute
 ==========
 
-**Contributions are highly welcomed!**
+**Contributions are highly welcomed!** See `CONTRIBUTING`_ for details.
 
-The source code is hosted on GitHub: https://github.com/pleiszenburg/zugbruecke/
-Pull requests will be reviewed and, if there is nothing to object, merged promptly.
-Do not break tests (unless there is a justified bug in them)!
+.. _CONTRIBUTING: CONTRIBUTING.rst
 
 Bugs
 ====
