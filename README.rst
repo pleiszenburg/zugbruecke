@@ -55,18 +55,6 @@ Prerequisites
 | for documentation  + - `Sphinx`_                                                                                            +
 +--------------------+--------------------------------------------------------------------------------------------------------+
 
-- `CPython`_ 3.x (tested with 3.{5,6}) - no additional Python packages required
-- `Wine`_ 2.x (tested with 2.{5,6,10,12} regular & `staging`_) - expected to be in the user's `PATH`_
-
-For examples and tests, in addition:
-
-- `pytest`_
-- `mingw cross-compiler`_ - for building DLLs against which examples and tests can be run
-
-For building the documentation:
-
-- `Sphinx`_
-
 .. _CPython: https://www.python.org/
 .. _Wine: https://www.winehq.org/
 .. _staging: https://wine-staging.com/
