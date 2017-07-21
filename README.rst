@@ -153,20 +153,10 @@ Miscellaneous
 =============
 
 - `FAQ`_
+- `Missing features`_ (for better ctypes compatibility)
 
 .. _FAQ: docs/faq.rst
-
-Missing features (for better ctypes compatibility)
-==================================================
-
-The following features have yet not been added to zugbruecke:
-
-- Two (important) Windows data types: ``HRESULT`` and ``VARIANT_BOOL``
-- Function prototyping with ``CFUNCTYPE`` and ``WINFUNCTYPE``
-- COM: ``DllCanUnloadNow`` and ``DllGetClassObject``
-
-All the above routines and classes can in fact be imported from zugbruecke
-for compatibility with ctypes, but they are stubs only.
+.. _Missing features: https://github.com/pleiszenburg/zugbruecke/issues?q=is%3Aissue+is%3Aopen+label%3A%22missing+ctypes+feature%22
 
 To do (target: BETA-status)
 ===========================

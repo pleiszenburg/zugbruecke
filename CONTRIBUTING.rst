@@ -47,6 +47,7 @@ A few rules, describing how this project is being developed:
 - Code maintainability comes first (until further notice), speed second.
   Speed does not hurt, though, and a lot of code could use some improvements.
 - Security has not been a primary concern so far, but it could use a lot of improvement.
+- Unimplemented routines and classes are offered as stubs.
 
 Submitting patches
 ------------------
