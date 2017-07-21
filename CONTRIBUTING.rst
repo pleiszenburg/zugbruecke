@@ -64,6 +64,7 @@ Looking for work? Check *zugbruecke*'s `open issues`_ :)
 First time setup
 ----------------
 
+- Make sure you have *Wine* 2.x and *CPython* 3.x installed.
 - Download and install the `latest version of git`_.
 - Configure git with your `username`_ and `email`_:
 

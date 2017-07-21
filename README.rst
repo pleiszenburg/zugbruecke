@@ -286,7 +286,7 @@ zugbruecke offers everything ctypes would on the Unix system it is running on
 plus everything ctypes would offer if it was imported under Windows. Functions
 and classes, which have a platform-specific behavior, are replaced with dispatchers.
 The dispatchers decide whether the Unix or the Windows behavior should be used
-depending on the context of how they were invoked and what parameters where passed
+depending on the context of how they were invoked and what parameters were passed
 into them. If Windows specific behavior is chosen, calls are passed from
 zugbruecke's client code running on Unix to the server component of zugbruecke
 running on Wine.
