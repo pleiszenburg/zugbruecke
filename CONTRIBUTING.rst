@@ -46,6 +46,7 @@ A few rules, describing how this project is being developed:
   to do it either. In this case, submit a patch to 'upstream' *CPython* instead first.
 - Code maintainability comes first (until further notice), speed second.
   Speed does not hurt, though, and a lot of code could use some improvements.
+- Security has not been a primary concern so far, but it could use a lot of improvement.
 
 Submitting patches
 ------------------

@@ -11,6 +11,8 @@ Welcome to zugbruecke's documentation!
    :caption: Contents:
 
    examples
+   benchmarks
+   security
    bugs
    faq
 
