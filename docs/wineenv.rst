@@ -1,5 +1,12 @@
 .. _wineenv:
 
+.. index::
+   single: wine-python
+   single: wine-pip
+   single: wine-pytest
+   triple: wine; python; environment
+   module: zugbruecke.core.wineenv
+
 Wine Python environment
 =======================
 
