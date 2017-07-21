@@ -40,26 +40,30 @@ allowing you to cleanly integrate Windows applications into your desktop.*
 
 **This project is NEITHER associated NOR affiliated in any way or form with the Wine project.**
 
-.. _WineHQ: https://www.winehq.org/
+.. _About Wine, from winehq.org: https://www.winehq.org/
 
 Prerequisites
 =============
 
-For using the module:
-
-- **CPython 3.x** *(tested with 3.{5,6})* - No additional Python packages are required.
-
-- **Wine 2.x** *(tested with 2.{5,6,10,12}{,-staging})* - Expected to be in the user's PATH.
+- **`CPython`_ 3.x** *(tested with 3.{5,6})* - No additional Python packages are required.
+- **`Wine`_ 2.x** *(tested with 2.{5,6,10,12}[-`staging`_])* - Expected to be in the user's `PATH`_.
 
 For examples and tests, in addition:
 
-- pytest
+- `pytest`_
+- `mingw cross-compiler` *(for building DLLs against which examples and tests can be run)*
 
-- mingw cross-compiler *(for building DLLs against which examples and tests can be run)*
+For building the documentation:
 
-For documentation:
+- `Sphinx`_
 
-- Sphinx
+.. _CPython: https://www.python.org/
+.. _Wine: https://www.winehq.org/
+.. _staging: https://wine-staging.com/
+.. _PATH: https://en.wikipedia.org/wiki/PATH_(variable)
+.. _pytest: https://www.pytest.org/
+.. _mingw cross-compiler: http://mxe.cc
+.. _Sphinx: http://www.sphinx-doc.org/
 
 Installation
 ============
@@ -76,15 +80,11 @@ For the latest **development snapshot** (likely broken) run:
 
 	pip install git+git://github.com/pleiszenburg/zugbruecke.git@develop
 
-Because of the use of Wine, which should never be run with root privileges,
-it is highly advisable to install this package with user privileges only into
-a virtual environment.
-
 Examples
 ========
 
-zugbruecke essentially behaves like a drop-in replacement for ctypes.
-Most code, which was written with ``cdll``, ``windll`` or ``oledll``
+zugbruecke is a drop-in replacement for ctypes.
+A lot of code, which was written with ``cdll``, ``windll`` or ``oledll``
 in mind and which runs under Windows, should run just fine with zugbruecke.
 
 .. code:: python
@@ -194,9 +194,9 @@ Bugs & issues
 
 Make sure you have read the chapter on `bugs`_ in zugbruecke's documentation.
 
-.. _zugbruecke issues: https://github.com/pleiszenburg/zugbruecke/issues
-.. _wine bug tracker: https://bugs.winehq.org/
-.. _bug how to: docs/bugs.rst
+.. _zugbruecke's GitHub issue tracker: https://github.com/pleiszenburg/zugbruecke/issues
+.. _Wine's WineHQ Bug Tracking System: https://bugs.winehq.org/
+.. _bugs: docs/bugs.rst
 
 Miscellaneous
 =============
