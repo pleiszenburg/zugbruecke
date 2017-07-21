@@ -78,18 +78,6 @@ Installation
 |                    + 	pip install git+git://github.com/pleiszenburg/zugbruecke.git@develop  +
 +--------------------+------------------++++++++++++++++++++++++++++++++++++++++++++++++++++--+
 
-For the latest "stable" (working) **release** run:
-
-.. code:: bash
-
-	pip install zugbruecke
-
-For the latest **development snapshot** (likely broken) run:
-
-.. code:: bash
-
-	pip install git+git://github.com/pleiszenburg/zugbruecke.git@develop
-
 Examples
 ========
 
@@ -148,8 +136,10 @@ Miscellaneous
 =============
 
 - Full project documentation
+
   - at `Read the Docs`_
   - at `zugbruecke repository`_
+
 - `LICENSE`_ (**LGPL v2.1**)
 - `CONTRIBUTING`_ (**Contributions are highly welcomed!**)
 - `FAQ`_
