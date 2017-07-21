@@ -30,7 +30,7 @@ associated with both itself and with Wine.
 zugbruecke is written using **Python 3 syntax** and primarily targets the
 **CPython** implementation of Python.
 
-*`About Wine, from winehq.org`_: Wine (originally an acronym
+*About Wine (from `winehq.org`_): Wine (originally an acronym
 for "Wine Is Not an Emulator") is a compatibility layer
 capable of running Windows applications on several POSIX-compliant operating systems,
 such as Linux, MacOS and BSD. Instead of simulating internal Windows logic like a
@@ -45,13 +45,13 @@ allowing you to cleanly integrate Windows applications into your desktop.*
 Prerequisites
 =============
 
-- **`CPython`_ 3.x** *(tested with 3.{5,6})* - No additional Python packages are required.
-- **`Wine`_ 2.x** *(tested with 2.{5,6,10,12}[-`staging`_])* - Expected to be in the user's `PATH`_.
+- ** `CPython`_ 3.x ** *(tested with 3.{5,6})* - No additional Python packages are required.
+- ** `Wine`_ 2.x ** *(tested with 2.{5,6,10,12} regular & `staging`_)* - Expected to be in the user's `PATH`_.
 
 For examples and tests, in addition:
 
 - `pytest`_
-- `mingw cross-compiler` *(for building DLLs against which examples and tests can be run)*
+- `mingw cross-compiler`_ *(for building DLLs against which examples and tests can be run)*
 
 For building the documentation:
 
