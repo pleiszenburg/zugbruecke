@@ -10,6 +10,7 @@ User's guide
    :maxdepth: 2
 
    examples
+   configuration
    wineenv
    benchmarks
    security

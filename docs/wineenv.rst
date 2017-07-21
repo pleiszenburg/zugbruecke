@@ -3,7 +3,7 @@
 Wine Python environment
 =======================
 
-zugbruecke offers a few useful helper scripts for allowing to work with
+*zugbruecke* offers a few useful helper scripts for allowing to work with
 *Python* on *Wine* more easily. They are also used for *zugbruecke*'s internal
 operations and development tests.
 
