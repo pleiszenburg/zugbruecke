@@ -147,6 +147,9 @@ Make sure you have read the chapter on `bugs`_ in zugbruecke's documentation.
 Miscellaneous
 =============
 
+- Full project documentation
+  - at `Read the Docs`_
+  - at `zugbruecke repository`_
 - `LICENSE`_ (**LGPL v2.1**)
 - `CONTRIBUTING`_ (**Contributions are highly welcomed!**)
 - `FAQ`_
@@ -155,6 +158,8 @@ Miscellaneous
 - `Long-term ideas`_
 - `Upstream issues`_ (relevant bugs in dependencies)
 
+.. _Read the Docs: http://zugbruecke.readthedocs.io/en/latest/
+.. _zugbruecke repository: docs/index.rst
 .. _LICENSE: LICENSE
 .. _CONTRIBUTING: CONTRIBUTING.rst
 .. _FAQ: docs/faq.rst
