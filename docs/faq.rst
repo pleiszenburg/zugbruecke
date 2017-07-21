@@ -6,19 +6,19 @@ Why? Seriously, WHY?
 
 Good question. Academic interest and frustration over the lack of a project of
 this kind, mostly. The need for calling individual routines offered by DLLs
-from Linux/MacOS/BSD software/scripts is reflected in numerous threads in forums and
+from *Linux*/*MacOS*/*BSD* software/scripts is reflected in numerous threads in forums and
 mailing lists reaching back well over a decade. The recommended approach so far
-has been (and still is!) to write a Wine application, which links against ``winelib``,
+has been (and still is!) to write a *Wine* application, which links against ``winelib``,
 thus allowing to access DLLs. Wine applications can also access libraries
-on the Unix "host" system, which provides the desired bridge between both worlds.
-Nevertheless, this approach is anything but trivial. zugbruecke is supposed
+on the *Unix* "host" system, which provides the desired bridge between both worlds.
+Nevertheless, this approach is anything but trivial. *zugbruecke* is supposed
 to satisfy the desire for a "quick and dirty" solution for calling routines from a
-high level scripting language, Python, directly running on the Unix "host" system.
-With respect to "quick", zugbruecke works just out of the box with Wine installed.
+high level scripting language, *Python*, directly running on the *Unix* "host" system.
+With respect to "quick", *zugbruecke* works just out of the box with *Wine* installed.
 No headers, compilers, cross-compilers or any other configuration is required - one
 import statement followed by well established ``ctypes`` syntax is enough.
-It is pure Python doing its job.
-With respect to "dirty", well, read this document from start to finish.
+It is pure *Python* doing its job.
+With respect to "dirty", well, read the project's documentation from start to finish.
 
 What are actual use cases for this project?
 -------------------------------------------
@@ -42,35 +42,35 @@ What are actual use cases for this project?
 How does it work?
 -----------------
 
-During the first import of zugbruecke, a stand-alone Windows-version of the
-CPython interpreter corresponding to the used Unix-version is automatically
+During the first import of *zugbruecke*, a stand-alone *Windows*-version of the
+*CPython* interpreter corresponding to the used *Unix*-version is automatically
 downloaded and placed into the module's configuration folder (by default located at
 ``~/.zugbruecke/``). Next to it, also during first import, zugbruecke
-generates its own Wine-profile directory for being used with a dedicated
-``WINEPREFIX``. This way, any undesirable interferences with other Wine-profile
+generates its own *Wine*-profile directory for being used with a dedicated
+``WINEPREFIX``. This way, any undesirable interferences with other *Wine*-profile
 directories containing user settings and unrelated software are avoided.
 
-During every import, zugbruecke starts the Windows Python interpreter on top of Wine.
+During every import, *zugbruecke* starts the *Windows* *Python* interpreter on top of *Wine*.
 It is used to run a server script named ``_server_.py``, located in the module's folder.
 
-zugbruecke offers everything ctypes would on the Unix system it is running on
-plus everything ctypes would offer if it was imported under Windows. Functions
+*zugbruecke* offers everything *ctypes* would on the *Unix* system it is running on
+plus everything *ctypes* would offer if it was imported under *Windows*. Functions
 and classes, which have a platform-specific behavior, are replaced with dispatchers.
-The dispatchers decide whether the Unix or the Windows behavior should be used
+The dispatchers decide whether the *Unix* or the *Windows* behavior should be used
 depending on the context of how they were invoked and what parameters were passed
-into them. If Windows specific behavior is chosen, calls are passed from
-zugbruecke's client code running on Unix to the server component of zugbruecke
-running on Wine.
+into them. If *Windows* specific behavior is chosen, calls are passed from
+*zugbruecke*'s client code running on *Unix* to the server component of *zugbruecke*
+running on *Wine*.
 
 Is it secure?
 -------------
 
-No. See "Security" section of this document.
+No. See :ref:`chapter on security <security>`.
 
 How fast/slow is it?
 --------------------
 
-It performs reasonably well. See "Speed" section of this document.
+It performs reasonably well. See :ref:`benchmark section <benchmarks>`.
 
 Can it handle structures?
 -------------------------
@@ -87,9 +87,9 @@ parameters or within structures can be handled just fine.
 
 Pointers to arbitrary data structures can be handled if another parameter of
 the call contains the length of the memory section the pointer is pointing to.
-zugbruecke uses a special ``memsync`` protocol for indicating which memory
-sections must be kept in sync between the Unix and the Wine side of the code.
-If run on Windows, the regular ``ctypes`` will just ignore any ``memsync``
+*zugbruecke* uses a special ``memsync`` protocol for indicating which memory
+sections must be kept in sync between the *Unix* and the *Wine* side of the code.
+If run on *Windows*, the regular *ctypes* will just ignore any ``memsync``
 directive in the code.
 
 Pointers returned by a DLL pointing to memory allocated by the DLL are
@@ -100,7 +100,7 @@ Is it thread-safe?
 
 Probably (yes). More extensive tests are required.
 
-If you want to be on the safe side, start one zugbruecke session per thread
+If you want to be on the safe side, start one *zugbruecke* session per thread
 in your code manually. You can do this as follows:
 
 .. code:: python

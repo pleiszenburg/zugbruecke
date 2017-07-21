@@ -3,9 +3,11 @@ Welcome to zugbruecke!
 
 .. image:: http://www.pleiszenburg.de/zugbruecke_logo.png
 
+User's guide
+------------
+
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
 
    examples
    wineenv
@@ -15,7 +17,7 @@ Welcome to zugbruecke!
    faq
 
 Indices and tables
-==================
+------------------
 
 * :ref:`genindex`
 * :ref:`modindex`
