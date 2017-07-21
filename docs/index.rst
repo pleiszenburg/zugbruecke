@@ -10,6 +10,7 @@ Welcome to zugbruecke's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+   examples
    bugs
    faq
 
