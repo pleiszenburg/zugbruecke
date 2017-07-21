@@ -6,7 +6,7 @@
     :target: https://travis-ci.org/pleiszenburg/zugbruecke
 
 +--------------------+--------------------+
-| master/release     + |branch_master|    +
+| master / release   + |branch_master|    +
 +--------------------+--------------------+
 | development branch + |branch_develop|   +
 +--------------------+--------------------+
@@ -83,11 +83,6 @@ For the latest **development snapshot** (likely broken) run:
 Examples
 ========
 
-zugbruecke is a drop-in replacement for ctypes.
-
-A lot of code, which was written with ``cdll``, ``windll`` or ``oledll``
-in mind and which runs under Windows, should run just fine with zugbruecke
-on Unix (assuming it does not use Windows features not supported by Wine).
 Start an interactive Python session under Unix and try the following:
 
 .. code:: python
@@ -101,6 +96,10 @@ Start an interactive Python session under Unix and try the following:
 
 You have just witnessed ``msvcrt.dll`` in action on Unix. Interested in more?
 Check the `examples`_ in zugbruecke's documentation or read `ctypes' documentation`_.
+
+A lot of code, which was written with ``cdll``, ``windll`` or ``oledll``
+in mind and which runs under Windows, should run just fine with zugbruecke
+on Unix (assuming it does not use Windows features not supported by Wine).
 
 .. _examples: docs/examples.rst
 .. _ctypes' documentation: https://docs.python.org/3/library/ctypes.html
@@ -123,20 +122,6 @@ For details, check the section on `security`_ in the documentation.
 
 .. _security: docs/security.rst
 
-License
-=======
-
-zugbruecke is licensed under **LGPL v2.1**. See `LICENSE`_ file for details.
-
-.. _LICENSE: LICENSE
-
-Contribute
-==========
-
-**Contributions are highly welcomed!** See `CONTRIBUTING`_ for details.
-
-.. _CONTRIBUTING: CONTRIBUTING.rst
-
 Bugs & issues
 =============
 
@@ -152,50 +137,19 @@ Make sure you have read the chapter on `bugs`_ in zugbruecke's documentation.
 Miscellaneous
 =============
 
+- `LICENSE`_ (**LGPL v2.1**)
+- `CONTRIBUTING`_ (**Contributions are highly welcomed!**)
 - `FAQ`_
-- `Missing features`_ (for better ctypes compatibility)
+- `Missing features`_ (for full ctypes compatibility)
+- `Long-term ideas`_
+- `Upstream issues`_ (relevant bugs in dependencies)
 
+.. _LICENSE: LICENSE
+.. _CONTRIBUTING: CONTRIBUTING.rst
 .. _FAQ: docs/faq.rst
 .. _Missing features: https://github.com/pleiszenburg/zugbruecke/issues?q=is%3Aissue+is%3Aopen+label%3A%22missing+ctypes+feature%22
-
-To do (target: BETA-status)
-===========================
-
-The following issues need to be resolved before 'Development Status :: 4 - Beta'
-can be achieved:
-
-- A test-suite covering all features must be developed.
-- Structures and pointers should be handled more appropriately.
-  Especially, structures should be passed in a better way.
-- The log should be divided into log-levels with more or less details.
-  Higher log-levels should contain details of the current stack frame
-  such as line number or calling routine (based on ``inspect``).
-  Log level support exists, though all messages currently use default level 1.
-- Dedicated error types for catching more errors and their details.
-
-Beyond beta-status
-==================
-
-Potentially interesting features, which might (or might not) be investigated after reaching beta status:
-
-- Support for popular "alternative" Python interpreters such as PyPy
-- Support for Python 2 syntax interpreters
-- Support for other versions of Wine such as CrossOver
-
-Known issues
-============
-
-The following relevant issues exist in software zugbruecke depends on:
-
-- Wine bug #42474 ("Python 3.6 needs function api-ms-win-core-path-l1-1-0.dll.PathCchCombineEx")
-  renders CPython 3.6.x for Windows unusable under Wine. 3.5 or prior has to be used instead.
-  More details: https://bugs.winehq.org/show_bug.cgi?id=42474
-- The CPython installer for Windows does not work with Wine at all.
-  In a similar fashion, msi-files also fail to install.
-  The current work-around is to use the "embedded" stand-alone version of CPython for Windows,
-  which is offered as a zip-file.
-- CPython for Windows prior to version 3.5 is not offered as a zipped
-  "embedded" stand-alone version without installer. 3.5 or later has to be used.
+.. _Long-term ideas: https://github.com/pleiszenburg/zugbruecke/milestone/2
+.. _Upstream issues: https://github.com/pleiszenburg/zugbruecke/issues?q=is%3Aissue+is%3Aopen+label%3Aupstream
 
 For production environments
 ===========================
