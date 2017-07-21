@@ -44,6 +44,8 @@ A few rules, describing how this project is being developed:
   Have a look at the implementation of ``make test`` for clarification.
 - If something does not work with *ctypes* under *Windows* / *Wine*, *zugbruecke* is not expected
   to do it either. In this case, submit a patch to 'upstream' *CPython* instead first.
+  Exceptions can be made if extra features are required for platform interoperability,
+  like for instance converting paths from Unix to Windows format or vice versa.
 - Code maintainability comes first (until further notice), speed second.
   Speed does not hurt, though, and a lot of code could use some improvements.
 - Security has not been a primary concern so far, but it could use a lot of improvement.
