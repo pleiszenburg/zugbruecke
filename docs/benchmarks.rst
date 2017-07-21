@@ -1,5 +1,5 @@
-Speed
-=====
+Benchmarks
+==========
 
 zugbruecke performs reasonably well given its complexity with **less than 0.2 µs
 overhead per call** in average on modern hardware.
