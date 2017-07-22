@@ -122,11 +122,13 @@ Bugs & issues
 =============
 
 - Report bugs in zugbruecke here: `GitHub issue tracker`_
+- Report bugs in ctypes here: 'Python tracker'_
 - Report bug in Wine here: `WineHQ Bug Tracking System`_
 
 Make sure you have read the chapter on `bugs`_ in zugbruecke's documentation.
 
 .. _GitHub issue tracker: https://github.com/pleiszenburg/zugbruecke/issues
+.. _Python tracker: https://bugs.python.org/
 .. _WineHQ Bug Tracking System: https://bugs.winehq.org/
 .. _bugs: docs/bugs.rst
 
@@ -138,20 +140,20 @@ Miscellaneous
   - at `Read the Docs`_
   - at `zugbruecke repository`_
 
-- `LICENSE`_ (**LGPL v2.1**)
-- `CONTRIBUTING`_ (**Contributions are highly welcomed!**)
+- `License`_ (**LGPL v2.1**)
+- `Contributing`_ (**Contributions are highly welcomed!**)
 - `FAQ`_
-- `AUTHORS`_
+- `Authors`_
 - `Missing features`_ (for full ctypes compatibility)
 - `Long-term ideas`_
 - `Upstream issues`_ (relevant bugs in dependencies)
 
 .. _Read the Docs: http://zugbruecke.readthedocs.io/en/latest/
 .. _zugbruecke repository: docs/index.rst
-.. _LICENSE: LICENSE
-.. _CONTRIBUTING: CONTRIBUTING.rst
+.. _License: LICENSE
+.. _Contributing: CONTRIBUTING.rst
 .. _FAQ: docs/faq.rst
-.. _AUTHORS: AUTHORS.rst
+.. _Authors: AUTHORS.rst
 .. _Missing features: https://github.com/pleiszenburg/zugbruecke/issues?q=is%3Aissue+is%3Aopen+label%3A%22missing+ctypes+feature%22
 .. _Long-term ideas: https://github.com/pleiszenburg/zugbruecke/milestone/2
 .. _Upstream issues: https://github.com/pleiszenburg/zugbruecke/issues?q=is%3Aissue+is%3Aopen+label%3Aupstream

@@ -5,13 +5,15 @@ Bugs
 
 Please report bugs in *zugbruecke* in *zugbruecke*'s `GitHub issue tracker`_.
 
+Please report bugs *ctypes* in the 'Python tracker'_.
+
 Please report bugs in *Wine* in the `WineHQ Bug Tracking System`_.
 
-Make sure to separate between *zugbruecke*-related and *Wine*-related bugs.
-Calling routines in DLLs from *Windows*-executables (executed with *Wine*) with identical
-parameters for narrowing down the possible sources of an error is a good way to start.
+Make sure to separate between *zugbruecke*-related, *ctypes*-related and
+*Wine*-related bugs.
 
 .. _GitHub issue tracker: https://github.com/pleiszenburg/zugbruecke/issues
+.. _Python tracker: https://bugs.python.org/
 .. _WineHQ Bug Tracking System: https://bugs.winehq.org/
 
 How to bisect issues
@@ -45,4 +47,8 @@ For more configuration objects check the :ref:`chapter on configuration <configu
 As an alternative approach, you can also check what happens if you
 run your code directly in a *Windows* *Python* interpreter with *ctypes*.
 Consult the :ref:`chapter on the Wine Python environment <wineenv>`
-for details.
+for details. It is easy to get *ctypes* syntax wrong, so this is a good
+approach for getting it right. 
+
+If in doubt, please also test your code with *ctypes* on an actual Windows
+system - it might be a bug in this module as well.
