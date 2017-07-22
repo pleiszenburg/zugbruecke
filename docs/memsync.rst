@@ -156,13 +156,13 @@ section, which must be kept in sync. It has the following keys:
 
 * ``p`` (:ref:`path to pointer <pathpointer>`)
 * ``l`` (:ref:`path to length <pathlength>`)
+* ``_t`` (:ref:`data type of pointer <pointertype>`)
 * ``_c`` (optional)
-* ``_t``
 
 .. _pathpointer:
 
-Path to pointer ``p`` (list of int and/or str)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Key: ``p``, path to pointer (list of int and/or str)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This parameter describes where in the arguments (along the lines of ``argtypes``)
 *zugbruecke*'s parser can find the pointer, which it is expected to handle.
@@ -197,9 +197,25 @@ You should be able to extrapolate from here.
 
 .. _pathlength:
 
-Path to length ``l`` (list of int and/or str)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Key: ``l``, path to length (list of int and/or str)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This parameter works just like the :ref:`path to pointer <pathpointer>` parameter.
 It is expected to tell the parser, where it can find a number (int) which represents
 the length of the memory block.
+
+.. _pointertype:
+
+Key: ``_t``, data type of pointer (PyCSimpleType or PyCStructType)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+This parameter will be fed into ``ctypes.sizeof`` for determining its size in bytes.
+The result is then multiplied with the ``length`` to get an actual size of the
+memory block in bytes.
+
+For details on ``sizeof``, consult the `Python documentation on sizeof`_.
+It will accept `fundamental types`_ as well as `structure types`_.
+
+.. _Python documentation on sizeof: https://docs.python.org/3/library/ctypes.html?highlight=ctypes#ctypes.sizeof
+.. _fundamental types: https://docs.python.org/3/library/ctypes.html?highlight=ctypes#fundamental-data-types
+.. _structure types: https://docs.python.org/3/library/ctypes.html?highlight=ctypes#ctypes.Structure
