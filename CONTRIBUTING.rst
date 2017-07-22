@@ -9,6 +9,7 @@ Reporting issues
 
 Issues are tracked on `Gitbub`_.
 
+- Read the section on `bugs`_ in *zugbruecke*'s documentation.
 - Describe what you expected to happen.
 - If possible, include a `minimal, complete, and verifiable example`_ to help
   identify the issue. This also helps check that the issue is not with your
@@ -21,7 +22,8 @@ Issues are tracked on `Gitbub`_.
   possible, check if this issue is already fixed in the repository
   (development branch).
 
-.. _zugbruecke issues: https://github.com/pleiszenburg/zugbruecke/issues
+.. _bugs: docs/bugs.rst
+.. _Gitbub: https://github.com/pleiszenburg/zugbruecke/issues
 .. _minimal, complete, and verifiable example: https://stackoverflow.com/help/mcve
 
 Project philosophy
@@ -55,14 +57,15 @@ Submitting patches
 ------------------
 
 - Include tests if your patch is supposed to solve a bug or add a missing feature,
-  and explain clearly under which circumstances the bug happens. Make sure the
-  test fails without your patch.
+  and explain clearly under which circumstances the bug happens what was missing.
+  Make sure the test fails with *zugbruecke* without your patch, while it must work
+  with *ctypes* on *Wine*.
 - Use **tabs** for indentation.
 - No, there is no line limit. Let your editor wrap the lines for you, if you want.
 - Add as many comments as you can - code-readability matters.
 - The ``master`` branch is supposed to be stable - request merges into the
   ``develop`` branch instead.
-- Commits are preferred to be signed (GPG).
+- Commits are preferred to be signed (GPG). Seriously, sign your code.
 
 Looking for work? Check *zugbruecke*'s `open issues`_ :)
 
@@ -123,4 +126,7 @@ Useful helpers
 Have a look at the ``wine-python``, ``wine-pip`` and ``wine-pytest`` commands.
 They actually work as one would expect ;) If you want, you can also write
 executable scripts and add ``#!/usr/bin/env wine-python`` at their top.
-Check ``import os; os.name``, it will return ``nt``.
+Check ``import os; os.name``, it will return ``nt``. Check the section on the
+`Wine Python environment`_ in the documentation.
+
+.. _`Wine Python environment`: docs/wineenv.rst
