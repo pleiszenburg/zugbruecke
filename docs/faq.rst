@@ -11,30 +11,12 @@ Good question. Have a look at the :ref:`motivation <motivation>` section in the 
 What are actual use cases for this project?
 -------------------------------------------
 
-Read the secion on :ref:`use cases <usecases>` in the introduction.
+Read the section on :ref:`use cases <usecases>` in the introduction.
 
 How does it work?
 -----------------
 
-During the first import of *zugbruecke*, a stand-alone *Windows*-version of the
-*CPython* interpreter corresponding to the used *Unix*-version is automatically
-downloaded and placed into the module's configuration folder (by default located at
-``~/.zugbruecke/``). Next to it, also during first import, zugbruecke
-generates its own *Wine*-profile directory for being used with a dedicated
-``WINEPREFIX``. This way, any undesirable interferences with other *Wine*-profile
-directories containing user settings and unrelated software are avoided.
-
-During every import, *zugbruecke* starts the *Windows* *Python* interpreter on top of *Wine*.
-It is used to run a server script named ``_server_.py``, located in the module's folder.
-
-*zugbruecke* offers everything *ctypes* would on the *Unix* system it is running on
-plus everything *ctypes* would offer if it was imported under *Windows*. Functions
-and classes, which have a platform-specific behavior, are replaced with dispatchers.
-The dispatchers decide whether the *Unix* or the *Windows* behavior should be used
-depending on the context of how they were invoked and what parameters were passed
-into them. If *Windows* specific behavior is chosen, calls are passed from
-*zugbruecke*'s client code running on *Unix* to the server component of *zugbruecke*
-running on *Wine*.
+Have a closer look at the section describing the :ref:`implementation <implementation>` in the introduction.
 
 Is it secure?
 -------------

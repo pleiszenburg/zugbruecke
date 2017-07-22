@@ -33,14 +33,40 @@ import statement followed by well established ``ctypes`` syntax is enough.
 It is pure *Python* doing its job.
 With respect to "dirty", well, read the project's documentation from start to finish.
 
+.. _implementation:
+
+The magic behind the curtain - or how it is implemented
+-------------------------------------------------------
+
+During the first import of *zugbruecke*, a stand-alone *Windows*-version of the
+*CPython* interpreter corresponding to the used *Unix*-version is automatically
+downloaded and placed into the module's configuration folder (by default located at
+``~/.zugbruecke/``). Next to it, also during first import, zugbruecke
+generates its own *Wine*-profile directory for being used with a dedicated
+``WINEPREFIX``. This way, any undesirable interferences with other *Wine*-profile
+directories containing user settings and unrelated software are avoided.
+
+During every import, *zugbruecke* starts the *Windows* *Python* interpreter on top of *Wine*.
+It is used to run a server script named ``_server_.py``, located in the module's folder.
+
+*zugbruecke* offers everything *ctypes* would on the *Unix* system it is running on
+plus everything *ctypes* would offer if it was imported under *Windows*. Functions
+and classes, which have a platform-specific behavior, are replaced with dispatchers.
+The dispatchers decide whether the *Unix* or the *Windows* behavior should be used
+depending on the context of how they were invoked and what parameters were passed
+into them. If *Windows* specific behavior is chosen, calls are passed from
+*zugbruecke*'s client code running on *Unix* to the server component of *zugbruecke*
+running on *Wine*.
+
 .. _usecases:
 
 Use cases - or when you should consider using this project
 ----------------------------------------------------------
 
-- Quickly calling routines in proprietary DLLs. Reading legacy file formats and
-  running mission critical legacy plugins for legacy ERP software in a modern environment
-  comes to mind.
+- Quickly calling routines in proprietary DLLs.
+
+- Reading legacy file formats and running mission critical legacy plugins
+  for legacy ERP software in a modern environment comes to mind.
 
 - Calling routines in DLLs which come, for some odd reason like "developer suddenly
   disappeared with source code", without source code.
