@@ -3,43 +3,15 @@
 FAQ
 ===
 
-Why? Seriously, WHY?
+Why? Seriously, why?
 --------------------
 
-Good question. Academic interest and frustration over the lack of a project of
-this kind, mostly. The need for calling individual routines offered by DLLs
-from *Linux*/*MacOS*/*BSD* software/scripts is reflected in numerous threads in forums and
-mailing lists reaching back well over a decade. The recommended approach so far
-has been (and still is!) to write a *Wine* application, which links against ``winelib``,
-thus allowing to access DLLs. Wine applications can also access libraries
-on the *Unix* "host" system, which provides the desired bridge between both worlds.
-Nevertheless, this approach is anything but trivial. *zugbruecke* is supposed
-to satisfy the desire for a "quick and dirty" solution for calling routines from a
-high level scripting language, *Python*, directly running on the *Unix* "host" system.
-With respect to "quick", *zugbruecke* works just out of the box with *Wine* installed.
-No headers, compilers, cross-compilers or any other configuration is required - one
-import statement followed by well established ``ctypes`` syntax is enough.
-It is pure *Python* doing its job.
-With respect to "dirty", well, read the project's documentation from start to finish.
+Good question. Have a look at the :ref:`motivation <motivation>` section in the introduction.
 
 What are actual use cases for this project?
 -------------------------------------------
 
-- Quickly calling routines in proprietary DLLs. Reading legacy file formats and
-  running mission critical legacy plugins for legacy ERP software in a modern environment
-  comes to mind.
-
-- Calling routines in DLLs which come, for some odd reason like "developer suddenly
-  disappeared with source code", without source code.
-  DLLs found in company-internal software or R&D projects come to mind.
-
-- More common than one might think, calling routines in DLLs, of which the source code is available but
-  can not be (re-)compiled (on another platform) / understood / ported for similarly
-  odd reasons like "developer retired and nobody knows how to do this" or "developer 'went on'
-  and nobody manages to understand the undocumented code". The latter is especially
-  prevalent in academic environments, where what is left of years of hard work might
-  only be a single "binary blob" - a copy of an old DLL file. All sorts of complicated
-  and highly specialized numerical computations come to mind.
+Read the secion on :ref:`use cases <usecases>` in the introduction.
 
 How does it work?
 -----------------

@@ -9,6 +9,7 @@ User's guide
 .. toctree::
    :maxdepth: 2
 
+   introduction
    examples
    configuration
    interoperability
