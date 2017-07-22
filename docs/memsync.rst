@@ -149,10 +149,54 @@ The ``memsync`` attribute (list of dict)
 ----------------------------------------
 
 ``memsync`` is a list of dictionaries. Every dictionary represents one memory
-section, which must be kept in sync. It has the following entries:
+section, which must be kept in sync. It has the following keys:
 
-Path to pointer "p" (list of int and str)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+* ``p`` (:ref:`path to pointer <pathpointer>`)
+* ``l`` (:ref:`path to length <pathlength>`)
+* ``_c`` (optional)
+* ``_t``
+
+.. _pathpointer:
+
+Path to pointer ``p`` (list of int and/or str)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This parameter describes where in the arguments (along the lines of ``argtypes``)
-the parser can find the pointer it is expected to handle.
+*zugbruecke*'s parser can find the pointer, which it is expected to handle.
+Consider the following example:
+
+.. code:: python
+
+	# arg nr:    0        1        2
+	some_routine(param_a, param_b, param_c)
+
+If ``param_b`` was the pointer, ``p`` would be ``[1]`` (a list with a single int),
+referring to the second argument of ``some_routine`` (counted from zero).
+
+The following more complex example illustrates why ``p`` is a list actually
+representing something like a "path":
+
+.. code:: python
+
+	class some_struct(Structure):
+		_fields_ = [
+			('field_a', POINTER(c_float)),
+			('field_b', c_int)
+			]
+
+	# arg nr:          0        1        2        3
+	some_other_routine(param_a, param_b, param_c, param_d)
+
+Let's assume that ``param_a`` is of type ``some_struct`` and ``field_a`` contains
+the pointer. ``p`` would look like this: ``[0, 'field_a']``. The pointer is found
+in ``field_a`` of the first parameter of ``some_other_routine``, ``param_a``.
+You should be able to extrapolate from here.
+
+.. _pathlength:
+
+Path to length ``l`` (list of int and/or str)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+This parameter works just like the :ref:`path to pointer <pathpointer>` parameter.
+It is expected to tell the parser, where it can find a number (int) which represents
+the length of the memory block.
