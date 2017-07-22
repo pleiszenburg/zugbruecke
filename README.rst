@@ -118,11 +118,19 @@ For details, check the section on `security`_ in the documentation.
 
 .. _security: docs/security.rst
 
+Need help?
+==========
+
+Feel free to post questions in the `GitHub issue tracker`_ of this project.
+Make sure to label them as `question`_.
+
+.. _question: https://github.com/pleiszenburg/zugbruecke/labels/question
+
 Bugs & issues
 =============
 
 - Report bugs in zugbruecke here: `GitHub issue tracker`_
-- Report bugs in ctypes here: 'Python tracker'_
+- Report bugs in ctypes here: `Python tracker`_
 - Report bug in Wine here: `WineHQ Bug Tracking System`_
 
 Make sure you have read the chapter on `bugs`_ in zugbruecke's documentation.
