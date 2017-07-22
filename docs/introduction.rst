@@ -36,8 +36,8 @@ With respect to "dirty", well, read the project's documentation from start to fi
 
 .. _implementation:
 
-The magic behind the curtain - or how it is implemented
--------------------------------------------------------
+Implementation
+--------------
 
 During the first import of *zugbruecke*, a stand-alone *Windows*-version of the
 *CPython* interpreter corresponding to the used *Unix*-version is automatically
@@ -61,8 +61,8 @@ running on *Wine*.
 
 .. _usecases:
 
-Use cases - or when you should consider using this project
-----------------------------------------------------------
+Use cases
+---------
 
 - Quickly calling routines in proprietary DLLs.
 

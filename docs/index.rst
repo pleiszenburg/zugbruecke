@@ -1,7 +1,7 @@
-Welcome to zugbruecke!
-======================
-
 .. image:: http://www.pleiszenburg.de/zugbruecke_logo.png
+	:alt: zugbruecke
+
+Calling routines in Windows DLLs from Python scripts running under Linux, MacOS or BSD.
 
 User's guide
 ------------

@@ -3,8 +3,11 @@
 .. index::
 	single: pointer
 
-The ``memsync`` protocol - handling pointers
-============================================
+Handling pointers
+=================
+
+The memory synchronization protocol
+-----------------------------------
 
 Because *zugbruecke* runs core in a separate *Python* interpreter on *Wine*,
 pointers pose a special kind of problem. The can, unfortunately, not be passed
@@ -145,7 +148,7 @@ The complete example, which will run on *Unix* and on *Windows* looks just like 
 	test_vector = [5.74, 3.72, 6.28, 8.6, 9.34, 6.47, 2.05, 9.09, 4.39, 4.75]
 	bubblesort(test_vector)
 
-The ``memsync`` attribute (list of dict)
+Attribute: ``memsync`` (list of dict)
 ----------------------------------------
 
 ``memsync`` is a list of dictionaries. Every dictionary represents one memory
