@@ -1,11 +1,11 @@
 .. _wineenv:
 
 .. index::
-   single: wine-python
-   single: wine-pip
-   single: wine-pytest
-   triple: wine; python; environment
-   module: zugbruecke.core.wineenv
+	single: wine-python
+	single: wine-pip
+	single: wine-pytest
+	triple: wine; python; environment
+	module: zugbruecke.core.wineenv
 
 Wine Python environment
 =======================
@@ -14,8 +14,8 @@ Wine Python environment
 *Python* on *Wine* more easily. They are also used for *zugbruecke*'s internal
 operations and development tests.
 
-``wine-python``
----------------
+Command: ``wine-python``
+------------------------
 
 This command behaves just like the regular ``python`` command in a *Unix* shell,
 except that it fires up a *Windows* *Python* interpreter on top of *Wine*. It works
@@ -25,8 +25,8 @@ interactive mode.
 You can also use it for creating executable *Python* scripts by adding the following
 at their top: ``#!/usr/bin/env wine-python``. Do not forget ``chmod +x your_script.py``.
 
-``wine-pip``
-------------
+Command: ``wine-pip``
+---------------------
 
 This command behaves just like the regular ``pip`` command on *Unix*, except
 that it attempts to install *Python* packages into a dedicated *Python* environment
@@ -37,8 +37,8 @@ Packages / wheels with pre-compiled binary components in them might work,
 although this is largely untested territory. Feel free to report any
 (positive or negative) results.
 
-``wine-pytest``
----------------
+Command: ``wine-pytest``
+------------------------
 
 This command behaves just like the regular ``pytest`` or ``py.test`` command
 on *Unix*. It is used for verifying how *ctypes* behaves on *Windows* / *Wine*.

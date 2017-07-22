@@ -11,11 +11,16 @@ User's guide
 
    examples
    configuration
+   interoperability
    wineenv
    benchmarks
    security
    bugs
    faq
+
+`Interested in contributing`_?
+
+.. _Interested in contributing: https://github.com/pleiszenburg/zugbruecke/blob/master/CONTRIBUTING.rst
 
 Indices and tables
 ------------------
