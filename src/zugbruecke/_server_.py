@@ -57,6 +57,9 @@ if __name__ == '__main__':
 	parser.add_argument(
 		'--log_level', type = int, nargs = 1
 		)
+	parser.add_argument(
+		'--logwrite', type = int, nargs = 1
+		)
 	args = parser.parse_args()
 
 	# Generate parameter dict
@@ -65,7 +68,7 @@ if __name__ == '__main__':
 		'platform': 'WINE',
 		'stdout': False,
 		'stderr': False,
-		'logwrite': True,
+		'logwrite': bool(args.logwrite[0]),
 		'remote_log': True,
 		'log_level': args.log_level[0],
 		'log_server': False,

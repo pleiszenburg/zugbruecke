@@ -269,5 +269,6 @@ class session_client_class():
 			'--id', self.id,
 			'--port_socket_ctypes', str(self.p['port_socket_ctypes']),
 			'--port_socket_log_main', str(self.p['port_socket_log_main']),
-			'--log_level', str(self.p['log_level'])
+			'--log_level', str(self.p['log_level']),
+			'--logwrite', str(int(self.p['logwrite']))
 			]
