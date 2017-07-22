@@ -159,6 +159,14 @@ class session_client_class():
 			# Raise error if unknown
 			raise # TODO
 
+		# Fix parameters dict with defauls values
+		if 'mode' not in dll_param.keys():
+			dll_param['mode'] = 0
+		if 'use_errno' not in dll_param.keys():
+			dll_param['use_errno'] = False
+		if 'use_last_error' not in dll_param.keys():
+			dll_param['use_last_error'] = False
+
 		# Log status
 		self.log.out('[session-client] Trying to access DLL "%s" of type "%s" ...' % (dll_name, dll_type))
 

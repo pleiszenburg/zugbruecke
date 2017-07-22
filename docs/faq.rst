@@ -108,11 +108,9 @@ in your code manually. You can do this as follows:
 .. code:: python
 
 	from zugbruecke import session
-	# start new thread - then, inside, do:
+	# start new thread or process (multiprocessing) - then, inside, do:
 	a = session()
 	# now you can do stuff like
-	kernel32 = a.load_library(
-		'kernel32', 'cdll', {'mode': 0, 'use_errno': False, 'use_last_error': False}
-		)
+	kernel32 = a.load_library('kernel32', 'cdll')
 	# do not forget to terminate the session (i.e. the Windows Python interpreter)
 	a.terminate()
