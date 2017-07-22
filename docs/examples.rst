@@ -1,5 +1,12 @@
 .. _examples:
 
+.. index::
+	pair: cdll; example
+	pair: windll; example
+	pair: oledll; example
+	pair: memsync; example
+	single: demo_dll
+
 Examples
 ========
 

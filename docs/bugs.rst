@@ -1,5 +1,11 @@
 .. _bugs:
 
+.. index::
+	triple: bug; issue; report
+	triple: bug; issue; bisect
+	single: ctypes
+	single: wine
+
 Bugs
 ====
 
@@ -48,7 +54,7 @@ As an alternative approach, you can also check what happens if you
 run your code directly in a *Windows* *Python* interpreter with *ctypes*.
 Consult the :ref:`chapter on the Wine Python environment <wineenv>`
 for details. It is easy to get *ctypes* syntax wrong, so this is a good
-approach for getting it right. 
+approach for getting it right.
 
 If in doubt, please also test your code with *ctypes* on an actual Windows
 system - it might be a bug in this module as well.

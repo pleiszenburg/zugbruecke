@@ -1,5 +1,8 @@
 .. _security:
 
+.. index::
+	triple: root; super user; privileges
+
 Security
 ========
 

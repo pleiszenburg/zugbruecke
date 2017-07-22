@@ -1,5 +1,11 @@
 .. _benchmarks:
 
+.. index::
+	single: speed
+	single: benchmark
+	single: optimization
+	pair: overhead; call
+
 Benchmarks
 ==========
 
