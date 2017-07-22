@@ -6,11 +6,20 @@ Welcome to zugbruecke!
 User's guide
 ------------
 
+*zugbruecke* is a drop-in replacement for *ctypes*. This manual describes what makes
+*zugbruecke* special and how it differs from *ctypes*. It does not substitute the
+*ctypes* documentation. Read it first if you have never called foreign functions with
+*ctypes* from *Python* scripts. It is part of the `Python documentation`_.
+
+.. _Python documentation: https://docs.python.org/3/library/ctypes.html?highlight=ctypes#module-ctypes
+
 .. toctree::
    :maxdepth: 2
 
    introduction
    examples
+   session
+   memsync
    configuration
    interoperability
    wineenv

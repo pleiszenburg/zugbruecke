@@ -2,6 +2,7 @@
 
 .. index::
 	single: motivation
+	single: implementation
 	single: use cases
 
 Introduction

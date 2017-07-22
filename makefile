@@ -25,7 +25,7 @@ dll:
 	@(cd demo_dll; make clean; make; make install)
 
 docu:
-	@(cd docs; make html)
+	@(cd docs; make clean; make html)
 
 release:
 	-rm dist/*
