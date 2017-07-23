@@ -157,7 +157,7 @@ section, which must be kept in sync. It has the following keys:
 * ``p`` (:ref:`path to pointer <pathpointer>`)
 * ``l`` (:ref:`path to length <pathlength>`)
 * ``_t`` (:ref:`data type of pointer <pointertype>`)
-* ``_c`` (optional)
+* ``_c`` (:ref:`custom data type <customtype>`, optional)
 
 .. _pathpointer:
 
@@ -219,3 +219,12 @@ It will accept `fundamental types`_ as well as `structure types`_.
 .. _Python documentation on sizeof: https://docs.python.org/3/library/ctypes.html?highlight=ctypes#ctypes.sizeof
 .. _fundamental types: https://docs.python.org/3/library/ctypes.html?highlight=ctypes#fundamental-data-types
 .. _structure types: https://docs.python.org/3/library/ctypes.html?highlight=ctypes#ctypes.Structure
+
+.. _customtype:
+
+Key: ``_c``, custom data type (optional)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+If you are using a custom non-*ctypes* datatype, which offers a ``from_param`` method,
+you must specify it here. This applies when you construct your own array types
+or use *numpy* types for instance.
