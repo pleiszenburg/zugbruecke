@@ -1,15 +1,23 @@
 
-.. |branch_master| image:: https://travis-ci.org/pleiszenburg/zugbruecke.svg?branch=master
+.. |build_master| image:: https://travis-ci.org/pleiszenburg/zugbruecke.svg?branch=master
     :target: https://travis-ci.org/pleiszenburg/zugbruecke
 
-.. |branch_develop| image:: https://travis-ci.org/pleiszenburg/zugbruecke.svg?branch=develop
+.. |build_develop| image:: https://travis-ci.org/pleiszenburg/zugbruecke.svg?branch=develop
     :target: https://travis-ci.org/pleiszenburg/zugbruecke
 
-+--------------------+--------------------+
-| master / release   + |branch_master|    +
-+--------------------+--------------------+
-| development branch + |branch_develop|   +
-+--------------------+--------------------+
+.. |docs_master| image:: https://readthedocs.org/projects/zugbruecke/badge/?version=latest
+	:target: http://zugbruecke.readthedocs.io/en/latest/?badge=latest
+	:alt: Documentation Status (master)
+
+.. |docs_develop| image:: https://readthedocs.org/projects/zugbruecke/badge/?version=docs_develop
+	:target: http://zugbruecke.readthedocs.io/en/develop/?badge=develop
+	:alt: Documentation Status (master)
+
++--------------------+-------------------+-------------------+
+| master / release   + |build_master|    + |docs_master|     +
++--------------------+-------------------+-------------------+
+| development branch + |build_develop|   + |docs_develop|    +
++--------------------+-------------------+-------------------+
 
 .. image:: http://www.pleiszenburg.de/zugbruecke_logo.png
 
