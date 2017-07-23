@@ -46,11 +46,15 @@ left unconfigured, *zugbuecke* will fill them with its defaults. A parameter
 found in a location higher in the list will always be given priority over
 a the same parameter with different content found in a location further down the list.
 
+.. _reconfiguration:
+
 Re-configuration during run-time
 --------------------------------
 
-Every session exposes a ``set_parameter`` method, which accepts dictionary
+Every session exposes a ``set_parameter`` method, which accepts a dictionary
 containing parameters.
+
+.. _configparameter:
 
 Configurable parameters
 -----------------------

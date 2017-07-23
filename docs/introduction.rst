@@ -1,4 +1,4 @@
-.. _interoperability:
+.. _introduction:
 
 .. index::
 	single: motivation
