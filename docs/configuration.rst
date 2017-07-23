@@ -19,6 +19,8 @@ During import, the *zugbruecke* module starts a default session which is referen
 ``zugbruecke.current_session``. Alternatively, you can create your own sessions with
 ``zugbruecke.session()``. See the :ref:`chapter on the session model <session>` for details.
 
+.. _configconstructor:
+
 Configuring the session constructor
 -----------------------------------
 
