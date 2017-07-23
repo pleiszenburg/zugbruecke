@@ -78,6 +78,17 @@ This method can be used to manually terminate a session. It will quit the
 can not be re-started. Any handles on DLLs and their routines derived from this
 session will become useless.
 
+String: ``id``
+^^^^^^^^^^^^^^
+
+Allows to read the unique session id.
+
+Boolean: ``up``
+^^^^^^^^^^^^^^^
+
+Can be read to determine whether a session is up. Once a session is terminated,
+it will be set to ``False``.
+
 .. _currentsessionobject:
 
 Instance: ``zugbruecke.current_session``
