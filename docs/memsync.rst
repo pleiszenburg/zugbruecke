@@ -9,8 +9,8 @@ Handling pointers
 The memory synchronization protocol
 -----------------------------------
 
-Because *zugbruecke* runs core in a separate *Python* interpreter on *Wine*,
-pointers pose a special kind of problem. The can, unfortunately, not be passed
+Because *zugbruecke* runs code in a separate *Python* interpreter on *Wine*,
+pointers pose a special kind of problem. They can, unfortunately, not be passed
 from the code running on the *Unix* side to the code running on the *Wine* side
 or vice versa. This is why the memory pointers are pointing to must be kept in
 sync on both sides. The memory synchronization can be controlled by the user
