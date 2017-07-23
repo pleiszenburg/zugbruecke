@@ -8,6 +8,25 @@
 Introduction
 ============
 
+.. _synopsis:
+
+Synopsis
+--------
+
+*zugbruecke* is an **EXPERIMENTAL** *Python* module (currently in development *status 3/alpha*).
+It allows to call routines in *Windows* DLLs from *Python* code running on
+Unices / *Unix*-like systems such as *Linux*, *MacOS* or *BSD*.
+*zugbruecke* is designed as a drop-in replacement for *Python*'s standard library's *ctypes* module.
+*zugbruecke* is built on top of *Wine*. A stand-alone *Windows* *Python* interpreter
+launched in the background is used to execute the called DLL routines.
+Communication between the *Unix*-side and the *Windows*/*Wine*-side is based on *Python*'s
+build-in multiprocessing connection capability.
+*zugbruecke* has (limited) support for pointers and struct types.
+*zugbruecke* comes with extensive logging features allowing to debug problems
+associated with both itself and with *Wine*.
+*zugbruecke* is written using *Python* 3 syntax and primarily targets the
+*CPython* implementation of *Python*.
+
 .. _motivation:
 
 Motivation
