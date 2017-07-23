@@ -44,10 +44,9 @@ from .routine_client import routine_client_class
 class dll_client_class(): # Representing one idividual dll to be called into, returned by LoadLibrary
 
 
-	def __init__(self, parent_session, full_path_dll, dll_name, dll_type, hash_id):
+	def __init__(self, parent_session, dll_name, dll_type, hash_id):
 
 		# Store dll parameters name, path and type
-		self.full_path = full_path_dll
 		self.name = dll_name
 		self.calling_convention = dll_type
 
@@ -69,40 +68,78 @@ class dll_client_class(): # Representing one idividual dll to be called into, re
 		# Expose routine registration
 		self.__register_routine_on_server__ = getattr(self.client, self.hash_id + '_register_routine')
 
+		# Expose string reprentation of dll object
+		self.__get_repr__ = getattr(self.client, self.hash_id + '_repr')
 
-	def __getattr__(self, name): # Handle requests for functions in dll which have yet not been touched
+
+	def __attach_to_routine__(self, name):
 
 		# Status log
-		self.log.out('[dll-client] Trying to attach to routine "%s" in DLL file "%s" ...' % (name, self.name))
+		self.log.out('[dll-client] Trying to attach to routine "%s" in DLL file "%s" ...' % (str(name), self.name))
 
-		# Is routine unknown?
-		if name not in self.routines.keys():
+		# Log status
+		self.log.out('[dll-client] ... unknown, registering  ...')
+
+		# Only if name is a string ...
+		if isinstance(name, str):
+
+			# Original ctypes does that
+			if name.startswith('__') and name.endswith('__'):
+				raise AttributeError(name)
+
+		# Register routine in wine
+		success = self.__register_routine_on_server__(name)
+
+		# If success ...
+		if success:
+
+			# Create new instance of routine_client
+			self.routines[name] = routine_client_class(self, name)
 
 			# Log status
-			self.log.out('[dll-client] ... unknown, registering  ...')
+			self.log.out('[dll-client] ... registered (unconfigured) ...')
 
-			# Register routine in wine
-			success = self.__register_routine_on_server__(name)
+		# If failed ...
+		else:
 
-			# If success ...
-			if success:
+			# Log status
+			self.log.out('[dll-client] ... failed!')
 
-				# Create new instance of routine_client
-				self.routines[name] = routine_client_class(self, name)
+			raise # TODO
 
-				# Log status
-				self.log.out('[dll-client] ... registered (unconfigured) ...')
+		# If name is a string ...
+		if isinstance(name, str):
 
-			# If failed ...
-			else:
-
-				# Log status
-				self.log.out('[dll-client] ... failed!')
-
-				raise # TODO
+			# Set attribute for future use
+			setattr(self, name, self.routines[name].handle_call)
 
 		# Log status
 		self.log.out('[dll-client] ... return handler.')
 
 		# Return handler
 		return self.routines[name].handle_call
+
+
+	def __getattr__(self, name):
+
+		return self.__attach_to_routine__(name)
+
+
+	def __getitem__(self, name_or_ordinal):
+
+		# Is it in dict?
+		if name_or_ordinal in self.routines.keys():
+
+			# Return handle
+			return self.routines[name_or_ordinal].handle_call
+
+		# Is is unknown?
+		else:
+
+			# Generate new handle
+			return self.__attach_to_routine__(name_or_ordinal)
+
+
+	def __repr__(self):
+
+		return self.__get_repr__()

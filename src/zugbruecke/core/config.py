@@ -53,9 +53,6 @@ def get_default_config():
 	# Generate unique session id
 	cfg['id'] = generate_session_id()
 
-	# Session mode
-	cfg['mode'] = 'ctypes'
-
 	# Display messages from stdout
 	cfg['stdout'] = True
 
@@ -144,7 +141,7 @@ def __locate_and_read_config_files__():
 
 		# Compile path
 		try:
-			try_path = os.path.join(file_location, 'config.json')
+			try_path = os.path.join(file_location, '.zugbruecke.json')
 		except:
 			try_path = None
 

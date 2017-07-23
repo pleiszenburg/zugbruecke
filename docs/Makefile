@@ -1,10 +1,8 @@
-#!/bin/bash
-
 # ZUGBRUECKE
 # Calling routines in Windows DLLs from Python scripts running on unixlike systems
 # https://github.com/pleiszenburg/zugbruecke
 #
-#	scripts/wine-pytest: Running tests with py.test
+#	docs/makefile: GNU makefile for building the documentation
 #
 #	Required to run on platform / side: [UNIX]
 #
@@ -22,26 +20,21 @@
 # specific language governing rights and limitations under the License.
 # </LICENSE_BLOCK>
 
-# Get parameters from zugbruecke configuration
-arch=$(python -c 'from zugbruecke.core.config import echo_parameter; echo_parameter("arch")')
-version=$(python -c 'from zugbruecke.core.config import echo_parameter; echo_parameter("version")')
-zugbruecke_dir=$(python -c 'from zugbruecke.core.config import echo_parameter; echo_parameter("dir")')
 
-# Process parameters
-dir_py=$zugbruecke_dir/$arch-python$version
-dir_wine=$zugbruecke_dir/$arch-wine
+# You can set these variables from the command line.
+SPHINXOPTS    =
+SPHINXBUILD   = python -msphinx
+SPHINXPROJ    = zugbruecke
+SOURCEDIR     = .
+BUILDDIR      = _build
 
-# Set environment variables
-export WINEARCH="$arch"
-export WINEPREFIX="$dir_wine"
+# Put it first so that "make" without argument is like "make help".
+help:
+	@$(SPHINXBUILD) -M help "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
-# Silence Wine ...
-export WINEDEBUG=-all
+.PHONY: help Makefile
 
-# Install pytest if it is not there ...
-if [ ! -f $dir_py/Scripts/pytest.exe ]; then
-	wine-pip install pytest
-fi
-
-# Fire up py.test under Wine, pass cmd line arguments
-wine $dir_py/Scripts/pytest.exe "$@"
+# Catch-all target: route all unknown targets to Sphinx using the new
+# "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).
+%: Makefile
+	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)

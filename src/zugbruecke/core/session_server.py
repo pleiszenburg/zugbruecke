@@ -39,6 +39,7 @@ import traceback
 
 from .dll_server import dll_server_class
 from .log import log_class
+from .path import path_class
 from .rpc import mp_server_class
 
 
@@ -64,8 +65,20 @@ class session_server_class:
 		# Mark session as up
 		self.up = True
 
+		# Offer methods for converting paths
+		path = path_class()
+		self.path_unix_to_wine = path.unix_to_wine
+		self.path_wine_to_unix = path.wine_to_unix
+
 		# Start dict for dll files and routines
 		self.dll_dict = {}
+
+		# Organize all DLL types
+		self.dll_types = {
+			'cdll': ctypes.CDLL,
+			'windll': ctypes.WinDLL,
+			'oledll': ctypes.OleDLL
+			}
 
 		# Create server
 		self.server = mp_server_class(
@@ -79,8 +92,17 @@ class session_server_class:
 		self.server.register_function(self.__get_status__, 'get_status')
 		# Register call: Accessing a dll
 		self.server.register_function(self.__load_library__, 'load_library')
+		# Expose routine for updating parameters
+		self.server.register_function(self.__set_parameter__, 'set_parameter')
 		# Register destructur: Call goes into xmlrpc-server first, which then terminates parent
 		self.server.register_function(self.server.terminate, 'terminate')
+		# Convert path: Unix to Wine
+		self.server.register_function(self.path_unix_to_wine, 'path_unix_to_wine')
+		# Convert path: Wine to Unix
+		self.server.register_function(self.path_wine_to_unix, 'path_wine_to_unix')
+
+		# Expose ctypes stuff
+		self.__expose_ctypes_routines__()
 
 		# Status log
 		self.log.out('[session-server] ctypes server is listening on port %d.' % self.p['port_socket_ctypes'])
@@ -89,6 +111,20 @@ class session_server_class:
 
 		# Run server ...
 		self.server.serve_forever()
+
+
+	def __expose_ctypes_routines__(self):
+
+		# As-is exported platform-specific routines from ctypes
+		for routine in [
+			'FormatError',
+			'get_last_error',
+			'GetLastError',
+			'WinError',
+			'set_last_error'
+			]:
+
+			self.server.register_function(getattr(ctypes, routine), 'ctypes_' + routine)
 
 
 	def __get_status__(self):
@@ -102,36 +138,39 @@ class session_server_class:
 			return 'down'
 
 
-	def __load_library__(self, full_path_dll, full_path_dll_unix, dll_name, dll_type):
+	def __load_library__(self, dll_name, dll_type, dll_param):
 		"""
 		Exposed interface
 		"""
 
 		# Although this should happen only once per dll, lets be on the safe side
-		if full_path_dll_unix in self.dll_dict.keys():
-			return (True, self.dll_dict[full_path_dll_unix].hash_id) # Success & dll hash_id
+		if dll_name in self.dll_dict.keys():
+			return (True, self.dll_dict[dll_name].hash_id) # Success & dll hash_id
 
 		# Status log
-		self.log.out('[session-server] Attaching to DLL file "%s" with calling convention "%s" located at' % (
+		self.log.out('[session-server] Attaching to DLL file "%s" with calling convention "%s" ...' % (
 			dll_name, dll_type
 			))
-		self.log.out('[session-server]  %s' % full_path_dll)
 
 		try:
 
 			# Attach to DLL with ctypes
-			handler = ctypes.windll.LoadLibrary(full_path_dll) # TODO handle oledll and cdll
+			handler = self.dll_types[dll_type](
+				dll_name, mode = dll_param['mode'], handle = None,
+				use_errno = dll_param['use_errno'],
+				use_last_error = dll_param['use_last_error']
+				)
 
 			# Load library
-			self.dll_dict[full_path_dll_unix] = dll_server_class(
-				self, full_path_dll, full_path_dll_unix, dll_name, dll_type, handler
+			self.dll_dict[dll_name] = dll_server_class(
+				self, dll_name, dll_type, handler
 				)
 
 			# Log status
 			self.log.out('[session-server] ... done.')
 
 			# Return success and dll's hash id
-			return (True, self.dll_dict[full_path_dll_unix].hash_id) # Success
+			return (True, self.dll_dict[dll_name].hash_id) # Success
 
 		except:
 
@@ -142,6 +181,11 @@ class session_server_class:
 			self.log.err(traceback.format_exc())
 
 			return (False, None) # Fail
+
+
+	def __set_parameter__(self, parameter):
+
+		self.p.update(parameter)
 
 
 	def __terminate__(self):

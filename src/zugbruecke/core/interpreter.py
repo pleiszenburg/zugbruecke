@@ -46,13 +46,12 @@ class interpreter_session_class():
 
 
 	# session init
-	def __init__(self, session_id, parameter, session_log, session_wineserver):
+	def __init__(self, session_id, parameter, session_log):
 
 		# Set ID, parameters and pointer to log
 		self.id = session_id
 		self.p = parameter
 		self.log = session_log
-		self.wineserver = session_wineserver
 
 		# Log status
 		self.log.out('[interpreter] STARTING ...')

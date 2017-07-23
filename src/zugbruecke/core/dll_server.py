@@ -45,11 +45,9 @@ from .routine_server import routine_server_class
 class dll_server_class(): # Representing one idividual dll to be called into
 
 
-	def __init__(self, parent_session, full_path_dll, full_path_dll_unix, dll_name, dll_type, handler):
+	def __init__(self, parent_session, dll_name, dll_type, handler):
 
 		# Store dll parameters name, path and type
-		self.full_path = full_path_dll
-		self.full_path_unix = full_path_dll_unix
 		self.name = dll_name
 		self.calling_convention = dll_type
 
@@ -66,31 +64,52 @@ class dll_server_class(): # Representing one idividual dll to be called into
 		self.routines = {}
 
 		# Hash my own path as unique ID
-		self.hash_id = get_hash_of_string(self.full_path_unix)
+		self.hash_id = get_hash_of_string(self.name)
 
 		# Export registration of my functions directly
 		self.session.server.register_function(
-			self.register_routine,
+			self.__get_repr__,
+			self.hash_id + '_repr'
+			)
+		self.session.server.register_function(
+			self.__register_routine__,
 			self.hash_id + '_register_routine'
 			)
 
 
-	def register_routine(self, routine_name):
+	def __get_repr__(self):
+
+		return self.handler.__repr__()
+
+
+	def __register_routine__(self, routine_name):
+		"""
+		Exposed interface
+		"""
 
 		# Just in case this routine is already known
 		if routine_name in self.routines.keys():
 			return True # Success
 
 		# Log status
-		self.log.out('[dll-server] Trying to access "%s" in DLL file "%s" ...' % (routine_name, self.name))
+		self.log.out('[dll-server] Trying to access "%s" in DLL file "%s" ...' % (str(routine_name), self.name))
 
 		# Try to attach to routine with ctypes
 		try:
 
-			# Get handler on routine in dll
-			routine_handler = getattr(
-				self.handler, routine_name
-				)
+			# If name is a string
+			if isinstance(routine_name, str):
+
+				# Get handler on routine in dll as attribute
+				routine_handler = getattr(
+					self.handler, routine_name
+					)
+
+			# If name is an integer
+			else:
+
+				# Get handler on routine in dll as item
+				routine_handler = self.handler[routine_name]
 
 		except:
 
@@ -108,11 +127,11 @@ class dll_server_class(): # Representing one idividual dll to be called into
 		# Export call and configration directly
 		self.session.server.register_function(
 			self.routines[routine_name].__handle_call__,
-			self.hash_id + '_' + routine_name + '_handle_call'
+			self.hash_id + '_' + str(routine_name) + '_handle_call'
 			)
 		self.session.server.register_function(
 			self.routines[routine_name].__configure__,
-			self.hash_id + '_' + routine_name + '_configure'
+			self.hash_id + '_' + str(routine_name) + '_configure'
 			)
 
 		# Log status

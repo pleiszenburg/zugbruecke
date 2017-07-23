@@ -45,4 +45,4 @@ export WINEPREFIX="$dir_wine"
 export WINEDEBUG=-all
 
 # Fire up Pip under Wine, pass cmd line arguments
-wine $dir_py/Scripts/pip.exe $*
+wine $dir_py/Scripts/pip.exe "$@"
