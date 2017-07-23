@@ -9,7 +9,7 @@
 	:target: http://zugbruecke.readthedocs.io/en/latest/?badge=latest
 	:alt: Documentation Status (master)
 
-.. |docs_develop| image:: https://readthedocs.org/projects/zugbruecke/badge/?version=docs_develop
+.. |docs_develop| image:: https://readthedocs.org/projects/zugbruecke/badge/?version=develop
 	:target: http://zugbruecke.readthedocs.io/en/develop/?badge=develop
 	:alt: Documentation Status (master)
 
