@@ -46,7 +46,7 @@ from sys import platform
 
 
 # Bump version HERE!
-version = '0.0.1'
+_version_ = '0.0.1'
 
 
 # List all versions of Python which are supported
@@ -70,13 +70,13 @@ setup(
 	name = 'zugbruecke',
 	packages = find_packages('src'),
 	package_dir = {'': 'src'},
-	version = version,
+	version = _version_,
 	description = 'Calling routines in Windows DLLs from Python scripts running under Linux, MacOS or BSD',
 	long_description = long_description,
 	author = 'Sebastian M. Ernst',
 	author_email = 'ernst@pleiszenburg.de',
 	url = 'https://github.com/pleiszenburg/zugbruecke',
-	download_url = 'https://github.com/pleiszenburg/zugbruecke/archive/zugbruecke_%s.tar.gz' % version,
+	download_url = 'https://github.com/pleiszenburg/zugbruecke/archive/v%s.tar.gz' % _version_,
 	license = 'LGPLv2',
 	keywords = ['ctypes', 'wine'],
 	scripts = glob(os.path.join('scripts', '*')),
