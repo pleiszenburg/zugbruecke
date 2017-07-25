@@ -1,3 +1,5 @@
+:github_url:
+
 .. _benchmarks:
 
 .. index::

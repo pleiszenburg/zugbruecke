@@ -1,3 +1,5 @@
+:github_url:
+
 .. image:: http://www.pleiszenburg.de/zugbruecke_logo.png
 	:alt: zugbruecke
 
