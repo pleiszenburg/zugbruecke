@@ -24,6 +24,9 @@
 dll:
 	@(cd demo_dll; make clean; make; make install)
 
+docu:
+	@(cd docs; make clean; make html)
+
 release:
 	-rm dist/*
 	-rm -r src/*.egg-info
@@ -50,5 +53,8 @@ install_link:
 	wine-pytest --version
 
 test:
+	make docu
+	-rm tests/__pycache__/*.pyc
 	wine-pytest
+	-rm tests/__pycache__/*.pyc
 	pytest

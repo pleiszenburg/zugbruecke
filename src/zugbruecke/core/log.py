@@ -6,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	src/zugbruecke/log.py: Classes for gathering, managing and displaying logs
+	src/zugbruecke/core/log.py: Classes for gathering, managing & displaying logs
 
 	Required to run on platform / side: [UNIX, WINE]
 
@@ -37,18 +37,11 @@ import sys
 import threading
 import time
 
-try:
-	from .lib import get_free_port
-	from .rpc import (
-		mp_client_class,
-		mp_server_class
-		)
-except:
-	from lib import get_free_port
-	from rpc import (
-		mp_client_class,
-		mp_server_class
-		)
+from .lib import get_free_port
+from .rpc import (
+	mp_client_class,
+	mp_server_class
+	)
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

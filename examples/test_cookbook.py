@@ -48,9 +48,14 @@ except:
 
 if True in [platform.startswith(os_name) for os_name in ['linux', 'darwin', 'freebsd']]:
 
-	from zugbruecke import ctypes
-	if not TIMING_RUN:
-		ctypes.windll.start_session(parameter = {'log_level': 10})
+	f = open('.zugbruecke.json', 'w')
+	if TIMING_RUN:
+		f.write('{}')
+	else:
+		f.write('{"log_level": 10}')
+	f.close()
+	import zugbruecke
+	ctypes = zugbruecke
 
 elif platform.startswith('win'):
 
@@ -167,6 +172,12 @@ class sample_class:
 		self.distance.argtypes = (ctypes.POINTER(Point), ctypes.POINTER(Point))
 		self.distance.restype = ctypes.c_double
 
+		# void mix_rgb_colors(int8_t [3], int8_t [3], int8_t *)
+		self.__mix_rgb_colors__ = self.__dll__.mix_rgb_colors
+		self.__mix_rgb_colors__.argtypes = (
+			ctypes.c_ubyte * 3, ctypes.c_ubyte * 3, ctypes.POINTER(ctypes.c_ubyte * 3)
+			)
+
 
 	def avg(self, values):
 
@@ -181,6 +192,18 @@ class sample_class:
 			)
 		self.__bubblesort__(ctypes_float_pointer_firstelement, len(values))
 		values[:] = ctypes_float_values[:]
+
+
+	def mix_rgb_colors(self, color_a, color_b):
+
+		color_type = ctypes.c_ubyte * 3
+		ctypes_color_a = color_type(*tuple(color_a))
+		ctypes_color_b = color_type(*tuple(color_b))
+		mixed_color = color_type()
+		self.__mix_rgb_colors__(
+			ctypes_color_a, ctypes_color_b, ctypes.pointer(mixed_color)
+			)
+		return mixed_color[:]
 
 
 	def divide(self, x, y):
@@ -255,3 +278,9 @@ if __name__ == '__main__':
 		returnvalue = sample.distance(p1, p2)
 	if TIMING_RUN:
 		time_ROUTINE('distance')
+
+	print([45, 35, 30], sample.mix_rgb_colors([10, 20, 40], [80, 50, 20]))
+	def time_mix_rgb_colors():
+		returnvalue = sample.mix_rgb_colors([10, 20, 40], [80, 50, 30])
+	if TIMING_RUN:
+		time_ROUTINE('mix_rgb_colors')

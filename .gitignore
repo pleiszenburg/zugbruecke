@@ -95,3 +95,6 @@ ENV/
 # Logging
 *_err.txt
 *_out.txt
+
+# CFG
+.zugbruecke.json

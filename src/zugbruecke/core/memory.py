@@ -1,4 +1,3 @@
-#!/usr/bin/env wine-python
 # -*- coding: utf-8 -*-
 
 """
@@ -7,9 +6,9 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	src/zugbruecke/_server_.py: Started with Python on Wine, executing DLL calls
+	src/zugbruecke/core/memory.py: Handles memory transfers between both sides
 
-	Required to run on platform / side: [WINE]
+	Required to run on platform / side: [UNIX, WINE]
 
 	Copyright (C) 2017 Sebastian M. Ernst <ernst@pleiszenburg.de>
 
@@ -27,54 +26,27 @@ specific language governing rights and limitations under the License.
 
 """
 
-
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-import argparse
-
-from core.session_server import session_server_class
+import ctypes
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# INIT
+# ROUTINES
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-if __name__ == '__main__':
+def generate_pointer_from_int_list(int_array):
 
-	# Parse arguments comming from unix side
-	parser = argparse.ArgumentParser()
-	parser.add_argument(
-		'--id', type = str, nargs = 1
-		)
-	parser.add_argument(
-		'--port_socket_ctypes', type = int, nargs = 1
-		)
-	parser.add_argument(
-		'--port_socket_log_main', type = int, nargs = 1
-		)
-	parser.add_argument(
-		'--log_level', type = int, nargs = 1
-		)
-	parser.add_argument(
-		'--logwrite', type = int, nargs = 1
-		)
-	args = parser.parse_args()
+	return ctypes.pointer((ctypes.c_ubyte * len(int_array))(*int_array))
 
-	# Generate parameter dict
-	parameter = {
-		'id': args.id[0],
-		'platform': 'WINE',
-		'stdout': False,
-		'stderr': False,
-		'logwrite': bool(args.logwrite[0]),
-		'remote_log': True,
-		'log_level': args.log_level[0],
-		'log_server': False,
-		'port_socket_ctypes': args.port_socket_ctypes[0],
-		'port_socket_log_main': args.port_socket_log_main[0]
-		}
 
-	# Fire up wine server session with parsed parameters
-	session = session_server_class(parameter['id'], parameter)
+def overwrite_pointer_with_int_list(ctypes_pointer, int_array):
+
+	(ctypes.c_ubyte * len(int_array)).from_address(ctypes.c_void_p.from_buffer(ctypes_pointer).value)[:] = int_array[:]
+
+
+def serialize_pointer_into_int_list(ctypes_pointer, size_bytes):
+
+	return (ctypes.c_ubyte * size_bytes).from_address(ctypes.c_void_p.from_buffer(ctypes_pointer).value)[:]

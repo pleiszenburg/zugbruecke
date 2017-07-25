@@ -6,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	src/zugbruecke/core.py: Core classes for managing zugbruecke sessions
+	src/zugbruecke/core/session.py: Classes for managing zugbruecke sessions
 
 	Required to run on platform / side: [UNIX]
 
@@ -41,13 +41,16 @@ from .dll_client import dll_client_class
 from .interpreter import interpreter_session_class
 from .lib import (
 	get_free_port,
-	get_location_of_file,
-	setup_wine_python
+	get_location_of_file
 	)
 from .log import log_class
-from .wineserver import wineserver_session_class
 from .rpc import (
 	mp_client_class
+	)
+from .wineenv import (
+	create_wine_prefix,
+	setup_wine_python,
+	set_wine_env
 	)
 
 
@@ -55,7 +58,7 @@ from .rpc import (
 # ZUGBRUECKE SESSION CLASS
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-class session_class():
+class session_client_class():
 
 
 	def __init__(self, parameter = {}):
@@ -70,9 +73,9 @@ class session_class():
 		self.log = log_class(self.id, self.p)
 
 		# Log status
-		self.log.out('[core] STARTING ...')
-		self.log.out('[core] Configured Wine-Python version is %s for %s.' % (self.p['version'], self.p['arch']))
-		self.log.out('[core] Log socket port: %d.' % self.p['port_socket_log_main'])
+		self.log.out('[session-client] STARTING ...')
+		self.log.out('[session-client] Configured Wine-Python version is %s for %s.' % (self.p['version'], self.p['arch']))
+		self.log.out('[session-client] Log socket port: %d.' % self.p['port_socket_log_main'])
 
 		# Store current working directory
 		self.dir_cwd = os.getcwd()
@@ -81,13 +84,14 @@ class session_class():
 		setup_wine_python(self.p['arch'], self.p['version'], self.p['dir'])
 
 		# Initialize Wine session
-		self.wineserver_session = wineserver_session_class(self.id, self.p, self.log)
+		self.dir_wineprefix = set_wine_env(self.p['dir'], self.p['arch'])
+		create_wine_prefix(self.dir_wineprefix)
 
 		# Prepare python command for ctypes server or interpreter
 		self.__prepare_python_command__()
 
 		# Initialize interpreter session
-		self.interpreter_session = interpreter_session_class(self.id, self.p, self.log, self.wineserver_session)
+		self.interpreter_session = interpreter_session_class(self.id, self.p, self.log)
 
 		# Set up a dict for loaded dlls
 		self.dll_dict = {}
@@ -98,13 +102,23 @@ class session_class():
 		# Mark session as up
 		self.up = True
 
+		# Get handles on methods for converting paths
+		self.path_unix_to_wine = self.client.path_unix_to_wine
+		self.path_wine_to_unix = self.client.path_wine_to_unix
+
 		# Register session destructur
 		atexit.register(self.terminate)
 		signal.signal(signal.SIGINT, self.terminate)
 		signal.signal(signal.SIGTERM, self.terminate)
 
 		# Log status
-		self.log.out('[core] STARTED.')
+		self.log.out('[session-client] STARTED.')
+
+
+	def set_parameter(self, parameter):
+
+		self.p.update(parameter)
+		self.client.set_parameter(parameter)
 
 
 	def terminate(self):
@@ -113,7 +127,7 @@ class session_class():
 		if self.up:
 
 			# Log status
-			self.log.out('[core] TERMINATING ...')
+			self.log.out('[session-client] TERMINATING ...')
 
 			# Tell server via message to terminate
 			self.client.terminate()
@@ -121,11 +135,8 @@ class session_class():
 			# Destruct interpreter session
 			self.interpreter_session.terminate()
 
-			# Destruct Wine session, quit wine processes
-			self.wineserver_session.terminate()
-
 			# Log status
-			self.log.out('[core] TERMINATED.')
+			self.log.out('[session-client] TERMINATED.')
 
 			# Terminate log
 			self.log.terminate()
@@ -134,55 +145,58 @@ class session_class():
 			self.up = False
 
 
-	def LoadLibrary(self, dll_name, dll_type = 'windll'):
+	def load_library(self, dll_name, dll_type, dll_param = {}):
 
-		# Get full path of dll TODO
-		full_path_dll = os.path.join(self.dir_cwd, dll_name)
+		# Check whether dll has already been touched
+		if dll_name in self.dll_dict.keys():
 
-		# Log status
-		self.log.out('[core] Trying to access DLL "%s" ...' % full_path_dll)
+			# Return reference on existing dll object
+			return self.dll_dict[dll_name]
 
-		# Check if dll file exists
-		if not os.path.isfile(full_path_dll):
+		# Is DLL type known?
+		if dll_type not in ['cdll', 'windll', 'oledll']:
 
-			# Log status
-			self.log.out('[core] ... file does NOT exist!')
-
+			# Raise error if unknown
 			raise # TODO
 
+		# Fix parameters dict with defauls values
+		if 'mode' not in dll_param.keys():
+			dll_param['mode'] = 0
+		if 'use_errno' not in dll_param.keys():
+			dll_param['use_errno'] = False
+		if 'use_last_error' not in dll_param.keys():
+			dll_param['use_last_error'] = False
+
 		# Log status
-		self.log.out('[core] ... exists ...')
+		self.log.out('[session-client] Trying to access DLL "%s" of type "%s" ...' % (dll_name, dll_type))
 
-		# Simplify full path
-		full_path_dll = os.path.abspath(full_path_dll)
+		# Tell wine about the dll and its type TODO implement some sort of find_library
+		(success, hash_id) = self.__load_library_on_server__(
+			dll_name, dll_type, dll_param
+			)
 
-		# Check whether dll has yet not been touched
-		if full_path_dll not in self.dll_dict.keys():
+		# If it failed, raise an error
+		if not success:
 
-			# Log status
-			self.log.out('[core] ... not yet touched ...')
+			# (Re-) raise an OSError if the above returned an error
+			raise # TODO
 
-			# Fire up new dll object
-			self.dll_dict[full_path_dll] = dll_client_class(
-				full_path_dll, dll_name, dll_type, self
-				)
+		# Fire up new dll object
+		self.dll_dict[dll_name] = dll_client_class(
+			self, dll_name, dll_type, hash_id
+			)
 
-			# Log status
-			self.log.out('[core] ... touched and added to list.')
-
-		else:
-
-			# Log status
-			self.log.out('[core] ... already touched and in list.')
+		# Log status
+		self.log.out('[session-client] ... touched and added to list.')
 
 		# Return reference on existing dll object
-		return self.dll_dict[full_path_dll]
+		return self.dll_dict[dll_name]
 
 
 	def __start_ctypes_client__(self):
 
 		# Log status
-		self.log.out('[core] ctypes client connecting ...')
+		self.log.out('[session-client] ctypes client connecting ...')
 
 		# Status variable
 		ctypes_server_up = False
@@ -233,15 +247,18 @@ class session_class():
 		if not ctypes_server_up:
 
 			# Log status
-			self.log.out('[core] ... could not connect (after %0.2f seconds & %d attempts)! Error.' %
+			self.log.out('[session-client] ... could not connect (after %0.2f seconds & %d attempts)! Error.' %
 				(time.time() - started_waiting_at, tried_this_many_times)
 				)
 			raise # TODO
 
 		else:
 
+			# Generate handles on server-side routines
+			self.__load_library_on_server__ = self.client.load_library
+
 			# Log status
-			self.log.out('[core] ... connected (after %0.2f seconds & %d attempts).' %
+			self.log.out('[session-client] ... connected (after %0.2f seconds & %d attempts).' %
 				(time.time() - started_waiting_at, tried_this_many_times)
 				)
 
@@ -253,46 +270,13 @@ class session_class():
 
 		# Prepare command with minimal meta info. All other info can be passed via sockets.
 		self.p['command_dict'] = [
-			'%s\\_server_.py' % self.wineserver_session.translate_path_unix2win(get_location_of_file(__file__)),
+			os.path.join(
+				os.path.abspath(os.path.join(get_location_of_file(__file__), os.pardir)),
+				'_server_.py'
+				),
 			'--id', self.id,
 			'--port_socket_ctypes', str(self.p['port_socket_ctypes']),
 			'--port_socket_log_main', str(self.p['port_socket_log_main']),
-			'--log_level', str(self.p['log_level'])
+			'--log_level', str(self.p['log_level']),
+			'--logwrite', str(int(self.p['logwrite']))
 			]
-
-
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# WINDLL CLASS
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-class windll_class(): # Mimic ctypes.windll
-
-
-	def __init__(self):
-
-		# Session not yet up
-		self.up = False
-
-
-	def start_session(self, parameter = {}):
-
-		# Session not yet up?
-		if not self.up:
-
-			# Fire up a new session
-			self.__session__ = session_class(parameter)
-
-			# Mark session as up
-			self.up = True
-
-
-	def LoadLibrary(self, name):
-
-		# Session not yet up?
-		if not self.up:
-
-			# Fire up session
-			self.start_session()
-
-		# Return a DLL instance object from within the session
-		return self.__session__.LoadLibrary(dll_name = name, dll_type = 'windll')
