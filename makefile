@@ -31,16 +31,18 @@ release:
 	-rm dist/*
 	-rm -r src/*.egg-info
 	python setup.py sdist bdist_wheel
-	gpg --detach-sign -a dist/zugbruecke*.whl
-	gpg --detach-sign -a dist/zugbruecke*.tar.gz
+	# gpg --detach-sign -a dist/zugbruecke*.whl
+	# gpg --detach-sign -a dist/zugbruecke*.tar.gz
 
 upload:
-	twine register dist/*
-	twine upload dist/*
+	for filename in $$(ls dist) ; do \
+		twine upload --sign dist/$$filename ; \
+	done
 
 upload_test:
-	twine register dist/* -r testpypi
-	twine upload dist/* -r testpypi
+	for filename in $$(ls dist) ; do \
+		twine upload --sign dist/$$filename -r pypitest ; \
+	done
 
 install:
 	pip install -r requirements.txt
