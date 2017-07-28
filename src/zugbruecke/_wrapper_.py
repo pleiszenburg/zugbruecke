@@ -93,15 +93,15 @@ current_session = session_client_class() # EXPORT
 # Routines only availabe on Wine / Windows - accessed via server
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-FormatError = current_session.client.ctypes_FormatError # EXPORT
+FormatError = current_session.ctypes_FormatError # EXPORT
 
-get_last_error = current_session.client.ctypes_get_last_error # EXPORT
+get_last_error = current_session.ctypes_get_last_error # EXPORT
 
-GetLastError = current_session.client.ctypes_GetLastError # EXPORT
+GetLastError = current_session.ctypes_GetLastError # EXPORT
 
-set_last_error = current_session.client.ctypes_set_last_error # EXPORT
+set_last_error = current_session.ctypes_set_last_error # EXPORT
 
-WinError = current_session.client.ctypes_WinError # EXPORT
+WinError = current_session.ctypes_WinError # EXPORT
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

@@ -61,91 +61,66 @@ from .wineenv import (
 class session_client_class():
 
 
-	def __init__(self, parameter = {}):
+	def __init__(self, parameter = {}, force = False):
 
-		# Fill empty parameters with default values and/or config file contents
-		self.p = get_module_config(parameter)
-
-		# Get and set session id
-		self.id = self.p['id']
-
-		# Start session logging
-		self.log = log_class(self.id, self.p)
-
-		# Log status
-		self.log.out('[session-client] STARTING ...')
-		self.log.out('[session-client] Configured Wine-Python version is %s for %s.' % (self.p['version'], self.p['arch']))
-		self.log.out('[session-client] Log socket port: %d.' % self.p['port_socket_log_main'])
-
-		# Store current working directory
-		self.dir_cwd = os.getcwd()
-
-		# Install wine-python
-		setup_wine_python(self.p['arch'], self.p['version'], self.p['dir'])
-
-		# Initialize Wine session
-		self.dir_wineprefix = set_wine_env(self.p['dir'], self.p['arch'])
-		create_wine_prefix(self.dir_wineprefix)
-
-		# Prepare python command for ctypes server or interpreter
-		self.__prepare_python_command__()
-
-		# Initialize interpreter session
-		self.interpreter_session = interpreter_session_class(self.id, self.p, self.log)
-
-		# Set up a dict for loaded dlls
-		self.dll_dict = {}
-
-		# If in ctypes mode ...
-		self.__start_ctypes_client__()
-
-		# Mark session as up
-		self.up = True
-
-		# Get handles on methods for converting paths
-		self.path_unix_to_wine = self.client.path_unix_to_wine
-		self.path_wine_to_unix = self.client.path_wine_to_unix
-
-		# Register session destructur
-		atexit.register(self.terminate)
-		signal.signal(signal.SIGINT, self.terminate)
-		signal.signal(signal.SIGTERM, self.terminate)
-
-		# Log status
-		self.log.out('[session-client] STARTED.')
+		self.__init_stage_1__(parameter, force)
 
 
-	def set_parameter(self, parameter):
+	def ctypes_FormatError(code = None):
 
-		self.p.update(parameter)
-		self.client.set_parameter(parameter)
+		# If in stage 1, fire up stage 2
+		if self.stage == 1:
+			self.__init_stage_2__()
+
+		# Ask the server
+		return self.client.ctypes_FormatError(code)
 
 
-	def terminate(self):
+	def ctypes_get_last_error():
 
-		# Run only if session is still up
-		if self.up:
+		# If in stage 1, fire up stage 2
+		if self.stage == 1:
+			self.__init_stage_2__()
 
-			# Log status
-			self.log.out('[session-client] TERMINATING ...')
+		# Ask the server
+		return self.client.ctypes_get_last_error()
 
-			# Tell server via message to terminate
-			self.client.terminate()
 
-			# Destruct interpreter session
-			self.interpreter_session.terminate()
+	def ctypes_GetLastError():
 
-			# Log status
-			self.log.out('[session-client] TERMINATED.')
+		# If in stage 1, fire up stage 2
+		if self.stage == 1:
+			self.__init_stage_2__()
 
-			# Terminate log
-			self.log.terminate()
+		# Ask the server
+		return self.client.ctypes_GetLastError()
 
-			# Session down
-			self.up = False
+
+	def ctypes_set_last_error(value):
+
+		# If in stage 1, fire up stage 2
+		if self.stage == 1:
+			self.__init_stage_2__()
+
+		# Ask the server
+		return self.client.ctypes_set_last_error(value)
+
+
+	def ctypes_WinError(code = None, descr = None):
+
+		# If in stage 1, fire up stage 2
+		if self.stage == 1:
+			self.__init_stage_2__()
+
+		# Ask the server
+		return self.client.ctypes_WinError(code, descr)
 
 
 	def load_library(self, dll_name, dll_type, dll_param = {}):
+
+		# If in stage 1, fire up stage 2
+		if self.stage == 1:
+			self.__init_stage_2__()
 
 		# Check whether dll has already been touched
 		if dll_name in self.dll_dict.keys():
@@ -191,6 +166,128 @@ class session_client_class():
 
 		# Return reference on existing dll object
 		return self.dll_dict[dll_name]
+
+
+	def path_unix_to_wine(in_path):
+
+		# If in stage 1, fire up stage 2
+		if self.stage == 1:
+			self.__init_stage_2__()
+
+		# Ask the server
+		return self.client.path_unix_to_wine(in_path)
+
+
+	def path_wine_to_unix(in_path):
+
+		# If in stage 1, fire up stage 2
+		if self.stage == 1:
+			self.__init_stage_2__()
+
+		# Ask the server
+		return self.client.path_wine_to_unix(in_path)
+
+
+	def set_parameter(self, parameter):
+
+		self.p.update(parameter)
+		self.client.set_parameter(parameter)
+
+
+	def terminate(self):
+
+		# Run only if session is still up
+		if self.up:
+
+			# Log status
+			self.log.out('[session-client] TERMINATING ...')
+
+			# Only if in stage 2:
+			if self.stage == 2:
+
+				# Tell server via message to terminate
+				self.client.terminate()
+
+				# Destruct interpreter session
+				self.interpreter_session.terminate()
+
+			# Log status
+			self.log.out('[session-client] TERMINATED.')
+
+			# Terminate log
+			self.log.terminate()
+
+			# Session down
+			self.up = False
+
+
+	def __init_stage_1__(self, parameter, force_stage_2):
+
+		# Fill empty parameters with default values and/or config file contents
+		self.p = get_module_config(parameter)
+
+		# Get and set session id
+		self.id = self.p['id']
+
+		# Start session logging
+		self.log = log_class(self.id, self.p)
+
+		# Log status
+		self.log.out('[session-client] STARTING (STAGE 1) ...')
+		self.log.out('[session-client] Configured Wine-Python version is %s for %s.' % (self.p['version'], self.p['arch']))
+		self.log.out('[session-client] Log socket port: %d.' % self.p['port_socket_log_main'])
+
+		# Store current working directory
+		self.dir_cwd = os.getcwd()
+
+		# Set up a dict for loaded dlls
+		self.dll_dict = {}
+
+		# Mark session as up
+		self.up = True
+
+		# Set current stage to 1
+		self.stage = 1
+
+		# Register session destructur
+		atexit.register(self.terminate)
+		signal.signal(signal.SIGINT, self.terminate)
+		signal.signal(signal.SIGTERM, self.terminate)
+
+		# Log status
+		self.log.out('[session-client] STARTED (STAGE 1).')
+
+		# If stage 2 shall start with force ...
+		if force_stage_2:
+			self.__init_stage_2__()
+
+
+	def __init_stage_2__(self):
+
+		# Log status
+		self.log.out('[session-client] STARTING (STAGE 2) ...')
+
+		# Install wine-python
+		setup_wine_python(self.p['arch'], self.p['version'], self.p['dir'])
+
+		# Initialize Wine session
+		self.dir_wineprefix = set_wine_env(self.p['dir'], self.p['arch'])
+		create_wine_prefix(self.dir_wineprefix)
+
+		# Prepare python command for ctypes server or interpreter
+		self.__prepare_python_command__()
+
+		# Initialize interpreter session
+		self.interpreter_session = interpreter_session_class(self.id, self.p, self.log)
+
+		# If in ctypes mode ...
+		self.__start_ctypes_client__()
+
+		# Set current stage to 1
+		self.stage = 2
+
+		# Log status
+		self.log.out('[session-client] STARTED (STAGE 2).')
 
 
 	def __start_ctypes_client__(self):
