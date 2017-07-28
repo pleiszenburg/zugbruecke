@@ -77,11 +77,11 @@ Installation
 +--------------------+--------------------------------------------------------------------------+
 | master / release   + .. code:: bash                                                           +
 |                    +                                                                          +
-|                    +  pip install zugbruecke                                                  +
+| |build_master|     +  pip install zugbruecke                                                  +
 +--------------------+--------------------------------------------------------------------------+
 | development branch + .. code:: bash                                                           +
 |                    +                                                                          +
-|                    +  pip install git+https://github.com/pleiszenburg/zugbruecke.git@develop  +
+| |build_develop|    +  pip install git+https://github.com/pleiszenburg/zugbruecke.git@develop  +
 +--------------------+--------------------------------------------------------------------------+
 
 Examples
