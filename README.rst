@@ -1,25 +1,42 @@
 
-.. |build_master| image:: https://travis-ci.org/pleiszenburg/zugbruecke.svg?branch=master
-    :target: https://travis-ci.org/pleiszenburg/zugbruecke
+.. |build_master| image:: https://img.shields.io/travis/pleiszenburg/zugbruecke/master.svg?style=flat-square
+	:target: https://travis-ci.org/pleiszenburg/zugbruecke
+	:alt: Build Status: master / release
 
-.. |build_develop| image:: https://travis-ci.org/pleiszenburg/zugbruecke.svg?branch=develop
-    :target: https://travis-ci.org/pleiszenburg/zugbruecke
-
-.. |docs_master| image:: https://readthedocs.org/projects/zugbruecke/badge/?version=latest
+.. |docs_master| image:: https://readthedocs.org/projects/zugbruecke/badge/?version=latest&style=flat-square
 	:target: http://zugbruecke.readthedocs.io/en/latest/?badge=latest
-	:alt: Documentation Status (master)
+	:alt: Documentation Status: master / release
 
-.. |docs_develop| image:: https://readthedocs.org/projects/zugbruecke/badge/?version=develop
+.. |build_develop| image:: https://img.shields.io/travis/pleiszenburg/zugbruecke/develop.svg?style=flat-square
+	:target: https://travis-ci.org/pleiszenburg/zugbruecke
+	:alt: Build Status: development branch
+
+.. |docs_develop| image:: https://readthedocs.org/projects/zugbruecke/badge/?version=develop&style=flat-square
 	:target: http://zugbruecke.readthedocs.io/en/develop/?badge=develop
-	:alt: Documentation Status (master)
+	:alt: Documentation Status: development branch
 
-+--------------------+-------------------+-------------------+
-| master / release   + |build_master|    + |docs_master|     +
-+--------------------+-------------------+-------------------+
-| development branch + |build_develop|   + |docs_develop|    +
-+--------------------+-------------------+-------------------+
+.. |license| image:: https://img.shields.io/pypi/l/zugbruecke.svg?style=flat-square
+	:target: https://github.com/pleiszenburg/zugbruecke/blob/master/LICENSE
+	:alt: Project License: LGPLv2
 
-.. image:: http://www.pleiszenburg.de/zugbruecke_logo.png
+.. |status| image:: https://img.shields.io/pypi/status/zugbruecke.svg?style=flat-square
+	:alt: Project Development Status
+
+.. |pypi_version| image:: https://img.shields.io/pypi/v/zugbruecke.svg?style=flat-square
+	:target: https://pypi.python.org/pypi/zugbruecke
+	:alt: Available on PyPi - the Python Package Index
+
+.. |pypi_versions| image:: https://img.shields.io/pypi/pyversions/zugbruecke.svg?style=flat-square
+	:target: https://pypi.python.org/pypi/zugbruecke
+	:alt: Available on PyPi - the Python Package Index
+
+.. |zugbruecke_logo| image:: http://www.pleiszenburg.de/zugbruecke_logo.png
+	:target: https://github.com/pleiszenburg/zugbruecke
+	:alt: zugbruecke repository
+
+|build_master| |docs_master| |build_develop| |docs_develop| |license| |status| |pypi_version| |pypi_versions|
+
+|zugbruecke_logo|
 
 Synopsis
 ========
