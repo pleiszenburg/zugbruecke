@@ -35,12 +35,14 @@ release:
 	gpg --detach-sign -a dist/zugbruecke*.tar.gz
 
 upload:
-	twine register dist/*
-	twine upload dist/*
+	for filename in $$(ls dist/*.tar.gz dist/*.whl) ; do \
+		twine upload $$filename $$filename.asc ; \
+	done
 
 upload_test:
-	twine register dist/* -r testpypi
-	twine upload dist/* -r testpypi
+	for filename in $$(ls dist/*.tar.gz dist/*.whl) ; do \
+		twine upload $$filename $$filename.asc -r pypitest ; \
+	done
 
 install:
 	pip install -r requirements.txt
