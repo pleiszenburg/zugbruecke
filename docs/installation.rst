@@ -4,9 +4,9 @@
 
 .. index::
 	pair: pip; install
-	pair: wine; linux
-	pair: wine; macos
-	pair: wine; bsd
+	triple: wine; linux; installation
+	triple: wine; macos; installation
+	triple: wine; bsd; installation
 
 Installation
 ============
