@@ -37,7 +37,6 @@
 
 |build_master| |docs_master| |build_develop| |docs_develop| |license| |status| |pypi_version| |pypi_versions|
 
-
 |zugbruecke_logo|
 
 Synopsis

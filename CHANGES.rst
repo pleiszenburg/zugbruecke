@@ -1,12 +1,13 @@
 Changes
 =======
 
-0.0.2 (2017-XX-XX)
+0.0.2 (2017-07-28)
 ------------------
 
-TBD
+* Added and confirmed CPython 3.4 compatibility
+* Added installation instructions to documentation
 
 0.0.1 (2017-07-28)
 ------------------
 
-First official (pre-) release of *zugbruecke*.
+* First official (pre-) release of *zugbruecke*
