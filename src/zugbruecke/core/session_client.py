@@ -168,7 +168,7 @@ class session_client_class():
 		return self.dll_dict[dll_name]
 
 
-	def path_unix_to_wine(in_path):
+	def path_unix_to_wine(self, in_path):
 
 		# If in stage 1, fire up stage 2
 		if self.stage == 1:
@@ -178,7 +178,7 @@ class session_client_class():
 		return self.client.path_unix_to_wine(in_path)
 
 
-	def path_wine_to_unix(in_path):
+	def path_wine_to_unix(self, in_path):
 
 		# If in stage 1, fire up stage 2
 		if self.stage == 1:
