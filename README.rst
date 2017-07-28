@@ -20,6 +20,7 @@
 	:alt: Project License: LGPLv2
 
 .. |status| image:: https://img.shields.io/pypi/status/zugbruecke.svg?style=flat-square
+	:target: https://github.com/pleiszenburg/zugbruecke/milestone/1
 	:alt: Project Development Status
 
 .. |pypi_version| image:: https://img.shields.io/pypi/v/zugbruecke.svg?style=flat-square
