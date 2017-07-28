@@ -37,6 +37,7 @@
 
 |build_master| |docs_master| |build_develop| |docs_develop| |license| |status| |pypi_version| |pypi_versions|
 
+
 |zugbruecke_logo|
 
 Synopsis
@@ -110,7 +111,6 @@ Start an interactive Python session under Unix and try the following:
 .. code:: python
 
 	from zugbruecke import cdll, c_double
-
 	dll_pow = cdll.msvcrt.pow
 	dll_pow.argtypes = (c_double, c_double)
 	dll_pow.restype = c_double
