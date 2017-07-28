@@ -54,7 +54,7 @@ Prerequisites
 =============
 
 +--------------------+--------------------------------------------------------------------------------------------------------+
-| for usage          + - `CPython`_ 3.x (tested with 3.{4,5,6}) - no additional Python packages required                        +
+| for usage          + - `CPython`_ 3.x (tested with 3.{4,5,6}) - no additional Python packages required                      +
 |                    + - `Wine`_ 2.x (tested with 2.{5,6,10,12} regular & `staging`_) - expected to be in the user's `PATH`_  +
 +--------------------+--------------------------------------------------------------------------------------------------------+
 | for tests          + - `pytest`_                                                                                            +
@@ -74,15 +74,15 @@ Prerequisites
 Installation
 ============
 
-+--------------------+------------------------------------------------------------------------+
-| master / release   + .. code:: bash                                                         +
-|                    +                                                                        +
-|                    + 	pip install zugbruecke                                                +
-+--------------------+------------------------------------------------------------------------+
-| development branch + .. code:: bash                                                         +
-|                    +                                                                        +
-|                    + 	pip install git+git://github.com/pleiszenburg/zugbruecke.git@develop  +
-+--------------------+------------------------------------------------------------------------+
++--------------------+--------------------------------------------------------------------------+
+| master / release   + .. code:: bash                                                           +
+|                    +                                                                          +
+|                    +  pip install zugbruecke                                                  +
++--------------------+--------------------------------------------------------------------------+
+| development branch + .. code:: bash                                                           +
+|                    +                                                                          +
+|                    +  pip install git+https://github.com/pleiszenburg/zugbruecke.git@develop  +
++--------------------+--------------------------------------------------------------------------+
 
 Examples
 ========

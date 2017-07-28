@@ -19,6 +19,7 @@ with *ctypes* from *Python* scripts.
    :maxdepth: 2
 
    introduction
+   installation
    examples
    session
    memsync
