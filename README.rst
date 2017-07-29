@@ -118,7 +118,7 @@ Start an interactive Python session under Unix and try the following:
 You have just witnessed ``msvcrt.dll`` in action on Unix. Interested in more?
 Check the `examples`_ in zugbruecke's documentation or read `ctypes' documentation`_.
 
-A lot of code, which was written with ``cdll``, ``windll`` or ``oledll``
+A lot of code, which was written with ``ctypes``' ``cdll``, ``windll`` or ``oledll``
 in mind and which runs under Windows, should run just fine with zugbruecke
 on Unix (assuming it does not use Windows features not supported by Wine).
 
