@@ -27,7 +27,7 @@ Configuring the session constructor
 -----------------------------------
 
 If you chose to start your own session with ``zugbruecke.session()``, the session
-constructor can be provided with a dictionaries containing parameters.
+constructor can be provided with a dictionary containing parameters.
 
 Configuration files
 -------------------
