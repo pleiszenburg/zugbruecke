@@ -32,9 +32,6 @@ specific language governing rights and limitations under the License.
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 import ctypes
-import os
-from pprint import pformat as pf
-import sys
 import traceback
 
 from .dll_server import dll_server_class
