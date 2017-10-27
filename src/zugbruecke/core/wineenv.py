@@ -35,7 +35,6 @@ from io import BytesIO
 import os
 import shutil
 import subprocess
-import tempfile
 import urllib.request
 import zipfile
 
