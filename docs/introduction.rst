@@ -63,7 +63,7 @@ Implementation
 During the first import of *zugbruecke*, a stand-alone *Windows*-version of the
 *CPython* interpreter corresponding to the used *Unix*-version is automatically
 downloaded and placed into the module's configuration folder (by default located at
-``~/.zugbruecke/``). Next to it, also during first import, zugbruecke
+``~/.zugbruecke/``). Next to it, also during first import, *zugbruecke*
 generates its own *Wine*-profile directory for being used with a dedicated
 ``WINEPREFIX``. This way, any undesirable interferences with other *Wine*-profile
 directories containing user settings and unrelated software are avoided.
