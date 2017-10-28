@@ -32,9 +32,9 @@ specific language governing rights and limitations under the License.
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-import sys
-import os
-import time
+# import sys
+# import os
+# import time
 from sys import argv, platform
 import timeit
 
@@ -46,7 +46,7 @@ try:
 except:
 	pass
 
-if True in [platform.startswith(os_name) for os_name in ['linux', 'darwin', 'freebsd']]:
+if any([platform.startswith(os_name) for os_name in ['linux', 'darwin', 'freebsd']]):
 
 	f = open('.zugbruecke.json', 'w')
 	if TIMING_RUN:
