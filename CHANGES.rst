@@ -1,10 +1,12 @@
 Changes
 =======
 
-0.0.3 (2017-XX-XX)
+0.0.3 (2017-10-XX)
 ------------------
 
-TBD
+* Plenty of cleanups based on static code analysis
+* Introduced ``Python``'s ``any`` functions in a number of places
+* Fixed lots of typos and grammar issues in documentation
 
 0.0.2 (2017-07-28)
 ------------------
