@@ -290,7 +290,6 @@ class arg_contents_class():
 					self.log.err(pf(arg))
 
 					# Start process with plain argument
-					# arg_rebuilt = getattr(ctypes, argtype_d['t'])(arg[1])
 					arg_rebuilt = arg[1]
 
 					# Handle scalars, whether pointer or not
@@ -384,7 +383,7 @@ class arg_contents_class():
 				struct_sub_inst = self.struct_type_dict[argtype_d['t']]()
 
 				# Unpack values into struct
-				self.__unpack_arguments_struct__(argtype_d['_fields'], struct_sub_inst, arg[1])
+				self.server_unpack_arg_struct_dict(argtype_d['_fields'], struct_sub_inst, arg[1])
 
 				# Append struct to struct TODO handle pointer to structs!
 				setattr(
