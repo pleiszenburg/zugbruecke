@@ -294,7 +294,7 @@ class arg_contents_class():
 					arg_rebuilt = arg[1]
 
 					# Handle scalars, whether pointer or not
-					if len([flag for flag in argtype_d['f'] if flag > 0]) == 0:
+					if argtype_d['s']:
 						arg_rebuilt = getattr(ctypes, argtype_d['t'])(arg_rebuilt)
 
 					# Step through flags in reverse order

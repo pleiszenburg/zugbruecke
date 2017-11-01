@@ -198,11 +198,15 @@ class arg_definition_class():
 			type_name = datatype.__name__
 			group_name = type(datatype).__name__
 
+		# Flag pure scalars as, well, pure scalars (for speed)
+		flag_scalar = len([flag for flag in flag_list if flag > 0]) == 0
+
 		# Fundamental ('simple') C types
 		if group_name == 'PyCSimpleType':
 
 			return {
 				'f': flag_list,
+				's': flag_scalar,
 				'n': field_name, # kw
 				't': type_name, # Type name, such as 'c_int'
 				'g': GROUP_FUNDAMENTAL
@@ -213,6 +217,7 @@ class arg_definition_class():
 
 			return {
 				'f': flag_list,
+				's': flag_scalar,
 				'n': field_name, # kw
 				't': type_name, # Type name, such as 'c_int'
 				'g': GROUP_STRUCT,
@@ -226,6 +231,7 @@ class arg_definition_class():
 
 			return {
 				'f': flag_list,
+				's': flag_scalar,
 				'n': field_name, # kw
 				't': type_name, # Type name, such as 'c_int'
 				'g': GROUP_VOID # Let's try void
