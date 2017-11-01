@@ -408,6 +408,16 @@ class arg_contents_class():
 		pass
 
 
+	def __pack_item_fundamental__(self):
+
+		pass
+
+
+	def __pack_item_struct__(self):
+
+		pass
+
+
 	def __unpack_item__(self):
 
 		pass
