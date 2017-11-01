@@ -105,7 +105,7 @@ class arg_contents_class():
 
 				self.log.err(pf(arg_value))
 
-			self.log.err('   abc')
+			self.log.err('== client_pack_arg_list ==')
 			self.log.err(pf(arg_value))
 
 			# Handle fundamental types
@@ -239,7 +239,7 @@ class arg_contents_class():
 					self.log.err('ERROR in __pack_return__, flag %d' % flag)
 					raise # TODO
 
-			self.log.err('   efg')
+			self.log.err('== server_pack_return_list ==')
 			self.log.err(pf(arg_value))
 
 			# Handle fundamental types by value
@@ -286,6 +286,8 @@ class arg_contents_class():
 
 				try:
 
+					self.log.err(pf(argtype_d))
+					self.log.err(pf(arg))
 					# Start process with plain argument
 					arg_rebuilt = getattr(ctypes, argtype_d['t'])(arg[1])
 
