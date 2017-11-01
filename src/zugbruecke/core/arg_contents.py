@@ -312,17 +312,6 @@ class arg_contents_class():
 
 							raise
 
-					# # By reference
-					# if argtype_d['p']:
-					# 	# Put value back into its ctypes datatype
-					# 	arguments_list.append(
-					# 		getattr(ctypes, argtype_d['t'])(arg[1])
-					# 		)
-					# # By value
-					# else:
-					# 	# Append value
-					# 	arguments_list.append(arg[1])
-
 					arguments_list.append(arg_rebuilt)
 
 				except:
