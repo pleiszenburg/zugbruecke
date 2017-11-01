@@ -402,3 +402,13 @@ class arg_contents_class():
 					arg[0], # parameter name (from tuple)
 					0 # least destructive value ...
 					)
+
+
+	def __pack_item__(self):
+
+		pass
+
+
+	def __unpack_item__(self):
+
+		pass
