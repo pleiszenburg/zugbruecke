@@ -288,19 +288,26 @@ class arg_contents_class():
 
 					self.log.err(pf(argtype_d))
 					self.log.err(pf(arg))
-					# Start process with plain argument
-					arg_rebuilt = getattr(ctypes, argtype_d['t'])(arg[1])
 
-					# Step through flags
-					for flag in argtype_d['f']:
+					# Start process with plain argument
+					# arg_rebuilt = getattr(ctypes, argtype_d['t'])(arg[1])
+					arg_rebuilt = arg[1]
+
+					# Handle scalars, whether pointer or not
+					if len([flag for flag in argtype_d['f'] if flag > 0]) == 0:
+						arg_rebuilt = getattr(ctypes, argtype_d['t'])(arg_rebuilt)
+
+					# Step through flags in reverse order
+					for flag in reversed(argtype_d['f']):
 
 						if flag == FLAG_POINTER:
 
-							pass # Nothing to do?
+							arg_rebuilt = ctypes.pointer(arg_rebuilt)
 
 						elif flag > 0:
 
-							raise
+							# TODO does not really handle arrays of arrays (yet)
+							arg_rebuilt = (flag * getattr(ctypes, argtype_d['t']))(*arg_rebuilt)
 
 						else:
 
