@@ -278,64 +278,7 @@ class arg_contents_class():
 		# Step through arguments
 		for arg_index, arg in enumerate(args_package_list):
 
-			# Fetch definition of current argument
-			argtype_d = argtypes_d[arg_index]
-
-			# Handle fundamental types
-			if argtype_d['g'] == GROUP_FUNDAMENTAL:
-
-				try:
-
-					self.log.err(pf(argtype_d))
-					self.log.err(pf(arg))
-
-					# Start process with plain argument
-					arg_rebuilt = arg[1]
-
-					# Handle scalars, whether pointer or not
-					if argtype_d['s']:
-						arg_rebuilt = getattr(ctypes, argtype_d['t'])(arg_rebuilt)
-
-					# Step through flags in reverse order
-					for flag in reversed(argtype_d['f']):
-
-						if flag == FLAG_POINTER:
-
-							arg_rebuilt = ctypes.pointer(arg_rebuilt)
-
-						elif flag > 0:
-
-							# TODO does not really handle arrays of arrays (yet)
-							arg_rebuilt = (flag * getattr(ctypes, argtype_d['t']))(*arg_rebuilt)
-
-						else:
-
-							raise
-
-					arguments_list.append(arg_rebuilt)
-
-				except:
-
-					self.log.err('ERROR in __unpack_arguments__, fundamental datatype path')
-					self.log.err(traceback.format_exc())
-
-			# Handle structs
-			elif argtype_d['g'] == GROUP_STRUCT:
-
-				# Generate new instance of struct datatype
-				struct_inst = self.struct_type_dict[argtype_d['t']]()
-
-				# Unpack values into struct
-				self.server_unpack_arg_struct_dict(argtype_d['_fields_'], struct_inst, arg[1])
-
-				# Append struct to list
-				arguments_list.append(struct_inst)
-
-			# Handle everything else ...
-			else:
-
-				# HACK TODO
-				arguments_list.append(0)
+			arguments_list.append(self.__unpack_item__(arg, argtypes_d[arg_index]))
 
 		# Return args as list, will be converted into tuple on call
 		return arguments_list
@@ -407,6 +350,71 @@ class arg_contents_class():
 		pass
 
 
-	def __unpack_item__(self):
+	def __unpack_item__(self, arg_tuple, arg_def_dict):
+
+		# Handle fundamental types
+		if arg_def_dict['g'] == GROUP_FUNDAMENTAL:
+
+			return self.__unpack_item_fundamental__(arg_tuple, arg_def_dict)
+
+		# Handle structs
+		elif arg_def_dict['g'] == GROUP_STRUCT:
+
+			# Generate new instance of struct datatype
+			struct_inst = self.struct_type_dict[arg_def_dict['t']]()
+
+			# Unpack values into struct
+			self.server_unpack_arg_struct_dict(arg_def_dict['_fields_'], struct_inst, arg_tuple[1])
+
+			# Append struct to list
+			return struct_inst
+
+		# Handle everything else ...
+		else:
+
+			# HACK TODO
+			self.log.err('__unpack_item__ NEITHER STRUCT NOR FUNDAMENTAL?')
+			return 0
+
+
+	def __unpack_item_fundamental__(self, arg_tuple, arg_def_dict):
+
+		try:
+
+			self.log.err(pf(arg_def_dict))
+			self.log.err(pf(arg_tuple))
+
+			# Start process with plain argument
+			arg_rebuilt = arg_tuple[1]
+
+			# Handle scalars, whether pointer or not
+			if arg_def_dict['s']:
+				arg_rebuilt = getattr(ctypes, arg_def_dict['t'])(arg_rebuilt)
+
+			# Step through flags in reverse order
+			for flag in reversed(arg_def_dict['f']):
+
+				if flag == FLAG_POINTER:
+
+					arg_rebuilt = ctypes.pointer(arg_rebuilt)
+
+				elif flag > 0:
+
+					# TODO does not really handle arrays of arrays (yet)
+					arg_rebuilt = (flag * getattr(ctypes, arg_def_dict['t']))(*arg_rebuilt)
+
+				else:
+
+					raise
+
+			return arg_rebuilt
+
+		except:
+
+			self.log.err('ERROR in __unpack_item_fundamental__, fundamental datatype path')
+			self.log.err(traceback.format_exc())
+
+
+	def __unpack_item_struct__(self):
 
 		pass
