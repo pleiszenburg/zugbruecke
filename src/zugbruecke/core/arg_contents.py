@@ -227,6 +227,33 @@ class arg_contents_class():
 		self.log.err(pf(old_arg))
 		self.log.err(pf(new_arg))
 
+		# Handle fundamental types
+		if arg_def_dict['g'] == GROUP_FUNDAMENTAL:
+
+			# HACK let's handle pointers to scalars like before
+			if len(arg_def_dict['f']) == 1 and arg_def_dict['f'][0] == FLAG_POINTER:
+
+				if hasattr(old_arg, 'contents'):
+					old_arg_ref = old_arg.contents
+				else:
+					old_arg_ref = old_arg
+				if hasattr(new_arg, 'contents'):
+					new_arg_ref = new_arg.contents
+				else:
+					new_arg_ref = new_arg
+				if hasattr(new_arg_ref, 'value'):
+					new_arg_value = new_arg_ref.value
+				else:
+					new_arg_value = new_arg_ref
+				if hasattr(old_arg_ref, 'value'):
+					old_arg_ref.value = new_arg_value
+				else:
+					old_arg_ref = new_arg_value
+
+		else:
+
+			pass # TODO struct ...
+
 
 	def __unpack_item__(self, arg_raw, arg_def_dict):
 
