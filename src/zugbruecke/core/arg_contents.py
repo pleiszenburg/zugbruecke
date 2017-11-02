@@ -287,57 +287,6 @@ class arg_contents_class():
 		return arguments_list
 
 
-	def __server_unpack_arg_struct_dict__(self, argtypes_d_sub, struct_inst, args_list):
-		"""
-		TODO Optimize for speed!
-		Can be called recursively!
-		"""
-
-		# Step through arguments
-		for arg_index, arg in enumerate(args_list):
-
-			# Get current argument definition
-			argtype_d = argtypes_d_sub[arg_index]
-
-			# Handle fundamental types
-			if argtype_d['g'] == GROUP_FUNDAMENTAL:
-
-				# Put value back into its ctypes datatype
-				setattr(
-					struct_inst, # struct instance to be modified
-					arg[0], # parameter name (from tuple)
-					getattr(ctypes, argtype_d['t'])(arg[1]) # ctypes instance of type with value from tuple
-					)
-
-				# TODO pointers and arrays
-
-			# Handle structs
-			elif argtype_d['g'] == GROUP_STRUCT:
-
-				# Generate new instance of struct datatype
-				struct_sub_inst = self.struct_type_dict[argtype_d['t']]()
-
-				# Unpack values into struct
-				self.__server_unpack_arg_struct_dict__(argtype_d['_fields'], struct_sub_inst, arg[1])
-
-				# Append struct to struct TODO handle pointer to structs!
-				setattr(
-					struct_inst, # struct instance to be modified
-					arg[0], # parameter name (from tuple)
-					struct_sub_inst # value from tuple
-					)
-
-			# Handle everything else ...
-			else:
-
-				# HACK TODO
-				setattr(
-					struct_inst, # struct instance to be modified
-					arg[0], # parameter name (from tuple)
-					0 # least destructive value ...
-					)
-
-
 	def __pack_item__(self):
 
 		pass
@@ -367,7 +316,7 @@ class arg_contents_class():
 			struct_inst = self.struct_type_dict[arg_def_dict['t']]()
 
 			# Unpack values into struct
-			self.__server_unpack_arg_struct_dict__(arg_def_dict['_fields_'], struct_inst, arg_raw)
+			self.__unpack_item_struct__(arg_def_dict['_fields_'], struct_inst, arg_raw)
 
 			# Append struct to list
 			return struct_inst
@@ -424,6 +373,52 @@ class arg_contents_class():
 			return None # Good idea ...?
 
 
-	def __unpack_item_struct__(self):
+	def __unpack_item_struct__(self, argtypes_d_sub, struct_inst, args_list):
+		"""
+		TODO Optimize for speed!
+		Can be called recursively!
+		"""
 
-		pass
+		# Step through arguments
+		for arg_index, arg in enumerate(args_list):
+
+			# Get current argument definition
+			argtype_d = argtypes_d_sub[arg_index]
+
+			# Handle fundamental types
+			if argtype_d['g'] == GROUP_FUNDAMENTAL:
+
+				# Put value back into its ctypes datatype
+				setattr(
+					struct_inst, # struct instance to be modified
+					arg[0], # parameter name (from tuple)
+					getattr(ctypes, argtype_d['t'])(arg[1]) # ctypes instance of type with value from tuple
+					)
+
+				# TODO pointers and arrays
+
+			# Handle structs
+			elif argtype_d['g'] == GROUP_STRUCT:
+
+				# Generate new instance of struct datatype
+				struct_sub_inst = self.struct_type_dict[argtype_d['t']]()
+
+				# Unpack values into struct
+				self.__unpack_item_struct__(argtype_d['_fields'], struct_sub_inst, arg[1])
+
+				# Append struct to struct TODO handle pointer to structs!
+				setattr(
+					struct_inst, # struct instance to be modified
+					arg[0], # parameter name (from tuple)
+					struct_sub_inst # value from tuple
+					)
+
+			# Handle everything else ...
+			else:
+
+				# HACK TODO
+				setattr(
+					struct_inst, # struct instance to be modified
+					arg[0], # parameter name (from tuple)
+					0 # least destructive value ...
+					)
