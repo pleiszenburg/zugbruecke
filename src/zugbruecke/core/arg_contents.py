@@ -51,85 +51,8 @@ class arg_contents_class():
 
 
 	def client_pack_arg_list(self, argtypes_d_sub, args):
-		"""
-		TODO Optimize for speed!
-		Can call itself recursively!
-		"""
 
-		# Shortcut for speed
-		args_package_list = []
-
-		# Step through arguments
-		for arg_index, argtype_d in enumerate(argtypes_d_sub):
-
-			# Fetch current argument by index from tuple or by name from struct/kw
-			if type(args) is list or type(args) is tuple:
-				arg = args[arg_index]
-			else:
-				arg = getattr(args, argtype_d['n'])
-
-			# TODO:
-			# append tuple to list "args_package_list"
-			# tuple contains: (argtype_d['n'], argument content / value)
-			#  pointer: arg.value or arg.contents.value
-			#  (value: Append value from ctypes datatype, because most of their Python equivalents are immutable)
-			#  (contents.value: Append value from ctypes datatype pointer ...)
-			#  by value: just "arg"
-
-			try:
-
-				arg_value = arg # Set up arg for iterative unpacking
-				for flag in argtype_d['f']: # step through flags
-
-					# Handle pointers
-					if flag == FLAG_POINTER:
-
-						# There are two ways of getting the actual value
-						if hasattr(arg_value, 'value'):
-							arg_value = arg_value.value
-						elif hasattr(arg_value, 'contents'):
-							arg_value = arg_value.contents
-						else:
-							raise # TODO
-
-					# Handle arrays
-					elif flag > 0:
-
-						arg_value = arg_value[:]
-
-					# Handle unknown flags
-					else:
-
-						raise # TODO
-			except:
-
-				self.log.err(pf(arg_value))
-
-			self.log.err('== client_pack_arg_list ==')
-			self.log.err(pf(arg_value))
-
-			# Handle fundamental types
-			if argtype_d['g'] == GROUP_FUNDAMENTAL:
-
-				# Append argument to list ...
-				args_package_list.append((argtype_d['n'], arg_value))
-
-			# Handle structs
-			elif argtype_d['g'] == GROUP_STRUCT:
-
-				# Reclusively call this routine for packing structs
-				args_package_list.append((argtype_d['n'], self.client_pack_arg_list(
-					argtype_d['_fields_'], arg
-					)))
-
-			# Handle everything else ... likely pointers handled by memsync
-			else:
-
-				# Just return None - will (hopefully) be overwritten by memsync
-				args_package_list.append((None, None))
-
-		# Return parameter message list - MUST WORK WITH PICKLE
-		return args_package_list
+		return self.__pack_arg_list__(argtypes_d_sub, args)
 
 
 	def client_unpack_return_list(self, argtypes_d, old_arguments_list, new_arguments_list):
@@ -269,9 +192,82 @@ class arg_contents_class():
 		return arguments_list
 
 
-	def __pack_arg_list__(self):
+	def __pack_arg_list__(self, argtypes_d_sub, args):
 
-		pass
+		# Shortcut for speed
+		args_package_list = []
+
+		# Step through arguments
+		for arg_index, argtype_d in enumerate(argtypes_d_sub):
+
+			# Fetch current argument by index from tuple or by name from struct/kw
+			if type(args) is list or type(args) is tuple:
+				arg = args[arg_index]
+			else:
+				arg = getattr(args, argtype_d['n'])
+
+			# TODO:
+			# append tuple to list "args_package_list"
+			# tuple contains: (argtype_d['n'], argument content / value)
+			#  pointer: arg.value or arg.contents.value
+			#  (value: Append value from ctypes datatype, because most of their Python equivalents are immutable)
+			#  (contents.value: Append value from ctypes datatype pointer ...)
+			#  by value: just "arg"
+
+			try:
+
+				arg_value = arg # Set up arg for iterative unpacking
+				for flag in argtype_d['f']: # step through flags
+
+					# Handle pointers
+					if flag == FLAG_POINTER:
+
+						# There are two ways of getting the actual value
+						if hasattr(arg_value, 'value'):
+							arg_value = arg_value.value
+						elif hasattr(arg_value, 'contents'):
+							arg_value = arg_value.contents
+						else:
+							raise # TODO
+
+					# Handle arrays
+					elif flag > 0:
+
+						arg_value = arg_value[:]
+
+					# Handle unknown flags
+					else:
+
+						raise # TODO
+			except:
+
+				self.log.err(pf(arg_value))
+
+			self.log.err('== __pack_arg_list__ ==')
+			self.log.err(pf(arg_value))
+
+			# Handle fundamental types
+			if argtype_d['g'] == GROUP_FUNDAMENTAL:
+
+				# Append argument to list ...
+				args_package_list.append((argtype_d['n'], arg_value))
+
+			# Handle structs
+			elif argtype_d['g'] == GROUP_STRUCT:
+
+				# Reclusively call this routine for packing structs
+				args_package_list.append((argtype_d['n'], self.__pack_arg_list__(
+					argtype_d['_fields_'], arg
+					)))
+
+			# Handle everything else ... likely pointers handled by memsync
+			else:
+
+				# Just return None - will (hopefully) be overwritten by memsync
+				args_package_list.append((None, None))
+
+		# Return parameter message list - MUST WORK WITH PICKLE
+		return args_package_list
 
 
 	def __pack_item__(self):
