@@ -312,7 +312,7 @@ class arg_contents_class():
 		# Handle structs
 		elif arg_def_dict['g'] == GROUP_STRUCT:
 
-			return self.__unpack_item_struct__(arg_def_dict, arg_raw)
+			return self.__unpack_item_struct__(arg_raw, arg_def_dict)
 
 		# Handle voids (likely mensync stuff)
 		elif arg_def_dict['g'] == GROUP_VOID:
@@ -366,7 +366,7 @@ class arg_contents_class():
 			return None # Good idea ...?
 
 
-	def __unpack_item_struct__(self, struct_def_dict, args_list):
+	def __unpack_item_struct__(self, args_list, struct_def_dict):
 
 		# Generate new instance of struct datatype
 		struct_inst = self.struct_type_dict[struct_def_dict['t']]()
