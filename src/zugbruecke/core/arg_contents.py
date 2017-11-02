@@ -104,9 +104,9 @@ class arg_contents_class():
 						raise # TODO
 
 				if hasattr(old_arg_ref, 'value'):
-					old_arg_ref.value = new_arguments_list[arg_index]
+					old_arg_ref.value = new_arguments_list[arg_index][1]
 				else:
-					old_arg_ref = new_arguments_list[arg_index]
+					old_arg_ref = new_arguments_list[arg_index][1]
 
 			# Handle everything else (structures and "the other stuff")
 			else:
@@ -115,73 +115,86 @@ class arg_contents_class():
 				pass
 
 
-	def server_pack_return_list(self, argtypes_d, args):
-		"""
-		TODO: Optimize for speed!
-		"""
+	def server_pack_return_list(self, args_tuple, argtypes_def_dict):
 
-		# Start argument list as a list
+		# Shortcut for speed
 		args_package_list = []
 
 		# Step through arguments
-		for arg_index, arg in enumerate(args):
+		for arg_index, arg_raw in enumerate(args_tuple):
 
-			# Fetch definition of current argument
-			argtype_d = argtypes_d[arg_index]
+			args_package_list.append(self.__pack_item__(arg_raw, argtypes_def_dict[arg_index]))
 
-			arg_value = arg # Set up arg for iterative unpacking
-			for flag in argtype_d['f']: # step through flags
-
-				# Handle pointers
-				if flag == FLAG_POINTER:
-
-					# There are two ways of getting the actual value
-					if hasattr(arg_value, 'value'):
-						arg_value = arg_value.value
-					elif hasattr(arg_value, 'contents'):
-						arg_value = arg_value.contents
-					else:
-						pass
-						# self.log.err(pf(arg_value))
-						# raise # TODO
-
-				# Handle arrays
-				elif flag > 0:
-
-					arg_value = arg_value[:]
-
-				# Handle unknown flags
-				else:
-
-					self.log.err('ERROR in __pack_return__, flag %d' % flag)
-					raise # TODO
-
-			self.log.err('== server_pack_return_list ==')
-			self.log.err(pf(arg_value))
-
-			# Handle fundamental types by value
-			if argtype_d['g'] == GROUP_FUNDAMENTAL:
-
-				if hasattr(arg_value, 'value'):
-					arg_value = arg_value.value
-				args_package_list.append(arg_value)
-
-				# # If by reference ...
-				# if argtype_d['p']:
-				# 	# Append value from ctypes datatype (because most of their Python equivalents are immutable)
-				# 	args_package_list.append(arg.value)
-				# # If by value ...
-				# else:
-				# 	# Nothing to do ...
-				# 	args_package_list.append(None)
-
-			# Handle everything else (structures etc)
-			else:
-
-				# HACK TODO
-				args_package_list.append(None)
-
+		# Return parameter message list - MUST WORK WITH PICKLE
 		return args_package_list
+
+
+
+		# # Start argument list as a list
+		# args_package_list = []
+		#
+		# # Step through arguments
+		# for arg_index, arg in enumerate(args):
+		#
+		# 	# Fetch definition of current argument
+		# 	argtype_d = argtypes_d[arg_index]
+		#
+		# 	arg_value = arg # Set up arg for iterative unpacking
+		# 	for flag in argtype_d['f']: # step through flags
+		#
+		# 		# Handle pointers
+		# 		if flag == FLAG_POINTER:
+		#
+		# 			# There are two ways of getting the actual value
+		# 			if hasattr(arg_value, 'value'):
+		# 				arg_value = arg_value.value
+		# 			elif hasattr(arg_value, 'contents'):
+		# 				arg_value = arg_value.contents
+		# 			else:
+		# 				pass
+		# 				# self.log.err(pf(arg_value))
+		# 				# raise # TODO
+		#
+		# 		# Handle arrays
+		# 		elif flag > 0:
+		#
+		# 			arg_value = arg_value[:]
+		#
+		# 		# Handle unknown flags
+		# 		else:
+		#
+		# 			self.log.err('ERROR in __pack_return__, flag %d' % flag)
+		# 			raise # TODO
+		#
+		# 	self.log.err('== server_pack_return_list ==')
+		# 	self.log.err(pf(arg_value))
+		#
+		# 	# Handle fundamental types by value
+		# 	if argtype_d['g'] == GROUP_FUNDAMENTAL:
+		#
+		# 		if hasattr(arg_value, 'value'):
+		# 			arg_value = arg_value.value
+		# 		args_package_list.append(arg_value)
+		#
+		# 		# # If by reference ...
+		# 		# if argtype_d['p']:
+		# 		# 	# Append value from ctypes datatype (because most of their Python equivalents are immutable)
+		# 		# 	args_package_list.append(arg.value)
+		# 		# # If by value ...
+		# 		# else:
+		# 		# 	# Nothing to do ...
+		# 		# 	args_package_list.append(None)
+		#
+		# 	# Handle everything else (structures etc)
+		# 	else:
+		#
+		# 		# HACK TODO
+		# 		args_package_list.append(None)
+		#
+		# self.log.err('// server_pack_return_list //')
+		# self.log.err(pf(args_package_list))
+		#
+		# return args_package_list
 
 
 	def server_unpack_arg_list(self, argtypes_d, args_package_list):
@@ -234,7 +247,10 @@ class arg_contents_class():
 		if arg_def_dict['g'] == GROUP_FUNDAMENTAL:
 
 			# Append argument to list ...
-			return (arg_def_dict['n'], arg_value)
+			return (
+				arg_def_dict['n'],
+				self.__pack_item_fundamental__(arg_value, arg_def_dict)
+				)
 
 		# Handle structs
 		elif arg_def_dict['g'] == GROUP_STRUCT:
@@ -252,9 +268,12 @@ class arg_contents_class():
 			return (None, None)
 
 
-	def __pack_item_fundamental__(self):
+	def __pack_item_fundamental__(self, arg_raw, arg_def_dict):
 
-		pass
+		if hasattr(arg_raw, 'value'):
+			return arg_raw.value
+		else:
+			return arg_raw
 
 
 	def __pack_item_struct__(self, struct_raw, struct_def_dict):
