@@ -72,51 +72,6 @@ class arg_contents_class():
 				argtypes_d[arg_index]
 				)
 
-		# # Step through arguments
-		# for arg_index, old_arg in enumerate(old_arguments_list):
-		#
-		# 	# Fetch definition of current argument
-		# 	argtype_d = argtypes_d[arg_index]
-		#
-		# 	# Handle fundamental types
-		# 	if argtype_d['g'] == GROUP_FUNDAMENTAL:
-		#
-		# 		# Start process with plain old argument
-		# 		old_arg_ref = old_arg
-		#
-		# 		# Step through flags
-		# 		for flag in argtype_d['f']:
-		#
-		# 			# Handle pointers
-		# 			if flag == FLAG_POINTER:
-		#
-		# 				# There are two ways of getting the actual value
-		# 				if hasattr(old_arg_ref, 'contents'):
-		# 					old_arg_ref = old_arg_ref.contents
-		# 				else:
-		# 					old_arg_ref = old_arg_ref
-		#
-		# 			# Handle arrays
-		# 			elif flag > 0:
-		#
-		# 				old_arg_ref = old_arg_ref # TODO ???
-		#
-		# 			# Handle unknown flags
-		# 			else:
-		#
-		# 				raise # TODO
-		#
-		# 		if hasattr(old_arg_ref, 'value'):
-		# 			old_arg_ref.value = new_arguments_list[arg_index][1]
-		# 		else:
-		# 			old_arg_ref = new_arguments_list[arg_index][1]
-		#
-		# 	# Handle everything else (structures and "the other stuff")
-		# 	else:
-		#
-		# 		# HACK TODO
-		# 		pass
-
 
 	def server_pack_return_list(self, args_tuple, argtypes_def_dict):
 
