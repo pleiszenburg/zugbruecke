@@ -312,14 +312,7 @@ class arg_contents_class():
 		# Handle structs
 		elif arg_def_dict['g'] == GROUP_STRUCT:
 
-			# Generate new instance of struct datatype
-			struct_inst = self.struct_type_dict[arg_def_dict['t']]()
-
-			# Unpack values into struct
-			self.__unpack_item_struct__(arg_def_dict['_fields_'], struct_inst, arg_raw)
-
-			# Append struct to list
-			return struct_inst
+			return self.__unpack_item_struct__(arg_def_dict, arg_raw)
 
 		# Handle voids (likely mensync stuff)
 		elif arg_def_dict['g'] == GROUP_VOID:
@@ -373,11 +366,13 @@ class arg_contents_class():
 			return None # Good idea ...?
 
 
-	def __unpack_item_struct__(self, argtypes_d_sub, struct_inst, args_list):
-		"""
-		TODO Optimize for speed!
-		Can be called recursively!
-		"""
+	def __unpack_item_struct__(self, struct_def_dict, args_list):
+
+		# Generate new instance of struct datatype
+		struct_inst = self.struct_type_dict[struct_def_dict['t']]()
+
+		# Fetch fields for speed
+		struct_fields = struct_def_dict['_fields_']
 
 		# Step through arguments
 		for arg_index, arg in enumerate(args_list):
@@ -385,5 +380,7 @@ class arg_contents_class():
 			setattr(
 				struct_inst, # struct instance to be modified
 				arg[0], # parameter name (from tuple)
-				self.__unpack_item__(arg[1], argtypes_d_sub[arg_index]) # parameter value
+				self.__unpack_item__(arg[1], struct_fields[arg_index]) # parameter value
 				)
+
+		return struct_inst
