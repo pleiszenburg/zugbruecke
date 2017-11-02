@@ -126,7 +126,7 @@ class arg_contents_class():
 			else:
 
 				# Just return None - will (hopefully) be overwritten by memsync
-				args_package_list.append(None)
+				args_package_list.append((None, None))
 
 		# Return parameter message list - MUST WORK WITH PICKLE
 		return args_package_list
