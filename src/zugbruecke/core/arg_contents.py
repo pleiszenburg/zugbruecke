@@ -37,7 +37,7 @@ import traceback
 
 from .const import (
 	FLAG_POINTER,
-	# GROUP_VOID,
+	GROUP_VOID,
 	GROUP_FUNDAMENTAL,
 	GROUP_STRUCT
 	)
@@ -275,6 +275,9 @@ class arg_contents_class():
 		# Start argument list as a list (will become a tuple)
 		arguments_list = []
 
+		self.log.err('$$ server_unpack_arg_list $$')
+		self.log.err(pf(args_package_list))
+
 		# Step through arguments
 		for arg_index, arg in enumerate(args_package_list):
 
@@ -369,12 +372,19 @@ class arg_contents_class():
 			# Append struct to list
 			return struct_inst
 
+		# Handle voids (likely mensync stuff)
+		elif arg_def_dict['g'] == GROUP_VOID:
+
+			# Return a placeholder
+			return 0
+
 		# Handle everything else ...
 		else:
 
 			# HACK TODO
 			self.log.err('__unpack_item__ NEITHER STRUCT NOR FUNDAMENTAL?')
-			return 0
+			self.log.err(str(arg_def_dict['g']))
+			return None
 
 
 	def __unpack_item_fundamental__(self, arg_tuple, arg_def_dict):
