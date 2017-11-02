@@ -275,9 +275,6 @@ class arg_contents_class():
 		# Start argument list as a list (will become a tuple)
 		arguments_list = []
 
-		self.log.err('$$ server_unpack_arg_list $$')
-		self.log.err(pf(args_package_list))
-
 		# Step through arguments
 		for arg_index, arg in enumerate(args_package_list):
 
