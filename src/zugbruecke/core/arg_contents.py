@@ -281,7 +281,7 @@ class arg_contents_class():
 		# Step through arguments
 		for arg_index, arg in enumerate(args_package_list):
 
-			arguments_list.append(self.__unpack_item__(arg, argtypes_d[arg_index]))
+			arguments_list.append(self.__unpack_item__(arg[1], argtypes_d[arg_index]))
 
 		# Return args as list, will be converted into tuple on call
 		return arguments_list
@@ -353,12 +353,12 @@ class arg_contents_class():
 		pass
 
 
-	def __unpack_item__(self, arg_tuple, arg_def_dict):
+	def __unpack_item__(self, arg_raw, arg_def_dict):
 
 		# Handle fundamental types
 		if arg_def_dict['g'] == GROUP_FUNDAMENTAL:
 
-			return self.__unpack_item_fundamental__(arg_tuple, arg_def_dict)
+			return self.__unpack_item_fundamental__(arg_raw, arg_def_dict)
 
 		# Handle structs
 		elif arg_def_dict['g'] == GROUP_STRUCT:
@@ -367,7 +367,7 @@ class arg_contents_class():
 			struct_inst = self.struct_type_dict[arg_def_dict['t']]()
 
 			# Unpack values into struct
-			self.__server_unpack_arg_struct_dict__(arg_def_dict['_fields_'], struct_inst, arg_tuple[1])
+			self.__server_unpack_arg_struct_dict__(arg_def_dict['_fields_'], struct_inst, arg_raw)
 
 			# Append struct to list
 			return struct_inst
@@ -387,15 +387,12 @@ class arg_contents_class():
 			return None
 
 
-	def __unpack_item_fundamental__(self, arg_tuple, arg_def_dict):
+	def __unpack_item_fundamental__(self, arg_rebuilt, arg_def_dict):
 
 		try:
 
 			self.log.err(pf(arg_def_dict))
-			self.log.err(pf(arg_tuple))
-
-			# Start process with plain argument
-			arg_rebuilt = arg_tuple[1]
+			self.log.err(pf(arg_rebuilt))
 
 			# Handle scalars, whether pointer or not
 			if arg_def_dict['s']:
