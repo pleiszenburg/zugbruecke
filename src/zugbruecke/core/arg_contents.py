@@ -52,12 +52,9 @@ class arg_contents_class():
 
 	def client_pack_arg_list(self, args_tuple, argtypes_def_dict):
 
-		# Shortcut for speed
-		args_package_list = []
-
 		# Step through arguments
+		args_package_list = []
 		for arg_index, arg_raw in enumerate(args_tuple):
-
 			args_package_list.append(self.__pack_item__(arg_raw, argtypes_def_dict[arg_index]))
 
 		# Return parameter message list - MUST WORK WITH PICKLE
@@ -114,12 +111,9 @@ class arg_contents_class():
 
 	def server_pack_return_list(self, args_tuple, argtypes_def_dict):
 
-		# Shortcut for speed
-		args_package_list = []
-
 		# Step through arguments
+		args_package_list = []
 		for arg_index, arg_raw in enumerate(args_tuple):
-
 			args_package_list.append(self.__pack_item__(arg_raw, argtypes_def_dict[arg_index]))
 
 		# Return parameter message list - MUST WORK WITH PICKLE
@@ -128,12 +122,9 @@ class arg_contents_class():
 
 	def server_unpack_arg_list(self, args_package_list, argtypes_d):
 
-		# Start argument list as a list (will become a tuple)
-		arguments_list = []
-
 		# Step through arguments
+		arguments_list = []
 		for arg_index, arg in enumerate(args_package_list):
-
 			arguments_list.append(self.__unpack_item__(arg[1], argtypes_d[arg_index]))
 
 		# Return args as list, will be converted into tuple on call
