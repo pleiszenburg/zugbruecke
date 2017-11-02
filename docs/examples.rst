@@ -34,13 +34,13 @@ looks somewhat like this:
 	float __stdcall __declspec(dllimport) simple_demo_routine(float param_a, float param_b)
 	{ return param_a - (param_a / param_b); }
 
-Because of the drop-in replacement design of zugbruecke, it is possible to write
-Python code which works under both Unices and Windows.
+Because of the drop-in replacement design of *zugbruecke*, it is possible to write
+*Python* code which works under both *Unices* and *Windows*.
 
 .. code:: python
 
 	from sys import platform
-	if True in [platform.startswith(os_name) for os_name in ['linux', 'darwin', 'freebsd']]:
+	if any([platform.startswith(os_name) for os_name in ['linux', 'darwin', 'freebsd']]):
 		from zugbruecke import cdll
 	elif platform.startswith('win'):
 		from ctypes import cdll

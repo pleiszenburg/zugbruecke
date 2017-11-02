@@ -6,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	tests/test_avg.py: Test custom datatype argument passing as pointer
+	tests/test_mix_rgb_colors.py: Tests 1D fixed length arrays with ints
 
 	Required to run on platform / side: [UNIX, WINE]
 
@@ -31,12 +31,11 @@ specific language governing rights and limitations under the License.
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-import pytest
+# import pytest
 
 from sys import platform
 if any([platform.startswith(os_name) for os_name in ['linux', 'darwin', 'freebsd']]):
-	import zugbruecke
-	ctypes = zugbruecke
+	import zugbruecke as ctypes
 elif platform.startswith('win'):
 	import ctypes
 
@@ -45,46 +44,6 @@ elif platform.startswith('win'):
 # CLASSES AND ROUTINES
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-# Define a special type for the 'double *' argument
-class DoubleArrayType:
-
-
-	def from_param(self, param):
-
-		typename = type(param).__name__
-		if hasattr(self, 'from_' + typename):
-			return getattr(self, 'from_' + typename)(param)
-		elif isinstance(param, ctypes.Array):
-			return param
-		else:
-			raise TypeError('Can\'t convert %s' % typename)
-
-
-	# Cast from array.array objects
-	def from_array(self, param):
-
-		if param.typecode != 'd':
-			raise TypeError('must be an array of doubles')
-		ptr, _ = param.buffer_info()
-		return ctypes.cast(ptr, ctypes.POINTER(ctypes.c_double))
-
-
-	# Cast from lists/tuples
-	def from_list(self, param):
-
-		val = ((ctypes.c_double)*len(param))(*param)
-		return val
-
-
-	from_tuple = from_list
-
-
-	# Cast from a numpy array
-	def from_ndarray(self, param):
-
-		return param.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
-
-
 class sample_class:
 
 
@@ -92,32 +51,31 @@ class sample_class:
 
 		self.__dll__ = ctypes.windll.LoadLibrary('tests/demo_dll.dll')
 
-		# void avg(double *, int n)
-		DoubleArray = DoubleArrayType()
-		self.__avg__ = self.__dll__.cookbook_avg
-		self.__avg__.memsync = [ # Regular ctypes on Windows should ignore this statement
-			{
-				'p': [0], # "path" to argument containing the pointer
-				'l': [1], # "path" to argument containing the length
-				'_t': ctypes.c_double, # type of argument (optional, default char/byte): sizeof(type) * length == bytes
-				'_c': DoubleArray # custom datatype
-				}
-			]
-		self.__avg__.argtypes = (DoubleArray, ctypes.c_int)
-		self.__avg__.restype = ctypes.c_double
+		# void mix_rgb_colors(int8_t [3], int8_t [3], int8_t *)
+		self.__mix_rgb_colors__ = self.__dll__.mix_rgb_colors
+		self.__mix_rgb_colors__.argtypes = (
+			ctypes.c_ubyte * 3, ctypes.c_ubyte * 3, ctypes.POINTER(ctypes.c_ubyte * 3)
+			)
 
 
-	def avg(self, values):
+	def mix_rgb_colors(self, color_a, color_b):
 
-		return self.__avg__(values, len(values))
+		color_type = ctypes.c_ubyte * 3
+		ctypes_color_a = color_type(*tuple(color_a))
+		ctypes_color_b = color_type(*tuple(color_b))
+		mixed_color = color_type()
+		self.__mix_rgb_colors__(
+			ctypes_color_a, ctypes_color_b, ctypes.pointer(mixed_color)
+			)
+		return mixed_color[:]
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # TEST(s)
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-def test_avg():
+def test_mix_rgb_colors():
 
 	sample = sample_class()
 
-	assert pytest.approx(2.5, 0.0000001) == sample.avg([1, 2, 3, 4])
+	assert [45, 35, 30] == sample.mix_rgb_colors([10, 20, 40], [80, 50, 20])

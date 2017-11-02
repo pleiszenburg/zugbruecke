@@ -50,7 +50,7 @@ All limitations and features of those constructors apply, e.g. the possibility
 of referring to DLLs without their .dll-file-extension or the use of absolute
 or relative *Windows* paths. *zugbruecke* offers :ref:`methods for path conversion <interoperability>`
 if required. If *ctypes* on the *Wine* side raises an error, e.g. because the DLL
-could not be found, the error will be re-raised by *zugbruecke* on the Unix side.
+can not be found, the error will be re-raised by *zugbruecke* on the Unix side.
 
 The third parameter is optional and allows to pass a dict with the following keys:
 

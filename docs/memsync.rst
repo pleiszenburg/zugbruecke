@@ -14,7 +14,7 @@ The memory synchronization protocol
 Because *zugbruecke* runs code in a separate *Python* interpreter on *Wine*,
 pointers pose a special kind of problem. They can, unfortunately, not be passed
 from the code running on the *Unix* side to the code running on the *Wine* side
-or vice versa. This is why the memory pointers are pointing to must be kept in
+or vice versa. This is why the memory (to where pointers are pointing) must be kept in
 sync on both sides. The memory synchronization can be controlled by the user
 through the ``memsync`` protocol. ``memsync`` implements special directives,
 which do not interfere with *ctypes* should the code be required to run on
@@ -48,7 +48,7 @@ Consider the following example DLL routine in C:
 		}
 	}
 
-It is a really simple implementation of the "bubblesort" algorithm, which accepts
+It is a simple implementation of the "bubblesort" algorithm, which accepts
 a pointer to an array of floats of arbitrary length and an integer with length information.
 The array is being sorted within its own memory, so the caller expects a sorted
 array at the passed pointer after the call.
@@ -120,7 +120,7 @@ The complete example, which will run on *Unix* and on *Windows* looks just like 
 .. code:: python
 
 	from sys import platform
-	if True in [platform.startswith(os_name) for os_name in ['linux', 'darwin', 'freebsd']]:
+	if any([platform.startswith(os_name) for os_name in ['linux', 'darwin', 'freebsd']]):
 		from zugbruecke import windll, cast, pointer, POINTER, c_float, c_int
 	elif platform.startswith('win'):
 		from ctypes import windll, cast, pointer, POINTER, c_float, c_int

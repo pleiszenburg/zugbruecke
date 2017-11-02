@@ -125,14 +125,14 @@ class routine_client_class(
 
 		# Actually call routine in DLL! TODO Handle kw ...
 		return_dict = self.__handle_call_on_server__(
-			self.client_pack_arg_list(self.argtypes_d, args), mem_package_list
+			self.client_pack_arg_list(args, self.argtypes_d), mem_package_list
 			)
 
 		# Log status
 		self.log.out('[routine-client] ... received feedback from server, unpacking ...')
 
 		# Unpack return dict (for pointers and structs)
-		self.client_unpack_return_list(self.argtypes_d, args, return_dict)
+		self.client_unpack_return_list(args, return_dict['args'], self.argtypes_d)
 
 		# Unpack memory
 		self.client_unpack_memory_list(return_dict['memory'], memory_transport_handle)

@@ -60,3 +60,9 @@ test:
 	wine-pytest
 	-rm tests/__pycache__/*.pyc
 	pytest
+
+test_quick:
+	-rm tests/__pycache__/*.pyc
+	wine-pytest
+	-rm tests/__pycache__/*.pyc
+	pytest

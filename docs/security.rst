@@ -24,4 +24,4 @@ The following problems also directly apply to *zugbruecke*:
 .. _Windows malware: https://en.wikipedia.org/wiki/Wine_(software)#Security
 .. _FAQ at WineHQ: https://wiki.winehq.org/FAQ#Should_I_run_Wine_as_root.3F
 
-*zugbruecke* does not actively prohibit the its use with root privileges.
+*zugbruecke* does not actively prohibit its use with root privileges.

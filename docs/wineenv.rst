@@ -21,7 +21,7 @@ Command: ``wine-python``
 
 This command behaves just like the regular ``python`` command in a *Unix* shell,
 except that it fires up a *Windows* *Python* interpreter on top of *Wine*. It works
-will all regular parameters and switches, even excepts pipes and can be launched in
+with all regular parameters and switches, accepts pipes and can be launched in
 interactive mode.
 
 You can also use it for creating executable *Python* scripts by adding the following

@@ -31,7 +31,7 @@ Return value
 * ``path_out`` (str)
 
 Converts an absolute or relative *Unix* path into a *Windows* path. It does
-not check, whether the path actually exists ot not. It uses *Wine*'s internal
+not check, whether the path actually exists or not. It uses *Wine*'s internal
 implementation for path conversion.
 
 Method: ``path_wine_to_unix``
@@ -46,5 +46,5 @@ Return value
 * ``path_out`` (str)
 
 Converts an absolute or relative *Windows* path into a *Unix* path. It does
-not check, whether the path actually exists ot not. It uses *Wine*'s internal
+not check, whether the path actually exists or not. It uses *Wine*'s internal
 implementation for path conversion.

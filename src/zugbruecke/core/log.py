@@ -32,9 +32,7 @@ specific language governing rights and limitations under the License.
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 import json
-import re
 import sys
-import threading
 import time
 
 from .lib import get_free_port
@@ -125,7 +123,6 @@ class log_class:
 	def __compile_message_dict_list__(self, message, pipe_name, level):
 
 		message_lines = []
-		message_line_max = 80
 
 		for line in message.split('\n'):
 			if line.strip() != '':

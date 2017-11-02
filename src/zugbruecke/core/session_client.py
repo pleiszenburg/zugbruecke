@@ -66,7 +66,7 @@ class session_client_class():
 		self.__init_stage_1__(parameter, force)
 
 
-	def ctypes_FormatError(code = None):
+	def ctypes_FormatError(self, code = None):
 
 		# If in stage 1, fire up stage 2
 		if self.stage == 1:
@@ -76,7 +76,7 @@ class session_client_class():
 		return self.client.ctypes_FormatError(code)
 
 
-	def ctypes_get_last_error():
+	def ctypes_get_last_error(self):
 
 		# If in stage 1, fire up stage 2
 		if self.stage == 1:
@@ -86,7 +86,7 @@ class session_client_class():
 		return self.client.ctypes_get_last_error()
 
 
-	def ctypes_GetLastError():
+	def ctypes_GetLastError(self):
 
 		# If in stage 1, fire up stage 2
 		if self.stage == 1:
@@ -96,7 +96,7 @@ class session_client_class():
 		return self.client.ctypes_GetLastError()
 
 
-	def ctypes_set_last_error(value):
+	def ctypes_set_last_error(self, value):
 
 		# If in stage 1, fire up stage 2
 		if self.stage == 1:
@@ -106,7 +106,7 @@ class session_client_class():
 		return self.client.ctypes_set_last_error(value)
 
 
-	def ctypes_WinError(code = None, descr = None):
+	def ctypes_WinError(self, code = None, descr = None):
 
 		# If in stage 1, fire up stage 2
 		if self.stage == 1:

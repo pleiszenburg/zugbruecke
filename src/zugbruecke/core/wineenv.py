@@ -35,7 +35,6 @@ from io import BytesIO
 import os
 import shutil
 import subprocess
-import tempfile
 import urllib.request
 import zipfile
 
@@ -103,7 +102,7 @@ def setup_wine_python(arch, version, directory, overwrite = False):
 	if preexisting and overwrite:
 
 		# Delete folder
-		shutil.rmtree(path)
+		shutil.rmtree(python_exe_path)
 
 	# Make sure the target directory exists
 	if not os.path.exists(directory):
