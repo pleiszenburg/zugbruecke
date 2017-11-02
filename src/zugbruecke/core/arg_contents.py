@@ -269,6 +269,11 @@ class arg_contents_class():
 		return arguments_list
 
 
+	def __pack_arg_list__(self):
+
+		pass
+
+
 	def __pack_item__(self):
 
 		pass
