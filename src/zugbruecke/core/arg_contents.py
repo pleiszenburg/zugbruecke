@@ -63,8 +63,6 @@ class arg_contents_class():
 
 	def client_unpack_return_list(self, old_arguments_list, args_package_list, argtypes_d):
 
-		self.log.err(pf(args_package_list))
-
 		# Step through arguments
 		new_arguments_list = []
 		for arg_index, arg in enumerate(args_package_list):
@@ -180,10 +178,6 @@ class arg_contents_class():
 
 	def __sync_item__(self, old_arg, new_arg, arg_def_dict):
 
-		self.log.err('== __sync_item__ ==')
-		self.log.err(pf(old_arg))
-		self.log.err(pf(new_arg))
-
 		# Handle fundamental types
 		if arg_def_dict['g'] == GROUP_FUNDAMENTAL:
 
@@ -210,8 +204,6 @@ class arg_contents_class():
 			# HACK let's handle 1D fixed length arrays
 			elif len(arg_def_dict['f']) == 2 and arg_def_dict['f'][0] == FLAG_POINTER and arg_def_dict['f'][1] > 0:
 
-				self.log.err(pf(arg_def_dict))
-
 				if hasattr(old_arg, 'contents'):
 					old_arg_ref = old_arg.contents
 				else:
@@ -221,8 +213,6 @@ class arg_contents_class():
 				else:
 					new_arg_ref = new_arg
 				old_arg_ref[:] = new_arg_ref[:]
-
-				self.log.err(pf(old_arg_ref[:]))
 
 		else:
 
