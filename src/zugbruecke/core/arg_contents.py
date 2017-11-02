@@ -65,9 +65,6 @@ class arg_contents_class():
 
 
 	def client_unpack_return_list(self, old_arguments_list, new_arguments_list, argtypes_d):
-		"""
-		TODO Optimize for speed!
-		"""
 
 		# Step through arguments
 		for arg_index, old_arg in enumerate(old_arguments_list):
