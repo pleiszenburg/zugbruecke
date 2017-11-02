@@ -284,7 +284,7 @@ class arg_contents_class():
 		return arguments_list
 
 
-	def server_unpack_arg_struct_dict(self, argtypes_d_sub, struct_inst, args_list):
+	def __server_unpack_arg_struct_dict__(self, argtypes_d_sub, struct_inst, args_list):
 		"""
 		TODO Optimize for speed!
 		Can be called recursively!
@@ -315,7 +315,7 @@ class arg_contents_class():
 				struct_sub_inst = self.struct_type_dict[argtype_d['t']]()
 
 				# Unpack values into struct
-				self.server_unpack_arg_struct_dict(argtype_d['_fields'], struct_sub_inst, arg[1])
+				self.__server_unpack_arg_struct_dict__(argtype_d['_fields'], struct_sub_inst, arg[1])
 
 				# Append struct to struct TODO handle pointer to structs!
 				setattr(
@@ -364,7 +364,7 @@ class arg_contents_class():
 			struct_inst = self.struct_type_dict[arg_def_dict['t']]()
 
 			# Unpack values into struct
-			self.server_unpack_arg_struct_dict(arg_def_dict['_fields_'], struct_inst, arg_tuple[1])
+			self.__server_unpack_arg_struct_dict__(arg_def_dict['_fields_'], struct_inst, arg_tuple[1])
 
 			# Append struct to list
 			return struct_inst
