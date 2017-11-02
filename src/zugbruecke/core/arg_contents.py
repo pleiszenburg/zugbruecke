@@ -132,13 +132,13 @@ class arg_contents_class():
 		return args_package_list
 
 
-	def client_unpack_return_list(self, argtypes_d, args, return_dict):
+	def client_unpack_return_list(self, argtypes_d, args, new_arguments_list):
 		"""
 		TODO Optimize for speed!
 		"""
 
-		# Get arguments' list
-		arguments_list = return_dict['args']
+		# # Get arguments' list
+		# arguments_list = return_dict['args']
 
 		# Step through arguments
 		for arg_index, arg in enumerate(args):
@@ -178,18 +178,9 @@ class arg_contents_class():
 						raise # TODO
 
 				if hasattr(arg_value, 'value'):
-					arg_value.value = arguments_list[arg_index]
+					arg_value.value = new_arguments_list[arg_index]
 				else:
-					arg_value = arguments_list[arg_index]
-
-				# # If by reference ...
-				# if argtype_d['p']:
-				# 	# Put value back into its ctypes datatype
-				# 	args[arg_index].value = arguments_list[arg_index]
-				# # If by value
-				# else:
-				# 	# Nothing to do
-				# 	pass
+					arg_value = new_arguments_list[arg_index]
 
 			# Handle everything else (structures and "the other stuff")
 			else:
