@@ -50,9 +50,18 @@ from .const import (
 class arg_contents_class():
 
 
-	def client_pack_arg_list(self, argtypes_d_sub, args):
+	def client_pack_arg_list(self, args_tuple, argtypes_def_dict):
 
-		return self.__pack_arg_list__(argtypes_d_sub, args)
+		# Shortcut for speed
+		args_package_list = []
+
+		# Step through arguments
+		for arg_index, arg_raw in enumerate(args_tuple):
+
+			args_package_list.append(self.__pack_item__(arg_raw, argtypes_def_dict[arg_index]))
+
+		# Return parameter message list - MUST WORK WITH PICKLE
+		return args_package_list
 
 
 	def client_unpack_return_list(self, argtypes_d, old_arguments_list, new_arguments_list):
@@ -192,87 +201,58 @@ class arg_contents_class():
 		return arguments_list
 
 
-	def __pack_arg_list__(self, argtypes_d_sub, args):
+	def __pack_item__(self, arg_raw, arg_def_dict):
 
-		# Shortcut for speed
-		args_package_list = []
+		arg_value = arg_raw # Set up arg for iterative unpacking
+		for flag in arg_def_dict['f']: # step through flags
 
-		# Step through arguments
-		for arg_index, argtype_d in enumerate(argtypes_d_sub):
+			# Handle pointers
+			if flag == FLAG_POINTER:
 
-			# Fetch current argument by index from tuple or by name from struct/kw
-			if type(args) is list or type(args) is tuple:
-				arg = args[arg_index]
-			else:
-				arg = getattr(args, argtype_d['n'])
+				# There are two ways of getting the actual value
+				if hasattr(arg_value, 'value'):
+					arg_value = arg_value.value
+				elif hasattr(arg_value, 'contents'):
+					arg_value = arg_value.contents
+				elif hasattr(arg_value, '_fields_'):
+					# HACK it's likely just a struct passed "as is",
+					# configured as a pointer in argtypes,
+					# but without the intention of letting the routine change it.
+					# ctypes does not mind ... (?)
+					pass
+				else:
+					raise # TODO
 
-			# TODO:
-			# append tuple to list "args_package_list"
-			# tuple contains: (argtype_d['n'], argument content / value)
-			#  pointer: arg.value or arg.contents.value
-			#  (value: Append value from ctypes datatype, because most of their Python equivalents are immutable)
-			#  (contents.value: Append value from ctypes datatype pointer ...)
-			#  by value: just "arg"
+			# Handle arrays
+			elif flag > 0:
 
-			try:
+				arg_value = arg_value[:] # TODO arrays of arrays (fixed length)
 
-				arg_value = arg # Set up arg for iterative unpacking
-				for flag in argtype_d['f']: # step through flags
-
-					# Handle pointers
-					if flag == FLAG_POINTER:
-
-						# There are two ways of getting the actual value
-						if hasattr(arg_value, 'value'):
-							arg_value = arg_value.value
-						elif hasattr(arg_value, 'contents'):
-							arg_value = arg_value.contents
-						else:
-							raise # TODO
-
-					# Handle arrays
-					elif flag > 0:
-
-						arg_value = arg_value[:]
-
-					# Handle unknown flags
-					else:
-
-						raise # TODO
-			except:
-
-				self.log.err(pf(arg_value))
-
-			self.log.err('== __pack_arg_list__ ==')
-			self.log.err(pf(arg_value))
-
-			# Handle fundamental types
-			if argtype_d['g'] == GROUP_FUNDAMENTAL:
-
-				# Append argument to list ...
-				args_package_list.append((argtype_d['n'], arg_value))
-
-			# Handle structs
-			elif argtype_d['g'] == GROUP_STRUCT:
-
-				# Reclusively call this routine for packing structs
-				args_package_list.append((argtype_d['n'], self.__pack_arg_list__(
-					argtype_d['_fields_'], arg
-					)))
-
-			# Handle everything else ... likely pointers handled by memsync
+			# Handle unknown flags
 			else:
 
-				# Just return None - will (hopefully) be overwritten by memsync
-				args_package_list.append((None, None))
+				raise # TODO
 
-		# Return parameter message list - MUST WORK WITH PICKLE
-		return args_package_list
+		# Handle fundamental types
+		if arg_def_dict['g'] == GROUP_FUNDAMENTAL:
 
+			# Append argument to list ...
+			return (arg_def_dict['n'], arg_value)
 
-	def __pack_item__(self):
+		# Handle structs
+		elif arg_def_dict['g'] == GROUP_STRUCT:
 
-		pass
+			# Reclusively call this routine for packing structs
+			return (
+				arg_def_dict['n'],
+				self.__pack_item_struct__(arg_value, arg_def_dict)
+				)
+
+		# Handle everything else ... likely pointers handled by memsync
+		else:
+
+			# Just return None - will (hopefully) be overwritten by memsync
+			return (None, None)
 
 
 	def __pack_item_fundamental__(self):
@@ -280,9 +260,20 @@ class arg_contents_class():
 		pass
 
 
-	def __pack_item_struct__(self):
+	def __pack_item_struct__(self, struct_raw, struct_def_dict):
 
-		pass
+		# Shortcut for speed
+		fields_package_list = []
+
+		# Step through fields of dict
+		for field_def_dict in struct_def_dict['_fields_']:
+
+			fields_package_list.append(self.__pack_item__(
+				getattr(struct_raw, field_def_dict['n']), field_def_dict
+				))
+
+		# Return parameter message list - MUST WORK WITH PICKLE
+		return fields_package_list
 
 
 	def __unpack_item__(self, arg_raw, arg_def_dict):
