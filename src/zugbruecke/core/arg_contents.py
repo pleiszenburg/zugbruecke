@@ -64,7 +64,7 @@ class arg_contents_class():
 		return args_package_list
 
 
-	def client_unpack_return_list(self, argtypes_d, old_arguments_list, new_arguments_list):
+	def client_unpack_return_list(self, old_arguments_list, new_arguments_list, argtypes_d):
 		"""
 		TODO Optimize for speed!
 		"""
