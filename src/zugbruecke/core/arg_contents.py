@@ -414,6 +414,8 @@ class arg_contents_class():
 			self.log.err('ERROR in __unpack_item_fundamental__, fundamental datatype path')
 			self.log.err(traceback.format_exc())
 
+			return None # Good idea ...?
+
 
 	def __unpack_item_struct__(self):
 
