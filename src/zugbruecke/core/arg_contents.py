@@ -63,6 +63,8 @@ class arg_contents_class():
 
 	def client_unpack_return_list(self, old_arguments_list, args_package_list, argtypes_d):
 
+		self.log.err(pf(args_package_list))
+
 		# Step through arguments
 		new_arguments_list = []
 		for arg_index, arg in enumerate(args_package_list):
@@ -204,6 +206,11 @@ class arg_contents_class():
 					old_arg_ref.value = new_arg_value
 				else:
 					old_arg_ref = new_arg_value
+
+			# HACK let's handle 1D fixed length arrays
+			elif len(arg_def_dict['f']) == 2 and arg_def_dict['f'][0] == FLAG_POINTER and arg_def_dict['f'][1] > 0:
+
+				self.log.err(pf(arg_def_dict))
 
 		else:
 
