@@ -185,9 +185,6 @@ class arg_contents_class():
 
 
 	def server_unpack_arg_list(self, argtypes_d, args_package_list):
-		"""
-		TODO Optimize for speed!
-		"""
 
 		# Start argument list as a list (will become a tuple)
 		arguments_list = []
