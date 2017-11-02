@@ -61,52 +61,61 @@ class arg_contents_class():
 		return args_package_list
 
 
-	def client_unpack_return_list(self, old_arguments_list, new_arguments_list, argtypes_d):
+	def client_unpack_return_list(self, old_arguments_list, args_package_list, argtypes_d):
 
 		# Step through arguments
-		for arg_index, old_arg in enumerate(old_arguments_list):
+		new_arguments_list = []
+		for arg_index, arg in enumerate(args_package_list):
+			self.__sync_item__(
+				old_arguments_list[arg_index],
+				self.__unpack_item__(arg[1], argtypes_d[arg_index]),
+				argtypes_d[arg_index]
+				)
 
-			# Fetch definition of current argument
-			argtype_d = argtypes_d[arg_index]
-
-			# Handle fundamental types
-			if argtype_d['g'] == GROUP_FUNDAMENTAL:
-
-				# Start process with plain old argument
-				old_arg_ref = old_arg
-
-				# Step through flags
-				for flag in argtype_d['f']:
-
-					# Handle pointers
-					if flag == FLAG_POINTER:
-
-						# There are two ways of getting the actual value
-						if hasattr(old_arg_ref, 'contents'):
-							old_arg_ref = old_arg_ref.contents
-						else:
-							old_arg_ref = old_arg_ref
-
-					# Handle arrays
-					elif flag > 0:
-
-						old_arg_ref = old_arg_ref # TODO ???
-
-					# Handle unknown flags
-					else:
-
-						raise # TODO
-
-				if hasattr(old_arg_ref, 'value'):
-					old_arg_ref.value = new_arguments_list[arg_index][1]
-				else:
-					old_arg_ref = new_arguments_list[arg_index][1]
-
-			# Handle everything else (structures and "the other stuff")
-			else:
-
-				# HACK TODO
-				pass
+		# # Step through arguments
+		# for arg_index, old_arg in enumerate(old_arguments_list):
+		#
+		# 	# Fetch definition of current argument
+		# 	argtype_d = argtypes_d[arg_index]
+		#
+		# 	# Handle fundamental types
+		# 	if argtype_d['g'] == GROUP_FUNDAMENTAL:
+		#
+		# 		# Start process with plain old argument
+		# 		old_arg_ref = old_arg
+		#
+		# 		# Step through flags
+		# 		for flag in argtype_d['f']:
+		#
+		# 			# Handle pointers
+		# 			if flag == FLAG_POINTER:
+		#
+		# 				# There are two ways of getting the actual value
+		# 				if hasattr(old_arg_ref, 'contents'):
+		# 					old_arg_ref = old_arg_ref.contents
+		# 				else:
+		# 					old_arg_ref = old_arg_ref
+		#
+		# 			# Handle arrays
+		# 			elif flag > 0:
+		#
+		# 				old_arg_ref = old_arg_ref # TODO ???
+		#
+		# 			# Handle unknown flags
+		# 			else:
+		#
+		# 				raise # TODO
+		#
+		# 		if hasattr(old_arg_ref, 'value'):
+		# 			old_arg_ref.value = new_arguments_list[arg_index][1]
+		# 		else:
+		# 			old_arg_ref = new_arguments_list[arg_index][1]
+		#
+		# 	# Handle everything else (structures and "the other stuff")
+		# 	else:
+		#
+		# 		# HACK TODO
+		# 		pass
 
 
 	def server_pack_return_list(self, args_tuple, argtypes_def_dict):
@@ -210,6 +219,13 @@ class arg_contents_class():
 
 		# Return parameter message list - MUST WORK WITH PICKLE
 		return fields_package_list
+
+
+	def __sync_item__(self, old_arg, new_arg, arg_def_dict):
+
+		self.log.err('== __sync_item__ ==')
+		self.log.err(pf(old_arg))
+		self.log.err(pf(new_arg))
 
 
 	def __unpack_item__(self, arg_raw, arg_def_dict):

@@ -215,6 +215,10 @@ class arg_definition_class():
 		# Structs
 		elif group_name == 'PyCStructType':
 
+			# Keep track of datatype on client side
+			if type_name not in self.struct_type_dict.keys():
+				self.struct_type_dict[type_name] = datatype
+
 			return {
 				'f': flag_list,
 				's': flag_scalar,
