@@ -212,6 +212,18 @@ class arg_contents_class():
 
 				self.log.err(pf(arg_def_dict))
 
+				if hasattr(old_arg, 'contents'):
+					old_arg_ref = old_arg.contents
+				else:
+					old_arg_ref = old_arg
+				if hasattr(new_arg, 'contents'):
+					new_arg_ref = new_arg.contents
+				else:
+					new_arg_ref = new_arg
+				old_arg_ref[:] = new_arg_ref[:]
+
+				self.log.err(pf(old_arg_ref[:]))
+
 		else:
 
 			pass # TODO struct ...
