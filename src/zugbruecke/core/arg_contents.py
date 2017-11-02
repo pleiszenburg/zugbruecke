@@ -132,16 +132,13 @@ class arg_contents_class():
 		return args_package_list
 
 
-	def client_unpack_return_list(self, argtypes_d, args, new_arguments_list):
+	def client_unpack_return_list(self, argtypes_d, old_arguments_list, new_arguments_list):
 		"""
 		TODO Optimize for speed!
 		"""
 
-		# # Get arguments' list
-		# arguments_list = return_dict['args']
-
 		# Step through arguments
-		for arg_index, arg in enumerate(args):
+		for arg_index, old_arg in enumerate(old_arguments_list):
 
 			# Fetch definition of current argument
 			argtype_d = argtypes_d[arg_index]
@@ -150,8 +147,7 @@ class arg_contents_class():
 			if argtype_d['g'] == GROUP_FUNDAMENTAL:
 
 				# Start process with plain old argument
-				arg_value = args[arg_index]
-				# New value is: arguments_list[arg_index]
+				old_arg_ref = old_arg
 
 				# Step through flags
 				for flag in argtype_d['f']:
@@ -160,27 +156,25 @@ class arg_contents_class():
 					if flag == FLAG_POINTER:
 
 						# There are two ways of getting the actual value
-						# if hasattr(arg_value, 'value'):
-						# 	arg_value = arg_value.value
-						if hasattr(arg_value, 'contents'):
-							arg_value = arg_value.contents
+						if hasattr(old_arg_ref, 'contents'):
+							old_arg_ref = old_arg_ref.contents
 						else:
-							arg_value = arg_value
+							old_arg_ref = old_arg_ref
 
 					# Handle arrays
 					elif flag > 0:
 
-						arg_value = arg_value
+						old_arg_ref = old_arg_ref # TODO ???
 
 					# Handle unknown flags
 					else:
 
 						raise # TODO
 
-				if hasattr(arg_value, 'value'):
-					arg_value.value = new_arguments_list[arg_index]
+				if hasattr(old_arg_ref, 'value'):
+					old_arg_ref.value = new_arguments_list[arg_index]
 				else:
-					arg_value = new_arguments_list[arg_index]
+					old_arg_ref = new_arguments_list[arg_index]
 
 			# Handle everything else (structures and "the other stuff")
 			else:
