@@ -305,39 +305,27 @@ class arg_contents_class():
 
 	def __unpack_item_fundamental__(self, arg_rebuilt, arg_def_dict):
 
-		try:
+		# Handle scalars, whether pointer or not
+		if arg_def_dict['s']:
+			arg_rebuilt = getattr(ctypes, arg_def_dict['t'])(arg_rebuilt)
 
-			self.log.err(pf(arg_def_dict))
-			self.log.err(pf(arg_rebuilt))
+		# Step through flags in reverse order
+		for flag in reversed(arg_def_dict['f']):
 
-			# Handle scalars, whether pointer or not
-			if arg_def_dict['s']:
-				arg_rebuilt = getattr(ctypes, arg_def_dict['t'])(arg_rebuilt)
+			if flag == FLAG_POINTER:
 
-			# Step through flags in reverse order
-			for flag in reversed(arg_def_dict['f']):
+				arg_rebuilt = ctypes.pointer(arg_rebuilt)
 
-				if flag == FLAG_POINTER:
+			elif flag > 0:
 
-					arg_rebuilt = ctypes.pointer(arg_rebuilt)
+				# TODO does not really handle arrays of arrays (yet)
+				arg_rebuilt = (flag * getattr(ctypes, arg_def_dict['t']))(*arg_rebuilt)
 
-				elif flag > 0:
+			else:
 
-					# TODO does not really handle arrays of arrays (yet)
-					arg_rebuilt = (flag * getattr(ctypes, arg_def_dict['t']))(*arg_rebuilt)
+				raise
 
-				else:
-
-					raise
-
-			return arg_rebuilt
-
-		except:
-
-			self.log.err('ERROR in __unpack_item_fundamental__, fundamental datatype path')
-			self.log.err(traceback.format_exc())
-
-			return None # Good idea ...?
+		return arg_rebuilt
 
 
 	def __unpack_item_struct__(self, args_list, struct_def_dict):
