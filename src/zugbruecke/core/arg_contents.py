@@ -129,7 +129,7 @@ class arg_contents_class():
 		return args_package_list
 
 
-	def server_unpack_arg_list(self, argtypes_d, args_package_list):
+	def server_unpack_arg_list(self, args_package_list, argtypes_d):
 
 		# Start argument list as a list (will become a tuple)
 		arguments_list = []
