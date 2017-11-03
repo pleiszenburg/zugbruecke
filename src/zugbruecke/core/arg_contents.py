@@ -64,7 +64,6 @@ class arg_contents_class():
 	def client_unpack_return_list(self, old_arguments_list, args_package_list, argtypes_d):
 
 		# Step through arguments
-		new_arguments_list = []
 		for arg_index, arg in enumerate(args_package_list):
 			self.__sync_item__(
 				old_arguments_list[arg_index],
