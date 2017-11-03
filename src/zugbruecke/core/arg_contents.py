@@ -103,19 +103,7 @@ class arg_contents_class():
 			# Handle pointers
 			if flag == FLAG_POINTER:
 
-				# There are two ways of getting the actual value
-				if hasattr(arg_value, 'value'):
-					arg_value = arg_value.value
-				elif hasattr(arg_value, 'contents'):
-					arg_value = arg_value.contents
-				elif hasattr(arg_value, '_fields_'):
-					# HACK it's likely just a struct passed "as is",
-					# configured as a pointer in argtypes,
-					# but without the intention of letting the routine change it.
-					# ctypes does not mind ... (?)
-					pass
-				else:
-					raise # TODO
+				arg_value = self.__pointer_item_strip__(arg_value)
 
 			# Handle arrays
 			elif flag > 0:
@@ -174,6 +162,23 @@ class arg_contents_class():
 
 		# Return parameter message list - MUST WORK WITH PICKLE
 		return fields_package_list
+
+
+	def __pointer_item_strip__(self, arg_in):
+
+		# There are two ways of getting the actual value
+		if hasattr(arg_in, 'value'):
+			return arg_in.value
+		elif hasattr(arg_in, 'contents'):
+			return arg_in.contents
+		elif hasattr(arg_in, '_fields_'):
+			# HACK it's likely just a struct passed "as is",
+			# configured as a pointer in argtypes,
+			# but without the intention of letting the routine change it.
+			# ctypes does not mind ... (?)
+			return arg_in
+		else:
+			raise # TODO
 
 
 	def __sync_item__(self, old_arg, new_arg, arg_def_dict):
