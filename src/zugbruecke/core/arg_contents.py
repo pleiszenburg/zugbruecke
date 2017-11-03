@@ -61,26 +61,26 @@ class arg_contents_class():
 		return args_package_list
 
 
-	def client_unpack_return_list(self, old_arguments_list, args_package_list, argtypes_d):
-
-		# Step through arguments
-		for arg_index, arg in enumerate(args_package_list):
-			self.__sync_item__(
-				old_arguments_list[arg_index],
-				self.__unpack_item__(arg[1], argtypes_d[arg_index]),
-				argtypes_d[arg_index]
-				)
-
-
-	def server_unpack_arg_list(self, args_package_list, argtypes_d):
+	def arg_list_unpack(self, args_package_list, argtypes_def_dict):
 
 		# Step through arguments
 		arguments_list = []
 		for arg_index, arg in enumerate(args_package_list):
-			arguments_list.append(self.__unpack_item__(arg[1], argtypes_d[arg_index]))
+			arguments_list.append(self.__unpack_item__(arg[1], argtypes_def_dict[arg_index]))
 
 		# Return args as list, will be converted into tuple on call
 		return arguments_list
+
+
+	def arg_list_sync(self, old_arguments_list, new_arguments_list, argtypes_def_dict):
+
+		# Step through arguments
+		for old_arg, new_arg, arg_def_dict in zip(
+			old_arguments_list, new_arguments_list, argtypes_def_dict
+			):
+			self.__sync_item__(
+				old_arg, new_arg, arg_def_dict
+				)
 
 
 	def __pack_item__(self, arg_raw, arg_def_dict):
