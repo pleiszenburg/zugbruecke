@@ -125,7 +125,7 @@ class routine_client_class(
 
 		# Actually call routine in DLL! TODO Handle kw ...
 		return_dict = self.__handle_call_on_server__(
-			self.client_pack_arg_list(args, self.argtypes_d), mem_package_list
+			self.arg_list_pack(args, self.argtypes_d), mem_package_list
 			)
 
 		# Log status

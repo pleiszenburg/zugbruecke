@@ -50,7 +50,7 @@ from .const import (
 class arg_contents_class():
 
 
-	def client_pack_arg_list(self, args_tuple, argtypes_def_dict):
+	def arg_list_pack(self, args_tuple, argtypes_def_dict):
 
 		# Step through arguments
 		args_package_list = []
@@ -70,17 +70,6 @@ class arg_contents_class():
 				self.__unpack_item__(arg[1], argtypes_d[arg_index]),
 				argtypes_d[arg_index]
 				)
-
-
-	def server_pack_return_list(self, args_tuple, argtypes_def_dict):
-
-		# Step through arguments
-		args_package_list = []
-		for arg_index, arg_raw in enumerate(args_tuple):
-			args_package_list.append(self.__pack_item__(arg_raw, argtypes_def_dict[arg_index]))
-
-		# Return parameter message list - MUST WORK WITH PICKLE
-		return args_package_list
 
 
 	def server_unpack_arg_list(self, args_package_list, argtypes_d):

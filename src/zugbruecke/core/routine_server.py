@@ -95,7 +95,7 @@ class routine_server_class(
 			arg_memory_list = self.server_pack_memory_list(memory_handle)
 
 			# Get new arg message list
-			arg_message_list = self.server_pack_return_list(args_list, self.argtypes_d)
+			arg_message_list = self.arg_list_pack(args_list, self.argtypes_d)
 
 			# Log status
 			self.log.out('[routine-server] ... done.')
