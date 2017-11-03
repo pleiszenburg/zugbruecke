@@ -219,6 +219,18 @@ class sample_class:
 		return quot, rem.value
 
 
+	def gauss_elimination(self, A):
+
+		N = 3
+		if len(A) != N or len(A[0]) != N + 1:
+			raise # TODO
+
+		_A = (ctypes.c_float * (N + 1) * N)(*(tuple(eq) for eq in A))
+		self.__gauss_elimination__(ctypes.pointer(_A))
+		for index, eq in enumerate(A):
+			eq[:] = _A[index][:]
+
+
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # RUN
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
