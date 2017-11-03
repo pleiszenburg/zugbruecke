@@ -163,7 +163,7 @@ class arg_contents_class():
 		return fields_package_list
 
 
-	def __pointer_item_strip__(self, arg_in):
+	def __pointer_item_strip__(self, arg_in, soft = False):
 
 		# There are two ways of getting the actual value
 		if hasattr(arg_in, 'value'):
@@ -177,7 +177,10 @@ class arg_contents_class():
 			# ctypes does not mind ... (?)
 			return arg_in
 		else:
-			raise # TODO
+			if soft:
+				return arg_in
+			else:
+				raise # TODO
 
 
 	def __sync_item__(self, old_arg, new_arg, arg_def_dict):
