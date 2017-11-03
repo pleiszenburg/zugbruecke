@@ -22,7 +22,7 @@
 
 
 CC      = i686-w64-mingw32-gcc
-CFLAGS  = -Wall -Wl,-add-stdcall-alias -shared
+CFLAGS  = -Wall -Wl,-add-stdcall-alias -shared -std=c99
 LDFLAGS = -lm
 
 DEMODLL = demo_dll
