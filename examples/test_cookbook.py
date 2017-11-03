@@ -230,6 +230,8 @@ class sample_class:
 		for index, eq in enumerate(A):
 			eq[:] = _A[index][:]
 
+		return A
+
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # RUN
@@ -302,3 +304,13 @@ if __name__ == '__main__':
 		returnvalue = sample.mix_rgb_colors([10, 20, 40], [80, 50, 30])
 	if TIMING_RUN:
 		time_ROUTINE('mix_rgb_colors')
+
+	print([7, 8, 9], sample.gauss_elimination([
+		[1, 2, 3, 2],
+		[1, 1, 1, 2],
+		[3, 3, 1, 0]
+		]))
+	# def time_gauss_elimination():
+	# 	returnvalue = sample.gauss_elimination([10, 20, 40], [80, 50, 30])
+	# if TIMING_RUN:
+	# 	time_ROUTINE('gauss_elimination')
