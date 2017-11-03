@@ -178,6 +178,12 @@ class sample_class:
 			ctypes.c_ubyte * 3, ctypes.c_ubyte * 3, ctypes.POINTER(ctypes.c_ubyte * 3)
 			)
 
+		# void gauss_elimination(float [3][4] *)
+		self.__gauss_elimination__ = self.__dll__.gauss_elimination
+		self.__gauss_elimination__.argtypes = (
+			ctypes.POINTER(ctypes.c_float * 4 * 3),
+			)
+
 
 	def avg(self, values):
 
