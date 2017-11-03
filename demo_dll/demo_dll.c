@@ -153,12 +153,13 @@ void __stdcall DEMODLL mix_rgb_colors(
 
 
 void __stdcall DEMODLL gauss_elimination(
-	float (*A)[3][4]
+	float (*A)[3][4],
+	float (*x)[3]
 	)
 {
 
 	int i, j, k, n = 3;
-	float c, x[10], sum = 0.0;
+	float c, sum = 0.0;
 
 	for(j = 0; j < n; j++)
 	{
@@ -172,16 +173,16 @@ void __stdcall DEMODLL gauss_elimination(
 		}
 	}
 
-	x[n - 1] = (*A)[n - 1][n] / (*A)[n - 1][n - 1];
+	(*x)[n - 1] = (*A)[n - 1][n] / (*A)[n - 1][n - 1];
 
 	for(i = n - 2; i >= 0; i--)
 	{
 		sum = 0;
 		for(j = i + 1; j < n; j++)
 		{
-			sum = sum + (*A)[i][j] * x[j];
+			sum = sum + (*A)[i][j] * (*x)[j];
 		}
-		x[i] = ((*A)[i][n] - sum) / (*A)[i][i];
+		(*x)[i] = ((*A)[i][n] - sum) / (*A)[i][i];
 	}
 
 }
