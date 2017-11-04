@@ -62,7 +62,10 @@ class arg_contents_class():
 	def arg_list_unpack(self, args_package_list, argtypes_list):
 
 		# Return args as list, will be converted into tuple on call
-		return [self.__unpack_item__(a[1], d) for a, d in zip(args_package_list, argtypes_list)]
+		tmp = [self.__unpack_item__(a[1], d) for a, d in zip(args_package_list, argtypes_list)]
+		self.log.err('== arg_list_unpack ==')
+		self.log.err(pf(tmp))
+		return tmp
 
 
 	def arg_list_sync(self, old_arguments_list, new_arguments_list, argtypes_list):
@@ -131,6 +134,7 @@ class arg_contents_class():
 
 			# Handle pointers
 			if flag == FLAG_POINTER:
+
 				arg_in = self.__item_pointer_strip__(arg_in)
 
 			# Handle arrays
@@ -152,6 +156,7 @@ class arg_contents_class():
 
 			# Handle unknown flags
 			else:
+
 				raise # TODO
 
 		return arg_in
@@ -192,54 +197,90 @@ class arg_contents_class():
 
 	def __unpack_item__(self, arg_raw, arg_def_dict):
 
-		# Handle fundamental types
-		if arg_def_dict['g'] == GROUP_FUNDAMENTAL:
-
-			return self.__unpack_item_fundamental__(arg_raw, arg_def_dict)
-
-		# Handle structs
-		elif arg_def_dict['g'] == GROUP_STRUCT:
-
-			return self.__unpack_item_struct__(arg_raw, arg_def_dict)
-
-		# Handle voids (likely mensync stuff)
-		elif arg_def_dict['g'] == GROUP_VOID:
-
-			# Return a placeholder
-			return 0
-
-		# Handle everything else ...
-		else:
-
-			# HACK TODO
-			self.log.err('__unpack_item__ NEITHER STRUCT NOR FUNDAMENTAL?')
-			self.log.err(str(arg_def_dict['g']))
-			return None
-
-
-	def __unpack_item_fundamental__(self, arg_rebuilt, arg_def_dict):
-
-		# Handle scalars, whether pointer or not
+		# Again the simple case first, scalars of any kind
 		if arg_def_dict['s']:
-			arg_rebuilt = getattr(ctypes, arg_def_dict['t'])(arg_rebuilt)
 
-		# Step through flags in reverse order
-		for flag in reversed(arg_def_dict['f']):
+			# Handle fundamental types
+			if arg_def_dict['g'] == GROUP_FUNDAMENTAL:
+				arg_rebuilt = getattr(ctypes, arg_def_dict['t'])(arg_raw)
+			# Handle structs
+			elif arg_def_dict['g'] == GROUP_STRUCT:
+				arg_rebuilt = self.__unpack_item_struct__(arg_raw, arg_def_dict)
+			# Handle voids (likely mensync stuff)
+			elif arg_def_dict['g'] == GROUP_VOID:
+				# Return a placeholder
+				return None
+			# Handle everything else ...
+			else:
+				raise # TODO
 
-			if flag == FLAG_POINTER:
-
+			# Step through flags in reverse order (if it's not a memsync field)
+			for flag in reversed(arg_def_dict['f']):
+				if flag != FLAG_POINTER:
+					raise # TODO
 				arg_rebuilt = ctypes.pointer(arg_rebuilt)
 
+			return arg_rebuilt
+
+		# And now arrays ...
+		else:
+
+			return self.__unpack_item_array__(
+				arg_raw,
+				arg_def_dict,
+				len(arg_def_dict['f']) - 1
+				)
+
+
+	def __unpack_item_array__(
+		self,
+		arg_in,
+		arg_def_dict,
+		flag_index_start,
+		array_depth = 0
+		):
+
+		self.log.err('ARRAY %d | %s' % (array_depth, pf(arg_in)))
+		if type(arg_in[0]) == list and array_depth < arg_def_dict['d'] - 1:
+			arg_in = [self.__unpack_item_array__(
+				e, arg_def_dict, flag_index_start, array_depth = array_depth + 1
+				) for e in arg_in]
+
+		for flag_index in range(flag_index_start, -1, -1):
+
+			# Extract the flag
+			flag = arg_def_dict['f'][flag_index]
+
+			# Handle pointers
+			if flag == FLAG_POINTER:
+
+				arg_in = ctypes.pointer(arg_in)
+
+			# Handle arrays
 			elif flag > 0:
 
-				# TODO does not really handle arrays of arrays (yet)
-				arg_rebuilt = (flag * getattr(ctypes, arg_def_dict['t']))(*arg_rebuilt)
+				# Handle fundamental types
+				if arg_def_dict['g'] == GROUP_FUNDAMENTAL:
+					arg_in = (getattr(ctypes, arg_def_dict['t']) * flag)(*arg_in)
+				# Handle structs
+				elif arg_def_dict['g'] == GROUP_STRUCT:
+					arg_in = self.__unpack_item_struct__(arg_raw, arg_def_dict)
+				# Handle everything else ...
+				else:
+					raise # TODO
 
+			# Handle unknown flags
 			else:
 
-				raise
+				raise # TODO
 
-		return arg_rebuilt
+		return arg_in
+
+
+	# def __unpack_item_fundamental__(self, arg_rebuilt, arg_def_dict):
+	#
+	# 	# TODO does not really handle arrays of arrays (yet)
+	# 	arg_rebuilt = (flag * getattr(ctypes, arg_def_dict['t']))(*arg_rebuilt)
 
 
 	def __unpack_item_struct__(self, args_list, struct_def_dict):
