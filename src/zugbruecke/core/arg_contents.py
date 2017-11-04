@@ -142,24 +142,12 @@ class arg_contents_class():
 		return fields_package_list
 
 
-	def __pointer_item_strip__(self, arg_in, soft = False):
+	def __pointer_item_strip__(self, arg_in):
 
-		# There are two ways of getting the actual value
-		if hasattr(arg_in, 'value'):
-			return arg_in.value
-		elif hasattr(arg_in, 'contents'):
+		if hasattr(arg_in, 'contents'):
 			return arg_in.contents
-		elif hasattr(arg_in, '_fields_'):
-			# HACK it's likely just a struct passed "as is",
-			# configured as a pointer in argtypes,
-			# but without the intention of letting the routine change it.
-			# ctypes does not mind ... (?)
-			return arg_in
 		else:
-			if soft:
-				return arg_in
-			else:
-				raise # TODO
+			return arg_in
 
 
 	def __sync_item__(self, old_arg, new_arg, arg_def_dict):
