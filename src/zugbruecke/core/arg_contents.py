@@ -141,18 +141,10 @@ class arg_contents_class():
 
 	def __pack_item_struct__(self, struct_raw, struct_def_dict):
 
-		# Shortcut for speed
-		fields_package_list = []
-
-		# Step through fields of dict
-		for field_def_dict in struct_def_dict['_fields_']:
-
-			fields_package_list.append(self.__pack_item__(
-				getattr(struct_raw, field_def_dict['n']), field_def_dict
-				))
-
 		# Return parameter message list - MUST WORK WITH PICKLE
-		return fields_package_list
+		return [self.__pack_item__(
+				getattr(struct_raw, field_def_dict['n']), field_def_dict
+				) for field_def_dict in struct_def_dict['_fields_']]
 
 
 	def __sync_item__(self, old_arg, new_arg, arg_def_dict):
