@@ -52,13 +52,8 @@ class arg_contents_class():
 
 	def arg_list_pack(self, args_tuple, argtypes_def_dict):
 
-		# Step through arguments
-		args_package_list = []
-		for arg_index, arg_raw in enumerate(args_tuple):
-			args_package_list.append(self.__pack_item__(arg_raw, argtypes_def_dict[arg_index]))
-
 		# Return parameter message list - MUST WORK WITH PICKLE
-		return args_package_list
+		return [self.__pack_item__(arg_raw, arg_def_dict) for arg_raw, arg_def_dict in zip(args_tuple, argtypes_def_dict)]
 
 
 	def arg_list_unpack(self, args_package_list, argtypes_def_dict):
