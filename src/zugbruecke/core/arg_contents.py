@@ -89,24 +89,39 @@ class arg_contents_class():
 			return arg_in
 
 
-	def __pack_item__(self, arg_in, arg_def_dict):
+	def __pack_item__(self, arg_in, arg_def_dict, flag_index_start = 0):
 
-		for flag in arg_def_dict['f']: # step through flags
+		for flag_index in range(flag_index_start, len(arg_def_dict['f'])): # step through flags
+
+			# Extract the flag
+			flag = arg_def_dict['f'][flag_index]
 
 			# Handle pointers
 			if flag == FLAG_POINTER:
-
 				arg_in = self.__item_pointer_strip__(arg_in)
 
 			# Handle arrays
 			elif flag > 0:
-
-				arg_in = arg_in[:] # TODO arrays of arrays (fixed length)
+				arg_in = self.__pack_item_array__(
+					arg_in, arg_def_dict,
+					flag_index_start = flag_index + 1
+					)
 
 			# Handle unknown flags
 			else:
-
 				raise # TODO
+
+		return self.__pack_item_content__(arg_in, arg_def_dict)
+
+
+	def __pack_item_array__(self, arg_in, arg_def_dict, flag_index_start = 0):
+
+		arg_in = arg_in[:]
+
+		return arg_in
+
+
+	def __pack_item_content__(self, arg_in, arg_def_dict):
 
 		# Handle fundamental types
 		if arg_def_dict['g'] == GROUP_FUNDAMENTAL:
