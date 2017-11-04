@@ -53,7 +53,10 @@ class arg_contents_class():
 	def arg_list_pack(self, args_tuple, argtypes_list):
 
 		# Return parameter message list - MUST WORK WITH PICKLE
-		return [(d['n'], self.__pack_item__(a, d)) for a, d in zip(args_tuple, argtypes_list)]
+		tmp = [(d['n'], self.__pack_item__(a, d)) for a, d in zip(args_tuple, argtypes_list)]
+		self.log.err('== arg_list_pack ==')
+		self.log.err(pf(tmp))
+		return tmp
 
 
 	def arg_list_unpack(self, args_package_list, argtypes_list):
@@ -89,9 +92,39 @@ class arg_contents_class():
 			return arg_in
 
 
-	def __pack_item__(self, arg_in, arg_def_dict, flag_index_start = 0):
+	def __pack_item__(self, arg_in, arg_def_dict):
 
-		for flag_index in range(flag_index_start, len(arg_def_dict['f'])): # step through flags
+		# Grep the simple case first, scalars
+		if arg_def_dict['s']:
+
+			# Strip away the pointers ... (all flags are pointers in this case)
+			for flag in arg_def_dict['f']:
+				if flag != FLAG_POINTER:
+					raise # TODO
+				arg_in = self.__item_pointer_strip__(arg_in)
+
+			# Handle fundamental types
+			if arg_def_dict['g'] == GROUP_FUNDAMENTAL:
+				# Append argument to list ...
+				return self.__item_value_strip__(arg_in)
+			# Handle structs
+			elif arg_def_dict['g'] == GROUP_STRUCT:
+				# Reclusively call this routine for packing structs
+				return self.__pack_item_struct__(arg_in, arg_def_dict)
+			# Handle everything else ... likely pointers handled by memsync
+			else:
+				# Just return None - will (hopefully) be overwritten by memsync
+				return None
+
+		# The non-trivial case, involving arrays
+		else:
+
+			return self.__pack_item_array__(arg_in, arg_def_dict)
+
+
+	def __pack_item_array__(self, arg_in, arg_def_dict, flag_index_start = 0):
+
+		for flag_index in range(flag_index_start, len(arg_def_dict['f'])):
 
 			# Extract the flag
 			flag = arg_def_dict['f'][flag_index]
@@ -102,49 +135,32 @@ class arg_contents_class():
 
 			# Handle arrays
 			elif flag > 0:
-				arg_in = self.__pack_item_array__(
-					arg_in, arg_def_dict,
-					flag_index_start = flag_index + 1
-					)
+
+				self.log.err('ARRAY FLAG %d (%d of %s)' % (flag, flag_index, pf(arg_def_dict['f'])))
+				self.log.err(pf(arg_in[:]))
+
+				# Only dive deeper if this is not the last flag
+				if flag_index < len(arg_def_dict['f']) - 1:
+					arg_in = [
+						self.__pack_item_array__(
+							e, arg_def_dict, flag_index_start = flag_index + 1
+							) for e in arg_in[:]
+						]
+				else:
+					arg_in = arg_in[:]
+					if arg_def_dict['g'] == GROUP_STRUCT:
+						arg_in = [
+							self.__pack_item_struct__(e, arg_def_dict) for e in arg_in
+							]
 
 			# Handle unknown flags
 			else:
 				raise # TODO
 
-		return self.__pack_item_content__(arg_in, arg_def_dict)
-
-
-	def __pack_item_array__(self, arg_in, arg_def_dict, flag_index_start = 0):
-
-		arg_in = arg_in[:]
+		self.log.err('ARRAY ELEMENT')
+		self.log.err(pf(arg_in))
 
 		return arg_in
-
-
-	def __pack_item_content__(self, arg_in, arg_def_dict):
-
-		# Handle fundamental types
-		if arg_def_dict['g'] == GROUP_FUNDAMENTAL:
-
-			# Append argument to list ...
-			return self.__pack_item_fundamental__(arg_in, arg_def_dict)
-
-		# Handle structs
-		elif arg_def_dict['g'] == GROUP_STRUCT:
-
-			# Reclusively call this routine for packing structs
-			return self.__pack_item_struct__(arg_in, arg_def_dict)
-
-		# Handle everything else ... likely pointers handled by memsync
-		else:
-
-			# Just return None - will (hopefully) be overwritten by memsync
-			return None
-
-
-	def __pack_item_fundamental__(self, arg_raw, arg_def_dict):
-
-		return self.__item_value_strip__(arg_raw)
 
 
 	def __pack_item_struct__(self, struct_raw, struct_def_dict):
