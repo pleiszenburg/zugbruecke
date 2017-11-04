@@ -73,6 +73,22 @@ class arg_contents_class():
 				)
 
 
+	def __item_pointer_strip__(self, arg_in):
+
+		if hasattr(arg_in, 'contents'):
+			return arg_in.contents
+		else:
+			return arg_in
+
+
+	def __item_value_strip__(self, arg_in):
+
+		if hasattr(arg_in, 'value'):
+			return arg_in.value
+		else:
+			return arg_in
+
+
 	def __pack_item__(self, arg_raw, arg_def_dict):
 
 		arg_value = arg_raw # Set up arg for iterative unpacking
@@ -81,7 +97,7 @@ class arg_contents_class():
 			# Handle pointers
 			if flag == FLAG_POINTER:
 
-				arg_value = self.__pointer_item_strip__(arg_value)
+				arg_value = self.__item_pointer_strip__(arg_value)
 
 			# Handle arrays
 			elif flag > 0:
@@ -120,10 +136,7 @@ class arg_contents_class():
 
 	def __pack_item_fundamental__(self, arg_raw, arg_def_dict):
 
-		if hasattr(arg_raw, 'value'):
-			return arg_raw.value
-		else:
-			return arg_raw
+		return self.__item_value_strip__(arg_raw)
 
 
 	def __pack_item_struct__(self, struct_raw, struct_def_dict):
@@ -142,14 +155,6 @@ class arg_contents_class():
 		return fields_package_list
 
 
-	def __pointer_item_strip__(self, arg_in):
-
-		if hasattr(arg_in, 'contents'):
-			return arg_in.contents
-		else:
-			return arg_in
-
-
 	def __sync_item__(self, old_arg, new_arg, arg_def_dict):
 
 		# Handle fundamental types
@@ -158,18 +163,8 @@ class arg_contents_class():
 			# HACK let's handle pointers to scalars like before
 			if len(arg_def_dict['f']) == 1 and arg_def_dict['f'][0] == FLAG_POINTER:
 
-				if hasattr(old_arg, 'contents'):
-					old_arg_ref = old_arg.contents
-				else:
-					old_arg_ref = old_arg
-				if hasattr(new_arg, 'contents'):
-					new_arg_ref = new_arg.contents
-				else:
-					new_arg_ref = new_arg
-				if hasattr(new_arg_ref, 'value'):
-					new_arg_value = new_arg_ref.value
-				else:
-					new_arg_value = new_arg_ref
+				old_arg_ref = self.__item_pointer_strip__(old_arg)
+				new_arg_value = self.__item_value_strip__(self.__item_pointer_strip__(new_arg))
 				if hasattr(old_arg_ref, 'value'):
 					old_arg_ref.value = new_arg_value
 				else:
@@ -178,15 +173,7 @@ class arg_contents_class():
 			# HACK let's handle 1D fixed length arrays
 			elif len(arg_def_dict['f']) == 2 and arg_def_dict['f'][0] == FLAG_POINTER and arg_def_dict['f'][1] > 0:
 
-				if hasattr(old_arg, 'contents'):
-					old_arg_ref = old_arg.contents
-				else:
-					old_arg_ref = old_arg
-				if hasattr(new_arg, 'contents'):
-					new_arg_ref = new_arg.contents
-				else:
-					new_arg_ref = new_arg
-				old_arg_ref[:] = new_arg_ref[:]
+				self.__item_pointer_strip__(old_arg)[:] = self.__item_pointer_strip__(new_arg)[:]
 
 		else:
 
