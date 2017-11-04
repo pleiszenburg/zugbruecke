@@ -136,9 +136,6 @@ class arg_contents_class():
 			# Handle arrays
 			elif flag > 0:
 
-				self.log.err('ARRAY FLAG %d (%d of %s)' % (flag, flag_index, pf(arg_def_dict['f'])))
-				self.log.err(pf(arg_in[:]))
-
 				# Only dive deeper if this is not the last flag
 				if flag_index < len(arg_def_dict['f']) - 1:
 					arg_in = [
@@ -156,9 +153,6 @@ class arg_contents_class():
 			# Handle unknown flags
 			else:
 				raise # TODO
-
-		self.log.err('ARRAY ELEMENT')
-		self.log.err(pf(arg_in))
 
 		return arg_in
 
