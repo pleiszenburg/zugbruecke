@@ -50,23 +50,23 @@ from .const import (
 class arg_contents_class():
 
 
-	def arg_list_pack(self, args_tuple, argtypes_def_dict):
+	def arg_list_pack(self, args_tuple, argtypes_list):
 
 		# Return parameter message list - MUST WORK WITH PICKLE
-		return [self.__pack_item__(a, d) for a, d in zip(args_tuple, argtypes_def_dict)]
+		return [(d['n'], self.__pack_item__(a, d)) for a, d in zip(args_tuple, argtypes_list)]
 
 
-	def arg_list_unpack(self, args_package_list, argtypes_def_dict):
+	def arg_list_unpack(self, args_package_list, argtypes_list):
 
 		# Return args as list, will be converted into tuple on call
-		return [self.__unpack_item__(a[1], d) for a, d in zip(args_package_list, argtypes_def_dict)]
+		return [self.__unpack_item__(a[1], d) for a, d in zip(args_package_list, argtypes_list)]
 
 
-	def arg_list_sync(self, old_arguments_list, new_arguments_list, argtypes_def_dict):
+	def arg_list_sync(self, old_arguments_list, new_arguments_list, argtypes_list):
 
 		# Step through arguments
 		for old_arg, new_arg, arg_def_dict in zip(
-			old_arguments_list, new_arguments_list, argtypes_def_dict
+			old_arguments_list, new_arguments_list, argtypes_list
 			):
 			self.__sync_item__(
 				old_arg, new_arg, arg_def_dict
@@ -89,20 +89,19 @@ class arg_contents_class():
 			return arg_in
 
 
-	def __pack_item__(self, arg_raw, arg_def_dict):
+	def __pack_item__(self, arg_in, arg_def_dict):
 
-		arg_value = arg_raw # Set up arg for iterative unpacking
 		for flag in arg_def_dict['f']: # step through flags
 
 			# Handle pointers
 			if flag == FLAG_POINTER:
 
-				arg_value = self.__item_pointer_strip__(arg_value)
+				arg_in = self.__item_pointer_strip__(arg_in)
 
 			# Handle arrays
 			elif flag > 0:
 
-				arg_value = arg_value[:] # TODO arrays of arrays (fixed length)
+				arg_in = arg_in[:] # TODO arrays of arrays (fixed length)
 
 			# Handle unknown flags
 			else:
@@ -113,25 +112,19 @@ class arg_contents_class():
 		if arg_def_dict['g'] == GROUP_FUNDAMENTAL:
 
 			# Append argument to list ...
-			return (
-				arg_def_dict['n'],
-				self.__pack_item_fundamental__(arg_value, arg_def_dict)
-				)
+			return self.__pack_item_fundamental__(arg_in, arg_def_dict)
 
 		# Handle structs
 		elif arg_def_dict['g'] == GROUP_STRUCT:
 
 			# Reclusively call this routine for packing structs
-			return (
-				arg_def_dict['n'],
-				self.__pack_item_struct__(arg_value, arg_def_dict)
-				)
+			return self.__pack_item_struct__(arg_in, arg_def_dict)
 
 		# Handle everything else ... likely pointers handled by memsync
 		else:
 
 			# Just return None - will (hopefully) be overwritten by memsync
-			return (None, None)
+			return None
 
 
 	def __pack_item_fundamental__(self, arg_raw, arg_def_dict):
@@ -142,9 +135,9 @@ class arg_contents_class():
 	def __pack_item_struct__(self, struct_raw, struct_def_dict):
 
 		# Return parameter message list - MUST WORK WITH PICKLE
-		return [self.__pack_item__(
+		return [(field_def_dict['n'], self.__pack_item__(
 				getattr(struct_raw, field_def_dict['n']), field_def_dict
-				) for field_def_dict in struct_def_dict['_fields_']]
+				)) for field_def_dict in struct_def_dict['_fields_']]
 
 
 	def __sync_item__(self, old_arg, new_arg, arg_def_dict):
