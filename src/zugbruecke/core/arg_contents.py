@@ -172,27 +172,80 @@ class arg_contents_class():
 
 	def __sync_item__(self, old_arg, new_arg, arg_def_dict):
 
-		# Handle fundamental types
-		if arg_def_dict['g'] == GROUP_FUNDAMENTAL:
+		# Grep the simple case first, pointers to scalars
+		if arg_def_dict['s'] and len(arg_def_dict['f']) > 0:
 
-			# HACK let's handle pointers to scalars like before
-			if len(arg_def_dict['f']) == 1 and arg_def_dict['f'][0] == FLAG_POINTER:
+			# Strip away the pointers ... (all flags are pointers in this case)
+			for flag in arg_def_dict['f']:
+				if flag != FLAG_POINTER:
+					raise # TODO
+				old_arg = self.__item_pointer_strip__(old_arg)
+				new_arg = self.__item_pointer_strip__(new_arg)
 
-				old_arg_ref = self.__item_pointer_strip__(old_arg)
-				new_arg_value = self.__item_value_strip__(self.__item_pointer_strip__(new_arg))
-				if hasattr(old_arg_ref, 'value'):
-					old_arg_ref.value = new_arg_value
+			if arg_def_dict['g'] == GROUP_FUNDAMENTAL:
+				old_arg.value = new_arg.value
+			elif arg_def_dict['g'] == GROUP_STRUCT:
+				return self.__sync_item_struct__(old_arg, new_arg, arg_def_dict)
+			else:
+				pass # DO NOTHING?
+
+		# The non-trivial case, pointers to arrays
+		elif not arg_def_dict['s'] and arg_def_dict['p']:
+
+			self.__sync_item_array__(old_arg, new_arg, arg_def_dict)
+
+
+	def __sync_item_array__(self, old_arg, new_arg, arg_def_dict, flag_index_start = 0):
+
+		for flag_index in range(flag_index_start, len(arg_def_dict['f'])):
+
+			# Extract the flag
+			flag = arg_def_dict['f'][flag_index]
+
+			# Handle pointers
+			if flag == FLAG_POINTER:
+
+				old_arg = self.__item_pointer_strip__(old_arg)
+				new_arg = self.__item_pointer_strip__(new_arg)
+
+			# Handle arrays
+			elif flag > 0:
+
+				# Only dive deeper if this is not the last flag
+				if flag_index < len(arg_def_dict['f']) - 1:
+
+					for old_arg_e, new_arg_e in zip(old_arg[:], new_arg[:]):
+						self.__sync_item_array__(
+							old_arg_e, new_arg_e, arg_def_dict,
+							flag_index_start = flag_index + 1
+							)
+
 				else:
-					old_arg_ref = new_arg_value
 
-			# HACK let's handle 1D fixed length arrays
-			elif len(arg_def_dict['f']) == 2 and arg_def_dict['f'][0] == FLAG_POINTER and arg_def_dict['f'][1] > 0:
+					if arg_def_dict['g'] == GROUP_FUNDAMENTAL:
+						old_arg[:] = new_arg[:]
+					elif arg_def_dict['g'] == GROUP_STRUCT:
+						for old_struct, new_struct in zip(old_arg[:], new_arg[:]):
+							self.__sync_item_struct__(old_struct, new_struct, arg_def_dict)
+					else:
+						raise # TODO
 
-				self.__item_pointer_strip__(old_arg)[:] = self.__item_pointer_strip__(new_arg)[:]
+			# Handle unknown flags
+			else:
 
-		else:
+				raise # TODO
 
-			pass # TODO struct ...
+
+	def __sync_item_struct__(self, old_struct, new_struct, struct_def_dict):
+
+		# Step through arguments
+		for field_def_dict in struct_def_dict['_fields_']:
+
+			self.__sync_item__(
+				getattr(old_struct, field_def_dict['n']),
+				getattr(new_struct, field_def_dict['n']),
+				field_def_dict
+				)
 
 
 	def __unpack_item__(self, arg_raw, arg_def_dict):
@@ -290,16 +343,13 @@ class arg_contents_class():
 		# Generate new instance of struct datatype
 		struct_inst = self.struct_type_dict[struct_def_dict['t']]()
 
-		# Fetch fields for speed
-		struct_fields = struct_def_dict['_fields_']
-
 		# Step through arguments
-		for arg_index, arg in enumerate(args_list):
+		for field_def_dict, field_arg in zip(struct_def_dict['_fields_'], args_list):
 
 			setattr(
 				struct_inst, # struct instance to be modified
-				arg[0], # parameter name (from tuple)
-				self.__unpack_item__(arg[1], struct_fields[arg_index]) # parameter value
+				field_arg[0], # parameter name (from tuple)
+				self.__unpack_item__(field_arg[1], field_def_dict) # parameter value
 				)
 
 		return struct_inst
