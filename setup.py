@@ -46,7 +46,7 @@ from sys import platform
 
 
 # Bump version HERE!
-_version_ = '0.0.3'
+_version_ = '0.0.4'
 
 
 # List all versions of Python which are supported
