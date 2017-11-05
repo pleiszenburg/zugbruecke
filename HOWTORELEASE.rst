@@ -7,6 +7,8 @@ How to release zugbruecke
 
 #. In branch ``develop``, adjust package version in ``setup.py`` by changing the ``version`` string.
 
+#. In branch ``develop``, add changes to ``CHANGES.rst``.
+
 #. Push branch ``develop`` to GitHub.
 
 #. Wait for feedback from Travis CI.
