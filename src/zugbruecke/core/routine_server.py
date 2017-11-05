@@ -77,7 +77,7 @@ class routine_server_class(
 		self.log.out('[routine-server] Trying call routine "%s" ...' % self.name)
 
 		# Unpack passed arguments, handle pointers and structs ...
-		args_list = self.server_unpack_arg_list(arg_message_list, self.argtypes_d)
+		args_list = self.arg_list_unpack(arg_message_list, self.argtypes_d)
 
 		# Unpack pointer data
 		memory_handle = self.server_unpack_memory_list(args_list, arg_memory_list, self.memsync_d)
@@ -95,7 +95,7 @@ class routine_server_class(
 			arg_memory_list = self.server_pack_memory_list(memory_handle)
 
 			# Get new arg message list
-			arg_message_list = self.server_pack_return_list(args_list, self.argtypes_d)
+			arg_message_list = self.arg_list_pack(args_list, self.argtypes_d)
 
 			# Log status
 			self.log.out('[routine-server] ... done.')

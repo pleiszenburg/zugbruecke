@@ -50,225 +50,286 @@ from .const import (
 class arg_contents_class():
 
 
-	def client_pack_arg_list(self, args_tuple, argtypes_def_dict):
-
-		# Step through arguments
-		args_package_list = []
-		for arg_index, arg_raw in enumerate(args_tuple):
-			args_package_list.append(self.__pack_item__(arg_raw, argtypes_def_dict[arg_index]))
+	def arg_list_pack(self, args_tuple, argtypes_list):
 
 		# Return parameter message list - MUST WORK WITH PICKLE
-		return args_package_list
+		return [(d['n'], self.__pack_item__(a, d)) for a, d in zip(args_tuple, argtypes_list)]
 
 
-	def client_unpack_return_list(self, old_arguments_list, args_package_list, argtypes_d):
+	def arg_list_unpack(self, args_package_list, argtypes_list):
+
+		# Return args as list, will be converted into tuple on call
+		return [self.__unpack_item__(a[1], d) for a, d in zip(args_package_list, argtypes_list)]
+
+
+	def arg_list_sync(self, old_arguments_list, new_arguments_list, argtypes_list):
 
 		# Step through arguments
-		new_arguments_list = []
-		for arg_index, arg in enumerate(args_package_list):
+		for old_arg, new_arg, arg_def_dict in zip(
+			old_arguments_list, new_arguments_list, argtypes_list
+			):
 			self.__sync_item__(
-				old_arguments_list[arg_index],
-				self.__unpack_item__(arg[1], argtypes_d[arg_index]),
-				argtypes_d[arg_index]
+				old_arg, new_arg, arg_def_dict
 				)
 
 
-	def server_pack_return_list(self, args_tuple, argtypes_def_dict):
+	def __item_pointer_strip__(self, arg_in):
 
-		# Step through arguments
-		args_package_list = []
-		for arg_index, arg_raw in enumerate(args_tuple):
-			args_package_list.append(self.__pack_item__(arg_raw, argtypes_def_dict[arg_index]))
-
-		# Return parameter message list - MUST WORK WITH PICKLE
-		return args_package_list
+		if hasattr(arg_in, 'contents'):
+			return arg_in.contents
+		else:
+			return arg_in
 
 
-	def server_unpack_arg_list(self, args_package_list, argtypes_d):
+	def __item_value_strip__(self, arg_in):
 
-		# Step through arguments
-		arguments_list = []
-		for arg_index, arg in enumerate(args_package_list):
-			arguments_list.append(self.__unpack_item__(arg[1], argtypes_d[arg_index]))
-
-		# Return args as list, will be converted into tuple on call
-		return arguments_list
+		if hasattr(arg_in, 'value'):
+			return arg_in.value
+		else:
+			return arg_in
 
 
-	def __pack_item__(self, arg_raw, arg_def_dict):
+	def __pack_item__(self, arg_in, arg_def_dict):
 
-		arg_value = arg_raw # Set up arg for iterative unpacking
-		for flag in arg_def_dict['f']: # step through flags
+		# Grep the simple case first, scalars
+		if arg_def_dict['s']:
+
+			# Strip away the pointers ... (all flags are pointers in this case)
+			for flag in arg_def_dict['f']:
+				if flag != FLAG_POINTER:
+					raise # TODO
+				arg_in = self.__item_pointer_strip__(arg_in)
+
+			# Handle fundamental types
+			if arg_def_dict['g'] == GROUP_FUNDAMENTAL:
+				# Append argument to list ...
+				return self.__item_value_strip__(arg_in)
+			# Handle structs
+			elif arg_def_dict['g'] == GROUP_STRUCT:
+				# Reclusively call this routine for packing structs
+				return self.__pack_item_struct__(arg_in, arg_def_dict)
+			# Handle everything else ... likely pointers handled by memsync
+			else:
+				# Just return None - will (hopefully) be overwritten by memsync
+				return None
+
+		# The non-trivial case, involving arrays
+		else:
+
+			return self.__pack_item_array__(arg_in, arg_def_dict)
+
+
+	def __pack_item_array__(self, arg_in, arg_def_dict, flag_index_start = 0):
+
+		for flag_index in range(flag_index_start, len(arg_def_dict['f'])):
+
+			# Extract the flag
+			flag = arg_def_dict['f'][flag_index]
 
 			# Handle pointers
 			if flag == FLAG_POINTER:
 
-				# There are two ways of getting the actual value
-				if hasattr(arg_value, 'value'):
-					arg_value = arg_value.value
-				elif hasattr(arg_value, 'contents'):
-					arg_value = arg_value.contents
-				elif hasattr(arg_value, '_fields_'):
-					# HACK it's likely just a struct passed "as is",
-					# configured as a pointer in argtypes,
-					# but without the intention of letting the routine change it.
-					# ctypes does not mind ... (?)
-					pass
-				else:
-					raise # TODO
+				arg_in = self.__item_pointer_strip__(arg_in)
 
 			# Handle arrays
 			elif flag > 0:
 
-				arg_value = arg_value[:] # TODO arrays of arrays (fixed length)
+				# Only dive deeper if this is not the last flag
+				if flag_index < len(arg_def_dict['f']) - 1:
+					arg_in = [
+						self.__pack_item_array__(
+							e, arg_def_dict, flag_index_start = flag_index + 1
+							) for e in arg_in[:]
+						]
+				else:
+					arg_in = arg_in[:]
+					if arg_def_dict['g'] == GROUP_STRUCT:
+						arg_in = [
+							self.__pack_item_struct__(e, arg_def_dict) for e in arg_in
+							]
 
 			# Handle unknown flags
 			else:
 
 				raise # TODO
 
-		# Handle fundamental types
-		if arg_def_dict['g'] == GROUP_FUNDAMENTAL:
-
-			# Append argument to list ...
-			return (
-				arg_def_dict['n'],
-				self.__pack_item_fundamental__(arg_value, arg_def_dict)
-				)
-
-		# Handle structs
-		elif arg_def_dict['g'] == GROUP_STRUCT:
-
-			# Reclusively call this routine for packing structs
-			return (
-				arg_def_dict['n'],
-				self.__pack_item_struct__(arg_value, arg_def_dict)
-				)
-
-		# Handle everything else ... likely pointers handled by memsync
-		else:
-
-			# Just return None - will (hopefully) be overwritten by memsync
-			return (None, None)
-
-
-	def __pack_item_fundamental__(self, arg_raw, arg_def_dict):
-
-		if hasattr(arg_raw, 'value'):
-			return arg_raw.value
-		else:
-			return arg_raw
+		return arg_in
 
 
 	def __pack_item_struct__(self, struct_raw, struct_def_dict):
 
-		# Shortcut for speed
-		fields_package_list = []
-
-		# Step through fields of dict
-		for field_def_dict in struct_def_dict['_fields_']:
-
-			fields_package_list.append(self.__pack_item__(
-				getattr(struct_raw, field_def_dict['n']), field_def_dict
-				))
-
 		# Return parameter message list - MUST WORK WITH PICKLE
-		return fields_package_list
+		return [(field_def_dict['n'], self.__pack_item__(
+				getattr(struct_raw, field_def_dict['n']), field_def_dict
+				)) for field_def_dict in struct_def_dict['_fields_']]
 
 
 	def __sync_item__(self, old_arg, new_arg, arg_def_dict):
 
-		# Handle fundamental types
-		if arg_def_dict['g'] == GROUP_FUNDAMENTAL:
+		# Grep the simple case first, pointers to scalars
+		if arg_def_dict['s'] and len(arg_def_dict['f']) > 0:
 
-			# HACK let's handle pointers to scalars like before
-			if len(arg_def_dict['f']) == 1 and arg_def_dict['f'][0] == FLAG_POINTER:
+			# Strip away the pointers ... (all flags are pointers in this case)
+			for flag in arg_def_dict['f']:
+				if flag != FLAG_POINTER:
+					raise # TODO
+				old_arg = self.__item_pointer_strip__(old_arg)
+				new_arg = self.__item_pointer_strip__(new_arg)
 
-				if hasattr(old_arg, 'contents'):
-					old_arg_ref = old_arg.contents
-				else:
-					old_arg_ref = old_arg
-				if hasattr(new_arg, 'contents'):
-					new_arg_ref = new_arg.contents
-				else:
-					new_arg_ref = new_arg
-				if hasattr(new_arg_ref, 'value'):
-					new_arg_value = new_arg_ref.value
-				else:
-					new_arg_value = new_arg_ref
-				if hasattr(old_arg_ref, 'value'):
-					old_arg_ref.value = new_arg_value
-				else:
-					old_arg_ref = new_arg_value
+			if arg_def_dict['g'] == GROUP_FUNDAMENTAL:
+				old_arg.value = new_arg.value
+			elif arg_def_dict['g'] == GROUP_STRUCT:
+				return self.__sync_item_struct__(old_arg, new_arg, arg_def_dict)
+			else:
+				pass # DO NOTHING?
 
-			# HACK let's handle 1D fixed length arrays
-			elif len(arg_def_dict['f']) == 2 and arg_def_dict['f'][0] == FLAG_POINTER and arg_def_dict['f'][1] > 0:
+		# The non-trivial case, pointers to arrays
+		elif not arg_def_dict['s'] and arg_def_dict['p']:
 
-				if hasattr(old_arg, 'contents'):
-					old_arg_ref = old_arg.contents
+			self.__sync_item_array__(old_arg, new_arg, arg_def_dict)
+
+
+	def __sync_item_array__(self, old_arg, new_arg, arg_def_dict, flag_index_start = 0):
+
+		for flag_index in range(flag_index_start, len(arg_def_dict['f'])):
+
+			# Extract the flag
+			flag = arg_def_dict['f'][flag_index]
+
+			# Handle pointers
+			if flag == FLAG_POINTER:
+
+				old_arg = self.__item_pointer_strip__(old_arg)
+				new_arg = self.__item_pointer_strip__(new_arg)
+
+			# Handle arrays
+			elif flag > 0:
+
+				# Only dive deeper if this is not the last flag
+				if flag_index < len(arg_def_dict['f']) - 1:
+
+					for old_arg_e, new_arg_e in zip(old_arg[:], new_arg[:]):
+						self.__sync_item_array__(
+							old_arg_e, new_arg_e, arg_def_dict,
+							flag_index_start = flag_index + 1
+							)
+
 				else:
-					old_arg_ref = old_arg
-				if hasattr(new_arg, 'contents'):
-					new_arg_ref = new_arg.contents
-				else:
-					new_arg_ref = new_arg
-				old_arg_ref[:] = new_arg_ref[:]
 
-		else:
+					if arg_def_dict['g'] == GROUP_FUNDAMENTAL:
+						old_arg[:] = new_arg[:]
+					elif arg_def_dict['g'] == GROUP_STRUCT:
+						for old_struct, new_struct in zip(old_arg[:], new_arg[:]):
+							self.__sync_item_struct__(old_struct, new_struct, arg_def_dict)
+					else:
+						raise # TODO
 
-			pass # TODO struct ...
+			# Handle unknown flags
+			else:
+
+				raise # TODO
+
+
+	def __sync_item_struct__(self, old_struct, new_struct, struct_def_dict):
+
+		# Step through arguments
+		for field_def_dict in struct_def_dict['_fields_']:
+
+			self.__sync_item__(
+				getattr(old_struct, field_def_dict['n']),
+				getattr(new_struct, field_def_dict['n']),
+				field_def_dict
+				)
 
 
 	def __unpack_item__(self, arg_raw, arg_def_dict):
 
-		# Handle fundamental types
-		if arg_def_dict['g'] == GROUP_FUNDAMENTAL:
-
-			return self.__unpack_item_fundamental__(arg_raw, arg_def_dict)
-
-		# Handle structs
-		elif arg_def_dict['g'] == GROUP_STRUCT:
-
-			return self.__unpack_item_struct__(arg_raw, arg_def_dict)
-
-		# Handle voids (likely mensync stuff)
-		elif arg_def_dict['g'] == GROUP_VOID:
-
-			# Return a placeholder
-			return 0
-
-		# Handle everything else ...
-		else:
-
-			# HACK TODO
-			self.log.err('__unpack_item__ NEITHER STRUCT NOR FUNDAMENTAL?')
-			self.log.err(str(arg_def_dict['g']))
-			return None
-
-
-	def __unpack_item_fundamental__(self, arg_rebuilt, arg_def_dict):
-
-		# Handle scalars, whether pointer or not
+		# Again the simple case first, scalars of any kind
 		if arg_def_dict['s']:
-			arg_rebuilt = getattr(ctypes, arg_def_dict['t'])(arg_rebuilt)
 
-		# Step through flags in reverse order
-		for flag in reversed(arg_def_dict['f']):
+			# Handle fundamental types
+			if arg_def_dict['g'] == GROUP_FUNDAMENTAL:
+				arg_rebuilt = getattr(ctypes, arg_def_dict['t'])(arg_raw)
+			# Handle structs
+			elif arg_def_dict['g'] == GROUP_STRUCT:
+				arg_rebuilt = self.__unpack_item_struct__(arg_raw, arg_def_dict)
+			# Handle voids (likely mensync stuff)
+			elif arg_def_dict['g'] == GROUP_VOID:
+				# Return a placeholder
+				return None
+			# Handle everything else ...
+			else:
+				raise # TODO
 
-			if flag == FLAG_POINTER:
-
+			# Step through flags in reverse order (if it's not a memsync field)
+			for flag in reversed(arg_def_dict['f']):
+				if flag != FLAG_POINTER:
+					raise # TODO
 				arg_rebuilt = ctypes.pointer(arg_rebuilt)
 
-			elif flag > 0:
+			return arg_rebuilt
 
-				# TODO does not really handle arrays of arrays (yet)
-				arg_rebuilt = (flag * getattr(ctypes, arg_def_dict['t']))(*arg_rebuilt)
+		# And now arrays ...
+		else:
 
+			return self.__unpack_item_array__(arg_raw, arg_def_dict)[1]
+
+
+	def __unpack_item_array__(self, arg_in, arg_def_dict, flag_index = 0):
+
+		# Extract the flag
+		flag = arg_def_dict['f'][flag_index]
+
+		# Dive deeper?
+		if flag_index < len(arg_def_dict['f']) - 1:
+
+			# Get index of next flag
+			next_flag_index = flag_index + 1
+
+			# If it's a Python list, dive once per element of list
+			if type(arg_in) == list and flag != FLAG_POINTER:
+
+				arg_in_tuple_list = [self.__unpack_item_array__(
+					e, arg_def_dict, flag_index = next_flag_index
+					) for e in arg_in]
+				arg_type = arg_in_tuple_list[0][0]
+				arg_in = [e[1] for e in arg_in_tuple_list]
+
+			# Likely a scalar or a ctypes object
 			else:
 
-				raise
+				arg_type, arg_in = self.__unpack_item_array__(
+					arg_in, arg_def_dict, flag_index = next_flag_index
+					)
 
-		return arg_rebuilt
+			# Handle pointers
+			if flag == FLAG_POINTER:
+				arg_type = ctypes.POINTER(arg_type)
+				arg_in = ctypes.pointer(arg_in)
+			# Handle arrays
+			elif flag > 0:
+				arg_type = arg_type * flag
+				arg_in = arg_type(*arg_in)
+			# Handle unknown flags
+			else:
+				raise # TODO
+
+		# No dive, we're at the bottom - just get the original ctypes type
+		else:
+
+			if flag == FLAG_POINTER:
+				raise # TODO
+
+			if arg_def_dict['g'] == GROUP_FUNDAMENTAL:
+				arg_type = getattr(ctypes, arg_def_dict['t']) * flag
+				arg_in = arg_type(*arg_in)
+			elif arg_def_dict['g'] == GROUP_STRUCT:
+				arg_type = self.struct_type_dict[struct_def_dict['t']] * flag
+				arg_in = arg_type(*(self.__unpack_item_struct__(e, arg_def_dict) for e in arg_in))
+			else:
+				raise # TODO
+
+		return arg_type, arg_in
 
 
 	def __unpack_item_struct__(self, args_list, struct_def_dict):
@@ -276,16 +337,13 @@ class arg_contents_class():
 		# Generate new instance of struct datatype
 		struct_inst = self.struct_type_dict[struct_def_dict['t']]()
 
-		# Fetch fields for speed
-		struct_fields = struct_def_dict['_fields_']
-
 		# Step through arguments
-		for arg_index, arg in enumerate(args_list):
+		for field_def_dict, field_arg in zip(struct_def_dict['_fields_'], args_list):
 
 			setattr(
 				struct_inst, # struct instance to be modified
-				arg[0], # parameter name (from tuple)
-				self.__unpack_item__(arg[1], struct_fields[arg_index]) # parameter value
+				field_arg[0], # parameter name (from tuple)
+				self.__unpack_item__(field_arg[1], field_def_dict) # parameter value
 				)
 
 		return struct_inst

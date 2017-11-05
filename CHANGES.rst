@@ -1,6 +1,11 @@
 Changes
 =======
 
+0.0.4 (2017-11-05)
+------------------
+
+* Implemented full support for multidimensional fixed length arrays
+
 0.0.3 (2017-11-02)
 ------------------
 
