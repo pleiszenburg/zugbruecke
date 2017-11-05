@@ -53,19 +53,13 @@ class arg_contents_class():
 	def arg_list_pack(self, args_tuple, argtypes_list):
 
 		# Return parameter message list - MUST WORK WITH PICKLE
-		tmp = [(d['n'], self.__pack_item__(a, d)) for a, d in zip(args_tuple, argtypes_list)]
-		self.log.err('== arg_list_pack ==')
-		self.log.err(pf(tmp))
-		return tmp
+		return [(d['n'], self.__pack_item__(a, d)) for a, d in zip(args_tuple, argtypes_list)]
 
 
 	def arg_list_unpack(self, args_package_list, argtypes_list):
 
 		# Return args as list, will be converted into tuple on call
-		tmp = [self.__unpack_item__(a[1], d) for a, d in zip(args_package_list, argtypes_list)]
-		self.log.err('== arg_list_unpack ==')
-		self.log.err(pf(tmp))
-		return tmp
+		return [self.__unpack_item__(a[1], d) for a, d in zip(args_package_list, argtypes_list)]
 
 
 	def arg_list_sync(self, old_arguments_list, new_arguments_list, argtypes_list):
