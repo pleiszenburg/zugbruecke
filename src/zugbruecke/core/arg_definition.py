@@ -198,8 +198,14 @@ class arg_definition_class():
 			type_name = datatype.__name__
 			group_name = type(datatype).__name__
 
+		# Store the depth of arrays (arrays within arrays etc; for speed)
+		flag_array_depth = len([flag for flag in flag_list if flag > 0])
+
 		# Flag pure scalars as, well, pure scalars (for speed)
-		flag_scalar = len([flag for flag in flag_list if flag > 0]) == 0
+		flag_scalar = flag_array_depth == 0
+
+		# Flag elements containing pointers
+		flag_pointer = len([flag for flag in flag_list if flag == FLAG_POINTER]) != 0
 
 		# Fundamental ('simple') C types
 		if group_name == 'PyCSimpleType':
@@ -207,6 +213,8 @@ class arg_definition_class():
 			return {
 				'f': flag_list,
 				's': flag_scalar,
+				'd': flag_array_depth,
+				'p': flag_pointer,
 				'n': field_name, # kw
 				't': type_name, # Type name, such as 'c_int'
 				'g': GROUP_FUNDAMENTAL
@@ -222,6 +230,8 @@ class arg_definition_class():
 			return {
 				'f': flag_list,
 				's': flag_scalar,
+				'd': flag_array_depth,
+				'p': flag_pointer,
 				'n': field_name, # kw
 				't': type_name, # Type name, such as 'c_int'
 				'g': GROUP_STRUCT,
@@ -236,6 +246,8 @@ class arg_definition_class():
 			return {
 				'f': flag_list,
 				's': flag_scalar,
+				'd': flag_array_depth,
+				'p': flag_pointer,
 				'n': field_name, # kw
 				't': type_name, # Type name, such as 'c_int'
 				'g': GROUP_VOID # Let's try void

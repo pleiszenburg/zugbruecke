@@ -54,8 +54,7 @@ if any([platform.startswith(os_name) for os_name in ['linux', 'darwin', 'freebsd
 	else:
 		f.write('{"log_level": 10}')
 	f.close()
-	import zugbruecke
-	ctypes = zugbruecke
+	import zugbruecke as ctypes
 
 elif platform.startswith('win'):
 
@@ -178,6 +177,13 @@ class sample_class:
 			ctypes.c_ubyte * 3, ctypes.c_ubyte * 3, ctypes.POINTER(ctypes.c_ubyte * 3)
 			)
 
+		# void gauss_elimination(float [3][4] *)
+		self.__gauss_elimination__ = self.__dll__.gauss_elimination
+		self.__gauss_elimination__.argtypes = (
+			ctypes.POINTER(ctypes.c_float * 4 * 3),
+			ctypes.POINTER(ctypes.c_float * 3)
+			)
+
 
 	def avg(self, values):
 
@@ -211,6 +217,23 @@ class sample_class:
 		rem = ctypes.c_int()
 		quot = self.__divide__(x, y, rem)
 		return quot, rem.value
+
+
+	def gauss_elimination(self, A):
+
+		N = 3
+		if len(A) != N or len(A[0]) != N + 1:
+			raise # TODO
+
+		x = [0 for eq in range(N)]
+		_A = (ctypes.c_float * (N + 1) * N)(*(tuple(eq) for eq in A))
+		_x = (ctypes.c_float * N)(*tuple(x))
+		self.__gauss_elimination__(ctypes.pointer(_A), ctypes.pointer(_x))
+		for index, eq in enumerate(A):
+			eq[:] = _A[index][:]
+		x[:] = _x[:]
+
+		return x
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -253,7 +276,7 @@ if __name__ == '__main__':
 	if TIMING_RUN:
 		time_ROUTINE('divide')
 
-	print(3.0, sample.avg([1, 2, 6]))
+	print(4.0, sample.avg([1, 2, 9]))
 	def time_avg():
 		returnvalue = sample.avg([1, 2, 6])
 	if TIMING_RUN:
@@ -284,3 +307,15 @@ if __name__ == '__main__':
 		returnvalue = sample.mix_rgb_colors([10, 20, 40], [80, 50, 30])
 	if TIMING_RUN:
 		time_ROUTINE('mix_rgb_colors')
+
+	eq_sys = [
+		[1, 2, 3, 2],
+		[1, 1, 1, 2],
+		[3, 3, 1, 0]
+		]
+	print([5.0, -6.0, 3.0], sample.gauss_elimination(eq_sys))
+	print([[1.0, 2.0, 3.0, 2.0], [0.0, -1.0, -2.0, 0.0], [0.0, 0.0, -2.0, -6.0]], eq_sys)
+	# def time_gauss_elimination():
+	# 	returnvalue = sample.gauss_elimination([10, 20, 40], [80, 50, 30])
+	# if TIMING_RUN:
+	# 	time_ROUTINE('gauss_elimination')

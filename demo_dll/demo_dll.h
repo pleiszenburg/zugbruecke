@@ -104,6 +104,11 @@ void __stdcall DEMODLL mix_rgb_colors(
 	int8_t *color_mixed
 	);
 
+void __stdcall DEMODLL gauss_elimination(
+	float (*A)[3][4],
+	float (*x)[3]
+	);
+
 struct test
 {
 	char el_char;

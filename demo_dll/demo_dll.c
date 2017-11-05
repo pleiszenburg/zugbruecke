@@ -152,6 +152,42 @@ void __stdcall DEMODLL mix_rgb_colors(
 }
 
 
+void __stdcall DEMODLL gauss_elimination(
+	float (*A)[3][4],
+	float (*x)[3]
+	)
+{
+
+	int i, j, k, n = 3;
+	float c, sum = 0.0;
+
+	for(j = 0; j < n; j++)
+	{
+		for(i = j + 1; i < n; i++)
+		{
+			c = (*A)[i][j] / (*A)[j][j];
+			for(k = 0; k <= n; k++)
+			{
+				(*A)[i][k] = (*A)[i][k] - c * (*A)[j][k];
+			}
+		}
+	}
+
+	(*x)[n - 1] = (*A)[n - 1][n] / (*A)[n - 1][n - 1];
+
+	for(i = n - 2; i >= 0; i--)
+	{
+		sum = 0;
+		for(j = i + 1; j < n; j++)
+		{
+			sum = sum + (*A)[i][j] * (*x)[j];
+		}
+		(*x)[i] = ((*A)[i][n] - sum) / (*A)[i][i];
+	}
+
+}
+
+
 float __stdcall DEMODLL simple_demo_routine(
 	float param_a,
 	float param_b
