@@ -230,77 +230,59 @@ class arg_contents_class():
 
 	def __unpack_item_array__(self, arg_in, arg_def_dict, flag_index = 0):
 
-		self.log.err('ARRAY flag_index %d | sub_arg: %s' % (flag_index, pf(arg_in)))
+		# Extract the flag
+		flag = arg_def_dict['f'][flag_index]
 
-		try:
+		# Dive deeper?
+		if flag_index < len(arg_def_dict['f']) - 1:
 
-			# Extract the flag
-			flag = arg_def_dict['f'][flag_index]
+			# Get index of next flag
+			next_flag_index = flag_index + 1
 
-			# Dive deeper?
-			if flag_index < len(arg_def_dict['f']) - 1:
+			# If it's a Python list, dive once per element of list
+			if type(arg_in) == list and flag != FLAG_POINTER:
 
-				# Get index of next flag
-				next_flag_index = flag_index + 1
+				arg_in_tuple_list = [self.__unpack_item_array__(
+					e, arg_def_dict, flag_index = next_flag_index
+					) for e in arg_in]
+				arg_type = arg_in_tuple_list[0][0]
+				arg_in = [e[1] for e in arg_in_tuple_list]
 
-				# If it's a Python list, dive once per element of list
-				if type(arg_in) == list and flag != FLAG_POINTER:
-
-					arg_in_tuple_list = [self.__unpack_item_array__(
-						e, arg_def_dict, flag_index = next_flag_index
-						) for e in arg_in]
-					arg_type = arg_in_tuple_list[0][0]
-					arg_in = [e[1] for e in arg_in_tuple_list]
-
-				# Likely a scalar or a ctypes object
-				else:
-
-					arg_type, arg_in = self.__unpack_item_array__(
-						arg_in, arg_def_dict, flag_index = next_flag_index
-						)
-
-				# Handle pointers
-				if flag == FLAG_POINTER:
-					arg_type = ctypes.POINTER(arg_type)
-					arg_in = ctypes.pointer(arg_in)
-				# Handle arrays
-				elif flag > 0:
-					arg_type = arg_type * flag
-					arg_in = arg_type(*arg_in)
-				# Handle unknown flags
-				else:
-					raise # TODO
-
-			# No dive, we're at the bottom - just get the original ctypes type
+			# Likely a scalar or a ctypes object
 			else:
 
-				self.log.err(' BOTTOM 0 arg_in %s' % pf(arg_in))
+				arg_type, arg_in = self.__unpack_item_array__(
+					arg_in, arg_def_dict, flag_index = next_flag_index
+					)
 
-				if flag == FLAG_POINTER:
-					raise # TODO
+			# Handle pointers
+			if flag == FLAG_POINTER:
+				arg_type = ctypes.POINTER(arg_type)
+				arg_in = ctypes.pointer(arg_in)
+			# Handle arrays
+			elif flag > 0:
+				arg_type = arg_type * flag
+				arg_in = arg_type(*arg_in)
+			# Handle unknown flags
+			else:
+				raise # TODO
 
-				if arg_def_dict['g'] == GROUP_FUNDAMENTAL:
-					arg_type = getattr(ctypes, arg_def_dict['t']) * flag
-					arg_in = arg_type(*arg_in)
-				elif arg_def_dict['g'] == GROUP_STRUCT:
-					arg_type = self.struct_type_dict[struct_def_dict['t']] * flag
-					arg_in = arg_type(*(self.__unpack_item_struct__(e, arg_def_dict) for e in arg_in))
-				else:
-					raise # TODO
+		# No dive, we're at the bottom - just get the original ctypes type
+		else:
 
-				self.log.err(' BOTTOM 1 arg_in %s arg_type %s' % (pf(arg_in), pf(arg_type)))
+			if flag == FLAG_POINTER:
+				raise # TODO
 
-		except:
-
-			self.log.err(traceback.format_exc())
+			if arg_def_dict['g'] == GROUP_FUNDAMENTAL:
+				arg_type = getattr(ctypes, arg_def_dict['t']) * flag
+				arg_in = arg_type(*arg_in)
+			elif arg_def_dict['g'] == GROUP_STRUCT:
+				arg_type = self.struct_type_dict[struct_def_dict['t']] * flag
+				arg_in = arg_type(*(self.__unpack_item_struct__(e, arg_def_dict) for e in arg_in))
+			else:
+				raise # TODO
 
 		return arg_type, arg_in
-
-
-	# def __unpack_item_fundamental__(self, arg_rebuilt, arg_def_dict):
-	#
-	# 	# TODO does not really handle arrays of arrays (yet)
-	# 	arg_rebuilt = (flag * getattr(ctypes, arg_def_dict['t']))(*arg_rebuilt)
 
 
 	def __unpack_item_struct__(self, args_list, struct_def_dict):
