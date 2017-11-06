@@ -75,8 +75,13 @@ class arg_contents_class():
 
 	def __item_pointer_strip__(self, arg_in):
 
+		# Handle pointer object
 		if hasattr(arg_in, 'contents'):
 			return arg_in.contents
+		# Handle reference (byref) 'light pointer'
+		elif hasattr(arg_in, '_obj'):
+			return arg_in._obj
+		# Object was likely not provided as a pointer
 		else:
 			return arg_in
 
