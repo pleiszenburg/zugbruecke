@@ -32,8 +32,11 @@ specific language governing rights and limitations under the License.
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-
-import ctypes
+from sys import platform
+if any([platform.startswith(os_name) for os_name in ['linux', 'darwin', 'freebsd']]):
+	import zugbruecke as ctypes
+elif platform.startswith('win'):
+	import ctypes
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
