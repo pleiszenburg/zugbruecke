@@ -171,8 +171,8 @@ class arg_contents_class():
 
 	def __sync_item__(self, old_arg, new_arg, arg_def_dict):
 
-		# Grep the simple case first, pointers to scalars
-		if arg_def_dict['s'] and len(arg_def_dict['f']) > 0:
+		# Grep the simple case first, scalars
+		if arg_def_dict['s']:
 
 			# Strip away the pointers ... (all flags are pointers in this case)
 			for flag in arg_def_dict['f']:
@@ -182,14 +182,17 @@ class arg_contents_class():
 				new_arg = self.__item_pointer_strip__(new_arg)
 
 			if arg_def_dict['g'] == GROUP_FUNDAMENTAL:
-				old_arg.value = new_arg.value
+				if hasattr(old_arg, 'value'):
+					old_arg.value = new_arg.value
+				else:
+					pass # only relevant within structs or for actual pointers to scalars
 			elif arg_def_dict['g'] == GROUP_STRUCT:
 				return self.__sync_item_struct__(old_arg, new_arg, arg_def_dict)
 			else:
 				pass # DO NOTHING?
 
-		# The non-trivial case, pointers to arrays
-		elif not arg_def_dict['s'] and arg_def_dict['p']:
+		# The non-trivial case, arrays
+		elif not arg_def_dict['s']:
 
 			self.__sync_item_array__(old_arg, new_arg, arg_def_dict)
 
