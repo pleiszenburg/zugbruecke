@@ -119,4 +119,8 @@ if __name__ == '__main__':
 	samples.complex_demo_routine(sample_param_char, sample_param_int, sample_type_test)
 
 	# Print result
-	print([e[:] for e in sample_type_test.el_int8t_2x3[:]])
+	print([0, 2, 6, 12], sample_type_test.el_int8t_4[:])
+	print(
+		[[1, 3], [3, 5], [7, 6]],
+		[e[:] for e in sample_type_test.el_int8t_2x3[:]]
+		)
