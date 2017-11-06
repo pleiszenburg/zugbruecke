@@ -1,6 +1,12 @@
 Changes
 =======
 
+0.0.5 (2017-XX-XX)
+------------------
+
+* Added support for light-weight pointers (``ctypes.byref``)
+* FIX: Elements within structures are properly synchronized even if they are not a pointer on their own.
+
 0.0.4 (2017-11-05)
 ------------------
 
