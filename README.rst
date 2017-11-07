@@ -129,8 +129,8 @@ Speed
 =====
 
 zugbruecke performs reasonably well given its complexity with **less than 0.2 µs
-overhead per call** in average on modern hardware. Check the latest `benchmarks`_
-for more details.
+overhead per call** in average on modern hardware. It is not (yet) optimized for
+speed. Check the latest `benchmarks`_ for more details.
 
 .. _benchmarks: docs/benchmarks.rst
 
