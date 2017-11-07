@@ -27,7 +27,6 @@ Consider the following example DLL routine in C:
 
 .. code:: C
 
-	/* Average values in an array */
 	void __stdcall __declspec(dllimport) bubblesort(
 		float *a,
 		int n

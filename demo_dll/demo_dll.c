@@ -116,7 +116,6 @@ double __stdcall DEMODLL cookbook_distance(
 // zugbruecke demo
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-/* Average values in an array */
 void __stdcall DEMODLL bubblesort(
 	float *a,
 	int n
