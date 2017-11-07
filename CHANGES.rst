@@ -6,6 +6,8 @@ Changes
 
 * Added support for light-weight pointers (``ctypes.byref``)
 * FIX: Elements within structures are properly synchronized even if they are not a pointer on their own.
+* FIX: Structure objects in arrays of structures are properly initialized.
+* FIX: Links in README.rst work when rendered on PyPI.
 
 0.0.4 (2017-11-05)
 ------------------
