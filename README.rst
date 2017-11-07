@@ -177,6 +177,7 @@ Miscellaneous
 - `Contributing`_ (**Contributions are highly welcomed!**)
 - `FAQ`_
 - `Authors`_
+- `Changes`_
 - `Missing features`_ (for full ctypes compatibility)
 - `Long-term ideas`_
 - `Upstream issues`_ (relevant bugs in dependencies)
@@ -187,6 +188,7 @@ Miscellaneous
 .. _Contributing: CONTRIBUTING.rst
 .. _FAQ: docs/faq.rst
 .. _Authors: AUTHORS.rst
+.. _Changes: https://github.com/pleiszenburg/zugbruecke/blob/master/CHANGES.rst
 .. _Missing features: https://github.com/pleiszenburg/zugbruecke/issues?q=is%3Aissue+is%3Aopen+label%3A%22missing+ctypes+feature%22
 .. _Long-term ideas: https://github.com/pleiszenburg/zugbruecke/milestone/2
 .. _Upstream issues: https://github.com/pleiszenburg/zugbruecke/issues?q=is%3Aissue+is%3Aopen+label%3Aupstream
