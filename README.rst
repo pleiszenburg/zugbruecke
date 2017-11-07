@@ -122,7 +122,7 @@ A lot of code, which was written with ``ctypes``' ``cdll``, ``windll`` or ``oled
 in mind and which runs under Windows, should run just fine with zugbruecke
 on Unix (assuming it does not use Windows features not supported by Wine).
 
-.. _examples: docs/examples.rst
+.. _examples: http://zugbruecke.readthedocs.io/en/stable/examples.html
 .. _ctypes' documentation: https://docs.python.org/3/library/ctypes.html
 
 Speed
@@ -132,7 +132,7 @@ zugbruecke performs reasonably well given its complexity with **less than 0.2 µ
 overhead per call** in average on modern hardware. It is not (yet) optimized for
 speed. Check the latest `benchmarks`_ for more details.
 
-.. _benchmarks: docs/benchmarks.rst
+.. _benchmarks: http://zugbruecke.readthedocs.io/en/stable/benchmarks.html
 
 Security
 ========
@@ -141,13 +141,12 @@ zugbruecke is **notoriously insecure**. Never, ever, run it with
 root / super users privileges! Do not use it where security matters!
 For details, check the section on `security`_ in the documentation.
 
-.. _security: docs/security.rst
+.. _security: http://zugbruecke.readthedocs.io/en/stable/security.html
 
 Need help?
 ==========
 
 Feel free to post questions in the `GitHub issue tracker`_ of this project.
-Make sure to label them as `question`_.
 
 .. _question: https://github.com/pleiszenburg/zugbruecke/labels/question
 
@@ -163,7 +162,7 @@ Make sure you have read the chapter on `bugs`_ in zugbruecke's documentation.
 .. _GitHub issue tracker: https://github.com/pleiszenburg/zugbruecke/issues
 .. _Python tracker: https://bugs.python.org/
 .. _WineHQ Bug Tracking System: https://bugs.winehq.org/
-.. _bugs: docs/bugs.rst
+.. _bugs: http://zugbruecke.readthedocs.io/en/stable/bugs.html
 
 Miscellaneous
 =============
@@ -184,10 +183,10 @@ Miscellaneous
 
 .. _Read the Docs: http://zugbruecke.readthedocs.io/en/latest/
 .. _zugbruecke repository: docs/index.rst
-.. _License: LICENSE
-.. _Contributing: CONTRIBUTING.rst
-.. _FAQ: docs/faq.rst
-.. _Authors: AUTHORS.rst
+.. _License: https://github.com/pleiszenburg/zugbruecke/blob/master/LICENSE
+.. _Contributing: https://github.com/pleiszenburg/zugbruecke/blob/master/CONTRIBUTING.rst
+.. _FAQ: http://zugbruecke.readthedocs.io/en/stable/faq.html
+.. _Authors: https://github.com/pleiszenburg/zugbruecke/blob/master/AUTHORS.rst
 .. _Changes: https://github.com/pleiszenburg/zugbruecke/blob/master/CHANGES.rst
 .. _Missing features: https://github.com/pleiszenburg/zugbruecke/issues?q=is%3Aissue+is%3Aopen+label%3A%22missing+ctypes+feature%22
 .. _Long-term ideas: https://github.com/pleiszenburg/zugbruecke/milestone/2
