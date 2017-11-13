@@ -116,7 +116,6 @@ double __stdcall DEMODLL cookbook_distance(
 // zugbruecke demo
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-/* Average values in an array */
 void __stdcall DEMODLL bubblesort(
 	float *a,
 	int n
@@ -203,11 +202,22 @@ void __stdcall DEMODLL complex_demo_routine(
 	struct test *param_struct_test_p
 	)
 {
-	printf("el_int8t = '%d' \n", (*param_struct_test_p).el_int8t);
-	printf("el_int8t_4[0] = '%d' \n", (*param_struct_test_p).el_int8t_4[0]);
-	printf("el_int8t_4[1] = '%d' \n", (*param_struct_test_p).el_int8t_4[1]);
-	printf("el_int8t_4[2] = '%d' \n", (*param_struct_test_p).el_int8t_4[2]);
-	printf("el_int8t_4[3] = '%d' \n", (*param_struct_test_p).el_int8t_4[3]);
+
+	int8_t i, j;
+
+	for(i = 0; i < 4; i++)
+	{
+		(*param_struct_test_p).el_int8t_4[i] *= i;
+	}
+
+	for(i = 0; i < 3; i++)
+	{
+		for(j = 0; j < 2; j++)
+		{
+			(*param_struct_test_p).el_int8t_2x3[i][j] += i + j;
+		}
+	}
+
 }
 
 

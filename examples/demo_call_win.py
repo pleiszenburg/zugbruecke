@@ -32,8 +32,11 @@ specific language governing rights and limitations under the License.
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-
-import ctypes
+from sys import platform
+if any([platform.startswith(os_name) for os_name in ['linux', 'darwin', 'freebsd']]):
+	import zugbruecke as ctypes
+elif platform.startswith('win'):
+	import ctypes
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -59,7 +62,7 @@ class type_test_struct(ctypes.Structure):
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
-class demo_routine_caller_class():
+class sample_class():
 
 	def __init__(self):
 
@@ -77,7 +80,7 @@ class demo_routine_caller_class():
 		self._call_demo_routine_.restype = ctypes.c_void_p
 
 
-	def call(self, param_char, param_int, param_type_test):
+	def complex_demo_routine(self, param_char, param_int, param_type_test):
 
 		# Call routine in DLL
 		self._call_demo_routine_(
@@ -85,9 +88,6 @@ class demo_routine_caller_class():
 			param_int,
 			ctypes.byref(param_type_test)
 			)
-
-		print('Called!')
-		return True
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -99,7 +99,9 @@ if __name__ == '__main__':
 	# Initialize some test parameters
 	sample_param_char = ctypes.c_char(7)
 	sample_param_int = ctypes.c_int(42)
+	# Initialize a test structure
 	sample_type_test = type_test_struct()
+	# Fill test structure with data
 	sample_type_test.el_char = ctypes.c_char(5)
 	sample_type_test.el_int8t = ctypes.c_int8(17)
 	sample_type_test.el_int16t = ctypes.c_int16(25874)
@@ -111,7 +113,14 @@ if __name__ == '__main__':
 	sample_type_test.el_int8t_2x3 = (ctypes.c_int8 * len(el_int8t_2x3[0]) * len(el_int8t_2x3))(*(tuple(i) for i in el_int8t_2x3))
 
 	# Initialize caller
-	demo_routine_caller = demo_routine_caller_class()
+	samples = sample_class()
 
 	# Call
-	demo_routine_caller.call(sample_param_char, sample_param_int, sample_type_test)
+	samples.complex_demo_routine(sample_param_char, sample_param_int, sample_type_test)
+
+	# Print result
+	print([0, 2, 6, 12], sample_type_test.el_int8t_4[:])
+	print(
+		[[1, 3], [3, 5], [7, 6]],
+		[e[:] for e in sample_type_test.el_int8t_2x3[:]]
+		)

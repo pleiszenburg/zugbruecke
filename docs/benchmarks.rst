@@ -12,7 +12,8 @@ Benchmarks
 ==========
 
 *zugbruecke* performs reasonably well given its complexity with **less than 0.2 µs
-overhead per call** in average on modern hardware.
+overhead per call** in average on modern hardware. It is not (yet) optimized for
+speed.
 
 The inter-process communication via *multiprocessing connection* adds overhead to
 every function call. Because *zugbruecke* takes care of packing and unpacking of
