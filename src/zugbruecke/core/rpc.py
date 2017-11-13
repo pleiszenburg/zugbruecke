@@ -35,7 +35,6 @@ from multiprocessing.connection import (
 	Client,
 	Listener
 	)
-import pickle
 from threading import Thread
 import traceback
 
@@ -59,9 +58,9 @@ class mp_client_class:
 		def do_rpc(*args, **kwargs):
 
 			# Send request to server
-			self.client.send(pickle.dumps((name, args, kwargs)))
+			self.client.send((name, args, kwargs))
 			# Receive answer
-			result = pickle.loads(self.client.recv())
+			result = self.client.recv()
 
 			# If the answer is an error, raise it
 			if isinstance(result, Exception):
@@ -101,14 +100,14 @@ class mp_server_handler_class:
 			while True:
 
 				# Receive the incomming message
-				function_name, args, kwargs = pickle.loads(connection_client.recv())
+				function_name, args, kwargs = connection_client.recv()
 
 				# Run the RPC and send a response
 				try:
 					r = self.__functions__[function_name](*args,**kwargs)
-					connection_client.send(pickle.dumps(r))
+					connection_client.send(r)
 				except Exception as e:
-					connection_client.send(pickle.dumps(e))
+					connection_client.send(e)
 
 		except EOFError:
 
