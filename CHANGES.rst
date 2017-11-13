@@ -1,7 +1,7 @@
 Changes
 =======
 
-0.0.5 (2017-XX-XX)
+0.0.5 (2017-11-13)
 ------------------
 
 * Added support for light-weight pointers (``ctypes.byref``)
