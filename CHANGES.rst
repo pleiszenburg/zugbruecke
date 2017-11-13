@@ -4,7 +4,7 @@ Changes
 0.0.6 (2017-XX-XX)
 ------------------
 
-* ...
+* RPC speedup due to removal of extra pickling step
 
 0.0.5 (2017-11-13)
 ------------------
