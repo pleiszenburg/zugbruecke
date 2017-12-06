@@ -123,6 +123,19 @@ def setup_wine_python(arch, version, directory, overwrite = False):
 		f.extractall(path = target_directory) # Directory created if required
 		f.close()
 
+		# Get path of Python library zip
+		library_zip_path = os.path.join(target_directory, 'python%s%s.zip' % (
+			version.split('.')[0], version.split('.')[1]
+			))
+
+		# Unpack Python library from embedded zip on disk
+		f = zipfile.ZipFile(library_zip_path, 'r')
+		f.extractall(path = os.path.join(target_directory, 'Lib')) # Directory created if required
+		f.close()
+
+		# Remove Python library zip from disk
+		os.remove(library_zip_path)
+
 
 def set_wine_env(cfg_dir, arch):
 
