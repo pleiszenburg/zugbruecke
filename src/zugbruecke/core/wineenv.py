@@ -111,7 +111,7 @@ def setup_wine_python(arch, version, directory, overwrite = False):
 		# Generate in-memory file-like-object
 		archive_zip = BytesIO()
 
-		# Download zip file from Python website into directory
+		# Download zip file from Python website into file-like-object
 		archive_req = urllib.request.urlopen(
 			'https://www.python.org/ftp/python/%s/%s' % (version, pyarchive)
 			)
