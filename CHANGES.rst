@@ -4,7 +4,10 @@ Changes
 0.0.6 (2017-XX-XX)
 ------------------
 
+* Added workaround for `CPython issue 24960`_
 * RPC speedup due to removal of extra pickling step
+
+.. _CPython issue 24960: https://bugs.python.org/issue24960
 
 0.0.5 (2017-11-13)
 ------------------
