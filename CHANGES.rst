@@ -1,11 +1,13 @@
 Changes
 =======
 
-0.0.6 (2017-XX-XX)
+0.0.6 (2017-12-06)
 ------------------
 
-* Added workaround for `CPython issue 24960`_
 * RPC speedup due to removal of extra pickling step
+* Moved definition of development dependencies into ``setup.py``
+* FIX: Added workaround for `CPython issue 24960`_ (embedded zip file extracted into library folder) - was triggered by latest version of ``pluggy`` (dependency of ``pytest``)
+* FIX: Preexisting installation of ``wine-python`` is now always being removed completely when required due to update or new installation
 
 .. _CPython issue 24960: https://bugs.python.org/issue24960
 
@@ -15,7 +17,7 @@ Changes
 * Added support for light-weight pointers (``ctypes.byref``)
 * FIX: Elements within structures are properly synchronized even if they are not a pointer on their own.
 * FIX: Structure objects in arrays of structures are properly initialized.
-* FIX: Links in README.rst work when rendered on PyPI.
+* FIX: Links in ``README.rst`` work when rendered on PyPI.
 
 0.0.4 (2017-11-05)
 ------------------
