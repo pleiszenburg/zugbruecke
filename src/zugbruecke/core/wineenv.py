@@ -92,20 +92,17 @@ def setup_wine_python(arch, version, directory, overwrite = False):
 	# Target directory
 	target_directory = os.path.join(directory, pydir)
 
-	# Target location of python.exe
-	python_exe_path = os.path.join(target_directory, 'python.exe')
-
 	# Is there a pre-existing Python installation with identical parameters?
-	preexisting = os.path.isfile(python_exe_path)
+	preexisting = os.path.isfile(os.path.join(target_directory, 'python.exe'))
 
 	# Is there a preexisting installation and should it be overwritten?
 	if preexisting and overwrite:
-
 		# Delete folder
-		shutil.rmtree(python_exe_path)
+		shutil.rmtree(target_directory)
 
 	# Make sure the target directory exists
 	if not os.path.exists(directory):
+		# Create folder
 		os.makedirs(directory)
 
 	# Only do if Python is not there OR if should be overwritten
@@ -123,7 +120,7 @@ def setup_wine_python(arch, version, directory, overwrite = False):
 
 		# Unpack from memory to disk
 		f = zipfile.ZipFile(archive_zip)
-		f.extractall(path = target_directory)
+		f.extractall(path = target_directory) # Directory created if required
 		f.close()
 
 
