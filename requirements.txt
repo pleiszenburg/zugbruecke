@@ -1,6 +1,2 @@
-setuptools
-wheel
-pytest
-Sphinx
-sphinx_rtd_theme
-twine
+--index-url https://pypi.python.org/simple/
+--process-dependency-links -e .[dev]

@@ -45,13 +45,11 @@ upload_test:
 	done
 
 install:
-	pip install -r requirements.txt
-	pip install .
+	pip install --process-dependency-links .[dev]
 	wine-pytest --version
 
 install_link:
-	pip install -r requirements.txt
-	pip install -e .
+	pip install --process-dependency-links -e .[dev]
 	wine-pytest --version
 
 test:
