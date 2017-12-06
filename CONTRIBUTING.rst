@@ -57,7 +57,7 @@ Submitting patches
 ------------------
 
 - Include tests if your patch is supposed to solve a bug or add a missing feature,
-  and explain clearly under which circumstances the bug happens what was missing.
+  and explain clearly under which circumstances the bug happens or what was missing.
   Make sure the test fails with *zugbruecke* without your patch, while it must work
   with *ctypes* on *Wine*.
 - Use **tabs** for indentation.
