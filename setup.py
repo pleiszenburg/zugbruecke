@@ -46,7 +46,7 @@ from sys import platform
 
 
 # Bump version HERE!
-_version_ = '0.0.5'
+_version_ = '0.0.6'
 
 
 # List all versions of Python which are supported
@@ -82,8 +82,16 @@ setup(
 	scripts = glob(os.path.join('scripts', '*')),
 	include_package_data = True,
 	install_requires = [],
+	extras_require = {'dev': [
+		'pytest',
+		'python-language-server',
+		'setuptools',
+		'Sphinx',
+		'sphinx_rtd_theme',
+		'twine',
+		'wheel'
+		]},
 	zip_safe = False,
-	extras_require = {},
 	entry_points = {},
 	classifiers = [
 		'Development Status :: 3 - Alpha',

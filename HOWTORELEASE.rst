@@ -15,7 +15,9 @@ How to release zugbruecke
 
 #. Change to branch ``master``.
 
-#. Merge branch ``develop`` into branch ``master`` and push it to GitHub.
+#. Merge branch ``develop`` into branch ``master``.
+
+#. Push branch ``master`` to GitHub.
 
 #. Tag branch ``master`` with ``"v_%s"  % version``.
 

@@ -44,7 +44,6 @@ from ctypes import LibraryLoader # EXPORT
 # IMPORT: Unix ctypes members, which will be modified
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-from ctypes import cdll as ctypes_cdll_obj
 from ctypes import CDLL as ctypes_CDLL_class
 
 from ctypes import CFUNCTYPE as __CFUNCTYPE__
