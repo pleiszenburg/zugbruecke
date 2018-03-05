@@ -1,6 +1,12 @@
 Changes
 =======
 
+0.0.7 (2018-03-05)
+------------------
+
+* FIX: Wine Python environment sometimes did, unintentionally, fall back to Python 2 and crash, see issue #20.
+* Confirmed: Support for Mac OS X, see issue #16.
+
 0.0.6 (2017-12-06)
 ------------------
 
