@@ -71,10 +71,11 @@ Looking for work? Check *zugbruecke*'s `open issues`_ :)
 
 .. _open issues: https://github.com/pleiszenburg/zugbruecke/issues
 
-First time setup
-----------------
+First time setup for developers
+-------------------------------
 
 - Make sure you have *Wine* 2.x and *CPython* 3.x installed.
+- Make sure you have the *mingw* cross compiler installed for compiling the *Windows* test DLL.
 - Download and install the `latest version of git`_.
 - Configure git with your `username`_ and `email`_:
 
@@ -112,6 +113,18 @@ First time setup
 .. code:: bash
 
 	make install_link
+
+- Compile the *Windows* test DLL:
+
+.. code:: bash
+
+	make dll
+
+- Run the test suite and confirm that the development environment is fully functional:
+
+.. code:: bash
+
+	make test
 
 .. _GitHub account: https://github.com/join
 .. _latest version of git: https://git-scm.com/downloads
