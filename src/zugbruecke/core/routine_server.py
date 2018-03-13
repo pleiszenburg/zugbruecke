@@ -97,13 +97,18 @@ class routine_server_class(
 			# Get new arg message list
 			arg_message_list = self.arg_list_pack(args_list, self.argtypes_d)
 
+			# Get new return message list TODO check sanity of following lines ...
+			return_message = None
+			if return_value != None:
+				return_message = self.arg_list_pack([return_value], [self.restype_d])[0]
+
 			# Log status
 			self.log.out('[routine-server] ... done.')
 
 			# Pack return package and return it
 			return {
 				'args': arg_message_list,
-				'return_value': return_value, # TODO allow & handle pointers
+				'return_value': return_message, # TODO handle memory allocated by DLL in "free form" pointers
 				'memory': arg_memory_list,
 				'success': True
 				}

@@ -138,6 +138,11 @@ class routine_client_class(
 			self.argtypes_d
 			)
 
+		# Unpack return value of routine TODO check sanity of following line ...
+		return_value = None
+		if return_dict['return_value'] is not None:
+			return_value = self.arg_list_unpack([return_dict['return_value']], [self.restype_d])[0]
+
 		# Unpack memory
 		self.client_unpack_memory_list(return_dict['memory'], memory_transport_handle)
 
@@ -145,7 +150,7 @@ class routine_client_class(
 		self.log.out('[routine-client] ... unpacked, return.')
 
 		# Return result. return_value will be None if there was not a result.
-		return return_dict['return_value']
+		return return_value
 
 
 	def __configure__(self):
