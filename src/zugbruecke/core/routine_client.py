@@ -142,6 +142,7 @@ class routine_client_class(
 		return_value = None
 		if return_dict['return_value'] is not None:
 			return_value = self.arg_list_unpack([return_dict['return_value']], [self.restype_d])[0]
+			return_value = self.return_value_strip(return_value, self.restype_d)
 
 		# Unpack memory
 		self.client_unpack_memory_list(return_dict['memory'], memory_transport_handle)

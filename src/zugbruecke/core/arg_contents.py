@@ -73,6 +73,20 @@ class arg_contents_class():
 				)
 
 
+	def return_value_strip(self, arg_in, arg_def_dict):
+
+		# The original ctypes strips away ctypes datatypes for fundamental
+		# (non-pointer, non-struct) return values and returns plain Python
+		# data types instead
+
+		# If this is not a fundamental datatype or if there is a pointer involved, just return
+		if not arg_def_dict['g'] == GROUP_FUNDAMENTAL or FLAG_POINTER in arg_def_dict['f']:
+			return arg_in
+
+		# Strip the ctypes datatype
+		return self.__item_value_strip__(arg_in)
+
+
 	def __item_pointer_strip__(self, arg_in):
 
 		# Handle pointer object
