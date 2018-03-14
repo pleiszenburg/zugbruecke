@@ -4,7 +4,7 @@ Changes
 0.0.8 (2018-XX-XX)
 ------------------
 
-* ...
+* FEATURE: Support for structures and pointers as return values, see issue #14.
 
 0.0.7 (2018-03-05)
 ------------------
@@ -25,7 +25,7 @@ Changes
 0.0.5 (2017-11-13)
 ------------------
 
-* Added support for light-weight pointers (``ctypes.byref``)
+* FEATURE: Support for light-weight pointers (``ctypes.byref``)
 * FIX: Elements within structures are properly synchronized even if they are not a pointer on their own.
 * FIX: Structure objects in arrays of structures are properly initialized.
 * FIX: Links in ``README.rst`` work when rendered on PyPI.
@@ -33,16 +33,16 @@ Changes
 0.0.4 (2017-11-05)
 ------------------
 
-* Implemented full support for multidimensional fixed length arrays
+* FEATURE: Full support for multidimensional fixed length arrays
 
 0.0.3 (2017-11-02)
 ------------------
 
-* Implemented fixed length 1D arrays
+* FEATURE: Fixed length 1D arrays
 * Refactored argument packing and unpacking code
 * Plenty of cleanups based on static code analysis
 * Introduced ``Python``'s ``any`` functions in a number of places
-* Fixed lots of typos and grammar issues in documentation
+* FIX: Lots of typos and grammar issues in documentation
 
 0.0.2 (2017-07-28)
 ------------------
