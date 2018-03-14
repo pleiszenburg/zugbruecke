@@ -37,7 +37,14 @@ from ctypes import DEFAULT_MODE
 # IMPORT: Unix ctypes members, which will exported as they are
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-from ctypes import LibraryLoader # EXPORT
+from ctypes import (
+	_c_functype_cache,
+	_CFuncPtr,
+	_FUNCFLAG_USE_ERRNO,
+	_FUNCFLAG_USE_LASTERROR,
+	CFUNCTYPE,
+	LibraryLoader
+	)
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -45,9 +52,6 @@ from ctypes import LibraryLoader # EXPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 from ctypes import CDLL as ctypes_CDLL_class
-
-from ctypes import CFUNCTYPE as __CFUNCTYPE__
-from ctypes import _c_functype_cache as __c_functype_cache__
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -72,12 +76,6 @@ class HRESULT: # EXPORT
 
 def _check_HRESULT(result): # EXPORT
 	pass # TODO stub - method for HRESULT, checks error bit, raises error if true. Needs reimplementation.
-
-def WINFUNCTYPE(restype, *argtypes, **kw): # EXPORT
-	pass # TODO stub
-
-# Used in ctypes __init__.py by WINFUNCTYPE. Needs to be exposed?
-_win_functype_cache = {} # EXPORT # TODO stub
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -104,15 +102,41 @@ WinError = current_session.ctypes_WinError # EXPORT
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# Compatibility to CFUNCTYPE on Wine side must be implemented
+# CFUNCTYPE & WINFUNCTYPE
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-# Need to handle c functions in DLLs
-CFUNCTYPE = __CFUNCTYPE__ # EXPORT
-_c_functype_cache = __c_functype_cache__ # EXPORT
+# TODO Compatibility to CFUNCTYPE on Wine side must be implemented
 
-# Just in case ...
+# Required for WINFUNCTYPE
 _FUNCFLAG_STDCALL = 0 # EXPORT
+
+# CFUNCTYPE
+# _c_functype_cache
+
+# WINDLL function calls
+def WINFUNCTYPE(restype, *argtypes, **kw): # EXPORT
+	flags = _FUNCFLAG_STDCALL
+	if kw.pop("use_errno", False):
+		flags |= _FUNCFLAG_USE_ERRNO
+	if kw.pop("use_last_error", False):
+		flags |= _FUNCFLAG_USE_LASTERROR
+	if kw:
+		raise ValueError("unexpected keyword argument(s) %s" % kw.keys())
+	try:
+		return _win_functype_cache[(restype, argtypes, flags)]
+	except KeyError:
+		class WinFunctionType(_CFuncPtr):
+			_argtypes_ = argtypes
+			_restype_ = restype
+			_flags_ = flags
+		_win_functype_cache[(restype, argtypes, flags)] = WinFunctionType
+		return WinFunctionType
+
+if WINFUNCTYPE.__doc__:
+	WINFUNCTYPE.__doc__ = CFUNCTYPE.__doc__.replace('CFUNCTYPE', 'WINFUNCTYPE')
+
+# Used in ctypes __init__.py by WINFUNCTYPE
+_win_functype_cache = {} # EXPORT
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
