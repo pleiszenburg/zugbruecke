@@ -62,6 +62,29 @@ class arg_contents_class():
 		return [self.__unpack_item__(a[1], d) for a, d in zip(args_package_list, argtypes_list)]
 
 
+	def return_msg_pack(self, return_value, returntype_dict):
+
+		if return_value is None:
+			return None
+
+		return self.__pack_item__(return_value, returntype_dict)
+
+
+	def return_msg_unpack(self, return_msg, returntype_dict):
+
+		if return_msg is None:
+			return None
+
+		# If this is not a fundamental datatype or if there is a pointer involved, just unpack
+		if not returntype_dict['g'] == GROUP_FUNDAMENTAL or FLAG_POINTER in returntype_dict['f']:
+			return self.__unpack_item__(return_msg, returntype_dict)
+
+		# The original ctypes strips away ctypes datatypes for fundamental
+		# (non-pointer, non-struct) return values and returns plain Python
+		# data types instead - the unpack result requires stripping
+		return self.__item_value_strip__(self.__unpack_item__(return_msg, returntype_dict))
+
+
 	def arg_list_sync(self, old_arguments_list, new_arguments_list, argtypes_list):
 
 		# Step through arguments
@@ -71,7 +94,6 @@ class arg_contents_class():
 			self.__sync_item__(
 				old_arg, new_arg, arg_def_dict
 				)
-
 
 	def __item_pointer_strip__(self, arg_in):
 

@@ -187,6 +187,23 @@ void __stdcall DEMODLL gauss_elimination(
 }
 
 
+vector3d __stdcall DEMODLL *vector3d_add(
+	vector3d *v1,
+	vector3d *v2
+	)
+{
+
+	vector3d *v3 = malloc(sizeof(vector3d));
+
+	v3->x = v1->x + v2->x;
+	v3->y = v1->y + v2->y;
+	v3->z = v1->z + v2->z;
+
+	return v3;
+
+}
+
+
 float __stdcall DEMODLL simple_demo_routine(
 	float param_a,
 	float param_b
