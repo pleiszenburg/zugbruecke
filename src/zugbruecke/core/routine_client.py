@@ -71,17 +71,14 @@ class routine_client_class(
 		# Set call status
 		self.called = False
 
-		# Turn a bound method into a function ... HACK?
-		self.handle_call = partial(self.__handle_call__)
-
 		# By default, there is no memory to sync
-		self.handle_call.memsync = []
+		self.__memsync__ = []
 
 		# By default, assume no arguments
-		self.handle_call.argtypes = []
+		self.__argtypes__ = []
 
 		# By default, assume c_int return value like ctypes expects
-		self.handle_call.restype = ctypes.c_int
+		self.__restype__ = ctypes.c_int
 
 		# Get handle on server-side configure
 		self.__configure_on_server__ = getattr(
@@ -94,7 +91,7 @@ class routine_client_class(
 			)
 
 
-	def __handle_call__(self, *args):
+	def __call__(self, *args):
 		"""
 		TODO Optimize for speed!
 		"""
@@ -153,37 +150,68 @@ class routine_client_class(
 
 	def __configure__(self):
 
-		# Processing argument and return value types on first call TODO proper sanity check
-		if hasattr(self.handle_call, 'memsync'):
-			self.memsync = self.handle_call.memsync
-		if hasattr(self.handle_call, 'argtypes'):
-			self.argtypes = self.handle_call.argtypes
-		if hasattr(self.handle_call, 'restype'):
-			self.restype = self.handle_call.restype
-
 		# Prepare list of arguments by parsing them into list of dicts (TODO field name / kw)
-		self.argtypes_d = self.pack_definition_argtypes(self.argtypes)
+		self.argtypes_d = self.pack_definition_argtypes(self.__argtypes__)
 
 		# Parse return type
-		self.restype_d = self.pack_definition_returntype(self.restype)
+		self.restype_d = self.pack_definition_returntype(self.__restype__)
 
 		# Fix missing ctypes in memsync
-		self.client_fix_memsync_ctypes(self.memsync)
+		self.client_fix_memsync_ctypes(self.__memsync__)
 
 		# Reduce memsync for transfer
-		self.memsync_d = self.pack_definition_memsync(self.memsync)
+		self.memsync_d = self.pack_definition_memsync(self.__memsync__)
 
 		# Generate handles on relevant argtype definitions for memsync, adjust definitions with void pointers
-		self.memsync_handle = self.apply_memsync_to_argtypes_definition(self.memsync, self.argtypes_d)
+		self.memsync_handle = self.apply_memsync_to_argtypes_definition(self.__memsync__, self.argtypes_d)
 
 		# Log status
-		self.log.out(' memsync: \n%s' % pf(self.memsync))
-		self.log.out(' argtypes: \n%s' % pf(self.argtypes))
+		self.log.out(' memsync: \n%s' % pf(self.__memsync__))
+		self.log.out(' argtypes: \n%s' % pf(self.__argtypes__))
 		self.log.out(' argtypes_d: \n%s' % pf(self.argtypes_d))
-		self.log.out(' restype: \n%s' % pf(self.restype))
+		self.log.out(' restype: \n%s' % pf(self.__restype__))
 		self.log.out(' restype_d: \n%s' % pf(self.restype_d))
 
 		# Pass argument and return value types as strings ...
 		result = self.__configure_on_server__(
 			self.argtypes_d, self.restype_d, self.memsync_d
 			)
+
+
+	@property
+	def argtypes(self):
+
+		return self.__argtypes__
+
+
+	@argtypes.setter
+	def argtypes(self, value):
+
+		if not isinstance(value, list) and not isinstance(value, tuple):
+			raise TypeError # original ctypes does that
+
+		self.__argtypes__ = value
+
+
+	@property
+	def restype(self):
+
+		return self.__restype__
+
+
+	@restype.setter
+	def restype(self, value):
+
+		self.__restype__ = value
+
+
+	@property
+	def memsync(self):
+
+		return self.__memsync__
+
+
+	@memsync.setter
+	def memsync(self, value):
+
+		self.__memsync__ = value
