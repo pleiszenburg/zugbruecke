@@ -110,7 +110,7 @@ void __stdcall DEMODLL gauss_elimination(
 	);
 
 typedef struct vector3d {
-	el_int16t x, y, z;
+	int16_t x, y, z;
 } vector3d;
 
 vector3d __stdcall DEMODLL *vector3d_add(
