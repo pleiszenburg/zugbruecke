@@ -5,6 +5,7 @@ Changes
 ------------------
 
 * FEATURE: Support for structures and pointers as return values, see issue #14.
+* FIX: ``argtypes`` definitions (with one single argument) were not raising a ``TypeError`` like ``ctypes`` does if not passed as a tuple or list, see issue #21.
 
 0.0.7 (2018-03-05)
 ------------------
