@@ -52,3 +52,25 @@ def test_sqrt_int():
 		get_const_int.restype = ctypes.c_int16
 
 		assert 7 == get_const_int()
+
+
+def test_sqrt_int_with_tuple():
+
+		dll = ctypes.windll.LoadLibrary('tests/demo_dll.dll')
+
+		get_const_int = dll.get_const_int
+		get_const_int.argtypes = tuple()
+		get_const_int.restype = ctypes.c_int16
+
+		assert 7 == get_const_int()
+
+
+def test_sqrt_int_with_list():
+
+		dll = ctypes.windll.LoadLibrary('tests/demo_dll.dll')
+
+		get_const_int = dll.get_const_int
+		get_const_int.argtypes = []
+		get_const_int.restype = ctypes.c_int16
+
+		assert 7 == get_const_int()
