@@ -122,6 +122,10 @@ vector3d __stdcall DEMODLL *vector3d_add(
 	vector3d *p2
 	);
 
+int16_t __stdcall DEMODLL sqrt_int(
+	int16_t a
+	);
+
 struct test
 {
 	char el_char;

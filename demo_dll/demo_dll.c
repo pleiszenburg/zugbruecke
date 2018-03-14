@@ -216,6 +216,14 @@ vector3d __stdcall DEMODLL *vector3d_add(
 }
 
 
+int16_t __stdcall DEMODLL sqrt_int(
+	int16_t a
+	)
+{
+	return a * a;
+}
+
+
 float __stdcall DEMODLL simple_demo_routine(
 	float param_a,
 	float param_b
