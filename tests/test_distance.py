@@ -66,6 +66,16 @@ class sample_class:
 		self.distance.argtypes = (ctypes.POINTER(Point), ctypes.POINTER(Point))
 		self.distance.restype = ctypes.c_double
 
+		# double *distance_pointer(Point *, Point *)
+		self.__distance_pointer__ = self.__dll__.cookbook_distance_pointer
+		self.__distance_pointer__.argtypes = (ctypes.POINTER(Point), ctypes.POINTER(Point))
+		self.__distance_pointer__.restype = ctypes.POINTER(ctypes.c_double)
+
+
+	def distance_pointer(self, in1, in2):
+
+		return self.__distance_pointer__(in1, in2).contents.value
+
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # TEST(s)
@@ -79,3 +89,13 @@ def test_distance():
 	p2 = Point(4, 5)
 
 	assert pytest.approx(4.242640687119285, 0.0000001) == sample.distance(p1, p2)
+
+
+def test_distance_pointer():
+
+	sample = sample_class()
+
+	p1 = Point(1, 2)
+	p2 = Point(4, 5)
+
+	assert pytest.approx(4.242640687119285, 0.0000001) == sample.distance_pointer(p1, p2)

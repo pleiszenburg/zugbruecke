@@ -112,6 +112,18 @@ double __stdcall DEMODLL cookbook_distance(
 }
 
 
+/* Function involving a C data structure - returning a pointer to a variable */
+double __stdcall DEMODLL *cookbook_distance_pointer(
+	cookbook_point *p1,
+	cookbook_point *p2
+	)
+{
+	double *distance_p = (double *)malloc(sizeof(double));
+	*distance_p = hypot(p1->x - p2->x, p1->y - p2->y);
+	return distance_p;
+}
+
+
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // zugbruecke demo
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

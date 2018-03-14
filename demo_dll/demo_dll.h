@@ -88,6 +88,10 @@ double __stdcall DEMODLL cookbook_distance(
 	cookbook_point *p2
 	);
 
+double __stdcall DEMODLL *cookbook_distance_pointer(
+	cookbook_point *p1,
+	cookbook_point *p2
+	);
 
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // zugbruecke demo
