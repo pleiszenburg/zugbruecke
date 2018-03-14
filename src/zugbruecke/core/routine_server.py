@@ -97,10 +97,8 @@ class routine_server_class(
 			# Get new arg message list
 			arg_message_list = self.arg_list_pack(args_list, self.argtypes_d)
 
-			# Get new return message list TODO check sanity of following lines ...
-			return_message = None
-			if return_value != None:
-				return_message = self.arg_list_pack([return_value], [self.restype_d])[0]
+			# Get new return message list
+			return_message = self.return_msg_pack(return_value, self.restype_d)
 
 			# Log status
 			self.log.out('[routine-server] ... done.')
