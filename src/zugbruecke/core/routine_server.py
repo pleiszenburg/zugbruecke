@@ -68,7 +68,7 @@ class routine_server_class(
 		self.handler = routine_handler
 
 
-	def __handle_call__(self, arg_message_list, arg_memory_list):
+	def __call__(self, arg_message_list, arg_memory_list):
 		"""
 		TODO: Optimize for speed!
 		"""
