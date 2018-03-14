@@ -126,6 +126,8 @@ int16_t __stdcall DEMODLL sqrt_int(
 	int16_t a
 	);
 
+int16_t __stdcall DEMODLL get_const_int(void);
+
 struct test
 {
 	char el_char;

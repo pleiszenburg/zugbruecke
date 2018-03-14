@@ -224,6 +224,12 @@ int16_t __stdcall DEMODLL sqrt_int(
 }
 
 
+int16_t __stdcall DEMODLL get_const_int(void)
+{
+	return sqrt(49);
+}
+
+
 float __stdcall DEMODLL simple_demo_routine(
 	float param_a,
 	float param_b
