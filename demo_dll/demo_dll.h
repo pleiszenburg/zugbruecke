@@ -109,6 +109,15 @@ void __stdcall DEMODLL gauss_elimination(
 	float (*x)[3]
 	);
 
+typedef struct vector3d {
+	el_int16t x, y, z;
+} vector3d;
+
+vector3d __stdcall DEMODLL *vector3d_add(
+	vector3d *p1,
+	vector3d *p2
+	);
+
 struct test
 {
 	char el_char;
