@@ -30,7 +30,10 @@ specific language governing rights and limitations under the License.
 # IMPORT: Unix ctypes members required by wrapper
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-from ctypes import DEFAULT_MODE
+from ctypes import (
+	_FUNCFLAG_CDECL,
+	DEFAULT_MODE
+	)
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -104,8 +107,8 @@ CFUNCTYPE = current_session.ctypes_CFUNCTYPE # EXPORT
 WINFUNCTYPE = current_session.ctypes_WINFUNCTYPE # EXPORT
 
 # Used as cache by CFUNCTYPE and WINFUNCTYPE
-_c_functype_cache = current_session.ctypes_c_functype_cache # EXPORT
-_win_functype_cache = current_session.ctypes_win_functype_cache # EXPORT
+_c_functype_cache = current_session.functype_cache[_FUNCFLAG_CDECL] # EXPORT
+_win_functype_cache = current_session.functype_cache[_FUNCFLAG_STDCALL] # EXPORT
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
