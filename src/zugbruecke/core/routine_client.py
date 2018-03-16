@@ -70,9 +70,8 @@ class routine_client_class(
 
 		# Required by arg definitions and contents
 		self.struct_type_dict = self.session.struct_type_dict
-
-		# Required by arg definitions and contents
 		self.funcpointer_dict = self.session.funcpointer_dict
+		self.functype_cache_dict = self.session.functype_cache_dict
 
 		# Set call status
 		self.called = False
