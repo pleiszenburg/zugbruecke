@@ -62,6 +62,9 @@ class session_server_class:
 		# Mark session as up
 		self.up = True
 
+		# Create dict for struct type definitions
+		self.struct_type_dict = {}
+
 		# Offer methods for converting paths
 		path = path_class()
 		self.path_unix_to_wine = path.unix_to_wine

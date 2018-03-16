@@ -243,6 +243,9 @@ class session_client_class():
 		# Set up a dict for loaded dlls
 		self.dll_dict = {}
 
+		# Create dict for struct type definitions
+		self.struct_type_dict = {}
+
 		# Mark session as up
 		self.up = True
 

@@ -68,6 +68,9 @@ class routine_client_class(
 		# Store my own name
 		self.name = routine_name
 
+		# Required by arg definitions and contents
+		self.struct_type_dict = self.session.struct_type_dict
+
 		# Set call status
 		self.called = False
 

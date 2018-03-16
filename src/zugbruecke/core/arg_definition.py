@@ -52,9 +52,6 @@ from .lib import (
 class arg_definition_class():
 
 
-	struct_type_dict = {}
-
-
 	def apply_memsync_to_argtypes_definition(self, memsync, argtypes_d):
 
 		# Start empty handle list
