@@ -35,6 +35,7 @@ FLAG_POINTER = -1
 GROUP_VOID = 1
 GROUP_FUNDAMENTAL = 2
 GROUP_STRUCT = 4
+GROUP_FUNCTION = 8
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

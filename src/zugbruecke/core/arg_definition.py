@@ -38,7 +38,8 @@ from .const import (
 	FLAG_POINTER,
 	GROUP_VOID,
 	GROUP_FUNDAMENTAL,
-	GROUP_STRUCT
+	GROUP_STRUCT,
+	GROUP_FUNCTION
 	)
 from .lib import (
 	reduce_dict
@@ -224,6 +225,8 @@ class arg_definition_class():
 			if type_name not in self.struct_type_dict.keys():
 				self.struct_type_dict[type_name] = datatype
 
+			# TODO: For speed, cache packed struct definitions for known structs
+
 			return {
 				'f': flag_list,
 				's': flag_scalar,
@@ -235,6 +238,24 @@ class arg_definition_class():
 				'_fields_': [
 					self.__pack_definition_dict__(field[1], field[0]) for field in datatype._fields_
 					]
+				}
+
+		# Function pointers
+		elif group_name == 'PyCFuncPtrType':
+
+			# TODO: For speed, cache packed function definitions for known functions
+
+			return {
+				'f': flag_list,
+				's': flag_scalar,
+				'd': flag_array_depth,
+				'p': flag_pointer,
+				'n': field_name, # kw
+				't': (datatype._restype_, datatype._argtypes_, datatype._flags_).__hash__(),
+				'g': GROUP_FUNCTION,
+				'_argtypes_': self.pack_definition_argtypes(datatype._argtypes_),
+				'_restype_': self.pack_definition_returntype(datatype._restype_),
+				'_flags_': datatype._flags_
 				}
 
 		# UNKNOWN stuff, likely pointers - handled without datatype
@@ -262,6 +283,11 @@ class arg_definition_class():
 		elif datatype_d_dict['g'] == GROUP_STRUCT:
 
 			return self.__unpack_definition_struct_dict__(datatype_d_dict)
+
+		# Function pointers (PyCFuncPtrType)
+		elif datatype_d_dict['g'] == GROUP_FUNCTION:
+
+			return self.__unpack_definition_function_dict__(datatype_d_dict)
 
 		# Handle generic pointers
 		elif datatype_d_dict['g'] == GROUP_VOID:
@@ -295,6 +321,26 @@ class arg_definition_class():
 				raise # TODO
 
 		return datatype
+
+
+	def __unpack_definition_function_dict__(self, datatype_d_dict):
+
+		# TODO BUG only works on Wine Python, must not be called on Unix side
+
+		# Figure out which "factory" to use, i.e. calling convention
+		if not(datatype_d_dict['_flags_'] & ctypes._FUNCFLAG_STDCALL):
+			FACTORY = ctypes.CFUNCTYPE
+		elif datatype_d_dict['_flags_'] & ctypes._FUNCFLAG_STDCALL:
+			FACTORY = ctypes.WINFUNCTYPE
+		else:
+			raise # TODO
+
+		return FACTORY(
+			self.unpack_definition_returntype(datatype_d_dict['_restype_']),
+			*self.unpack_definition_argtypes(datatype_d_dict['_argtypes_']),
+			use_errno = datatype_d_dict['_flags_'] & ctypes._FUNCFLAG_USE_ERRNO,
+			use_last_error = datatype_d_dict['_flags_'] & ctypes._FUNCFLAG_USE_LASTERROR
+			)
 
 
 	def __unpack_definition_fundamental_dict__(self, datatype_d_dict):
