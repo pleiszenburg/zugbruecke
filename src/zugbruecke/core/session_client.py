@@ -123,7 +123,7 @@ class session_client_class():
 		return self.client.ctypes_WinError(code, descr)
 
 
-	def ctypes_CFUNCTYPE(restype, *argtypes, **kw):
+	def ctypes_CFUNCTYPE(self, restype, *argtypes, **kw):
 
 		# If in stage 1, fire up stage 2
 		if self.stage == 1:
@@ -155,14 +155,23 @@ class session_client_class():
 			flags |= _FUNCFLAG_USE_LASTERROR
 		if kw:
 			raise ValueError("unexpected keyword argument(s) %s" % kw.keys())
+
 		try:
-			return self.functype_cache[functype][(restype, argtypes, flags)]
+
+			# There already is a matching function pointer type available
+			return self.functype_cache_dict[functype][(restype, argtypes, flags)]
+
 		except KeyError:
+
+			# Create new function pointer type class
 			class FunctionType(_CFuncPtr):
+
 				_argtypes_ = argtypes
 				_restype_ = restype
 				_flags_ = flags
-			self.functype_cache[functype][(restype, argtypes, flags)] = FunctionType
+
+			# Store the new type and return
+			self.functype_cache_dict[functype][(restype, argtypes, flags)] = FunctionType
 			return FunctionType
 
 
@@ -297,10 +306,13 @@ class session_client_class():
 		self.struct_type_dict = {}
 
 		# Create dicts for function prototypes
-		self.functype_cache = {
+		self.functype_cache_dict = {
 			_FUNCFLAG_CDECL: {},
 			_FUNCFLAG_STDCALL: {}
 			}
+
+		# Create dict for actual function pointers (call back functions)
+		self.funcpointer_dict = {}
 
 		# Mark session as up
 		self.up = True

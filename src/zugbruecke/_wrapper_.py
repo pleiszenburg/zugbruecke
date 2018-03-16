@@ -107,8 +107,8 @@ CFUNCTYPE = current_session.ctypes_CFUNCTYPE # EXPORT
 WINFUNCTYPE = current_session.ctypes_WINFUNCTYPE # EXPORT
 
 # Used as cache by CFUNCTYPE and WINFUNCTYPE
-_c_functype_cache = current_session.functype_cache[_FUNCFLAG_CDECL] # EXPORT
-_win_functype_cache = current_session.functype_cache[_FUNCFLAG_STDCALL] # EXPORT
+_c_functype_cache = current_session.functype_cache_dict[_FUNCFLAG_CDECL] # EXPORT
+_win_functype_cache = current_session.functype_cache_dict[_FUNCFLAG_STDCALL] # EXPORT
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
