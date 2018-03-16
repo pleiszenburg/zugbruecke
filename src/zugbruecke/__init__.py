@@ -34,8 +34,11 @@ specific language governing rights and limitations under the License.
 from ctypes import __version__
 
 from ctypes import (
+	_CFuncPtr,
 	_FUNCFLAG_CDECL,
 	_FUNCFLAG_PYTHONAPI,
+	_FUNCFLAG_USE_ERRNO,
+	_FUNCFLAG_USE_LASTERROR,
 	_Pointer,
 	_SimpleCData,
 	_calcsize,
@@ -126,10 +129,7 @@ from ctypes import (
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 from ._wrapper_ import (
-	_CFuncPtr,
 	_FUNCFLAG_STDCALL,
-	_FUNCFLAG_USE_ERRNO,
-	_FUNCFLAG_USE_LASTERROR,
 	cdll,
 	CDLL,
 	oledll,

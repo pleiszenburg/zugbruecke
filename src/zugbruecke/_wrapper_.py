@@ -37,14 +37,7 @@ from ctypes import DEFAULT_MODE
 # IMPORT: Unix ctypes members, which will exported as they are
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-from ctypes import (
-	_c_functype_cache,
-	_CFuncPtr,
-	_FUNCFLAG_USE_ERRNO,
-	_FUNCFLAG_USE_LASTERROR,
-	CFUNCTYPE,
-	LibraryLoader
-	)
+from ctypes import LibraryLoader # EXPORT
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -55,10 +48,11 @@ from ctypes import CDLL as ctypes_CDLL_class
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# IMPORT: zugbruecke core
+# IMPORT: zugbruecke core and missing ctypes flags
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-from .core.session_client import session_client_class
+from .core.session_client import session_client_class # EXPORT
+from .core.const import _FUNCFLAG_STDCALL # EXPORT
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -105,38 +99,13 @@ WinError = current_session.ctypes_WinError # EXPORT
 # CFUNCTYPE & WINFUNCTYPE
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-# TODO Compatibility to CFUNCTYPE on Wine side must be implemented
+# CFUNCTYPE and WINFUNCTYPE function pointer factories
+CFUNCTYPE = current_session.ctypes_CFUNCTYPE # EXPORT
+WINFUNCTYPE = current_session.ctypes_WINFUNCTYPE # EXPORT
 
-# Required for WINFUNCTYPE
-_FUNCFLAG_STDCALL = 0 # EXPORT
-
-# CFUNCTYPE
-# _c_functype_cache
-
-# WINDLL function calls
-def WINFUNCTYPE(restype, *argtypes, **kw): # EXPORT
-	flags = _FUNCFLAG_STDCALL
-	if kw.pop("use_errno", False):
-		flags |= _FUNCFLAG_USE_ERRNO
-	if kw.pop("use_last_error", False):
-		flags |= _FUNCFLAG_USE_LASTERROR
-	if kw:
-		raise ValueError("unexpected keyword argument(s) %s" % kw.keys())
-	try:
-		return _win_functype_cache[(restype, argtypes, flags)]
-	except KeyError:
-		class WinFunctionType(_CFuncPtr):
-			_argtypes_ = argtypes
-			_restype_ = restype
-			_flags_ = flags
-		_win_functype_cache[(restype, argtypes, flags)] = WinFunctionType
-		return WinFunctionType
-
-if WINFUNCTYPE.__doc__:
-	WINFUNCTYPE.__doc__ = CFUNCTYPE.__doc__.replace('CFUNCTYPE', 'WINFUNCTYPE')
-
-# Used in ctypes __init__.py by WINFUNCTYPE
-_win_functype_cache = {} # EXPORT
+# Used as cache by CFUNCTYPE and WINFUNCTYPE
+_c_functype_cache = current_session.ctypes_c_functype_cache # EXPORT
+_win_functype_cache = current_session.ctypes_win_functype_cache # EXPORT
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

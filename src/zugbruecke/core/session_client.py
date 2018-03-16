@@ -32,10 +32,17 @@ specific language governing rights and limitations under the License.
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 import atexit
+from ctypes import (
+	_CFuncPtr,
+	_FUNCFLAG_CDECL,
+	_FUNCFLAG_USE_ERRNO,
+	_FUNCFLAG_USE_LASTERROR
+	)
 import os
 import signal
 import time
 
+from .const import _FUNCFLAG_STDCALL
 from .config import get_module_config
 from .dll_client import dll_client_class
 from .interpreter import interpreter_session_class
@@ -114,6 +121,48 @@ class session_client_class():
 
 		# Ask the server
 		return self.client.ctypes_WinError(code, descr)
+
+
+	def ctypes_CFUNCTYPE(restype, *argtypes, **kw):
+
+		flags = _FUNCFLAG_CDECL
+
+		if kw.pop("use_errno", False):
+			flags |= _FUNCFLAG_USE_ERRNO
+		if kw.pop("use_last_error", False):
+			flags |= _FUNCFLAG_USE_LASTERROR
+		if kw:
+			raise ValueError("unexpected keyword argument(s) %s" % kw.keys())
+		try:
+			return _c_functype_cache[(restype, argtypes, flags)]
+		except KeyError:
+			class CFunctionType(_CFuncPtr):
+				_argtypes_ = argtypes
+				_restype_ = restype
+				_flags_ = flags
+			_c_functype_cache[(restype, argtypes, flags)] = CFunctionType
+			return CFunctionType
+
+
+	def ctypes_WINFUNCTYPE(self, restype, *argtypes, **kw): # EXPORT
+
+		flags = _FUNCFLAG_STDCALL
+
+		if kw.pop("use_errno", False):
+			flags |= _FUNCFLAG_USE_ERRNO
+		if kw.pop("use_last_error", False):
+			flags |= _FUNCFLAG_USE_LASTERROR
+		if kw:
+			raise ValueError("unexpected keyword argument(s) %s" % kw.keys())
+		try:
+			return self.ctypes_win_functype_cache[(restype, argtypes, flags)]
+		except KeyError:
+			class WinFunctionType(_CFuncPtr):
+				_argtypes_ = argtypes
+				_restype_ = restype
+				_flags_ = flags
+			self.ctypes_win_functype_cache[(restype, argtypes, flags)] = WinFunctionType
+			return WinFunctionType
 
 
 	def load_library(self, dll_name, dll_type, dll_param = {}):
@@ -245,6 +294,10 @@ class session_client_class():
 
 		# Create dict for struct type definitions
 		self.struct_type_dict = {}
+
+		# Crate dicts for function prototypes
+		self.ctypes_c_functype_cache = {}
+		self.ctypes_win_functype_cache = {}
 
 		# Mark session as up
 		self.up = True
