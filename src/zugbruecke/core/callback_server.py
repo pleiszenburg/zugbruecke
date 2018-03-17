@@ -42,11 +42,40 @@ import traceback
 class callback_translator_server_class:
 
 
-	def __init__(self):
+	def __init__(self, parent_routine, routine_name, routine_handler, argtypes_d, restype_d):
 
-		pass
+		# Store my own name
+		self.name = routine_name
+
+		# Store handler
+		self.handler = routine_handler
+
+		# Store handle on parent routine
+		self.parent_routine = parent_routine
+
+		# Get handle on log
+		self.log = self.parent_routine.log
+
+		# Store definition of argument types
+		self.argtypes_d = argtypes_d
+
+		# Store definition of return value type
+		self.restype_d = restype_d
+
+		# Store handlers on packing/unpacking routines
+		self.arg_list_pack = self.parent_routine.arg_list_pack
+		self.return_msg_unpack = self.parent_routine.return_msg_unpack
 
 
 	def __call__(self, *args):
 
-		pass
+		# Pack arguments
+		packed_args = self.arg_list_pack(args, self.argtypes_d)
+
+		# Call RPC callback function
+		ret = self.handler(*packed_args)
+
+		# Unpack return value
+		ret_unpacked = self.return_msg_unpack(ret, self.restype_d)
+
+		return ret_unpacked

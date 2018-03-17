@@ -414,22 +414,13 @@ class arg_contents_class():
 			# Just return handle
 			return self.cache_dict['func_handle'][func_name]
 
-		# Build callback translator for RPC server
-		def callback_translator(*args):
-
-			# Pack arguments
-			packed_args = self.arg_list_pack(args, func_def_dict['_argtypes_'])
-
-			# Call RPC callback function
-			ret = getattr(self.callback_client, func_name)(*packed_args)
-
-			# Unpack return value
-			ret_unpacked = self.return_msg_unpack(ret, func_def_dict['_restype_'])
-
-			return ret_unpacked
-
-		# Decorate and store callback translator in cache
-		self.cache_dict['func_handle'][func_name] = func_def_dict['_factory_type_'](callback_translator)
+		# Generate, decorate and store callback translator in cache
+		self.cache_dict['func_handle'][func_name] = func_def_dict['_factory_type_'](
+			callback_translator_server_class(
+				self, func_name, getattr(self.callback_client, func_name),
+				func_def_dict['_argtypes_'], func_def_dict['_restype_']
+				)
+			)
 
 		# Return name of callback entry
 		return self.cache_dict['func_handle'][func_name]
