@@ -127,7 +127,7 @@ class routine_server_class(
 			# Pack return package and return it
 			return {
 				'args': arg_message_list,
-				'return_value': return_value, # TODO allow & handle pointers
+				'return_value': return_value,
 				'memory': arg_memory_list,
 				'success': False
 				}

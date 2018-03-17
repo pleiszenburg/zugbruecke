@@ -64,19 +64,37 @@ class callback_translator_server_class:
 
 		# Store handlers on packing/unpacking routines
 		self.arg_list_pack = self.parent_routine.arg_list_pack
+		self.arg_list_sync = self.parent_routine.arg_list_sync
+		self.arg_list_unpack = self.parent_routine.arg_list_unpack
 		self.return_msg_unpack = self.parent_routine.return_msg_unpack
 
 
 	def __call__(self, *args):
 
-		# Pack arguments
-		packed_args = self.arg_list_pack(args, self.argtypes_d)
+		# Log status
+		self.log.out('[callback-server] Trying to call callback routine "%s" ...' % self.name)
 
-		# Call RPC callback function (packed arguments are shipped to Unix side)
-		ret = self.handler(*packed_args)
+		# Log status
+		self.log.out('[callback-server] ... parameters are "%r". Packing and pushing to client ...' % (args,))
+
+		# Pack arguments and call RPC callback function (packed arguments are shipped to Unix side)
+		return_dict = self.handler(self.arg_list_pack(args, self.argtypes_d))
+
+		# Log status
+		self.log.out('[callback-server] ... received feedback from client, unpacking ...')
+
+		# Unpack return dict (for pointers and structs)
+		self.arg_list_sync(
+			args,
+			self.arg_list_unpack(return_dict['args'], self.argtypes_d),
+			self.argtypes_d
+			)
 
 		# Unpack return value
-		ret_unpacked = self.return_msg_unpack(ret, self.restype_d)
+		return_value = self.return_msg_unpack(return_dict['return_value'], self.restype_d)
+
+		# Log status
+		self.log.out('[callback-server] ... unpacked, return.')
 
 		# Return data directly to DLL routine
-		return ret_unpacked
+		return return_value

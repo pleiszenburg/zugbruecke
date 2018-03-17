@@ -64,19 +64,56 @@ class callback_translator_client_class:
 
 		# Store handlers on packing/unpacking routines
 		self.arg_list_unpack = self.parent_routine.arg_list_unpack
+		self.arg_list_pack = self.parent_routine.arg_list_pack
 		self.return_msg_pack = self.parent_routine.return_msg_pack
 
 
-	def __call__(self, *args):
+	def __call__(self, arg_message_list):
+
+		# Log status
+		self.log.out('[callback-client] Trying to call callback routine "%s" ...' % self.name)
 
 		# Unpack arguments
-		unpacked_args = self.arg_list_unpack(args, self.argtypes_d)
+		args_list = self.arg_list_unpack(arg_message_list, self.argtypes_d)
 
-		# Call actual callback function (ctypes function pointer)
-		ret = self.handler(*unpacked_args)
+		# Default return value
+		return_value = None
 
-		# Pack return value
-		ret_packed = self.return_msg_pack(ret, self.restype_d)
+		# This is risky
+		try:
 
-		# Ship data back to Wine side
-		return ret_packed
+			# Call actual callback function (ctypes function pointer)
+			return_value = self.handler(*args_list)
+
+			# Get new arg message list
+			arg_message_list = self.arg_list_pack(args_list, self.argtypes_d)
+
+			# Pack return value
+			return_message = self.return_msg_pack(return_value, self.restype_d)
+
+			# Log status
+			self.log.out('[routine-client] ... done.')
+
+			# Ship data back to Wine side
+			return {
+				'args': arg_message_list,
+				'return_value': return_message, # TODO handle memory allocated by callback in "free form" pointers
+				'memory': None, # TODO memsync not included
+				'success': True
+				}
+
+		except:
+
+			# Log status
+			self.log.out('[routine-client] ... failed!')
+
+			# Push traceback to log
+			self.log.err(traceback.format_exc())
+
+			# Pack return package and return it
+			return {
+				'args': arg_message_list,
+				'return_value': return_value,
+				'memory': None, # TODO memsync not included
+				'success': False
+				}
