@@ -39,7 +39,8 @@ from .const import (
 	FLAG_POINTER,
 	GROUP_VOID,
 	GROUP_FUNDAMENTAL,
-	GROUP_STRUCT
+	GROUP_STRUCT,
+	GROUP_FUNCTION
 	)
 
 
@@ -135,6 +136,10 @@ class arg_contents_class():
 			elif arg_def_dict['g'] == GROUP_STRUCT:
 				# Reclusively call this routine for packing structs
 				return self.__pack_item_struct__(arg_in, arg_def_dict)
+			# Handle functions
+			elif arg_def_dict['g'] == GROUP_FUNCTION:
+				# Packs functions and registers them at RPC server
+				return self.__pack_item_function__(arg_in, arg_def_dict)
 			# Handle everything else ... likely pointers handled by memsync
 			else:
 				# Just return None - will (hopefully) be overwritten by memsync
@@ -181,6 +186,45 @@ class arg_contents_class():
 				raise # TODO
 
 		return arg_in
+
+
+	def __pack_item_function__(self, func_ptr, func_def_dict):
+
+		# HACK if on server, just return None
+		if self.is_server:
+			return None
+
+		# Use memory address of function pointer as unique name/ID
+		func_name = 'func_%x' % id(func_ptr)
+
+		# Has callback translator been built before?
+		if func_name in self.cache_dict['func_handle'].keys():
+
+			# Just return its name
+			return func_name
+
+		# Build callback translator for RPC server
+		def callback_translator(*args):
+
+			# Unpack arguments
+			unpacked_args = self.arg_list_unpack(args, func_def_dict['_argtypes_'])
+
+			# Call actual callback function
+			ret = func_ptr(*unpacked_args)
+
+			# Pack return value
+			ret_packed = self.return_msg_pack(ret, func_def_dict['_restype_'])
+
+			return ret_packed
+
+		# Store callback translator in cache
+		self.cache_dict['func_handle'][func_name] = callback_translator
+
+		# Register translator at RPC server
+		self.callback_server.register_function(callback_translator, public_name = func_name)
+
+		# Return name of callback entry
+		return func_name
 
 
 	def __pack_item_struct__(self, struct_raw, struct_def_dict):
@@ -283,6 +327,9 @@ class arg_contents_class():
 			# Handle structs
 			elif arg_def_dict['g'] == GROUP_STRUCT:
 				arg_rebuilt = self.__unpack_item_struct__(arg_raw, arg_def_dict)
+			# Handle functions
+			elif arg_def_dict['g'] == GROUP_FUNCTION:
+				arg_rebuilt = self.__unpack_item_function__(arg_raw, arg_def_dict)
 			# Handle voids (likely mensync stuff)
 			elif arg_def_dict['g'] == GROUP_VOID:
 				# Return a placeholder
@@ -360,6 +407,39 @@ class arg_contents_class():
 				raise # TODO
 
 		return arg_type, arg_in
+
+
+	def __unpack_item_function__(self, func_name, func_def_dict):
+
+		# HACK if this function is called on the client, just return None
+		if not self.is_server:
+			return None
+
+		# Has callback translator been built?
+		if func_name in self.cache_dict['func_handle'].keys():
+
+			# Just return handle
+			return self.cache_dict['func_handle'][func_name]
+
+		# Build callback translator for RPC server
+		def callback_translator(*args):
+
+			# Pack arguments
+			packed_args = self.arg_list_pack(args, func_def_dict['_argtypes_'])
+
+			# Call RPC callback function
+			ret = getattr(self.callback_client, func_name)(*packed_args)
+
+			# Unpack return value
+			ret_unpacked = self.return_msg_unpack(ret, func_def_dict['_restype_'])
+
+			return ret_unpacked
+
+		# Decorate and store callback translator in cache
+		self.cache_dict['func_handle'][func_name] = func_def_dict['_factory_type_'](callback_translator)
+
+		# Return name of callback entry
+		return self.cache_dict['func_handle'][func_name]
 
 
 	def __unpack_item_struct__(self, args_list, struct_def_dict):

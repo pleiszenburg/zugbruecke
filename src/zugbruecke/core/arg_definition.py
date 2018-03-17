@@ -326,6 +326,8 @@ class arg_definition_class():
 	def __unpack_definition_function_dict__(self, datatype_d_dict):
 
 		# TODO BUG only works on Wine Python, must not be called on Unix side
+		if not self.is_server:
+			raise # TODO
 
 		# Figure out which "factory" to use, i.e. calling convention
 		if not(datatype_d_dict['_flags_'] & ctypes._FUNCFLAG_STDCALL):
@@ -335,12 +337,18 @@ class arg_definition_class():
 		else:
 			raise # TODO
 
-		return FACTORY(
+		# Generate function pointer type (used as parameter type and as decorator for Python function)
+		factory_type = FACTORY(
 			self.unpack_definition_returntype(datatype_d_dict['_restype_']),
 			*self.unpack_definition_argtypes(datatype_d_dict['_argtypes_']),
 			use_errno = datatype_d_dict['_flags_'] & ctypes._FUNCFLAG_USE_ERRNO,
 			use_last_error = datatype_d_dict['_flags_'] & ctypes._FUNCFLAG_USE_LASTERROR
 			)
+
+		# Store function pointer type for subsequent use as decorator
+		datatype_d_dict['_factory_type_'] = factory_type
+
+		return factory_type
 
 
 	def __unpack_definition_fundamental_dict__(self, datatype_d_dict):

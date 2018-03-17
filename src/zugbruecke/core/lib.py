@@ -80,6 +80,7 @@ def generate_cache_dict():
 			_FUNCFLAG_CDECL: {},
 			_FUNCFLAG_STDCALL: {}
 			},
+		'func_handle': {},
 		'struct_type': {}
 		}
 

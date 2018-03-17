@@ -66,6 +66,8 @@ class routine_server_class(
 
 		# Required by arg definitions and contents
 		self.cache_dict = self.session.cache_dict
+		self.callback_client = self.session.callback_client
+		self.is_server = True
 
 		# Set routine handler
 		self.handler = routine_handler

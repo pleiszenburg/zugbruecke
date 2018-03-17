@@ -70,6 +70,8 @@ class routine_client_class(
 
 		# Required by arg definitions and contents
 		self.cache_dict = self.session.cache_dict
+		self.callback_server = self.session.callback_server
+		self.is_server = False
 
 		# Set call status
 		self.called = False
