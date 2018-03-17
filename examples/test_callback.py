@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 """
@@ -6,7 +7,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	src/zugbruecke/core/const.py: Holds constant values, flags, types
+	examples/test_callback.py: Demonstrates callback routines as arguments
 
 	Required to run on platform / side: [UNIX, WINE]
 
@@ -28,19 +29,47 @@ specific language governing rights and limitations under the License.
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# TYPES
+# IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-FLAG_POINTER = -1
-GROUP_VOID = 1
-GROUP_FUNDAMENTAL = 2
-GROUP_STRUCT = 4
-GROUP_FUNCTION = 8
+from sys import platform
+
+if any([platform.startswith(os_name) for os_name in ['linux', 'darwin', 'freebsd']]):
+
+	f = open('.zugbruecke.json', 'w')
+	f.write('{"log_level": 10}')
+	f.close()
+
+	import zugbruecke as ctypes
+
+elif platform.startswith('win'):
+
+	import ctypes
+
+else:
+
+	raise # TODO unsupported platform
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# CTYPES FLAGS
+# RUN
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-# Required for WINFUNCTYPE
-_FUNCFLAG_STDCALL = 0 # EXPORT
+if __name__ == '__main__':
+
+	DATA = [1, 6, 8, 4, 9, 7, 4, 2, 5, 2]
+
+	conveyor_belt = ctypes.WINFUNCTYPE(ctypes.c_int16, ctypes.c_int16)
+
+	@conveyor_belt
+	def get_data(index):
+		print((index, DATA[index]))
+		return DATA[index]
+
+	dll = ctypes.windll.LoadLibrary('demo_dll.dll')
+	sum_elements_from_callback = dll.sum_elements_from_callback
+	sum_elements_from_callback.argtypes = (ctypes.c_int16, conveyor_belt)
+	sum_elements_from_callback.restype = ctypes.c_int16
+
+	test_sum = sum_elements_from_callback(len(DATA), get_data)
+	print(('sum', 48, test_sum))

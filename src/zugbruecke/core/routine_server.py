@@ -64,6 +64,11 @@ class routine_server_class(
 		# Store my own name
 		self.name = routine_name
 
+		# Required by arg definitions and contents
+		self.cache_dict = self.session.cache_dict
+		self.callback_client = self.session.callback_client
+		self.is_server = True
+
 		# Set routine handler
 		self.handler = routine_handler
 
@@ -122,7 +127,7 @@ class routine_server_class(
 			# Pack return package and return it
 			return {
 				'args': arg_message_list,
-				'return_value': return_value, # TODO allow & handle pointers
+				'return_value': return_value,
 				'memory': arg_memory_list,
 				'success': False
 				}

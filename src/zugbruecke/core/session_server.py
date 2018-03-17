@@ -35,9 +35,13 @@ import ctypes
 import traceback
 
 from .dll_server import dll_server_class
+from .lib import generate_cache_dict
 from .log import log_class
 from .path import path_class
-from .rpc import mp_server_class
+from .rpc import (
+	mp_client_class,
+	mp_server_class
+	)
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -62,6 +66,9 @@ class session_server_class:
 		# Mark session as up
 		self.up = True
 
+		# Create dict for struct type definitions
+		self.cache_dict = generate_cache_dict()
+
 		# Offer methods for converting paths
 		path = path_class()
 		self.path_unix_to_wine = path.unix_to_wine
@@ -76,6 +83,12 @@ class session_server_class:
 			'windll': ctypes.WinDLL,
 			'oledll': ctypes.OleDLL
 			}
+
+		# Connect to callback server
+		self.callback_client = mp_client_class(
+			('localhost', self.p['port_socket_callback']),
+			'zugbruecke_callback_main'
+			)
 
 		# Create server
 		self.server = mp_server_class(

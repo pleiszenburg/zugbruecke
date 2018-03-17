@@ -6,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	src/zugbruecke/core/lib.py: General purpose routines
+	tests/test_callback_simple.py: Demonstrates callback routines as arguments
 
 	Required to run on platform / side: [UNIX, WINE]
 
@@ -31,73 +31,53 @@ specific language governing rights and limitations under the License.
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-from ctypes import _FUNCFLAG_CDECL
-import hashlib
-import os
-import random
-import socket
+# import pytest
 
-from .const import _FUNCFLAG_STDCALL
+from sys import platform
+if any([platform.startswith(os_name) for os_name in ['linux', 'darwin', 'freebsd']]):
+	import zugbruecke as ctypes
+elif platform.startswith('win'):
+	import ctypes
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# LIBRARY ROUTINES
+# CLASSES AND ROUTINES
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-def get_free_port():
-
-	s = socket.socket()
-	s.bind(('', 0))
-	port = s.getsockname()[1]
-	s.close()
-
-	return port
+class sample_class:
 
 
-def get_hash_of_string(str_in):
+	def __init__(self):
 
-	return hashlib.sha256(str_in.encode('utf-8')).hexdigest()
+		self.__dll__ = ctypes.windll.LoadLibrary('tests/demo_dll.dll')
 
+		conveyor_belt = ctypes.WINFUNCTYPE(ctypes.c_int16, ctypes.c_int16)
 
-def get_location_of_file(filename = ''):
+		self.__sum_elements_from_callback__ = self.__dll__.sum_elements_from_callback
+		self.__sum_elements_from_callback__.argtypes = (ctypes.c_int16, conveyor_belt)
+		self.__sum_elements_from_callback__.restype = ctypes.c_int16
 
-	if filename == '':
-		filename = __file__
+		self.DATA = [1, 6, 8, 4, 9, 7, 4, 2, 5, 2]
 
-	return os.path.split(os.path.realpath(filename))[0]
+		@conveyor_belt
+		def get_data(index):
+			print((index, self.DATA[index]))
+			return self.DATA[index]
 
-
-def get_randhashstr(dig):
-
-	# Return hash string with dig digits
-	return (('%0' + str(dig) + 'x') % random.randrange(16**dig))
-
-
-def generate_cache_dict():
-
-	return {
-		'func_type': {
-			_FUNCFLAG_CDECL: {},
-			_FUNCFLAG_STDCALL: {}
-			},
-		'func_handle': {},
-		'struct_type': {}
-		}
+		self.__get_data__ = get_data
 
 
-def generate_session_id():
+	def sum_elements_from_callback(self):
 
-	# A session id by default is an 8 digit hash string
-	return get_randhashstr(8)
+		return self.__sum_elements_from_callback__(len(self.DATA), self.__get_data__)
 
 
-def reduce_dict(input_dict):
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# TEST(s)
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-	output_dict = {}
+def test_callback_simple():
 
-	# Keep everything, which is not private (does not start with '_')
-	for key in input_dict.keys():
-		if not key.startswith('_'):
-			output_dict[key] = input_dict[key]
+	sample = sample_class()
 
-	return output_dict
+	assert 48 == sample.sum_elements_from_callback()
