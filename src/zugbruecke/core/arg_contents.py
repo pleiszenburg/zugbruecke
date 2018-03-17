@@ -42,6 +42,8 @@ from .const import (
 	GROUP_STRUCT,
 	GROUP_FUNCTION
 	)
+from .callback_client import callback_translator_client_class
+from .callback_server import callback_translator_server_class
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -203,25 +205,16 @@ class arg_contents_class():
 			# Just return its name
 			return func_name
 
-		# Build callback translator for RPC server
-		def callback_translator(*args):
-
-			# Unpack arguments
-			unpacked_args = self.arg_list_unpack(args, func_def_dict['_argtypes_'])
-
-			# Call actual callback function
-			ret = func_ptr(*unpacked_args)
-
-			# Pack return value
-			ret_packed = self.return_msg_pack(ret, func_def_dict['_restype_'])
-
-			return ret_packed
-
-		# Store callback translator in cache
-		self.cache_dict['func_handle'][func_name] = callback_translator
+		# Generate and store callback translator in cache
+		self.cache_dict['func_handle'][func_name] = callback_translator_client_class(
+			self, func_name, func_ptr, func_def_dict['_argtypes_'], func_def_dict['_restype_']
+			)
 
 		# Register translator at RPC server
-		self.callback_server.register_function(callback_translator, public_name = func_name)
+		self.callback_server.register_function(
+			self.cache_dict['func_handle'][func_name],
+			public_name = func_name
+			)
 
 		# Return name of callback entry
 		return func_name
