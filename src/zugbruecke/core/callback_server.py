@@ -72,10 +72,11 @@ class callback_translator_server_class:
 		# Pack arguments
 		packed_args = self.arg_list_pack(args, self.argtypes_d)
 
-		# Call RPC callback function
+		# Call RPC callback function (packed arguments are shipped to Unix side)
 		ret = self.handler(*packed_args)
 
 		# Unpack return value
 		ret_unpacked = self.return_msg_unpack(ret, self.restype_d)
 
+		# Return data directly to DLL routine
 		return ret_unpacked

@@ -72,10 +72,11 @@ class callback_translator_client_class:
 		# Unpack arguments
 		unpacked_args = self.arg_list_unpack(args, self.argtypes_d)
 
-		# Call actual callback function
+		# Call actual callback function (ctypes function pointer)
 		ret = self.handler(*unpacked_args)
 
 		# Pack return value
 		ret_packed = self.return_msg_pack(ret, self.restype_d)
 
+		# Ship data back to Wine side
 		return ret_packed
