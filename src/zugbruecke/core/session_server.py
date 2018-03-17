@@ -35,6 +35,7 @@ import ctypes
 import traceback
 
 from .dll_server import dll_server_class
+from .lib import generate_cache_dict
 from .log import log_class
 from .path import path_class
 from .rpc import mp_server_class
@@ -63,7 +64,7 @@ class session_server_class:
 		self.up = True
 
 		# Create dict for struct type definitions
-		self.struct_type_dict = {}
+		self.cache_dict = generate_cache_dict()
 
 		# Offer methods for converting paths
 		path = path_class()

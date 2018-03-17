@@ -65,7 +65,7 @@ class routine_server_class(
 		self.name = routine_name
 
 		# Required by arg definitions and contents
-		self.struct_type_dict = self.session.struct_type_dict
+		self.cache_dict = self.session.cache_dict
 
 		# Set routine handler
 		self.handler = routine_handler

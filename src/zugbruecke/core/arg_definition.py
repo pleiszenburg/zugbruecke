@@ -147,7 +147,7 @@ class arg_definition_class():
 					))
 
 		# Generate actual class
-		self.struct_type_dict[struct_d_dict['t']] = type(
+		self.cache_dict['struct_type'][struct_d_dict['t']] = type(
 			struct_d_dict['t'], # Potenial BUG: Ends up in __main__ scope, problematic?
 			(ctypes.Structure,),
 			{'_fields_': fields}
@@ -222,8 +222,8 @@ class arg_definition_class():
 		elif group_name == 'PyCStructType':
 
 			# Keep track of datatype on client side
-			if type_name not in self.struct_type_dict.keys():
-				self.struct_type_dict[type_name] = datatype
+			if type_name not in self.cache_dict['struct_type'].keys():
+				self.cache_dict['struct_type'][type_name] = datatype
 
 			# TODO: For speed, cache packed struct definitions for known structs
 
@@ -356,11 +356,11 @@ class arg_definition_class():
 	def __unpack_definition_struct_dict__(self, datatype_d_dict):
 
 		# Generate struct class if it does not exist yet
-		if datatype_d_dict['t'] not in self.struct_type_dict.keys():
+		if datatype_d_dict['t'] not in self.cache_dict['struct_type'].keys():
 			self.__generate_struct_from_definition__(datatype_d_dict)
 
 		# Return type class or type pointer
 		return self.__unpack_definition_flags__(
-			self.struct_type_dict[datatype_d_dict['t']], # struct class
+			self.cache_dict['struct_type'][datatype_d_dict['t']], # struct class
 			datatype_d_dict['f'] # flags
 			)

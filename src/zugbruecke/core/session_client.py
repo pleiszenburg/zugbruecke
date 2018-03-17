@@ -47,6 +47,7 @@ from .config import get_module_config
 from .dll_client import dll_client_class
 from .interpreter import interpreter_session_class
 from .lib import (
+	generate_cache_dict,
 	get_free_port,
 	get_location_of_file
 	)
@@ -159,7 +160,7 @@ class session_client_class():
 		try:
 
 			# There already is a matching function pointer type available
-			return self.functype_cache_dict[functype][(restype, argtypes, flags)]
+			return self.cache_dict['func_type'][functype][(restype, argtypes, flags)]
 
 		except KeyError:
 
@@ -171,7 +172,7 @@ class session_client_class():
 				_flags_ = flags
 
 			# Store the new type and return
-			self.functype_cache_dict[functype][(restype, argtypes, flags)] = FunctionType
+			self.cache_dict['func_type'][functype][(restype, argtypes, flags)] = FunctionType
 			return FunctionType
 
 
@@ -299,20 +300,11 @@ class session_client_class():
 		# Store current working directory
 		self.dir_cwd = os.getcwd()
 
+		# Set up a cache dict (packed and unpacked types)
+		self.cache_dict = generate_cache_dict()
+
 		# Set up a dict for loaded dlls
 		self.dll_dict = {}
-
-		# Create dict for struct type definitions
-		self.struct_type_dict = {}
-
-		# Create dicts for function prototypes
-		self.functype_cache_dict = {
-			_FUNCFLAG_CDECL: {},
-			_FUNCFLAG_STDCALL: {}
-			}
-
-		# Create dict for actual function pointers (call back functions)
-		self.funcpointer_dict = {}
 
 		# Mark session as up
 		self.up = True

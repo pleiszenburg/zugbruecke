@@ -31,10 +31,13 @@ specific language governing rights and limitations under the License.
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+from ctypes import _FUNCFLAG_CDECL
 import hashlib
 import os
 import random
 import socket
+
+from .const import _FUNCFLAG_STDCALL
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -68,6 +71,17 @@ def get_randhashstr(dig):
 
 	# Return hash string with dig digits
 	return (('%0' + str(dig) + 'x') % random.randrange(16**dig))
+
+
+def generate_cache_dict():
+
+	return {
+		'func_type': {
+			_FUNCFLAG_CDECL: {},
+			_FUNCFLAG_STDCALL: {}
+			},
+		'struct_type': {}
+		}
 
 
 def generate_session_id():

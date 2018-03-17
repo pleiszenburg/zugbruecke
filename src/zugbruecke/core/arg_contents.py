@@ -354,7 +354,7 @@ class arg_contents_class():
 				arg_type = getattr(ctypes, arg_def_dict['t']) * flag
 				arg_in = arg_type(*arg_in)
 			elif arg_def_dict['g'] == GROUP_STRUCT:
-				arg_type = self.struct_type_dict[arg_def_dict['t']] * flag
+				arg_type = self.cache_dict['struct_type'][arg_def_dict['t']] * flag
 				arg_in = arg_type(*(self.__unpack_item_struct__(e, arg_def_dict) for e in arg_in))
 			else:
 				raise # TODO
@@ -365,7 +365,7 @@ class arg_contents_class():
 	def __unpack_item_struct__(self, args_list, struct_def_dict):
 
 		# Generate new instance of struct datatype
-		struct_inst = self.struct_type_dict[struct_def_dict['t']]()
+		struct_inst = self.cache_dict['struct_type'][struct_def_dict['t']]()
 
 		# Step through arguments
 		for field_def_dict, field_arg in zip(struct_def_dict['_fields_'], args_list):
