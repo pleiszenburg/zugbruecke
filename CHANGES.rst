@@ -1,7 +1,7 @@
 Changes
 =======
 
-0.0.8 (2018-XX-XX)
+0.0.8 (2018-03-18)
 ------------------
 
 * FEATURE: Support for structures and pointers as return values, see issue #14.
