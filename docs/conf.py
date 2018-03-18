@@ -11,7 +11,7 @@ https://github.com/pleiszenburg/zugbruecke
 
 	Required to run on platform / side: [UNIX]
 
-	Copyright (C) 2017 Sebastian M. Ernst <ernst@pleiszenburg.de>
+	Copyright (C) 2017-2018 Sebastian M. Ernst <ernst@pleiszenburg.de>
 
 <LICENSE_BLOCK>
 The contents of this file are subject to the GNU Lesser General Public License
@@ -77,7 +77,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'zugbruecke'
-copyright = '2017 Sebastian M. Ernst'
+copyright = '2017-2018 Sebastian M. Ernst'
 author = 'Sebastian M. Ernst'
 
 # The version info for the project you're documenting, acts as replacement for

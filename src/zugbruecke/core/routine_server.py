@@ -10,7 +10,7 @@ https://github.com/pleiszenburg/zugbruecke
 
 	Required to run on platform / side: [WINE]
 
-	Copyright (C) 2017 Sebastian M. Ernst <ernst@pleiszenburg.de>
+	Copyright (C) 2017-2018 Sebastian M. Ernst <ernst@pleiszenburg.de>
 
 <LICENSE_BLOCK>
 The contents of this file are subject to the GNU Lesser General Public License
@@ -64,11 +64,16 @@ class routine_server_class(
 		# Store my own name
 		self.name = routine_name
 
+		# Required by arg definitions and contents
+		self.cache_dict = self.session.cache_dict
+		self.callback_client = self.session.callback_client
+		self.is_server = True
+
 		# Set routine handler
 		self.handler = routine_handler
 
 
-	def __handle_call__(self, arg_message_list, arg_memory_list):
+	def __call__(self, arg_message_list, arg_memory_list):
 		"""
 		TODO: Optimize for speed!
 		"""
@@ -97,13 +102,16 @@ class routine_server_class(
 			# Get new arg message list
 			arg_message_list = self.arg_list_pack(args_list, self.argtypes_d)
 
+			# Get new return message list
+			return_message = self.return_msg_pack(return_value, self.restype_d)
+
 			# Log status
 			self.log.out('[routine-server] ... done.')
 
 			# Pack return package and return it
 			return {
 				'args': arg_message_list,
-				'return_value': return_value, # TODO allow & handle pointers
+				'return_value': return_message, # TODO handle memory allocated by DLL in "free form" pointers
 				'memory': arg_memory_list,
 				'success': True
 				}
@@ -119,7 +127,7 @@ class routine_server_class(
 			# Pack return package and return it
 			return {
 				'args': arg_message_list,
-				'return_value': return_value, # TODO allow & handle pointers
+				'return_value': return_value,
 				'memory': arg_memory_list,
 				'success': False
 				}

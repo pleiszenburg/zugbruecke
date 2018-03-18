@@ -11,7 +11,7 @@ https://github.com/pleiszenburg/zugbruecke
 
 	Required to run on platform / side: [WINE]
 
-	Copyright (C) 2017 Sebastian M. Ernst <ernst@pleiszenburg.de>
+	Copyright (C) 2017-2018 Sebastian M. Ernst <ernst@pleiszenburg.de>
 
 <LICENSE_BLOCK>
 The contents of this file are subject to the GNU Lesser General Public License
@@ -52,6 +52,9 @@ if __name__ == '__main__':
 		'--port_socket_ctypes', type = int, nargs = 1
 		)
 	parser.add_argument(
+		'--port_socket_callback', type = int, nargs = 1
+		)
+	parser.add_argument(
 		'--port_socket_log_main', type = int, nargs = 1
 		)
 	parser.add_argument(
@@ -73,6 +76,7 @@ if __name__ == '__main__':
 		'log_level': args.log_level[0],
 		'log_server': False,
 		'port_socket_ctypes': args.port_socket_ctypes[0],
+		'port_socket_callback': args.port_socket_callback[0],
 		'port_socket_log_main': args.port_socket_log_main[0]
 		}
 

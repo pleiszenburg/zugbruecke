@@ -10,7 +10,7 @@ https://github.com/pleiszenburg/zugbruecke
 
 	Required to run on platform / side: [WINE]
 
-	Copyright (C) 2017 Sebastian M. Ernst <ernst@pleiszenburg.de>
+	Copyright (C) 2017-2018 Sebastian M. Ernst <ernst@pleiszenburg.de>
 
 <LICENSE_BLOCK>
 The contents of this file are subject to the GNU Lesser General Public License
@@ -125,7 +125,7 @@ class dll_server_class(): # Representing one idividual dll to be called into
 
 		# Export call and configration directly
 		self.session.server.register_function(
-			self.routines[routine_name].__handle_call__,
+			self.routines[routine_name],
 			self.hash_id + '_' + str(routine_name) + '_handle_call'
 			)
 		self.session.server.register_function(

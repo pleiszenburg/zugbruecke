@@ -6,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	src/zugbruecke/core/memory.py: Handles memory transfers between both sides
+	tests/test_sqrt_int.py: Test function with single parameter
 
 	Required to run on platform / side: [UNIX, WINE]
 
@@ -26,27 +26,42 @@ specific language governing rights and limitations under the License.
 
 """
 
+
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-import ctypes
+import pytest
+
+from sys import platform
+if any([platform.startswith(os_name) for os_name in ['linux', 'darwin', 'freebsd']]):
+	import zugbruecke as ctypes
+elif platform.startswith('win'):
+	import ctypes
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# ROUTINES
+# CLASSES AND ROUTINES
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-def generate_pointer_from_int_list(int_array):
-
-	return ctypes.pointer((ctypes.c_ubyte * len(int_array))(*int_array))
+class sample_class:
 
 
-def overwrite_pointer_with_int_list(ctypes_pointer, int_array):
+	def __init__(self):
 
-	(ctypes.c_ubyte * len(int_array)).from_address(ctypes.c_void_p.from_buffer(ctypes_pointer).value)[:] = int_array[:]
+		self.__dll__ = ctypes.windll.LoadLibrary('tests/demo_dll.dll')
+
+		self.sqrt_int = self.__dll__.sqrt_int
+		self.sqrt_int.argtypes = (ctypes.c_int16,)
+		self.sqrt_int.restype = ctypes.c_int16
 
 
-def serialize_pointer_into_int_list(ctypes_pointer, size_bytes):
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# TEST(s)
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-	return (ctypes.c_ubyte * size_bytes).from_address(ctypes.c_void_p.from_buffer(ctypes_pointer).value)[:]
+def test_sqrt_int():
+
+	sample = sample_class()
+
+	assert 9 == sample.sqrt_int(3)

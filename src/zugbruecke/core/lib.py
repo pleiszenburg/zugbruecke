@@ -10,7 +10,7 @@ https://github.com/pleiszenburg/zugbruecke
 
 	Required to run on platform / side: [UNIX, WINE]
 
-	Copyright (C) 2017 Sebastian M. Ernst <ernst@pleiszenburg.de>
+	Copyright (C) 2017-2018 Sebastian M. Ernst <ernst@pleiszenburg.de>
 
 <LICENSE_BLOCK>
 The contents of this file are subject to the GNU Lesser General Public License
@@ -31,10 +31,13 @@ specific language governing rights and limitations under the License.
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+from ctypes import _FUNCFLAG_CDECL
 import hashlib
 import os
 import random
 import socket
+
+from .const import _FUNCFLAG_STDCALL
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -68,6 +71,18 @@ def get_randhashstr(dig):
 
 	# Return hash string with dig digits
 	return (('%0' + str(dig) + 'x') % random.randrange(16**dig))
+
+
+def generate_cache_dict():
+
+	return {
+		'func_type': {
+			_FUNCFLAG_CDECL: {},
+			_FUNCFLAG_STDCALL: {}
+			},
+		'func_handle': {},
+		'struct_type': {}
+		}
 
 
 def generate_session_id():

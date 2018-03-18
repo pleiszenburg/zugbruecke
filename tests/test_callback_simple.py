@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 """
@@ -7,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	examples/test_zugbruecke.py: Demonstrates drop-in-replacement for ctypes
+	tests/test_callback_simple.py: Demonstrates callback routines as arguments
 
 	Required to run on platform / side: [UNIX, WINE]
 
@@ -32,49 +31,53 @@ specific language governing rights and limitations under the License.
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-# import sys
-# import os
-# import time
+# import pytest
+
 from sys import platform
-
 if any([platform.startswith(os_name) for os_name in ['linux', 'darwin', 'freebsd']]):
-
-	f = open('.zugbruecke.json', 'w')
-	f.write('{"log_level": 10}')
-	f.close()
-
 	import zugbruecke as ctypes
-
 elif platform.startswith('win'):
-
 	import ctypes
 
-else:
 
-	raise # TODO unsupported platform
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# CLASSES AND ROUTINES
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+class sample_class:
+
+
+	def __init__(self):
+
+		self.__dll__ = ctypes.windll.LoadLibrary('tests/demo_dll.dll')
+
+		conveyor_belt = ctypes.WINFUNCTYPE(ctypes.c_int16, ctypes.c_int16)
+
+		self.__sum_elements_from_callback__ = self.__dll__.sum_elements_from_callback
+		self.__sum_elements_from_callback__.argtypes = (ctypes.c_int16, conveyor_belt)
+		self.__sum_elements_from_callback__.restype = ctypes.c_int16
+
+		self.DATA = [1, 6, 8, 4, 9, 7, 4, 2, 5, 2]
+
+		@conveyor_belt
+		def get_data(index):
+			print((index, self.DATA[index]))
+			return self.DATA[index]
+
+		self.__get_data__ = get_data
+
+
+	def sum_elements_from_callback(self):
+
+		return self.__sum_elements_from_callback__(len(self.DATA), self.__get_data__)
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# RUN
+# TEST(s)
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-if __name__ == '__main__':
+def test_callback_simple():
 
-	_call_demo_routine_ = ctypes.windll.LoadLibrary('demo_dll.dll').simple_demo_routine
-	print('DLL and routine loaded!')
+	sample = sample_class()
 
-	_call_demo_routine_.argtypes = [
-		ctypes.c_float,
-		ctypes.c_float
-		]
-	print('Set argument types!')
-
-	_call_demo_routine_.restype = ctypes.c_float
-	print('Set return value type!')
-
-	return_value = _call_demo_routine_(20.0, 1.07)
-	print('Called!')
-	try:
-		print('Got "%f".' % return_value)
-	except:
-		print('Got no return value!')
+	assert 48 == sample.sum_elements_from_callback()

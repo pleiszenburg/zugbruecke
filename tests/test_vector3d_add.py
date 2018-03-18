@@ -6,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	tests/test_avg.py: Test custom datatype argument passing as pointer
+	tests/test_vector3d_add.py: Tests pointer to struct type return value
 
 	Required to run on platform / side: [UNIX, WINE]
 
@@ -44,44 +44,14 @@ elif platform.startswith('win'):
 # CLASSES AND ROUTINES
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-# Define a special type for the 'double *' argument
-class DoubleArrayType:
+class vector3d(ctypes.Structure):
 
 
-	def from_param(self, param):
-
-		typename = type(param).__name__
-		if hasattr(self, 'from_' + typename):
-			return getattr(self, 'from_' + typename)(param)
-		elif isinstance(param, ctypes.Array):
-			return param
-		else:
-			raise TypeError('Can\'t convert %s' % typename)
-
-
-	# Cast from array.array objects
-	def from_array(self, param):
-
-		if param.typecode != 'd':
-			raise TypeError('must be an array of doubles')
-		ptr, _ = param.buffer_info()
-		return ctypes.cast(ptr, ctypes.POINTER(ctypes.c_double))
-
-
-	# Cast from lists/tuples
-	def from_list(self, param):
-
-		val = ((ctypes.c_double)*len(param))(*param)
-		return val
-
-
-	from_tuple = from_list
-
-
-	# Cast from a numpy array
-	def from_ndarray(self, param):
-
-		return param.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
+	_fields_ = [
+		('x', ctypes.c_int16),
+		('y', ctypes.c_int16),
+		('z', ctypes.c_int16)
+		]
 
 
 class sample_class:
@@ -91,32 +61,34 @@ class sample_class:
 
 		self.__dll__ = ctypes.windll.LoadLibrary('tests/demo_dll.dll')
 
-		# void avg(double *, int n)
-		DoubleArray = DoubleArrayType()
-		self.__avg__ = self.__dll__.cookbook_avg
-		self.__avg__.memsync = [ # Regular ctypes on Windows should ignore this statement
-			{
-				'p': [0], # "path" to argument containing the pointer
-				'l': [1], # "path" to argument containing the length
-				'_t': ctypes.c_double, # type of argument (optional, default char/byte): sizeof(type) * length == bytes
-				'_c': DoubleArray # custom datatype
-				}
-			]
-		self.__avg__.argtypes = (DoubleArray, ctypes.c_int)
-		self.__avg__.restype = ctypes.c_double
+		# vector3d *distance(vector3d *, vector3d *)
+		self.__vector3d_add__ = self.__dll__.vector3d_add
+		self.__vector3d_add__.argtypes = (ctypes.POINTER(vector3d), ctypes.POINTER(vector3d))
+		self.__vector3d_add__.restype = ctypes.POINTER(vector3d)
 
 
-	def avg(self, values):
+	def vector3d_add(self, v1, v2):
 
-		return self.__avg__(values, len(values))
+		def struct_from_dict(in_dict):
+			return vector3d(*tuple(in_dict[key] for key in ['x', 'y', 'z']))
+		def dict_from_struct(in_struct):
+			return {key: getattr(in_struct.contents, key) for key in ['x', 'y', 'z']}
+
+		return dict_from_struct(self.__vector3d_add__(
+			struct_from_dict(v1), struct_from_dict(v2)
+			))
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # TEST(s)
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-def test_avg():
+def test_vector3d_add():
+
+	v1 = {'x': 5, 'y': 7, 'z': 2}
+	v2 = {'x': 1, 'y': 9, 'z': 8}
+	added = {'x': 6, 'y': 16, 'z': 10}
 
 	sample = sample_class()
 
-	assert pytest.approx(2.5, 0.0000001) == sample.avg([1, 2, 3, 4])
+	assert added == sample.vector3d_add(v1, v2)

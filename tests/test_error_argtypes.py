@@ -6,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	src/zugbruecke/core/memory.py: Handles memory transfers between both sides
+	tests/test_error_argtypes.py: Checks for proper error handling of argtypes definition
 
 	Required to run on platform / side: [UNIX, WINE]
 
@@ -26,27 +26,28 @@ specific language governing rights and limitations under the License.
 
 """
 
+
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-import ctypes
+import pytest
+
+from sys import platform
+if any([platform.startswith(os_name) for os_name in ['linux', 'darwin', 'freebsd']]):
+	import zugbruecke as ctypes
+elif platform.startswith('win'):
+	import ctypes
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# ROUTINES
+# TEST(s)
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-def generate_pointer_from_int_list(int_array):
+def test_argtypes_neither_list_nor_tuple():
 
-	return ctypes.pointer((ctypes.c_ubyte * len(int_array))(*int_array))
+	dll = ctypes.windll.LoadLibrary('tests/demo_dll.dll')
+	sqrt_int = dll.sqrt_int
 
-
-def overwrite_pointer_with_int_list(ctypes_pointer, int_array):
-
-	(ctypes.c_ubyte * len(int_array)).from_address(ctypes.c_void_p.from_buffer(ctypes_pointer).value)[:] = int_array[:]
-
-
-def serialize_pointer_into_int_list(ctypes_pointer, size_bytes):
-
-	return (ctypes.c_ubyte * size_bytes).from_address(ctypes.c_void_p.from_buffer(ctypes_pointer).value)[:]
+	with pytest.raises(TypeError):
+		sqrt_int.argtypes = ctypes.c_int16

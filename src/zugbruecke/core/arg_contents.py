@@ -10,7 +10,7 @@ https://github.com/pleiszenburg/zugbruecke
 
 	Required to run on platform / side: [UNIX, WINE]
 
-	Copyright (C) 2017 Sebastian M. Ernst <ernst@pleiszenburg.de>
+	Copyright (C) 2017-2018 Sebastian M. Ernst <ernst@pleiszenburg.de>
 
 <LICENSE_BLOCK>
 The contents of this file are subject to the GNU Lesser General Public License
@@ -39,8 +39,11 @@ from .const import (
 	FLAG_POINTER,
 	GROUP_VOID,
 	GROUP_FUNDAMENTAL,
-	GROUP_STRUCT
+	GROUP_STRUCT,
+	GROUP_FUNCTION
 	)
+from .callback_client import callback_translator_client_class
+from .callback_server import callback_translator_server_class
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -62,6 +65,29 @@ class arg_contents_class():
 		return [self.__unpack_item__(a[1], d) for a, d in zip(args_package_list, argtypes_list)]
 
 
+	def return_msg_pack(self, return_value, returntype_dict):
+
+		if return_value is None:
+			return None
+
+		return self.__pack_item__(return_value, returntype_dict)
+
+
+	def return_msg_unpack(self, return_msg, returntype_dict):
+
+		if return_msg is None:
+			return None
+
+		# If this is not a fundamental datatype or if there is a pointer involved, just unpack
+		if not returntype_dict['g'] == GROUP_FUNDAMENTAL or FLAG_POINTER in returntype_dict['f']:
+			return self.__unpack_item__(return_msg, returntype_dict)
+
+		# The original ctypes strips away ctypes datatypes for fundamental
+		# (non-pointer, non-struct) return values and returns plain Python
+		# data types instead - the unpack result requires stripping
+		return self.__item_value_strip__(self.__unpack_item__(return_msg, returntype_dict))
+
+
 	def arg_list_sync(self, old_arguments_list, new_arguments_list, argtypes_list):
 
 		# Step through arguments
@@ -71,7 +97,6 @@ class arg_contents_class():
 			self.__sync_item__(
 				old_arg, new_arg, arg_def_dict
 				)
-
 
 	def __item_pointer_strip__(self, arg_in):
 
@@ -113,6 +138,10 @@ class arg_contents_class():
 			elif arg_def_dict['g'] == GROUP_STRUCT:
 				# Reclusively call this routine for packing structs
 				return self.__pack_item_struct__(arg_in, arg_def_dict)
+			# Handle functions
+			elif arg_def_dict['g'] == GROUP_FUNCTION:
+				# Packs functions and registers them at RPC server
+				return self.__pack_item_function__(arg_in, arg_def_dict)
 			# Handle everything else ... likely pointers handled by memsync
 			else:
 				# Just return None - will (hopefully) be overwritten by memsync
@@ -159,6 +188,36 @@ class arg_contents_class():
 				raise # TODO
 
 		return arg_in
+
+
+	def __pack_item_function__(self, func_ptr, func_def_dict):
+
+		# HACK if on server, just return None
+		if self.is_server:
+			return None
+
+		# Use memory address of function pointer as unique name/ID
+		func_name = 'func_%x' % id(func_ptr)
+
+		# Has callback translator been built before?
+		if func_name in self.cache_dict['func_handle'].keys():
+
+			# Just return its name
+			return func_name
+
+		# Generate and store callback translator in cache
+		self.cache_dict['func_handle'][func_name] = callback_translator_client_class(
+			self, func_name, func_ptr, func_def_dict['_argtypes_'], func_def_dict['_restype_']
+			)
+
+		# Register translator at RPC server
+		self.callback_server.register_function(
+			self.cache_dict['func_handle'][func_name],
+			public_name = func_name
+			)
+
+		# Return name of callback entry
+		return func_name
 
 
 	def __pack_item_struct__(self, struct_raw, struct_def_dict):
@@ -261,6 +320,9 @@ class arg_contents_class():
 			# Handle structs
 			elif arg_def_dict['g'] == GROUP_STRUCT:
 				arg_rebuilt = self.__unpack_item_struct__(arg_raw, arg_def_dict)
+			# Handle functions
+			elif arg_def_dict['g'] == GROUP_FUNCTION:
+				arg_rebuilt = self.__unpack_item_function__(arg_raw, arg_def_dict)
 			# Handle voids (likely mensync stuff)
 			elif arg_def_dict['g'] == GROUP_VOID:
 				# Return a placeholder
@@ -332,7 +394,7 @@ class arg_contents_class():
 				arg_type = getattr(ctypes, arg_def_dict['t']) * flag
 				arg_in = arg_type(*arg_in)
 			elif arg_def_dict['g'] == GROUP_STRUCT:
-				arg_type = self.struct_type_dict[arg_def_dict['t']] * flag
+				arg_type = self.cache_dict['struct_type'][arg_def_dict['t']] * flag
 				arg_in = arg_type(*(self.__unpack_item_struct__(e, arg_def_dict) for e in arg_in))
 			else:
 				raise # TODO
@@ -340,10 +402,34 @@ class arg_contents_class():
 		return arg_type, arg_in
 
 
+	def __unpack_item_function__(self, func_name, func_def_dict):
+
+		# HACK if this function is called on the client, just return None
+		if not self.is_server:
+			return None
+
+		# Has callback translator been built?
+		if func_name in self.cache_dict['func_handle'].keys():
+
+			# Just return handle
+			return self.cache_dict['func_handle'][func_name]
+
+		# Generate, decorate and store callback translator in cache
+		self.cache_dict['func_handle'][func_name] = func_def_dict['_factory_type_'](
+			callback_translator_server_class(
+				self, func_name, getattr(self.callback_client, func_name),
+				func_def_dict['_argtypes_'], func_def_dict['_restype_']
+				)
+			)
+
+		# Return name of callback entry
+		return self.cache_dict['func_handle'][func_name]
+
+
 	def __unpack_item_struct__(self, args_list, struct_def_dict):
 
 		# Generate new instance of struct datatype
-		struct_inst = self.struct_type_dict[struct_def_dict['t']]()
+		struct_inst = self.cache_dict['struct_type'][struct_def_dict['t']]()
 
 		# Step through arguments
 		for field_def_dict, field_arg in zip(struct_def_dict['_fields_'], args_list):

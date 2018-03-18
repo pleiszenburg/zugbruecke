@@ -8,7 +8,7 @@ https://github.com/pleiszenburg/zugbruecke
 
 	Required to run on platform / side: [WINE]
 
-	Copyright (C) 2017 Sebastian M. Ernst <ernst@pleiszenburg.de>
+	Copyright (C) 2017-2018 Sebastian M. Ernst <ernst@pleiszenburg.de>
 
 <LICENSE_BLOCK>
 The contents of this file are subject to the GNU Lesser General Public License
@@ -88,6 +88,10 @@ double __stdcall DEMODLL cookbook_distance(
 	cookbook_point *p2
 	);
 
+double __stdcall DEMODLL *cookbook_distance_pointer(
+	cookbook_point *p1,
+	cookbook_point *p2
+	);
 
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // zugbruecke demo
@@ -109,6 +113,21 @@ void __stdcall DEMODLL gauss_elimination(
 	float (*x)[3]
 	);
 
+typedef struct vector3d {
+	int16_t x, y, z;
+} vector3d;
+
+vector3d __stdcall DEMODLL *vector3d_add(
+	vector3d *p1,
+	vector3d *p2
+	);
+
+int16_t __stdcall DEMODLL sqrt_int(
+	int16_t a
+	);
+
+int16_t __stdcall DEMODLL get_const_int(void);
+
 struct test
 {
 	char el_char;
@@ -129,6 +148,18 @@ void __stdcall DEMODLL complex_demo_routine(
 	char *param_char_p,
 	int param_int,
 	struct test *param_struct_test_p
+	);
+
+
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// zugbruecke demo: callback
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+typedef int16_t __stdcall (*conveyor_belt)(int16_t index);
+
+int16_t __stdcall DEMODLL sum_elements_from_callback(
+	int16_t len,
+	conveyor_belt get_data
 	);
 
 

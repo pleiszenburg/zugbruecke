@@ -10,7 +10,7 @@ https://github.com/pleiszenburg/zugbruecke
 
 	Required to run on platform / side: [UNIX]
 
-	Copyright (C) 2017 Sebastian M. Ernst <ernst@pleiszenburg.de>
+	Copyright (C) 2017-2018 Sebastian M. Ernst <ernst@pleiszenburg.de>
 
 <LICENSE_BLOCK>
 The contents of this file are subject to the GNU Lesser General Public License
@@ -30,7 +30,10 @@ specific language governing rights and limitations under the License.
 # IMPORT: Unix ctypes members required by wrapper
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-from ctypes import DEFAULT_MODE
+from ctypes import (
+	_FUNCFLAG_CDECL,
+	DEFAULT_MODE
+	)
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -46,15 +49,13 @@ from ctypes import LibraryLoader # EXPORT
 
 from ctypes import CDLL as ctypes_CDLL_class
 
-from ctypes import CFUNCTYPE as __CFUNCTYPE__
-from ctypes import _c_functype_cache as __c_functype_cache__
-
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# IMPORT: zugbruecke core
+# IMPORT: zugbruecke core and missing ctypes flags
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-from .core.session_client import session_client_class
+from .core.session_client import session_client_class # EXPORT
+from .core.const import _FUNCFLAG_STDCALL # EXPORT
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -72,12 +73,6 @@ class HRESULT: # EXPORT
 
 def _check_HRESULT(result): # EXPORT
 	pass # TODO stub - method for HRESULT, checks error bit, raises error if true. Needs reimplementation.
-
-def WINFUNCTYPE(restype, *argtypes, **kw): # EXPORT
-	pass # TODO stub
-
-# Used in ctypes __init__.py by WINFUNCTYPE. Needs to be exposed?
-_win_functype_cache = {} # EXPORT # TODO stub
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -104,15 +99,16 @@ WinError = current_session.ctypes_WinError # EXPORT
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# Compatibility to CFUNCTYPE on Wine side must be implemented
+# CFUNCTYPE & WINFUNCTYPE
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-# Need to handle c functions in DLLs
-CFUNCTYPE = __CFUNCTYPE__ # EXPORT
-_c_functype_cache = __c_functype_cache__ # EXPORT
+# CFUNCTYPE and WINFUNCTYPE function pointer factories
+CFUNCTYPE = current_session.ctypes_CFUNCTYPE # EXPORT
+WINFUNCTYPE = current_session.ctypes_WINFUNCTYPE # EXPORT
 
-# Just in case ...
-_FUNCFLAG_STDCALL = 0 # EXPORT
+# Used as cache by CFUNCTYPE and WINFUNCTYPE
+_c_functype_cache = current_session.cache_dict['func_type'][_FUNCFLAG_CDECL] # EXPORT
+_win_functype_cache = current_session.cache_dict['func_type'][_FUNCFLAG_STDCALL] # EXPORT
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

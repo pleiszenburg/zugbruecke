@@ -10,7 +10,7 @@ https://github.com/pleiszenburg/zugbruecke
 
 	Required to run on platform / side: [UNIX]
 
-	Copyright (C) 2017 Sebastian M. Ernst <ernst@pleiszenburg.de>
+	Copyright (C) 2017-2018 Sebastian M. Ernst <ernst@pleiszenburg.de>
 
 <LICENSE_BLOCK>
 The contents of this file are subject to the GNU Lesser General Public License
@@ -108,13 +108,13 @@ class dll_client_class(): # Representing one idividual dll to be called into, re
 		if isinstance(name, str):
 
 			# Set attribute for future use
-			setattr(self, name, self.routines[name].handle_call)
+			setattr(self, name, self.routines[name])
 
 		# Log status
 		self.log.out('[dll-client] ... return handler.')
 
 		# Return handler
-		return self.routines[name].handle_call
+		return self.routines[name]
 
 
 	def __getattr__(self, name):
@@ -128,13 +128,10 @@ class dll_client_class(): # Representing one idividual dll to be called into, re
 		if name_or_ordinal in self.routines.keys():
 
 			# Return handle
-			return self.routines[name_or_ordinal].handle_call
+			return self.routines[name_or_ordinal]
 
-		# Is is unknown?
-		else:
-
-			# Generate new handle
-			return self.__attach_to_routine__(name_or_ordinal)
+		# Generate new handle and return
+		return self.__attach_to_routine__(name_or_ordinal)
 
 
 	def __repr__(self):

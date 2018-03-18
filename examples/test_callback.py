@@ -7,7 +7,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	examples/test_zugbruecke.py: Demonstrates drop-in-replacement for ctypes
+	examples/test_callback.py: Demonstrates callback routines as arguments
 
 	Required to run on platform / side: [UNIX, WINE]
 
@@ -32,9 +32,6 @@ specific language governing rights and limitations under the License.
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-# import sys
-# import os
-# import time
 from sys import platform
 
 if any([platform.startswith(os_name) for os_name in ['linux', 'darwin', 'freebsd']]):
@@ -60,21 +57,19 @@ else:
 
 if __name__ == '__main__':
 
-	_call_demo_routine_ = ctypes.windll.LoadLibrary('demo_dll.dll').simple_demo_routine
-	print('DLL and routine loaded!')
+	DATA = [1, 6, 8, 4, 9, 7, 4, 2, 5, 2]
 
-	_call_demo_routine_.argtypes = [
-		ctypes.c_float,
-		ctypes.c_float
-		]
-	print('Set argument types!')
+	conveyor_belt = ctypes.WINFUNCTYPE(ctypes.c_int16, ctypes.c_int16)
 
-	_call_demo_routine_.restype = ctypes.c_float
-	print('Set return value type!')
+	@conveyor_belt
+	def get_data(index):
+		print((index, DATA[index]))
+		return DATA[index]
 
-	return_value = _call_demo_routine_(20.0, 1.07)
-	print('Called!')
-	try:
-		print('Got "%f".' % return_value)
-	except:
-		print('Got no return value!')
+	dll = ctypes.windll.LoadLibrary('demo_dll.dll')
+	sum_elements_from_callback = dll.sum_elements_from_callback
+	sum_elements_from_callback.argtypes = (ctypes.c_int16, conveyor_belt)
+	sum_elements_from_callback.restype = ctypes.c_int16
+
+	test_sum = sum_elements_from_callback(len(DATA), get_data)
+	print(('sum', 48, test_sum))

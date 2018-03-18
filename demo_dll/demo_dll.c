@@ -8,7 +8,7 @@ https://github.com/pleiszenburg/zugbruecke
 
 	Required to run on platform / side: [WINE]
 
-	Copyright (C) 2017 Sebastian M. Ernst <ernst@pleiszenburg.de>
+	Copyright (C) 2017-2018 Sebastian M. Ernst <ernst@pleiszenburg.de>
 
 <LICENSE_BLOCK>
 The contents of this file are subject to the GNU Lesser General Public License
@@ -112,6 +112,18 @@ double __stdcall DEMODLL cookbook_distance(
 }
 
 
+/* Function involving a C data structure - returning a pointer to a variable */
+double __stdcall DEMODLL *cookbook_distance_pointer(
+	cookbook_point *p1,
+	cookbook_point *p2
+	)
+{
+	double *distance_p = (double *)malloc(sizeof(double));
+	*distance_p = hypot(p1->x - p2->x, p1->y - p2->y);
+	return distance_p;
+}
+
+
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // zugbruecke demo
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -187,6 +199,37 @@ void __stdcall DEMODLL gauss_elimination(
 }
 
 
+vector3d __stdcall DEMODLL *vector3d_add(
+	vector3d *v1,
+	vector3d *v2
+	)
+{
+
+	vector3d *v3 = malloc(sizeof(vector3d));
+
+	v3->x = v1->x + v2->x;
+	v3->y = v1->y + v2->y;
+	v3->z = v1->z + v2->z;
+
+	return v3;
+
+}
+
+
+int16_t __stdcall DEMODLL sqrt_int(
+	int16_t a
+	)
+{
+	return a * a;
+}
+
+
+int16_t __stdcall DEMODLL get_const_int(void)
+{
+	return sqrt(49);
+}
+
+
 float __stdcall DEMODLL simple_demo_routine(
 	float param_a,
 	float param_b
@@ -217,6 +260,29 @@ void __stdcall DEMODLL complex_demo_routine(
 			(*param_struct_test_p).el_int8t_2x3[i][j] += i + j;
 		}
 	}
+
+}
+
+
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// zugbruecke demo: callback
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+int16_t __stdcall DEMODLL sum_elements_from_callback(
+	int16_t len,
+	conveyor_belt get_data
+	)
+{
+
+	int16_t sum = 0;
+	int16_t i;
+
+	for(i = 0; i < len; i++)
+	{
+		sum += get_data(i);
+	}
+
+	return sum;
 
 }
 
