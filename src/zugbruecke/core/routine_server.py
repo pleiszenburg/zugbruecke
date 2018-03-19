@@ -34,20 +34,12 @@ specific language governing rights and limitations under the License.
 from pprint import pformat as pf
 import traceback
 
-from .arg_contents import arg_contents_class
-from .arg_definition import arg_definition_class
-from .arg_memory import arg_memory_class
-
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # DLL SERVER CLASS
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-class routine_server_class(
-	arg_contents_class,
-	arg_definition_class,
-	arg_memory_class
-	):
+class routine_server_class():
 
 
 	def __init__(self, parent_dll, routine_name, routine_handler):
