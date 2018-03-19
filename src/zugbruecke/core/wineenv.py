@@ -84,7 +84,7 @@ def setup_wine_pip(arch, version, directory):
 def setup_wine_python(arch, version, directory, overwrite = False):
 
 	# File name for python stand-alone zip file
-	pyarchive = 'python-%s-embed-%s.zip' % (version, arch)
+	pyarchive = 'python-%s-embed-%s.zip' % (version, 'amd64' if arch == 'win64' else arch)
 
 	# Name of target subfolder
 	pydir = '%s-python%s' % (arch, version)
