@@ -4,7 +4,7 @@ Changes
 0.0.9 (2018-XX-XX)
 ------------------
 
-* ...
+* FIX: Arch "win64" was broken because of wrong download URL for embedded CPython for win64/amd64, see issue #27.
 
 0.0.8 (2018-03-18)
 ------------------
