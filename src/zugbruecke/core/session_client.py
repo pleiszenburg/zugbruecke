@@ -44,10 +44,10 @@ import time
 
 from .const import _FUNCFLAG_STDCALL
 from .config import get_module_config
+from .data import data_class
 from .dll_client import dll_client_class
 from .interpreter import interpreter_session_class
 from .lib import (
-	generate_cache_dict,
 	get_free_port,
 	get_location_of_file
 	)
@@ -161,7 +161,7 @@ class session_client_class():
 		try:
 
 			# There already is a matching function pointer type available
-			return self.cache_dict['func_type'][functype][(restype, argtypes, flags)]
+			return self.data.cache_dict['func_type'][functype][(restype, argtypes, flags)]
 
 		except KeyError:
 
@@ -173,7 +173,7 @@ class session_client_class():
 				_flags_ = flags
 
 			# Store the new type and return
-			self.cache_dict['func_type'][functype][(restype, argtypes, flags)] = FunctionType
+			self.data.cache_dict['func_type'][functype][(restype, argtypes, flags)] = FunctionType
 			return FunctionType
 
 
@@ -269,11 +269,11 @@ class session_client_class():
 				# Tell server via message to terminate
 				self.client.terminate()
 
-				# Terminate callback server
-				self.callback_server.terminate()
-
 				# Destruct interpreter session
 				self.interpreter_session.terminate()
+
+			# Terminate callback server
+			self.callback_server.terminate()
 
 			# Log status
 			self.log.out('[session-client] TERMINATED.')
@@ -304,8 +304,11 @@ class session_client_class():
 		# Store current working directory
 		self.dir_cwd = os.getcwd()
 
-		# Set up a cache dict (packed and unpacked types)
-		self.cache_dict = generate_cache_dict()
+		# Start RPC server for callback routines
+		self.__start_callback_server__()
+
+		# Set data cache and parser
+		self.data = data_class(self.log, is_server = False, callback_server = self.callback_server)
 
 		# Set up a dict for loaded dlls
 		self.dll_dict = {}
@@ -340,9 +343,6 @@ class session_client_class():
 		# Initialize Wine session
 		self.dir_wineprefix = set_wine_env(self.p['dir'], self.p['arch'])
 		create_wine_prefix(self.dir_wineprefix)
-
-		# Start RPC server for callback routines
-		self.__start_callback_server__()
 
 		# Prepare python command for ctypes server or interpreter
 		self.__prepare_python_command__()

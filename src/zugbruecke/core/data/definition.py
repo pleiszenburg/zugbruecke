@@ -6,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	src/zugbruecke/core/arg_definition.py: (Un-) packing of argument definitions
+	src/zugbruecke/core/data/definition.py: (Un-) packing of argument definitions
 
 	Required to run on platform / side: [UNIX, WINE]
 
@@ -34,14 +34,14 @@ specific language governing rights and limitations under the License.
 import ctypes
 #from pprint import pformat as pf
 
-from .const import (
+from ..const import (
 	FLAG_POINTER,
 	GROUP_VOID,
 	GROUP_FUNDAMENTAL,
 	GROUP_STRUCT,
 	GROUP_FUNCTION
 	)
-from .lib import (
+from ..lib import (
 	reduce_dict
 	)
 
@@ -50,7 +50,7 @@ from .lib import (
 # CLASS: Definition packing and unpacking
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-class arg_definition_class():
+class definition_class():
 
 
 	def apply_memsync_to_argtypes_definition(self, memsync, argtypes_d):
@@ -136,6 +136,14 @@ class arg_definition_class():
 				# Add tuple with name and struct datatype
 				fields.append((
 					field['n'], self.__unpack_definition_struct_dict__(field)
+					))
+
+			# Functions (PyCFuncPtrType)
+			elif field['g'] == GROUP_FUNCTION:
+
+				# Add tuple with name and struct datatype
+				fields.append((
+					field['n'], self.__unpack_definition_function_dict__(field)
 					))
 
 			# Undhandled stuff (pointers of pointers etc.) TODO

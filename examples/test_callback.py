@@ -73,3 +73,20 @@ if __name__ == '__main__':
 
 	test_sum = sum_elements_from_callback(len(DATA), get_data)
 	print(('sum', 48, test_sum))
+
+	# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+	class conveyor_belt_data(ctypes.Structure):
+		_fields_ = [
+			('len', ctypes.c_int16),
+			('get_data', conveyor_belt)
+			]
+
+	sum_elements_from_callback_in_struct = dll.sum_elements_from_callback_in_struct
+	sum_elements_from_callback_in_struct.argtypes = (ctypes.POINTER(conveyor_belt_data),)
+	sum_elements_from_callback_in_struct.restype = ctypes.c_int16
+
+	in_struct = conveyor_belt_data(len(DATA), get_data)
+
+	test_struct_sum = sum_elements_from_callback_in_struct(in_struct)
+	print(('sum', 48, test_struct_sum))

@@ -6,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	src/zugbruecke/core/arg_contents.py: (Un-) packing of argument contents
+	src/zugbruecke/core/data/contents.py: (Un-) packing of argument contents
 
 	Required to run on platform / side: [UNIX, WINE]
 
@@ -35,22 +35,22 @@ import ctypes
 from pprint import pformat as pf
 import traceback
 
-from .const import (
+from ..const import (
 	FLAG_POINTER,
 	GROUP_VOID,
 	GROUP_FUNDAMENTAL,
 	GROUP_STRUCT,
 	GROUP_FUNCTION
 	)
-from .callback_client import callback_translator_client_class
-from .callback_server import callback_translator_server_class
+from ..callback_client import callback_translator_client_class
+from ..callback_server import callback_translator_server_class
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # CLASS: Content packing and unpacking
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-class arg_contents_class():
+class contents_class():
 
 
 	def arg_list_pack(self, args_tuple, argtypes_list):
@@ -433,6 +433,10 @@ class arg_contents_class():
 
 		# Step through arguments
 		for field_def_dict, field_arg in zip(struct_def_dict['_fields_'], args_list):
+
+			# HACK is field_arg[1] is None, it's likely a function pointer sent back from Wine side - skip
+			if field_arg[1] is None:
+				continue
 
 			setattr(
 				struct_inst, # struct instance to be modified
