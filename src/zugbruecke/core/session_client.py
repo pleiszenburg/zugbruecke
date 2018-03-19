@@ -44,10 +44,10 @@ import time
 
 from .const import _FUNCFLAG_STDCALL
 from .config import get_module_config
+from .data import data_class
 from .dll_client import dll_client_class
 from .interpreter import interpreter_session_class
 from .lib import (
-	generate_cache_dict,
 	get_free_port,
 	get_location_of_file
 	)
@@ -304,8 +304,8 @@ class session_client_class():
 		# Store current working directory
 		self.dir_cwd = os.getcwd()
 
-		# Set up a cache dict (packed and unpacked types)
-		self.cache_dict = generate_cache_dict()
+		# Set data cache and parser
+		self.data = data_class()
 
 		# Set up a dict for loaded dlls
 		self.dll_dict = {}
