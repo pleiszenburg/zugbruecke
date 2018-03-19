@@ -82,7 +82,7 @@ class session_client_class():
 			self.__init_stage_2__()
 
 		# Ask the server
-		return self.client.ctypes_FormatError(code)
+		return self.rpc_client.ctypes_FormatError(code)
 
 
 	def ctypes_get_last_error(self):
@@ -92,7 +92,7 @@ class session_client_class():
 			self.__init_stage_2__()
 
 		# Ask the server
-		return self.client.ctypes_get_last_error()
+		return self.rpc_client.ctypes_get_last_error()
 
 
 	def ctypes_GetLastError(self):
@@ -102,7 +102,7 @@ class session_client_class():
 			self.__init_stage_2__()
 
 		# Ask the server
-		return self.client.ctypes_GetLastError()
+		return self.rpc_client.ctypes_GetLastError()
 
 
 	def ctypes_set_last_error(self, value):
@@ -112,7 +112,7 @@ class session_client_class():
 			self.__init_stage_2__()
 
 		# Ask the server
-		return self.client.ctypes_set_last_error(value)
+		return self.rpc_client.ctypes_set_last_error(value)
 
 
 	def ctypes_WinError(self, code = None, descr = None):
@@ -122,7 +122,7 @@ class session_client_class():
 			self.__init_stage_2__()
 
 		# Ask the server
-		return self.client.ctypes_WinError(code, descr)
+		return self.rpc_client.ctypes_WinError(code, descr)
 
 
 	def ctypes_CFUNCTYPE(self, restype, *argtypes, **kw):
