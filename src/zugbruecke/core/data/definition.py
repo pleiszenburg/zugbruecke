@@ -32,9 +32,11 @@ specific language governing rights and limitations under the License.
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 import ctypes
+from ctypes import _FUNCFLAG_CDECL
 #from pprint import pformat as pf
 
 from ..const import (
+	_FUNCFLAG_STDCALL,
 	FLAG_POINTER,
 	GROUP_VOID,
 	GROUP_FUNDAMENTAL,
@@ -86,6 +88,32 @@ class definition_class():
 				})
 
 		return memsync_handle
+
+
+	def generate_callback_decorator(self, flags, restype, *argtypes):
+
+		if not(flags & _FUNCFLAG_STDCALL):
+			func_type_key = _FUNCFLAG_CDECL
+		else:
+			func_type_key = _FUNCFLAG_STDCALL
+
+		try:
+
+			# There already is a matching function pointer type available
+			return self.cache_dict['func_type'][func_type_key][(restype, argtypes, flags)]
+
+		except KeyError:
+
+			# Create new function pointer type class
+			class FunctionType(ctypes._CFuncPtr):
+
+				_argtypes_ = argtypes
+				_restype_ = restype
+				_flags_ = flags
+
+			# Store the new type and return
+			self.cache_dict['func_type'][func_type_key][(restype, argtypes, flags)] = FunctionType
+			return FunctionType
 
 
 	def pack_definition_argtypes(self, argtypes):
@@ -337,20 +365,11 @@ class definition_class():
 		if not self.is_server:
 			raise # TODO
 
-		# Figure out which "factory" to use, i.e. calling convention
-		if not(datatype_d_dict['_flags_'] & ctypes._FUNCFLAG_STDCALL):
-			FACTORY = ctypes.CFUNCTYPE
-		elif datatype_d_dict['_flags_'] & ctypes._FUNCFLAG_STDCALL:
-			FACTORY = ctypes.WINFUNCTYPE
-		else:
-			raise # TODO
-
 		# Generate function pointer type (used as parameter type and as decorator for Python function)
-		factory_type = FACTORY(
+		factory_type = self.generate_callback_decorator(
+			datatype_d_dict['_flags_'],
 			self.unpack_definition_returntype(datatype_d_dict['_restype_']),
-			*self.unpack_definition_argtypes(datatype_d_dict['_argtypes_']),
-			use_errno = datatype_d_dict['_flags_'] & ctypes._FUNCFLAG_USE_ERRNO,
-			use_last_error = datatype_d_dict['_flags_'] & ctypes._FUNCFLAG_USE_LASTERROR
+			*self.unpack_definition_argtypes(datatype_d_dict['_argtypes_'])
 			)
 
 		# Store function pointer type for subsequent use as decorator

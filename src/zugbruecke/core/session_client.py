@@ -33,7 +33,6 @@ specific language governing rights and limitations under the License.
 
 import atexit
 from ctypes import (
-	_CFuncPtr,
 	_FUNCFLAG_CDECL,
 	_FUNCFLAG_USE_ERRNO,
 	_FUNCFLAG_USE_LASTERROR
@@ -131,25 +130,7 @@ class session_client_class():
 		if self.stage == 1:
 			self.__init_stage_2__()
 
-		return self.get_callback_decorator(_FUNCFLAG_CDECL, restype, *argtypes, **kw)
-
-
-	def ctypes_WINFUNCTYPE(self, restype, *argtypes, **kw): # EXPORT
-
-		# If in stage 1, fire up stage 2
-		if self.stage == 1:
-			self.__init_stage_2__()
-
-		return self.get_callback_decorator(_FUNCFLAG_STDCALL, restype, *argtypes, **kw)
-
-
-	def get_callback_decorator(self, functype, restype, *argtypes, **kw):
-
-		# If in stage 1, fire up stage 2
-		if self.stage == 1:
-			self.__init_stage_2__()
-
-		flags = functype
+		flags = _FUNCFLAG_CDECL
 
 		if kw.pop("use_errno", False):
 			flags |= _FUNCFLAG_USE_ERRNO
@@ -158,23 +139,25 @@ class session_client_class():
 		if kw:
 			raise ValueError("unexpected keyword argument(s) %s" % kw.keys())
 
-		try:
+		return self.data.generate_callback_decorator(flags, restype, *argtypes)
 
-			# There already is a matching function pointer type available
-			return self.data.cache_dict['func_type'][functype][(restype, argtypes, flags)]
 
-		except KeyError:
+	def ctypes_WINFUNCTYPE(self, restype, *argtypes, **kw): # EXPORT
 
-			# Create new function pointer type class
-			class FunctionType(_CFuncPtr):
+		# If in stage 1, fire up stage 2
+		if self.stage == 1:
+			self.__init_stage_2__()
 
-				_argtypes_ = argtypes
-				_restype_ = restype
-				_flags_ = flags
+		flags = _FUNCFLAG_STDCALL
 
-			# Store the new type and return
-			self.data.cache_dict['func_type'][functype][(restype, argtypes, flags)] = FunctionType
-			return FunctionType
+		if kw.pop("use_errno", False):
+			flags |= _FUNCFLAG_USE_ERRNO
+		if kw.pop("use_last_error", False):
+			flags |= _FUNCFLAG_USE_LASTERROR
+		if kw:
+			raise ValueError("unexpected keyword argument(s) %s" % kw.keys())
+
+		return self.data.generate_callback_decorator(flags, restype, *argtypes)
 
 
 	def load_library(self, dll_name, dll_type, dll_param = {}):
