@@ -8,6 +8,7 @@ Changes
 * FIX: Function pointers in struct types were not handled, see issue #28.
 * Isolated argument packing and unpacking code, preparing to solve issue #25.
 * Renamed "logwrite" parameter & command line option into "log_write".
+* Reduced number of RPC servers to one per side (Unix and Wine).
 
 0.0.8 (2018-03-18)
 ------------------
