@@ -6,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	src/zugbruecke/core/arg_contents.py: (Un-) packing of argument contents
+	src/zugbruecke/core/data/contents.py: (Un-) packing of argument contents
 
 	Required to run on platform / side: [UNIX, WINE]
 
@@ -50,7 +50,7 @@ from .callback_server import callback_translator_server_class
 # CLASS: Content packing and unpacking
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-class arg_contents_class():
+class contents_class():
 
 
 	def arg_list_pack(self, args_tuple, argtypes_list):

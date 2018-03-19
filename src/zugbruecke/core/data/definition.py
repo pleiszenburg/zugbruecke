@@ -6,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	src/zugbruecke/core/arg_definition.py: (Un-) packing of argument definitions
+	src/zugbruecke/core/data/definition.py: (Un-) packing of argument definitions
 
 	Required to run on platform / side: [UNIX, WINE]
 
@@ -50,7 +50,7 @@ from .lib import (
 # CLASS: Definition packing and unpacking
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-class arg_definition_class():
+class definition_class():
 
 
 	def apply_memsync_to_argtypes_definition(self, memsync, argtypes_d):
