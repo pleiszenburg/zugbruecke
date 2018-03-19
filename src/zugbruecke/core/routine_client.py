@@ -52,7 +52,7 @@ class routine_client_class():
 		self.session = self.dll.session
 
 		# For convenience ...
-		self.client = self.dll.client
+		self.rpc_client = self.dll.rpc_client
 
 		# Get handle on log
 		self.log = self.dll.log
@@ -77,12 +77,12 @@ class routine_client_class():
 
 		# Get handle on server-side configure
 		self.__configure_on_server__ = getattr(
-			self.client, self.dll.hash_id + '_' + str(self.name) + '_configure'
+			self.rpc_client, self.dll.hash_id + '_' + str(self.name) + '_configure'
 			)
 
 		# Get handle on server-side handle_call
 		self.__handle_call_on_server__ = getattr(
-			self.client, self.dll.hash_id + '_' + str(self.name) + '_handle_call'
+			self.rpc_client, self.dll.hash_id + '_' + str(self.name) + '_handle_call'
 			)
 
 

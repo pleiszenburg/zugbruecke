@@ -46,7 +46,7 @@ your current working directory or *zugbruecke*'s configuration directory (likely
 
 .. code:: javascript
 
-	{"log_level": 10, "logwrite": true}
+	{"log_level": 10, "log_write": true}
 
 The higher the log level, the more output you will get. Default is 0 for no logs.
 The on-screen log is color-coded for readability. The log can also, in addition,

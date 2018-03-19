@@ -82,7 +82,7 @@ Tells *zugbuecke* to show messages its sub-processes are writing to ``stdout``.
 Tells *zugbuecke* to show messages its sub-processes are writing to ``stderr``.
 ``True`` by default.
 
-``logwrite`` (bool)
+``log_write`` (bool)
 ^^^^^^^^^^^^^^^^^^^
 
 Tells *zugbuecke* to write its logs to disk into the current working directory.
