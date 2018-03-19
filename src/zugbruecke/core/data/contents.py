@@ -434,6 +434,10 @@ class contents_class():
 		# Step through arguments
 		for field_def_dict, field_arg in zip(struct_def_dict['_fields_'], args_list):
 
+			# HACK is field_arg[1] is None, it's likely a function pointer sent back from Wine side - skip
+			if field_arg[1] is None:
+				continue
+
 			setattr(
 				struct_inst, # struct instance to be modified
 				field_arg[0], # parameter name (from tuple)

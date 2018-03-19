@@ -138,6 +138,14 @@ class definition_class():
 					field['n'], self.__unpack_definition_struct_dict__(field)
 					))
 
+			# Functions (PyCFuncPtrType)
+			elif field['g'] == GROUP_FUNCTION:
+
+				# Add tuple with name and struct datatype
+				fields.append((
+					field['n'], self.__unpack_definition_function_dict__(field)
+					))
+
 			# Undhandled stuff (pointers of pointers etc.) TODO
 			else:
 

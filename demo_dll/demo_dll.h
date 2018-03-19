@@ -162,6 +162,15 @@ int16_t __stdcall DEMODLL sum_elements_from_callback(
 	conveyor_belt get_data
 	);
 
+typedef struct conveyor_belt_data {
+	int16_t len;
+	conveyor_belt get_data;
+} conveyor_belt_data;
+
+int16_t __stdcall DEMODLL sum_elements_from_callback_in_struct(
+	struct conveyor_belt_data *data
+	);
+
 
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // DLL infrastructure
