@@ -35,15 +35,15 @@ import ctypes
 from pprint import pformat as pf
 import traceback
 
-from .const import (
+from ..const import (
 	FLAG_POINTER,
 	GROUP_VOID,
 	GROUP_FUNDAMENTAL,
 	GROUP_STRUCT,
 	GROUP_FUNCTION
 	)
-from .callback_client import callback_translator_client_class
-from .callback_server import callback_translator_server_class
+from ..callback_client import callback_translator_client_class
+from ..callback_server import callback_translator_server_class
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

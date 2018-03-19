@@ -34,7 +34,7 @@ specific language governing rights and limitations under the License.
 import ctypes
 #from pprint import pformat as pf
 
-from .memory import (
+from ..memory import (
 	generate_pointer_from_int_list,
 	overwrite_pointer_with_int_list,
 	serialize_pointer_into_int_list

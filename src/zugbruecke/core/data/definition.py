@@ -34,14 +34,14 @@ specific language governing rights and limitations under the License.
 import ctypes
 #from pprint import pformat as pf
 
-from .const import (
+from ..const import (
 	FLAG_POINTER,
 	GROUP_VOID,
 	GROUP_FUNDAMENTAL,
 	GROUP_STRUCT,
 	GROUP_FUNCTION
 	)
-from .lib import (
+from ..lib import (
 	reduce_dict
 	)
 
