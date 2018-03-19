@@ -66,9 +66,6 @@ class session_server_class:
 		# Mark session as up
 		self.up = True
 
-		# Set data cache and parser
-		self.data = data_class()
-
 		# Offer methods for converting paths
 		path = path_class()
 		self.path_unix_to_wine = path.unix_to_wine
@@ -89,6 +86,9 @@ class session_server_class:
 			('localhost', self.p['port_socket_callback']),
 			'zugbruecke_callback_main'
 			)
+
+		# Set data cache and parser
+		self.data = data_class(self.log, is_server = True, callback_client = self.callback_client)
 
 		# Create server
 		self.server = mp_server_class(

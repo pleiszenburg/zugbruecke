@@ -46,6 +46,7 @@ from ..const import _FUNCFLAG_STDCALL
 
 class data_class(contents_class, definition_class, memory_class):
 
+
 	cache_dict = {
 		'func_type': {
 			_FUNCFLAG_CDECL: {},
@@ -54,3 +55,12 @@ class data_class(contents_class, definition_class, memory_class):
 		'func_handle': {},
 		'struct_type': {}
 		}
+
+
+	def __init__(self, log, is_server, callback_client = None, callback_server = None):
+
+		self.log = log
+		self.is_server = is_server
+
+		self.callback_client = callback_client
+		self.callback_server = callback_server

@@ -42,7 +42,7 @@ import traceback
 class callback_translator_server_class:
 
 
-	def __init__(self, parent_routine, routine_name, routine_handler, argtypes_d, restype_d):
+	def __init__(self, data, routine_name, routine_handler, argtypes_d, restype_d):
 
 		# Store my own name
 		self.name = routine_name
@@ -50,23 +50,17 @@ class callback_translator_server_class:
 		# Store handler
 		self.handler = routine_handler
 
-		# Store handle on parent routine
-		self.parent_routine = parent_routine
+		# Store handle on data
+		self.data = data
 
 		# Get handle on log
-		self.log = self.parent_routine.log
+		self.log = self.data.log
 
 		# Store definition of argument types
 		self.argtypes_d = argtypes_d
 
 		# Store definition of return value type
 		self.restype_d = restype_d
-
-		# Store handlers on packing/unpacking routines
-		self.arg_list_pack = self.parent_routine.arg_list_pack
-		self.arg_list_sync = self.parent_routine.arg_list_sync
-		self.arg_list_unpack = self.parent_routine.arg_list_unpack
-		self.return_msg_unpack = self.parent_routine.return_msg_unpack
 
 
 	def __call__(self, *args):
@@ -78,20 +72,20 @@ class callback_translator_server_class:
 		self.log.out('[callback-server] ... parameters are "%r". Packing and pushing to client ...' % (args,))
 
 		# Pack arguments and call RPC callback function (packed arguments are shipped to Unix side)
-		return_dict = self.handler(self.arg_list_pack(args, self.argtypes_d))
+		return_dict = self.handler(self.data.arg_list_pack(args, self.argtypes_d))
 
 		# Log status
 		self.log.out('[callback-server] ... received feedback from client, unpacking ...')
 
 		# Unpack return dict (for pointers and structs)
-		self.arg_list_sync(
+		self.data.arg_list_sync(
 			args,
-			self.arg_list_unpack(return_dict['args'], self.argtypes_d),
+			self.data.arg_list_unpack(return_dict['args'], self.argtypes_d),
 			self.argtypes_d
 			)
 
 		# Unpack return value
-		return_value = self.return_msg_unpack(return_dict['return_value'], self.restype_d)
+		return_value = self.data.return_msg_unpack(return_dict['return_value'], self.restype_d)
 
 		# Log status
 		self.log.out('[callback-server] ... unpacked, return.')
