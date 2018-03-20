@@ -191,9 +191,9 @@ class mp_server_class():
 				traceback.print_exc()
 
 
-	def server_forever_in_thread(self):
+	def server_forever_in_thread(self, daemon = True):
 
 		# Start the server in its own thread
 		t = Thread(target = self.serve_forever)
-		t.daemon = True
+		t.daemon = daemon
 		t.start()

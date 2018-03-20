@@ -190,7 +190,7 @@ class session_client_class():
 		self.log.out('[session-client] Trying to access DLL "%s" of type "%s" ...' % (dll_name, dll_type))
 
 		# Tell wine about the dll and its type TODO implement some sort of find_library
-		(success, hash_id) = self.__load_library_on_server__(
+		(success, hash_id) = self.rpc_client.load_library(
 			dll_name, dll_type, dll_param
 			)
 
@@ -249,6 +249,9 @@ class session_client_class():
 			# Only if in stage 2:
 			if self.stage == 2:
 
+				# Wait for server to appear
+				self.__wait_for_server_status_change__(target_status = False)
+
 				# Tell server via message to terminate
 				self.rpc_client.terminate()
 
@@ -299,6 +302,9 @@ class session_client_class():
 		# Mark session as up
 		self.up = True
 
+		# Marking server component as down
+		self.server_up = False
+
 		# Set current stage to 1
 		self.stage = 1
 
@@ -333,6 +339,9 @@ class session_client_class():
 		# Initialize interpreter session
 		self.interpreter_session = interpreter_session_class(self.id, self.p, self.log)
 
+		# Wait for server to appear
+		self.__wait_for_server_status_change__(target_status = True)
+
 		# Try to connect to Wine side
 		self.__start_rpc_client__()
 
@@ -343,74 +352,19 @@ class session_client_class():
 		self.log.out('[session-client] STARTED (STAGE 2).')
 
 
+	def __set_server_status__(self, status):
+
+		# Interface for session server through RPC
+		self.server_up = status
+
+
 	def __start_rpc_client__(self):
 
-		# Log status
-		self.log.out('[session-client] ctypes client connecting ...')
-
-		# Status variable
-		ctypes_server_up = False
-		# Time-step
-		wait_for_seconds = 0.01
-		# Timeout
-		timeout_after_seconds = 30.0
-		# Already waited for ...
-		started_waiting_at = time.time()
-		# Connection trys
-		tried_this_many_times = 0
-
-		# Run loop until socket appears
-		while True:
-
-			# Try to get server status
-			try:
-
-				# Count attempts
-				tried_this_many_times += 1
-
-				# Fire up xmlrpc client
-				self.rpc_client = mp_client_class(
-					('localhost', self.p['port_socket_wine']),
-					'zugbruecke_wine'
-					)
-
-				# Get status from server
-				server_status = self.rpc_client.get_status()
-
-				# Check result
-				if server_status == 'up':
-					ctypes_server_up = True
-					break
-
-			except:
-
-				pass
-
-			# Break the loop after timeout
-			if time.time() >= (started_waiting_at + timeout_after_seconds):
-				break
-
-			# Wait before trying again
-			time.sleep(wait_for_seconds)
-
-		# Evaluate the result
-		if not ctypes_server_up:
-
-			# Log status
-			self.log.out('[session-client] ... could not connect (after %0.2f seconds & %d attempts)! Error.' %
-				(time.time() - started_waiting_at, tried_this_many_times)
-				)
-			raise # TODO
-
-		else:
-
-			# Generate handles on server-side routines
-			self.__load_library_on_server__ = self.rpc_client.load_library
-
-			# Log status
-			self.log.out('[session-client] ... connected (after %0.2f seconds & %d attempts).' %
-				(time.time() - started_waiting_at, tried_this_many_times)
-				)
+		# Fire up xmlrpc client
+		self.rpc_client = mp_client_class(
+			('localhost', self.p['port_socket_wine']),
+			'zugbruecke_wine'
+			)
 
 
 	def __start_rpc_server__(self):
@@ -423,6 +377,9 @@ class session_client_class():
 			('localhost', self.p['port_socket_unix']),
 			'zugbruecke_unix'
 			) # Log is added later
+
+		# Interface to server to indicate its status
+		self.rpc_server.register_function(self.__set_server_status__, 'set_server_status')
 
 		# Start server into its own thread
 		self.rpc_server.server_forever_in_thread()
@@ -445,3 +402,50 @@ class session_client_class():
 			'--log_level', str(self.p['log_level']),
 			'--log_write', str(int(self.p['log_write']))
 			]
+
+
+	def __wait_for_server_status_change__(self, target_status):
+
+		# Does the status have to change?
+		if target_status == self.server_up:
+
+			# No, so get out of here
+			return
+
+		# Debug strings
+		STATUS_DICT = {True: 'up', False: 'down'}
+
+		# Log status
+		self.log.out('[session-client] Waiting for session-server be %s ...' % STATUS_DICT[target_status])
+
+		# Time-step
+		wait_for_seconds = 0.01
+		# Timeout
+		timeout_after_seconds = 30.0
+		# Already waited for ...
+		started_waiting_at = time.time()
+
+		# Run loop until socket appears
+		while not self.server_up:
+
+			# Wait before trying again
+			time.sleep(wait_for_seconds)
+
+			# Time out
+			if time.time() >= (started_waiting_at + timeout_after_seconds):
+				break
+
+		# Handle timeout
+		if not self.server_up:
+
+			# Log status
+			self.log.out('[session-client] ... wait timed out (after %0.2f seconds).' %
+				(time.time() - started_waiting_at)
+				)
+
+			raise # TODO
+
+		# Log status
+		self.log.out('[session-client] ... session server is %s (after %0.2f seconds).' %
+			(STATUS_DICT[target_status], time.time() - started_waiting_at)
+			)
