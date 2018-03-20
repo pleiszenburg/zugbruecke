@@ -233,6 +233,10 @@ class contents_class():
 		# Grep the simple case first, scalars
 		if arg_def_dict['s']:
 
+			# Do not do this for void pointers, likely handled by memsync
+			if arg_def_dict['g'] == GROUP_VOID:
+				return
+
 			# Strip away the pointers ... (all flags are pointers in this case)
 			for flag in arg_def_dict['f']:
 				if flag != FLAG_POINTER:

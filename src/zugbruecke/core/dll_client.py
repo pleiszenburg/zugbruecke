@@ -51,7 +51,7 @@ class dll_client_class(): # Representing one idividual dll to be called into, re
 		self.session = parent_session
 
 		# For convenience ...
-		self.client = self.session.client
+		self.rpc_client = self.session.rpc_client
 
 		# Get handle on log
 		self.log = self.session.log
@@ -63,10 +63,10 @@ class dll_client_class(): # Representing one idividual dll to be called into, re
 		self.routines = {}
 
 		# Expose routine registration
-		self.__register_routine_on_server__ = getattr(self.client, self.hash_id + '_register_routine')
+		self.__register_routine_on_server__ = getattr(self.rpc_client, self.hash_id + '_register_routine')
 
 		# Expose string reprentation of dll object
-		self.__get_repr__ = getattr(self.client, self.hash_id + '_repr')
+		self.__get_repr__ = getattr(self.rpc_client, self.hash_id + '_repr')
 
 
 	def __attach_to_routine__(self, name):

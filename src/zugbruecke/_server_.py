@@ -49,19 +49,16 @@ if __name__ == '__main__':
 		'--id', type = str, nargs = 1
 		)
 	parser.add_argument(
-		'--port_socket_ctypes', type = int, nargs = 1
+		'--port_socket_unix', type = int, nargs = 1
 		)
 	parser.add_argument(
-		'--port_socket_callback', type = int, nargs = 1
-		)
-	parser.add_argument(
-		'--port_socket_log_main', type = int, nargs = 1
+		'--port_socket_wine', type = int, nargs = 1
 		)
 	parser.add_argument(
 		'--log_level', type = int, nargs = 1
 		)
 	parser.add_argument(
-		'--logwrite', type = int, nargs = 1
+		'--log_write', type = int, nargs = 1
 		)
 	args = parser.parse_args()
 
@@ -71,13 +68,10 @@ if __name__ == '__main__':
 		'platform': 'WINE',
 		'stdout': False,
 		'stderr': False,
-		'logwrite': bool(args.logwrite[0]),
-		'remote_log': True,
+		'log_write': bool(args.log_write[0]),
 		'log_level': args.log_level[0],
-		'log_server': False,
-		'port_socket_ctypes': args.port_socket_ctypes[0],
-		'port_socket_callback': args.port_socket_callback[0],
-		'port_socket_log_main': args.port_socket_log_main[0]
+		'port_socket_wine': args.port_socket_wine[0],
+		'port_socket_unix': args.port_socket_unix[0]
 		}
 
 	# Fire up wine server session with parsed parameters
