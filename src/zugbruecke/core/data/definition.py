@@ -67,15 +67,35 @@ class definition_class():
 			arg_type = argtypes_d[segment['p'][0]]
 			# Step through path to argument type ...
 			for path_element in segment['p'][1:]:
+				# Keep track of whether or not a match has been found so an error can be raised if not
+				found_match = False
+				# Find field with matching name
+				for field_index, field in enumerate(arg_type['_fields_']):
+					if field['n'] == path_element:
+						found_match = True
+						break
+				# Raise an error if the definition does not make sense
+				if not found_match:
+					raise # TODO
 				# Go deeper ...
-				arg_type = arg_type['_fields_'][path_element]
+				arg_type = arg_type['_fields_'][field_index]
 
 			# Reference processed argument types - start with depth 0
 			len_type = argtypes_d[segment['l'][0]]
 			# Step through path to argument type ...
 			for path_element in segment['l'][1:]:
+				# Keep track of whether or not a match has been found so an error can be raised if not
+				found_match = False
+				# Find field with matching name
+				for field_index, field in enumerate(len_type['_fields_']):
+					if field['n'] == path_element:
+						found_match = True
+						break
+				# Raise an error if the definition does not make sense
+				if not found_match:
+					raise # TODO
 				# Go deeper ...
-				len_type = len_type['_fields_'][path_element]
+				len_type = len_type['_fields_'][field_index]
 
 			# HACK make memory sync pointers type agnostic
 			arg_type['g'] = GROUP_VOID
@@ -172,6 +192,18 @@ class definition_class():
 				# Add tuple with name and struct datatype
 				fields.append((
 					field['n'], self.__unpack_definition_function_dict__(field)
+					))
+
+			# Handle generic pointers
+			elif field['g'] == GROUP_VOID:
+
+				fields.append((
+					field['n'],
+					self.__unpack_definition_flags__(
+						ctypes.c_void_p,
+						field['f'],
+						is_void_pointer = True
+						)
 					))
 
 			# Undhandled stuff (pointers of pointers etc.) TODO

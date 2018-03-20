@@ -33,6 +33,7 @@ specific language governing rights and limitations under the License.
 
 import ctypes
 #from pprint import pformat as pf
+#import traceback
 
 from ..memory import (
 	generate_pointer_from_int_list,
@@ -74,14 +75,20 @@ class memory_class():
 			# Step through path to pointer ...
 			for path_element in segment['p']:
 				# Go deeper ...
-				pointer = pointer[path_element]
+				if isinstance(path_element, int):
+					pointer = pointer[path_element]
+				else:
+					pointer = getattr(pointer, path_element)
 
 			# Reference args - search for length
 			length = args
 			# Step through path to pointer ...
 			for path_element in segment['l']:
 				# Go deeper ...
-				length = length[path_element]
+				if isinstance(path_element, int):
+					length = length[path_element]
+				else:
+					length = getattr(length, path_element)
 
 			# Compute actual length - might come from ctypes or a Python datatype
 			if hasattr(length, 'value'):
@@ -139,12 +146,20 @@ class memory_class():
 			# Step through path to pointer ...
 			for path_element in segment['p'][:-1]:
 				# Go deeper ...
-				pointer = pointer[path_element]
+				if isinstance(path_element, int):
+					pointer = pointer[path_element]
+				else:
+					pointer = getattr(pointer.contents, path_element)
 
-			# Handle deepest instance
-			pointer[segment['p'][-1]] = generate_pointer_from_int_list(arg_memory_list[segment_index])
-
-			# Append to handle
-			memory_handle.append((pointer[segment['p'][-1]], len(arg_memory_list[segment_index])))
+			if isinstance(segment['p'][-1], int):
+				# Handle deepest instance
+				pointer[segment['p'][-1]] = generate_pointer_from_int_list(arg_memory_list[segment_index])
+				# Append to handle
+				memory_handle.append((pointer[segment['p'][-1]], len(arg_memory_list[segment_index])))
+			else:
+				# Handle deepest instance
+				setattr(pointer.contents, segment['p'][-1], generate_pointer_from_int_list(arg_memory_list[segment_index]))
+				# Append to handle
+				memory_handle.append((getattr(pointer.contents, segment['p'][-1]), len(arg_memory_list[segment_index])))
 
 		return memory_handle
