@@ -149,6 +149,26 @@ void __stdcall DEMODLL bubblesort(
 }
 
 
+void __stdcall DEMODLL bubblesort_struct(
+	bubblesort_data *data
+	)
+{
+	int i, j;
+	for (i = 0; i < data->n - 1; ++i)
+	{
+		for (j = 0; j < data->n - i - 1; ++j)
+		{
+			if (data->a[j] > data->a[j + 1])
+			{
+				float tmp = data->a[j];
+				data->a[j] = data->a[j + 1];
+				data->a[j + 1] = tmp;
+			}
+		}
+	}
+}
+
+
 void __stdcall DEMODLL mix_rgb_colors(
 	int8_t color_a[3],
 	int8_t color_b[3],
