@@ -149,6 +149,26 @@ void __stdcall DEMODLL bubblesort(
 }
 
 
+void __stdcall DEMODLL bubblesort_struct(
+	bubblesort_data *data
+	)
+{
+	int i, j;
+	for (i = 0; i < data->n - 1; ++i)
+	{
+		for (j = 0; j < data->n - i - 1; ++j)
+		{
+			if (data->a[j] > data->a[j + 1])
+			{
+				float tmp = data->a[j];
+				data->a[j] = data->a[j + 1];
+				data->a[j + 1] = tmp;
+			}
+		}
+	}
+}
+
+
 void __stdcall DEMODLL mix_rgb_colors(
 	int8_t color_a[3],
 	int8_t color_b[3],
@@ -220,7 +240,51 @@ int16_t __stdcall DEMODLL sqrt_int(
 	int16_t a
 	)
 {
+	return sqrt(a);
+}
+
+
+int16_t __stdcall DEMODLL square_int(
+	int16_t a
+	)
+{
 	return a * a;
+}
+
+
+int16_t __stdcall DEMODLL add_ints(
+	int16_t a,
+	int16_t b
+	)
+{
+	return a + b;
+}
+
+
+float __stdcall DEMODLL add_floats(
+	float a,
+	float b
+	)
+{
+	return a + b;
+}
+
+
+int16_t __stdcall DEMODLL subtract_ints(
+	int16_t a,
+	int16_t b
+	)
+{
+	return a - b;
+}
+
+
+int16_t __stdcall DEMODLL pow_ints(
+	int16_t a,
+	int16_t b
+	)
+{
+	return pow(a, b);
 }
 
 
@@ -280,6 +344,24 @@ int16_t __stdcall DEMODLL sum_elements_from_callback(
 	for(i = 0; i < len; i++)
 	{
 		sum += get_data(i);
+	}
+
+	return sum;
+
+}
+
+
+int16_t __stdcall DEMODLL sum_elements_from_callback_in_struct(
+	struct conveyor_belt_data *data
+	)
+{
+
+	int16_t sum = 0;
+	int16_t i;
+
+	for(i = 0; i < data->len; i++)
+	{
+		sum += data->get_data(i);
 	}
 
 	return sum;

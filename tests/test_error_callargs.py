@@ -6,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	tests/test_sqrt_int.py: Test function with single parameter
+	tests/test_error_callargs.py: Test error handling when malformed arguments are passed
 
 	Required to run on platform / side: [UNIX, WINE]
 
@@ -41,27 +41,52 @@ elif platform.startswith('win'):
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# CLASSES AND ROUTINES
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-class sample_class:
-
-
-	def __init__(self):
-
-		self.__dll__ = ctypes.windll.LoadLibrary('tests/demo_dll.dll')
-
-		self.sqrt_int = self.__dll__.sqrt_int
-		self.sqrt_int.argtypes = (ctypes.c_int16,)
-		self.sqrt_int.restype = ctypes.c_int16
-
-
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # TEST(s)
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-def test_sqrt_int():
+def test_error_callargs_unconfigured_too_many_args():
 
-	sample = sample_class()
+	dll = ctypes.windll.LoadLibrary('tests/demo_dll.dll')
+	square_int = dll.square_int
 
-	assert 3 == sample.sqrt_int(9)
+	with pytest.raises(ValueError):
+		a = square_int(1, 2, 3)
+
+
+def test_error_callargs_unconfigured_right_number_of_args():
+
+	dll = ctypes.windll.LoadLibrary('tests/demo_dll.dll')
+	add_ints = dll.add_ints
+
+	assert 7 == add_ints(3, 4)
+
+
+def test_error_callargs_unconfigured_right_number_of_args_nondefault_float():
+
+	dll = ctypes.windll.LoadLibrary('tests/demo_dll.dll')
+	add_floats = dll.add_floats
+
+	with pytest.raises(ctypes.ArgumentError):
+		a = add_floats(1.2, 3.6)
+
+
+def test_error_callargs_configured_too_few_args():
+
+	dll = ctypes.windll.LoadLibrary('tests/demo_dll.dll')
+	subtract_ints = dll.subtract_ints
+	subtract_ints.argtypes = (ctypes.c_int16, ctypes.c_int16)
+	subtract_ints.restype = ctypes.c_int16
+
+	with pytest.raises(TypeError):
+		a = subtract_ints(7)
+
+
+def test_error_callargs_configured_too_many_args():
+
+	dll = ctypes.windll.LoadLibrary('tests/demo_dll.dll')
+	pow_ints = dll.pow_ints
+	pow_ints.argtypes = (ctypes.c_int16, ctypes.c_int16)
+	pow_ints.restype = ctypes.c_int16
+
+	with pytest.raises(TypeError):
+		a = pow_ints(7, 2, 99)

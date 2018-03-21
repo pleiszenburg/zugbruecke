@@ -6,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	src/zugbruecke/core/arg_definition.py: (Un-) packing of argument definitions
+	src/zugbruecke/core/data/definition.py: (Un-) packing of argument definitions
 
 	Required to run on platform / side: [UNIX, WINE]
 
@@ -32,16 +32,18 @@ specific language governing rights and limitations under the License.
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 import ctypes
+from ctypes import _FUNCFLAG_CDECL
 #from pprint import pformat as pf
 
-from .const import (
+from ..const import (
+	_FUNCFLAG_STDCALL,
 	FLAG_POINTER,
 	GROUP_VOID,
 	GROUP_FUNDAMENTAL,
 	GROUP_STRUCT,
 	GROUP_FUNCTION
 	)
-from .lib import (
+from ..lib import (
 	reduce_dict
 	)
 
@@ -50,7 +52,7 @@ from .lib import (
 # CLASS: Definition packing and unpacking
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-class arg_definition_class():
+class definition_class():
 
 
 	def apply_memsync_to_argtypes_definition(self, memsync, argtypes_d):
@@ -65,15 +67,35 @@ class arg_definition_class():
 			arg_type = argtypes_d[segment['p'][0]]
 			# Step through path to argument type ...
 			for path_element in segment['p'][1:]:
+				# Keep track of whether or not a match has been found so an error can be raised if not
+				found_match = False
+				# Find field with matching name
+				for field_index, field in enumerate(arg_type['_fields_']):
+					if field['n'] == path_element:
+						found_match = True
+						break
+				# Raise an error if the definition does not make sense
+				if not found_match:
+					raise # TODO
 				# Go deeper ...
-				arg_type = arg_type['_fields_'][path_element]
+				arg_type = arg_type['_fields_'][field_index]
 
 			# Reference processed argument types - start with depth 0
 			len_type = argtypes_d[segment['l'][0]]
 			# Step through path to argument type ...
 			for path_element in segment['l'][1:]:
+				# Keep track of whether or not a match has been found so an error can be raised if not
+				found_match = False
+				# Find field with matching name
+				for field_index, field in enumerate(len_type['_fields_']):
+					if field['n'] == path_element:
+						found_match = True
+						break
+				# Raise an error if the definition does not make sense
+				if not found_match:
+					raise # TODO
 				# Go deeper ...
-				len_type = len_type['_fields_'][path_element]
+				len_type = len_type['_fields_'][field_index]
 
 			# HACK make memory sync pointers type agnostic
 			arg_type['g'] = GROUP_VOID
@@ -86,6 +108,32 @@ class arg_definition_class():
 				})
 
 		return memsync_handle
+
+
+	def generate_callback_decorator(self, flags, restype, *argtypes):
+
+		if not(flags & _FUNCFLAG_STDCALL):
+			func_type_key = _FUNCFLAG_CDECL
+		else:
+			func_type_key = _FUNCFLAG_STDCALL
+
+		try:
+
+			# There already is a matching function pointer type available
+			return self.cache_dict['func_type'][func_type_key][(restype, argtypes, flags)]
+
+		except KeyError:
+
+			# Create new function pointer type class
+			class FunctionType(ctypes._CFuncPtr):
+
+				_argtypes_ = argtypes
+				_restype_ = restype
+				_flags_ = flags
+
+			# Store the new type and return
+			self.cache_dict['func_type'][func_type_key][(restype, argtypes, flags)] = FunctionType
+			return FunctionType
 
 
 	def pack_definition_argtypes(self, argtypes):
@@ -136,6 +184,26 @@ class arg_definition_class():
 				# Add tuple with name and struct datatype
 				fields.append((
 					field['n'], self.__unpack_definition_struct_dict__(field)
+					))
+
+			# Functions (PyCFuncPtrType)
+			elif field['g'] == GROUP_FUNCTION:
+
+				# Add tuple with name and struct datatype
+				fields.append((
+					field['n'], self.__unpack_definition_function_dict__(field)
+					))
+
+			# Handle generic pointers
+			elif field['g'] == GROUP_VOID:
+
+				fields.append((
+					field['n'],
+					self.__unpack_definition_flags__(
+						ctypes.c_void_p,
+						field['f'],
+						is_void_pointer = True
+						)
 					))
 
 			# Undhandled stuff (pointers of pointers etc.) TODO
@@ -329,20 +397,11 @@ class arg_definition_class():
 		if not self.is_server:
 			raise # TODO
 
-		# Figure out which "factory" to use, i.e. calling convention
-		if not(datatype_d_dict['_flags_'] & ctypes._FUNCFLAG_STDCALL):
-			FACTORY = ctypes.CFUNCTYPE
-		elif datatype_d_dict['_flags_'] & ctypes._FUNCFLAG_STDCALL:
-			FACTORY = ctypes.WINFUNCTYPE
-		else:
-			raise # TODO
-
 		# Generate function pointer type (used as parameter type and as decorator for Python function)
-		factory_type = FACTORY(
+		factory_type = self.generate_callback_decorator(
+			datatype_d_dict['_flags_'],
 			self.unpack_definition_returntype(datatype_d_dict['_restype_']),
-			*self.unpack_definition_argtypes(datatype_d_dict['_argtypes_']),
-			use_errno = datatype_d_dict['_flags_'] & ctypes._FUNCFLAG_USE_ERRNO,
-			use_last_error = datatype_d_dict['_flags_'] & ctypes._FUNCFLAG_USE_LASTERROR
+			*self.unpack_definition_argtypes(datatype_d_dict['_argtypes_'])
 			)
 
 		# Store function pointer type for subsequent use as decorator

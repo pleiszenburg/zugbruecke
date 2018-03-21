@@ -1,6 +1,19 @@
 Changes
 =======
 
+0.0.9 (2018-03-21)
+------------------
+
+* FIX: Arch "win64" was broken because of wrong download URL for embedded CPython for win64/amd64, see issue #27.
+* FIX: Function pointers in struct types were not handled, see issue #28.
+* FIX: Memsync directives pointing to elements within structs were not handled properly, see issue #29.
+* FIX: Missing DLLs of type windll and oledll now raise OSError as expected, see issue #30.
+* FIX: Missing routines in DLLs now raise AttributeError as expected, see issue #31.
+* FIX: Wrong or unconfigured argtypes as well as wrong number of arguments do raise appropriate errors (ValueError, ArgumentError or TypeError), see issue #32.
+* Isolated argument packing and unpacking code, preparing to solve issue #25.
+* Renamed "logwrite" parameter & command line option into "log_write".
+* Reduced number of RPC servers to one per side (Unix and Wine).
+
 0.0.8 (2018-03-18)
 ------------------
 

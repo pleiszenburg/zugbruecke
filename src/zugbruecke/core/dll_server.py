@@ -66,11 +66,11 @@ class dll_server_class(): # Representing one idividual dll to be called into
 		self.hash_id = get_hash_of_string(self.name)
 
 		# Export registration of my functions directly
-		self.session.server.register_function(
+		self.session.rpc_server.register_function(
 			self.__get_repr__,
 			self.hash_id + '_repr'
 			)
-		self.session.server.register_function(
+		self.session.rpc_server.register_function(
 			self.__register_routine__,
 			self.hash_id + '_register_routine'
 			)
@@ -110,30 +110,32 @@ class dll_server_class(): # Representing one idividual dll to be called into
 				# Get handler on routine in dll as item
 				routine_handler = self.handler[routine_name]
 
-		except:
+		except AttributeError as e:
 
 			# Log status
 			self.log.out('[dll-server] ... failed!')
 
+			raise e
+
+		except:
+
 			# Push traceback to log
 			self.log.err(traceback.format_exc())
 
-			return False # Fail
+			raise # TODO
 
 		# Generate new instance of routine class
 		self.routines[routine_name] = routine_server_class(self, routine_name, routine_handler)
 
 		# Export call and configration directly
-		self.session.server.register_function(
+		self.session.rpc_server.register_function(
 			self.routines[routine_name],
 			self.hash_id + '_' + str(routine_name) + '_handle_call'
 			)
-		self.session.server.register_function(
+		self.session.rpc_server.register_function(
 			self.routines[routine_name].__configure__,
 			self.hash_id + '_' + str(routine_name) + '_configure'
 			)
 
 		# Log status
 		self.log.out('[dll-server] ... done.')
-
-		return True # Success

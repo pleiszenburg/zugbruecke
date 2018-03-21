@@ -1,6 +1,10 @@
-zugbruecke contributors
-=======================
+zugbruecke authors
+==================
 
-In alphabetical order:
+Core developer:
 
 - Sebastian M. Ernst <ernst@pleiszenburg.de>
+
+Contributors, in alphabetical order:
+
+- Jimmy M. Gong <jimmy.m.gong@gmail.com>

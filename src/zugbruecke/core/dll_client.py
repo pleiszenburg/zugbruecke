@@ -51,7 +51,7 @@ class dll_client_class(): # Representing one idividual dll to be called into, re
 		self.session = parent_session
 
 		# For convenience ...
-		self.client = self.session.client
+		self.rpc_client = self.session.rpc_client
 
 		# Get handle on log
 		self.log = self.session.log
@@ -63,10 +63,10 @@ class dll_client_class(): # Representing one idividual dll to be called into, re
 		self.routines = {}
 
 		# Expose routine registration
-		self.__register_routine_on_server__ = getattr(self.client, self.hash_id + '_register_routine')
+		self.__register_routine_on_server__ = getattr(self.rpc_client, self.hash_id + '_register_routine')
 
 		# Expose string reprentation of dll object
-		self.__get_repr__ = getattr(self.client, self.hash_id + '_repr')
+		self.__get_repr__ = getattr(self.rpc_client, self.hash_id + '_repr')
 
 
 	def __attach_to_routine__(self, name):
@@ -84,25 +84,23 @@ class dll_client_class(): # Representing one idividual dll to be called into, re
 			if name.startswith('__') and name.endswith('__'):
 				raise AttributeError(name)
 
-		# Register routine in wine
-		success = self.__register_routine_on_server__(name)
+		try:
 
-		# If success ...
-		if success:
+			# Register routine in wine
+			self.__register_routine_on_server__(name)
 
-			# Create new instance of routine_client
-			self.routines[name] = routine_client_class(self, name)
-
-			# Log status
-			self.log.out('[dll-client] ... registered (unconfigured) ...')
-
-		# If failed ...
-		else:
+		except AttributeError as e:
 
 			# Log status
 			self.log.out('[dll-client] ... failed!')
 
-			raise # TODO
+			raise e
+
+		# Create new instance of routine_client
+		self.routines[name] = routine_client_class(self, name)
+
+		# Log status
+		self.log.out('[dll-client] ... registered (unconfigured) ...')
 
 		# If name is a string ...
 		if isinstance(name, str):
@@ -118,6 +116,9 @@ class dll_client_class(): # Representing one idividual dll to be called into, re
 
 
 	def __getattr__(self, name):
+
+		if name in ['__objclass__']:
+			raise AttributeError(name)
 
 		return self.__attach_to_routine__(name)
 

@@ -6,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	tests/test_sqrt_int.py: Test function with single parameter
+	tests/test_error_missingroutine.py: Checks for proper error handling if routine does not exist
 
 	Required to run on platform / side: [UNIX, WINE]
 
@@ -41,27 +41,12 @@ elif platform.startswith('win'):
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# CLASSES AND ROUTINES
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-class sample_class:
-
-
-	def __init__(self):
-
-		self.__dll__ = ctypes.windll.LoadLibrary('tests/demo_dll.dll')
-
-		self.sqrt_int = self.__dll__.sqrt_int
-		self.sqrt_int.argtypes = (ctypes.c_int16,)
-		self.sqrt_int.restype = ctypes.c_int16
-
-
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # TEST(s)
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-def test_sqrt_int():
+def test_missingroutine():
 
-	sample = sample_class()
+	dll = ctypes.windll.LoadLibrary('tests/demo_dll.dll')
 
-	assert 3 == sample.sqrt_int(9)
+	with pytest.raises(AttributeError):
+		missing_routine = dll.missing_routine

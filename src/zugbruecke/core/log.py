@@ -35,12 +35,6 @@ import json
 import sys
 import time
 
-from .lib import get_free_port
-from .rpc import (
-	mp_client_class,
-	mp_server_class
-	)
-
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # CONSTANTS
@@ -69,7 +63,7 @@ c = {
 class log_class:
 
 
-	def __init__(self, session_id, parameter):
+	def __init__(self, session_id, parameter, rpc_server = None, rpc_client = None):
 
 		# Store id and parameter
 		self.id = session_id
@@ -88,28 +82,27 @@ class log_class:
 			self.p['platform'] = 'UNIX'
 
 		# Open logfiles
-		if self.p['logwrite']:
+		if self.p['log_write']:
 			self.f = {}
 			self.f['out'] = '%s_%s.txt' % (self.p['platform'], 'out')
 			self.f['err'] = '%s_%s.txt' % (self.p['platform'], 'err')
 
 		# Fire up server if required
 		self.server_port = 0
-		if self.p['log_server']:
-			self.__start_server__()
+		if rpc_server is not None:
+			self.server = rpc_server
+			self.server.register_function(self.__receive_message_from_client__, 'transfer_message')
 
 		# Fire up client if required
-		if self.p['remote_log']:
-			self.__start_client__()
+		if rpc_client is not None:
+			self.client = rpc_client
 
 
 	def terminate(self):
 
 		if self.up:
 
-			# Stop server, if there is one
-			if self.p['log_server']:
-				self.__stop_server__()
+			# Nothing to do, just a placeholder
 
 			# Log down
 			self.up = False
@@ -187,9 +180,9 @@ class log_class:
 			self.__append_message_to_log__(mesage_dict)
 			if self.p['std' + mesage_dict['pipe']]:
 				self.__print_message__(mesage_dict)
-			if self.p['remote_log']:
+			if hasattr(self, 'client'):
 				self.__push_message_to_server__(mesage_dict)
-			if self.p['logwrite']:
+			if self.p['log_write']:
 				self.__store_message__(mesage_dict)
 
 
@@ -201,37 +194,6 @@ class log_class:
 	def __receive_message_from_client__(self, message):
 
 		self.__process_message_dict__(json.loads(message))
-
-
-	def __start_client__(self):
-
-		self.client = mp_client_class(
-			('localhost', self.p['port_socket_log_main']),
-			'zugbruecke_log_main'
-			)
-
-
-	def __start_server__(self):
-
-		# Generate new socket and store it
-		self.p['port_socket_log_main'] = get_free_port()
-
-		# Create server
-		self.server = mp_server_class(
-			('localhost', self.p['port_socket_log_main']),
-			'zugbruecke_log_main'
-			)
-
-		# Register functions
-		self.server.register_function(self.__receive_message_from_client__, 'transfer_message')
-
-		# Run server in its own thread
-		self.server.server_forever_in_thread()
-
-
-	def __stop_server__(self):
-
-		self.server.terminate()
 
 
 	def __store_message__(self, message):

@@ -6,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	tests/test_sqrt_int.py: Test function with single parameter
+	src/zugbruecke/core/data/__init__.py: Arguments, return values and memory
 
 	Required to run on platform / side: [UNIX, WINE]
 
@@ -31,37 +31,36 @@ specific language governing rights and limitations under the License.
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-import pytest
+from ctypes import _FUNCFLAG_CDECL
 
-from sys import platform
-if any([platform.startswith(os_name) for os_name in ['linux', 'darwin', 'freebsd']]):
-	import zugbruecke as ctypes
-elif platform.startswith('win'):
-	import ctypes
+from .contents import contents_class
+from .definition import definition_class
+from .memory import memory_class
 
-
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# CLASSES AND ROUTINES
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-class sample_class:
-
-
-	def __init__(self):
-
-		self.__dll__ = ctypes.windll.LoadLibrary('tests/demo_dll.dll')
-
-		self.sqrt_int = self.__dll__.sqrt_int
-		self.sqrt_int.argtypes = (ctypes.c_int16,)
-		self.sqrt_int.restype = ctypes.c_int16
+from ..const import _FUNCFLAG_STDCALL
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# TEST(s)
+# CLASS: DATA
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-def test_sqrt_int():
+class data_class(contents_class, definition_class, memory_class):
 
-	sample = sample_class()
 
-	assert 3 == sample.sqrt_int(9)
+	cache_dict = {
+		'func_type': {
+			_FUNCFLAG_CDECL: {},
+			_FUNCFLAG_STDCALL: {}
+			},
+		'func_handle': {},
+		'struct_type': {}
+		}
+
+
+	def __init__(self, log, is_server, callback_client = None, callback_server = None):
+
+		self.log = log
+		self.is_server = is_server
+
+		self.callback_client = callback_client
+		self.callback_server = callback_server

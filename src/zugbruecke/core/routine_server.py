@@ -34,20 +34,12 @@ specific language governing rights and limitations under the License.
 from pprint import pformat as pf
 import traceback
 
-from .arg_contents import arg_contents_class
-from .arg_definition import arg_definition_class
-from .arg_memory import arg_memory_class
-
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # DLL SERVER CLASS
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-class routine_server_class(
-	arg_contents_class,
-	arg_definition_class,
-	arg_memory_class
-	):
+class routine_server_class():
 
 
 	def __init__(self, parent_dll, routine_name, routine_handler):
@@ -65,9 +57,7 @@ class routine_server_class(
 		self.name = routine_name
 
 		# Required by arg definitions and contents
-		self.cache_dict = self.session.cache_dict
-		self.callback_client = self.session.callback_client
-		self.is_server = True
+		self.data = self.session.data
 
 		# Set routine handler
 		self.handler = routine_handler
@@ -82,10 +72,10 @@ class routine_server_class(
 		self.log.out('[routine-server] Trying call routine "%s" ...' % self.name)
 
 		# Unpack passed arguments, handle pointers and structs ...
-		args_list = self.arg_list_unpack(arg_message_list, self.argtypes_d)
+		args_list = self.data.arg_list_unpack(arg_message_list, self.argtypes_d)
 
 		# Unpack pointer data
-		memory_handle = self.server_unpack_memory_list(args_list, arg_memory_list, self.memsync_d)
+		memory_handle = self.data.server_unpack_memory_list(args_list, arg_memory_list, self.memsync_d)
 
 		# Default return value
 		return_value = None
@@ -97,13 +87,13 @@ class routine_server_class(
 			return_value = self.handler(*tuple(args_list))
 
 			# Pack memory for return
-			arg_memory_list = self.server_pack_memory_list(memory_handle)
+			arg_memory_list = self.data.server_pack_memory_list(memory_handle)
 
 			# Get new arg message list
-			arg_message_list = self.arg_list_pack(args_list, self.argtypes_d)
+			arg_message_list = self.data.arg_list_pack(args_list, self.argtypes_d)
 
 			# Get new return message list
-			return_message = self.return_msg_pack(return_value, self.restype_d)
+			return_message = self.data.return_msg_pack(return_value, self.restype_d)
 
 			# Log status
 			self.log.out('[routine-server] ... done.')
@@ -113,10 +103,11 @@ class routine_server_class(
 				'args': arg_message_list,
 				'return_value': return_message, # TODO handle memory allocated by DLL in "free form" pointers
 				'memory': arg_memory_list,
-				'success': True
+				'success': True,
+				'exception': None
 				}
 
-		except:
+		except Exception as e:
 
 			# Log status
 			self.log.out('[routine-server] ... failed!')
@@ -129,7 +120,8 @@ class routine_server_class(
 				'args': arg_message_list,
 				'return_value': return_value,
 				'memory': arg_memory_list,
-				'success': False
+				'success': False,
+				'exception': e
 				}
 
 
@@ -142,13 +134,16 @@ class routine_server_class(
 		self.argtypes_d = argtypes_d
 
 		# Parse and apply argtype definition dict to actual ctypes routine
-		self.handler.argtypes = self.unpack_definition_argtypes(argtypes_d)
+		_argtypes = self.data.unpack_definition_argtypes(argtypes_d)
+		# Only configure if there are definitions, otherwise calls with int parameters without definition fail
+		if len(_argtypes) > 0:
+			self.handler.argtypes = _argtypes
 
 		# Store return value definition dict
 		self.restype_d = restype_d
 
 		# Parse and apply restype definition dict to actual ctypes routine
-		self.handler.restype = self.unpack_definition_returntype(restype_d)
+		self.handler.restype = self.data.unpack_definition_returntype(restype_d)
 
 		# Log status
 		self.log.out(' memsync: \n%s' % pf(self.memsync_d))

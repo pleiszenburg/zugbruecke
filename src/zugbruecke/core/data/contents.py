@@ -6,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	src/zugbruecke/core/arg_contents.py: (Un-) packing of argument contents
+	src/zugbruecke/core/data/contents.py: (Un-) packing of argument contents
 
 	Required to run on platform / side: [UNIX, WINE]
 
@@ -35,34 +35,52 @@ import ctypes
 from pprint import pformat as pf
 import traceback
 
-from .const import (
+from ..const import (
 	FLAG_POINTER,
 	GROUP_VOID,
 	GROUP_FUNDAMENTAL,
 	GROUP_STRUCT,
 	GROUP_FUNCTION
 	)
-from .callback_client import callback_translator_client_class
-from .callback_server import callback_translator_server_class
+from ..callback_client import callback_translator_client_class
+from ..callback_server import callback_translator_server_class
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # CLASS: Content packing and unpacking
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-class arg_contents_class():
+class contents_class():
 
 
 	def arg_list_pack(self, args_tuple, argtypes_list):
 
-		# Return parameter message list - MUST WORK WITH PICKLE
-		return [(d['n'], self.__pack_item__(a, d)) for a, d in zip(args_tuple, argtypes_list)]
+		# Everything is normal
+		if len(args_tuple) == len(argtypes_list):
+			return [(d['n'], self.__pack_item__(a, d)) for a, d in zip(args_tuple, argtypes_list)]
+
+		# Function has likely not been configured but there are arguments
+		elif len(args_tuple) > 0 and len(argtypes_list) == 0:
+			return list(args_tuple) # let's try ... TODO catch pickling errors
+
+		# Number of arguments is just wrong
+		else:
+			raise TypeError
 
 
 	def arg_list_unpack(self, args_package_list, argtypes_list):
 
-		# Return args as list, will be converted into tuple on call
-		return [self.__unpack_item__(a[1], d) for a, d in zip(args_package_list, argtypes_list)]
+		# Everything is normal
+		if len(args_package_list) == len(argtypes_list):
+			return [self.__unpack_item__(a[1], d) for a, d in zip(args_package_list, argtypes_list)]
+
+		# Function has likely not been configured but there are arguments
+		elif len(args_package_list) > 0 and len(argtypes_list) == 0:
+			return args_package_list
+
+		# Number of arguments is just wrong
+		else:
+			raise TypeError
 
 
 	def return_msg_pack(self, return_value, returntype_dict):
@@ -232,6 +250,10 @@ class arg_contents_class():
 
 		# Grep the simple case first, scalars
 		if arg_def_dict['s']:
+
+			# Do not do this for void pointers, likely handled by memsync
+			if arg_def_dict['g'] == GROUP_VOID:
+				return
 
 			# Strip away the pointers ... (all flags are pointers in this case)
 			for flag in arg_def_dict['f']:
@@ -433,6 +455,10 @@ class arg_contents_class():
 
 		# Step through arguments
 		for field_def_dict, field_arg in zip(struct_def_dict['_fields_'], args_list):
+
+			# HACK is field_arg[1] is None, it's likely a function pointer sent back from Wine side - skip
+			if field_arg[1] is None:
+				continue
 
 			setattr(
 				struct_inst, # struct instance to be modified

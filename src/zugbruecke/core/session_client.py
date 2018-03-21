@@ -33,7 +33,6 @@ specific language governing rights and limitations under the License.
 
 import atexit
 from ctypes import (
-	_CFuncPtr,
 	_FUNCFLAG_CDECL,
 	_FUNCFLAG_USE_ERRNO,
 	_FUNCFLAG_USE_LASTERROR
@@ -44,16 +43,16 @@ import time
 
 from .const import _FUNCFLAG_STDCALL
 from .config import get_module_config
+from .data import data_class
 from .dll_client import dll_client_class
 from .interpreter import interpreter_session_class
 from .lib import (
-	generate_cache_dict,
 	get_free_port,
 	get_location_of_file
 	)
 from .log import log_class
 from .rpc import (
-	mp_client_class,
+	mp_client_safe_connect,
 	mp_server_class
 	)
 from .wineenv import (
@@ -82,7 +81,7 @@ class session_client_class():
 			self.__init_stage_2__()
 
 		# Ask the server
-		return self.client.ctypes_FormatError(code)
+		return self.rpc_client.ctypes_FormatError(code)
 
 
 	def ctypes_get_last_error(self):
@@ -92,7 +91,7 @@ class session_client_class():
 			self.__init_stage_2__()
 
 		# Ask the server
-		return self.client.ctypes_get_last_error()
+		return self.rpc_client.ctypes_get_last_error()
 
 
 	def ctypes_GetLastError(self):
@@ -102,7 +101,7 @@ class session_client_class():
 			self.__init_stage_2__()
 
 		# Ask the server
-		return self.client.ctypes_GetLastError()
+		return self.rpc_client.ctypes_GetLastError()
 
 
 	def ctypes_set_last_error(self, value):
@@ -112,7 +111,7 @@ class session_client_class():
 			self.__init_stage_2__()
 
 		# Ask the server
-		return self.client.ctypes_set_last_error(value)
+		return self.rpc_client.ctypes_set_last_error(value)
 
 
 	def ctypes_WinError(self, code = None, descr = None):
@@ -122,7 +121,7 @@ class session_client_class():
 			self.__init_stage_2__()
 
 		# Ask the server
-		return self.client.ctypes_WinError(code, descr)
+		return self.rpc_client.ctypes_WinError(code, descr)
 
 
 	def ctypes_CFUNCTYPE(self, restype, *argtypes, **kw):
@@ -131,25 +130,7 @@ class session_client_class():
 		if self.stage == 1:
 			self.__init_stage_2__()
 
-		return self.get_callback_decorator(_FUNCFLAG_CDECL, restype, *argtypes, **kw)
-
-
-	def ctypes_WINFUNCTYPE(self, restype, *argtypes, **kw): # EXPORT
-
-		# If in stage 1, fire up stage 2
-		if self.stage == 1:
-			self.__init_stage_2__()
-
-		return self.get_callback_decorator(_FUNCFLAG_STDCALL, restype, *argtypes, **kw)
-
-
-	def get_callback_decorator(self, functype, restype, *argtypes, **kw):
-
-		# If in stage 1, fire up stage 2
-		if self.stage == 1:
-			self.__init_stage_2__()
-
-		flags = functype
+		flags = _FUNCFLAG_CDECL
 
 		if kw.pop("use_errno", False):
 			flags |= _FUNCFLAG_USE_ERRNO
@@ -158,23 +139,25 @@ class session_client_class():
 		if kw:
 			raise ValueError("unexpected keyword argument(s) %s" % kw.keys())
 
-		try:
+		return self.data.generate_callback_decorator(flags, restype, *argtypes)
 
-			# There already is a matching function pointer type available
-			return self.cache_dict['func_type'][functype][(restype, argtypes, flags)]
 
-		except KeyError:
+	def ctypes_WINFUNCTYPE(self, restype, *argtypes, **kw): # EXPORT
 
-			# Create new function pointer type class
-			class FunctionType(_CFuncPtr):
+		# If in stage 1, fire up stage 2
+		if self.stage == 1:
+			self.__init_stage_2__()
 
-				_argtypes_ = argtypes
-				_restype_ = restype
-				_flags_ = flags
+		flags = _FUNCFLAG_STDCALL
 
-			# Store the new type and return
-			self.cache_dict['func_type'][functype][(restype, argtypes, flags)] = FunctionType
-			return FunctionType
+		if kw.pop("use_errno", False):
+			flags |= _FUNCFLAG_USE_ERRNO
+		if kw.pop("use_last_error", False):
+			flags |= _FUNCFLAG_USE_LASTERROR
+		if kw:
+			raise ValueError("unexpected keyword argument(s) %s" % kw.keys())
+
+		return self.data.generate_callback_decorator(flags, restype, *argtypes)
 
 
 	def load_library(self, dll_name, dll_type, dll_param = {}):
@@ -204,18 +187,22 @@ class session_client_class():
 			dll_param['use_last_error'] = False
 
 		# Log status
-		self.log.out('[session-client] Trying to access DLL "%s" of type "%s" ...' % (dll_name, dll_type))
+		self.log.out('[session-client] Attaching to DLL file "%s" with calling convention "%s" ...' % (dll_name, dll_type))
 
-		# Tell wine about the dll and its type TODO implement some sort of find_library
-		(success, hash_id) = self.__load_library_on_server__(
-			dll_name, dll_type, dll_param
-			)
+		try:
 
-		# If it failed, raise an error
-		if not success:
+			# Tell wine about the dll and its type
+			hash_id = self.rpc_client.load_library(
+				dll_name, dll_type, dll_param
+				)
 
-			# (Re-) raise an OSError if the above returned an error
-			raise # TODO
+		except OSError as e:
+
+			# Log status
+			self.log.out('[session-client] ... failed!')
+
+			# If DLL was not found, reraise error
+			raise e
 
 		# Fire up new dll object
 		self.dll_dict[dll_name] = dll_client_class(
@@ -223,7 +210,7 @@ class session_client_class():
 			)
 
 		# Log status
-		self.log.out('[session-client] ... touched and added to list.')
+		self.log.out('[session-client] ... attached.')
 
 		# Return reference on existing dll object
 		return self.dll_dict[dll_name]
@@ -236,7 +223,7 @@ class session_client_class():
 			self.__init_stage_2__()
 
 		# Ask the server
-		return self.client.path_unix_to_wine(in_path)
+		return self.rpc_client.path_unix_to_wine(in_path)
 
 
 	def path_wine_to_unix(self, in_path):
@@ -246,13 +233,13 @@ class session_client_class():
 			self.__init_stage_2__()
 
 		# Ask the server
-		return self.client.path_wine_to_unix(in_path)
+		return self.rpc_client.path_wine_to_unix(in_path)
 
 
 	def set_parameter(self, parameter):
 
 		self.p.update(parameter)
-		self.client.set_parameter(parameter)
+		self.rpc_client.set_parameter(parameter)
 
 
 	def terminate(self):
@@ -266,14 +253,17 @@ class session_client_class():
 			# Only if in stage 2:
 			if self.stage == 2:
 
-				# Tell server via message to terminate
-				self.client.terminate()
+				# Wait for server to appear
+				self.__wait_for_server_status_change__(target_status = False)
 
-				# Terminate callback server
-				self.callback_server.terminate()
+				# Tell server via message to terminate
+				self.rpc_client.terminate()
 
 				# Destruct interpreter session
 				self.interpreter_session.terminate()
+
+			# Terminate callback server
+			self.rpc_server.terminate()
 
 			# Log status
 			self.log.out('[session-client] TERMINATED.')
@@ -293,25 +283,31 @@ class session_client_class():
 		# Get and set session id
 		self.id = self.p['id']
 
+		# Start RPC server for callback routines
+		self.__start_rpc_server__()
+
 		# Start session logging
-		self.log = log_class(self.id, self.p)
+		self.log = log_class(self.id, self.p, rpc_server = self.rpc_server)
 
 		# Log status
 		self.log.out('[session-client] STARTING (STAGE 1) ...')
 		self.log.out('[session-client] Configured Wine-Python version is %s for %s.' % (self.p['version'], self.p['arch']))
-		self.log.out('[session-client] Log socket port: %d.' % self.p['port_socket_log_main'])
+		self.log.out('[session-client] Log socket port: %d.' % self.p['port_socket_unix'])
 
 		# Store current working directory
 		self.dir_cwd = os.getcwd()
 
-		# Set up a cache dict (packed and unpacked types)
-		self.cache_dict = generate_cache_dict()
+		# Set data cache and parser
+		self.data = data_class(self.log, is_server = False, callback_server = self.rpc_server)
 
 		# Set up a dict for loaded dlls
 		self.dll_dict = {}
 
 		# Mark session as up
 		self.up = True
+
+		# Marking server component as down
+		self.server_up = False
 
 		# Set current stage to 1
 		self.stage = 1
@@ -341,115 +337,62 @@ class session_client_class():
 		self.dir_wineprefix = set_wine_env(self.p['dir'], self.p['arch'])
 		create_wine_prefix(self.dir_wineprefix)
 
-		# Start RPC server for callback routines
-		self.__start_callback_server__()
-
 		# Prepare python command for ctypes server or interpreter
 		self.__prepare_python_command__()
 
 		# Initialize interpreter session
 		self.interpreter_session = interpreter_session_class(self.id, self.p, self.log)
 
-		# If in ctypes mode ...
-		self.__start_ctypes_client__()
+		# Wait for server to appear
+		self.__wait_for_server_status_change__(target_status = True)
 
-		# Set current stage to 1
+		# Try to connect to Wine side
+		self.__start_rpc_client__()
+
+		# Set current stage to 2
 		self.stage = 2
 
 		# Log status
 		self.log.out('[session-client] STARTED (STAGE 2).')
 
 
-	def __start_callback_server__(self):
+	def __set_server_status__(self, status):
 
-		# Get socket for callback bridge
-		self.p['port_socket_callback'] = get_free_port()
+		# Interface for session server through RPC
+		self.server_up = status
 
-		# Create server
-		self.callback_server = mp_server_class(
-			('localhost', self.p['port_socket_callback']),
-			'zugbruecke_callback_main',
-			log = self.log
+
+	def __start_rpc_client__(self):
+
+		# Fire up xmlrpc client
+		self.rpc_client = mp_client_safe_connect(
+			('localhost', self.p['port_socket_wine']),
+			'zugbruecke_wine'
 			)
 
+
+	def __start_rpc_server__(self):
+
+		# Get socket for callback bridge
+		self.p['port_socket_unix'] = get_free_port()
+
+		# Create server
+		self.rpc_server = mp_server_class(
+			('localhost', self.p['port_socket_unix']),
+			'zugbruecke_unix'
+			) # Log is added later
+
+		# Interface to server to indicate its status
+		self.rpc_server.register_function(self.__set_server_status__, 'set_server_status')
+
 		# Start server into its own thread
-		self.callback_server.server_forever_in_thread()
-
-
-	def __start_ctypes_client__(self):
-
-		# Log status
-		self.log.out('[session-client] ctypes client connecting ...')
-
-		# Status variable
-		ctypes_server_up = False
-		# Time-step
-		wait_for_seconds = 0.01
-		# Timeout
-		timeout_after_seconds = 30.0
-		# Already waited for ...
-		started_waiting_at = time.time()
-		# Connection trys
-		tried_this_many_times = 0
-
-		# Run loop until socket appears
-		while True:
-
-			# Try to get server status
-			try:
-
-				# Count attempts
-				tried_this_many_times += 1
-
-				# Fire up xmlrpc client
-				self.client = mp_client_class(
-					('localhost', self.p['port_socket_ctypes']),
-					'zugbruecke_server_main'
-					)
-
-				# Get status from server
-				server_status = self.client.get_status()
-
-				# Check result
-				if server_status == 'up':
-					ctypes_server_up = True
-					break
-
-			except:
-
-				pass
-
-			# Break the loop after timeout
-			if time.time() >= (started_waiting_at + timeout_after_seconds):
-				break
-
-			# Wait before trying again
-			time.sleep(wait_for_seconds)
-
-		# Evaluate the result
-		if not ctypes_server_up:
-
-			# Log status
-			self.log.out('[session-client] ... could not connect (after %0.2f seconds & %d attempts)! Error.' %
-				(time.time() - started_waiting_at, tried_this_many_times)
-				)
-			raise # TODO
-
-		else:
-
-			# Generate handles on server-side routines
-			self.__load_library_on_server__ = self.client.load_library
-
-			# Log status
-			self.log.out('[session-client] ... connected (after %0.2f seconds & %d attempts).' %
-				(time.time() - started_waiting_at, tried_this_many_times)
-				)
+		self.rpc_server.server_forever_in_thread()
 
 
 	def __prepare_python_command__(self):
 
 		# Get socket for ctypes bridge
-		self.p['port_socket_ctypes'] = get_free_port()
+		self.p['port_socket_wine'] = get_free_port()
 
 		# Prepare command with minimal meta info. All other info can be passed via sockets.
 		self.p['command_dict'] = [
@@ -458,9 +401,55 @@ class session_client_class():
 				'_server_.py'
 				),
 			'--id', self.id,
-			'--port_socket_ctypes', str(self.p['port_socket_ctypes']),
-			'--port_socket_callback', str(self.p['port_socket_callback']),
-			'--port_socket_log_main', str(self.p['port_socket_log_main']),
+			'--port_socket_wine', str(self.p['port_socket_wine']),
+			'--port_socket_unix', str(self.p['port_socket_unix']),
 			'--log_level', str(self.p['log_level']),
-			'--logwrite', str(int(self.p['logwrite']))
+			'--log_write', str(int(self.p['log_write']))
 			]
+
+
+	def __wait_for_server_status_change__(self, target_status):
+
+		# Does the status have to change?
+		if target_status == self.server_up:
+
+			# No, so get out of here
+			return
+
+		# Debug strings
+		STATUS_DICT = {True: 'up', False: 'down'}
+
+		# Log status
+		self.log.out('[session-client] Waiting for session-server be %s ...' % STATUS_DICT[target_status])
+
+		# Time-step
+		wait_for_seconds = 0.01
+		# Timeout
+		timeout_after_seconds = 30.0
+		# Already waited for ...
+		started_waiting_at = time.time()
+
+		# Run loop until socket appears
+		while not self.server_up:
+
+			# Wait before trying again
+			time.sleep(wait_for_seconds)
+
+			# Time out
+			if time.time() >= (started_waiting_at + timeout_after_seconds):
+				break
+
+		# Handle timeout
+		if not self.server_up:
+
+			# Log status
+			self.log.out('[session-client] ... wait timed out (after %0.2f seconds).' %
+				(time.time() - started_waiting_at)
+				)
+
+			raise # TODO
+
+		# Log status
+		self.log.out('[session-client] ... session server is %s (after %0.2f seconds).' %
+			(STATUS_DICT[target_status], time.time() - started_waiting_at)
+			)

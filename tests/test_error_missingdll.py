@@ -6,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	tests/test_sqrt_int.py: Test function with single parameter
+	tests/test_error_missingdll.py: Checks for proper error handling if DLL does not exist
 
 	Required to run on platform / side: [UNIX, WINE]
 
@@ -41,27 +41,40 @@ elif platform.startswith('win'):
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# CLASSES AND ROUTINES
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-class sample_class:
-
-
-	def __init__(self):
-
-		self.__dll__ = ctypes.windll.LoadLibrary('tests/demo_dll.dll')
-
-		self.sqrt_int = self.__dll__.sqrt_int
-		self.sqrt_int.argtypes = (ctypes.c_int16,)
-		self.sqrt_int.restype = ctypes.c_int16
-
-
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # TEST(s)
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-def test_sqrt_int():
+def test_missingdll_cll():
 
-	sample = sample_class()
+	with pytest.raises(OSError):
+		dll = ctypes.cdll.LoadLibrary('tests/nonexistent_dll.dll')
 
-	assert 3 == sample.sqrt_int(9)
+
+def test_missingdll_windll():
+
+	with pytest.raises(OSError):
+		dll = ctypes.windll.LoadLibrary('tests/nonexistent_dll.dll')
+
+
+def test_missingdll_oledll():
+
+	with pytest.raises(OSError):
+		dll = ctypes.oledll.LoadLibrary('tests/nonexistent_dll.dll')
+
+
+def test_missingdll_cll_attr():
+
+	with pytest.raises(OSError):
+		dll = ctypes.cdll.nonexistent_dll
+
+
+def test_missingdll_windll_attr():
+
+	with pytest.raises(OSError):
+		dll = ctypes.windll.nonexistent_dll
+
+
+def test_missingdll_oledll_attr():
+
+	with pytest.raises(OSError):
+		dll = ctypes.oledll.nonexistent_dll
