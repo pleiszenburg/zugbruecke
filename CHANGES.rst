@@ -8,6 +8,7 @@ Changes
 * FIX: Function pointers in struct types were not handled, see issue #28.
 * FIX: Memsync directives pointing to elements within structs were not handled properly, see issue #29.
 * FIX: Missing DLLs of type windll and oledll now raise OSError as expected, see issue #30.
+* FIX: Missing routines in DLLs now raise AttributeError as expected, see issue #31.
 * Isolated argument packing and unpacking code, preparing to solve issue #25.
 * Renamed "logwrite" parameter & command line option into "log_write".
 * Reduced number of RPC servers to one per side (Unix and Wine).
