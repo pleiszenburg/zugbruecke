@@ -187,18 +187,22 @@ class session_client_class():
 			dll_param['use_last_error'] = False
 
 		# Log status
-		self.log.out('[session-client] Trying to access DLL "%s" of type "%s" ...' % (dll_name, dll_type))
+		self.log.out('[session-client] Attaching to DLL file "%s" with calling convention "%s" ...' % (dll_name, dll_type))
 
-		# Tell wine about the dll and its type TODO implement some sort of find_library
-		(success, hash_id) = self.rpc_client.load_library(
-			dll_name, dll_type, dll_param
-			)
+		try:
 
-		# If it failed, raise an error
-		if not success:
+			# Tell wine about the dll and its type
+			hash_id = self.rpc_client.load_library(
+				dll_name, dll_type, dll_param
+				)
 
-			# (Re-) raise an OSError if the above returned an error
-			raise # TODO
+		except OSError as e:
+
+			# Log status
+			self.log.out('[session-client] ... failed!')
+
+			# If DLL was not found, reraise error
+			raise e
 
 		# Fire up new dll object
 		self.dll_dict[dll_name] = dll_client_class(
@@ -206,7 +210,7 @@ class session_client_class():
 			)
 
 		# Log status
-		self.log.out('[session-client] ... touched and added to list.')
+		self.log.out('[session-client] ... attached.')
 
 		# Return reference on existing dll object
 		return self.dll_dict[dll_name]

@@ -162,26 +162,31 @@ class session_server_class:
 				use_last_error = dll_param['use_last_error']
 				)
 
-			# Load library
-			self.dll_dict[dll_name] = dll_server_class(
-				self, dll_name, dll_type, handler
-				)
-
-			# Log status
-			self.log.out('[session-server] ... done.')
-
-			# Return success and dll's hash id
-			return (True, self.dll_dict[dll_name].hash_id) # Success
-
-		except:
+		except OSError as e:
 
 			# Log status
 			self.log.out('[session-server] ... failed!')
 
+			# Reraise error
+			raise e
+
+		except:
+
 			# Push traceback to log
 			self.log.err(traceback.format_exc())
 
-			return (False, None) # Fail
+			raise # TODO
+
+		# Load library
+		self.dll_dict[dll_name] = dll_server_class(
+			self, dll_name, dll_type, handler
+			)
+
+		# Log status
+		self.log.out('[session-server] ... attached.')
+
+		# Return success and dll's hash id
+		return self.dll_dict[dll_name].hash_id
 
 
 	def __set_parameter__(self, parameter):
