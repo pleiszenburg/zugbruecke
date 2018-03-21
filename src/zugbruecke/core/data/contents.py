@@ -55,14 +55,32 @@ class contents_class():
 
 	def arg_list_pack(self, args_tuple, argtypes_list):
 
-		# Return parameter message list - MUST WORK WITH PICKLE
-		return [(d['n'], self.__pack_item__(a, d)) for a, d in zip(args_tuple, argtypes_list)]
+		# Everything is normal
+		if len(args_tuple) == len(argtypes_list):
+			return [(d['n'], self.__pack_item__(a, d)) for a, d in zip(args_tuple, argtypes_list)]
+
+		# Function has likely not been configured but there are arguments
+		elif len(args_tuple) > 0 and len(argtypes_list) == 0:
+			return list(args_tuple) # let's try ... TODO catch pickling errors
+
+		# Number of arguments is just wrong
+		else:
+			raise TypeError
 
 
 	def arg_list_unpack(self, args_package_list, argtypes_list):
 
-		# Return args as list, will be converted into tuple on call
-		return [self.__unpack_item__(a[1], d) for a, d in zip(args_package_list, argtypes_list)]
+		# Everything is normal
+		if len(args_package_list) == len(argtypes_list):
+			return [self.__unpack_item__(a[1], d) for a, d in zip(args_package_list, argtypes_list)]
+
+		# Function has likely not been configured but there are arguments
+		elif len(args_package_list) > 0 and len(argtypes_list) == 0:
+			return args_package_list
+
+		# Number of arguments is just wrong
+		else:
+			raise TypeError
 
 
 	def return_msg_pack(self, return_value, returntype_dict):

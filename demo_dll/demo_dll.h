@@ -135,6 +135,30 @@ int16_t __stdcall DEMODLL sqrt_int(
 	int16_t a
 	);
 
+int16_t __stdcall DEMODLL square_int(
+	int16_t a
+	);
+
+int16_t __stdcall DEMODLL add_ints(
+	int16_t a,
+	int16_t b
+	);
+
+float __stdcall DEMODLL add_floats(
+	float a,
+	float b
+	);
+
+int16_t __stdcall DEMODLL subtract_ints(
+	int16_t a,
+	int16_t b
+	);
+
+int16_t __stdcall DEMODLL pow_ints(
+	int16_t a,
+	int16_t b
+	);
+
 int16_t __stdcall DEMODLL get_const_int(void);
 
 struct test

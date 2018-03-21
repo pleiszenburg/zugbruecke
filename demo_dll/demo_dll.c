@@ -240,7 +240,51 @@ int16_t __stdcall DEMODLL sqrt_int(
 	int16_t a
 	)
 {
+	return sqrt(a);
+}
+
+
+int16_t __stdcall DEMODLL square_int(
+	int16_t a
+	)
+{
 	return a * a;
+}
+
+
+int16_t __stdcall DEMODLL add_ints(
+	int16_t a,
+	int16_t b
+	)
+{
+	return a + b;
+}
+
+
+float __stdcall DEMODLL add_floats(
+	float a,
+	float b
+	)
+{
+	return a + b;
+}
+
+
+int16_t __stdcall DEMODLL subtract_ints(
+	int16_t a,
+	int16_t b
+	)
+{
+	return a - b;
+}
+
+
+int16_t __stdcall DEMODLL pow_ints(
+	int16_t a,
+	int16_t b
+	)
+{
+	return pow(a, b);
 }
 
 

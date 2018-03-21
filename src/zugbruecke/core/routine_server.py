@@ -103,10 +103,11 @@ class routine_server_class():
 				'args': arg_message_list,
 				'return_value': return_message, # TODO handle memory allocated by DLL in "free form" pointers
 				'memory': arg_memory_list,
-				'success': True
+				'success': True,
+				'exception': None
 				}
 
-		except:
+		except Exception as e:
 
 			# Log status
 			self.log.out('[routine-server] ... failed!')
@@ -119,7 +120,8 @@ class routine_server_class():
 				'args': arg_message_list,
 				'return_value': return_value,
 				'memory': arg_memory_list,
-				'success': False
+				'success': False,
+				'exception': e
 				}
 
 
@@ -132,7 +134,10 @@ class routine_server_class():
 		self.argtypes_d = argtypes_d
 
 		# Parse and apply argtype definition dict to actual ctypes routine
-		self.handler.argtypes = self.data.unpack_definition_argtypes(argtypes_d)
+		_argtypes = self.data.unpack_definition_argtypes(argtypes_d)
+		# Only configure if there are definitions, otherwise calls with int parameters without definition fail
+		if len(_argtypes) > 0:
+			self.handler.argtypes = _argtypes
 
 		# Store return value definition dict
 		self.restype_d = restype_d
