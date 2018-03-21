@@ -84,25 +84,23 @@ class dll_client_class(): # Representing one idividual dll to be called into, re
 			if name.startswith('__') and name.endswith('__'):
 				raise AttributeError(name)
 
-		# Register routine in wine
-		success = self.__register_routine_on_server__(name)
+		try:
 
-		# If success ...
-		if success:
+			# Register routine in wine
+			self.__register_routine_on_server__(name)
 
-			# Create new instance of routine_client
-			self.routines[name] = routine_client_class(self, name)
-
-			# Log status
-			self.log.out('[dll-client] ... registered (unconfigured) ...')
-
-		# If failed ...
-		else:
+		except AttributeError as e:
 
 			# Log status
 			self.log.out('[dll-client] ... failed!')
 
-			raise # TODO
+			raise e
+
+		# Create new instance of routine_client
+		self.routines[name] = routine_client_class(self, name)
+
+		# Log status
+		self.log.out('[dll-client] ... registered (unconfigured) ...')
 
 		# If name is a string ...
 		if isinstance(name, str):

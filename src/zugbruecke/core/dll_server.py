@@ -110,15 +110,19 @@ class dll_server_class(): # Representing one idividual dll to be called into
 				# Get handler on routine in dll as item
 				routine_handler = self.handler[routine_name]
 
-		except:
+		except AttributeError as e:
 
 			# Log status
 			self.log.out('[dll-server] ... failed!')
 
+			raise e
+
+		except:
+
 			# Push traceback to log
 			self.log.err(traceback.format_exc())
 
-			return False # Fail
+			raise # TODO
 
 		# Generate new instance of routine class
 		self.routines[routine_name] = routine_server_class(self, routine_name, routine_handler)
@@ -135,5 +139,3 @@ class dll_server_class(): # Representing one idividual dll to be called into
 
 		# Log status
 		self.log.out('[dll-server] ... done.')
-
-		return True # Success
