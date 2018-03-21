@@ -117,6 +117,9 @@ class dll_client_class(): # Representing one idividual dll to be called into, re
 
 	def __getattr__(self, name):
 
+		if name in ['__objclass__']:
+			raise AttributeError(name)
+
 		return self.__attach_to_routine__(name)
 
 
