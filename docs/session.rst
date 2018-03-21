@@ -99,6 +99,6 @@ Instance: ``zugbruecke.current_session``
 This is the default session of *zugbruecke*. It will be started during import.
 Like every session, it can be :ref:`re-configured <reconfiguration>`
 during run-time. If any of the usual *ctypes* members are imported from
-*zugbruecke*, like for instance ``cdll``, ``CDLL``, ``windll``, ``WinDLL``,
-``oledll``, ``OleDLL``, ``FormatError``, ``get_last_error``, ``GetLastError``,
+*zugbruecke*, like for instance ``cdll``, ``CDLL``, ``CFUNCTYPE``, ``windll``, ``WinDLL``,
+``WINFUNCTYPE``, ``oledll``, ``OleDLL``, ``FormatError``, ``get_last_error``, ``GetLastError``,
 ``set_last_error`` or ``WinError``, this session will be used.

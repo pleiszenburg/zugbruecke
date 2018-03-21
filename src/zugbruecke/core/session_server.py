@@ -32,6 +32,7 @@ specific language governing rights and limitations under the License.
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 import ctypes
+import time
 import traceback
 
 from .data import data_class
@@ -39,7 +40,7 @@ from .dll_server import dll_server_class
 from .log import log_class
 from .path import path_class
 from .rpc import (
-	mp_client_class,
+	mp_client_safe_connect,
 	mp_server_class
 	)
 
@@ -58,7 +59,7 @@ class session_server_class:
 		self.p = parameter
 
 		# Connect to Unix side
-		self.rpc_client = mp_client_class(
+		self.rpc_client = mp_client_safe_connect(
 			('localhost', self.p['port_socket_unix']),
 			'zugbruecke_unix'
 			)
@@ -98,8 +99,6 @@ class session_server_class:
 			terminate_function = self.__terminate__
 			)
 
-		# Return status of server
-		self.rpc_server.register_function(self.__get_status__, 'get_status')
 		# Register call: Accessing a dll
 		self.rpc_server.register_function(self.__load_library__, 'load_library')
 		# Expose routine for updating parameters
@@ -120,7 +119,10 @@ class session_server_class:
 		self.log.out('[session-server] Serve forever ...')
 
 		# Run server ...
-		self.rpc_server.serve_forever()
+		self.rpc_server.server_forever_in_thread(daemon = False)
+
+		# Indicate to session client that the server is up
+		self.rpc_client.set_server_status(True)
 
 
 	def __expose_ctypes_routines__(self):
@@ -135,17 +137,6 @@ class session_server_class:
 			]:
 
 			self.rpc_server.register_function(getattr(ctypes, routine), 'ctypes_' + routine)
-
-
-	def __get_status__(self):
-		"""
-		Exposed interface
-		"""
-
-		if self.up:
-			return 'up'
-		else:
-			return 'down'
 
 
 	def __load_library__(self, dll_name, dll_type, dll_param):
@@ -212,8 +203,11 @@ class session_server_class:
 			# Terminate log
 			self.log.terminate()
 
+			# Session down
+			self.up = False
+
 			# Status log
 			self.log.out('[session-server] TERMINATED.')
 
-			# Session down
-			self.up = False
+			# Indicate to session client that server was terminated
+			self.rpc_client.set_server_status(False)
