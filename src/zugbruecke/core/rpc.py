@@ -36,12 +36,42 @@ from multiprocessing.connection import (
 	Listener
 	)
 from threading import Thread
+import time
 import traceback
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # CLASSES AND CONSTRUCTOR ROUTINES
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+def mp_client_safe_connect(socket_path, authkey, timeout_after_seconds = 30, wait_for_seconds = 0.01):
+
+	# Already waited for ...
+	started_waiting_at = time.time()
+
+	# Run loop until socket appears
+	while True:
+
+		# Try to connect to server and get its status
+		try:
+			# Fire up xmlrpc client
+			mp_client = mp_client_class(socket_path, authkey)
+			# Get status from server and return handle
+			if mp_client.__get_handler_status__():
+				return mp_client
+		except:
+			pass
+
+		# Break the loop after timeout
+		if time.time() >= (started_waiting_at + timeout_after_seconds):
+			break
+
+		# Wait before trying again
+		time.sleep(wait_for_seconds)
+
+	# If client could not connect, raise an error
+	raise # TODO
+
 
 class mp_client_class:
 
@@ -78,7 +108,16 @@ class mp_server_handler_class:
 
 	def __init__(self):
 
+		# cache for registered functions
 		self.__functions__ = {}
+
+		# Method for verifying server status
+		self.register_function(self.__get_handler_status__)
+
+
+	def __get_handler_status__(self):
+
+		return True
 
 
 	def register_function(self, function_pointer, public_name = None):

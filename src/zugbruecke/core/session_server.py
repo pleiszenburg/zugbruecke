@@ -40,7 +40,7 @@ from .dll_server import dll_server_class
 from .log import log_class
 from .path import path_class
 from .rpc import (
-	mp_client_class,
+	mp_client_safe_connect,
 	mp_server_class
 	)
 
@@ -59,7 +59,7 @@ class session_server_class:
 		self.p = parameter
 
 		# Connect to Unix side
-		self.rpc_client = mp_client_class(
+		self.rpc_client = mp_client_safe_connect(
 			('localhost', self.p['port_socket_unix']),
 			'zugbruecke_unix'
 			)
@@ -120,9 +120,6 @@ class session_server_class:
 
 		# Run server ...
 		self.rpc_server.server_forever_in_thread(daemon = False)
-
-		# HACK Allow server thread to start
-		time.sleep(0.01)
 
 		# Indicate to session client that the server is up
 		self.rpc_client.set_server_status(True)

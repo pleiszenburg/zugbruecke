@@ -52,7 +52,7 @@ from .lib import (
 	)
 from .log import log_class
 from .rpc import (
-	mp_client_class,
+	mp_client_safe_connect,
 	mp_server_class
 	)
 from .wineenv import (
@@ -361,7 +361,7 @@ class session_client_class():
 	def __start_rpc_client__(self):
 
 		# Fire up xmlrpc client
-		self.rpc_client = mp_client_class(
+		self.rpc_client = mp_client_safe_connect(
 			('localhost', self.p['port_socket_wine']),
 			'zugbruecke_wine'
 			)
