@@ -133,27 +133,30 @@ class memory_class():
 		return memory_handle
 
 
+	def __get_element_from_memsync_path__(self, args, memsync_path):
+
+		# Reference args as initial value
+		element = args
+
+		# Step through path
+		for path_element in memsync_path:
+
+			# Go deeper ...
+			if isinstance(path_element, int):
+				element = element[path_element]
+			else:
+				element = getattr(element, path_element)
+
+		return element
+
+
 	def __pack_memory_item__(self, args, segment_index, segment):
 
-		# Reference args - search for pointer
-		pointer = args
-		# Step through path to pointer ...
-		for path_element in segment['p']:
-			# Go deeper ...
-			if isinstance(path_element, int):
-				pointer = pointer[path_element]
-			else:
-				pointer = getattr(pointer, path_element)
+		# Search for pointer
+		pointer = self.__get_element_from_memsync_path__(args, segment['p'])
 
-		# Reference args - search for length
-		length = args
-		# Step through path to pointer ...
-		for path_element in segment['l']:
-			# Go deeper ...
-			if isinstance(path_element, int):
-				length = length[path_element]
-			else:
-				length = getattr(length, path_element)
+		# Search for length
+		length = self.__get_element_from_memsync_path__(args, segment['l'])
 
 		# Compute actual length - might come from ctypes or a Python datatype
 		if hasattr(length, 'value'):
