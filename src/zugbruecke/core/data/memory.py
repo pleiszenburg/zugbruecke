@@ -133,7 +133,7 @@ class memory_class():
 		return memory_handle
 
 
-	def __get_element_from_memsync_path__(self, args, memsync_path):
+	def __get_argument_by_memsync_path__(self, args, memsync_path):
 
 		# Reference args as initial value
 		element = args
@@ -153,10 +153,10 @@ class memory_class():
 	def __pack_memory_item__(self, args, segment_index, segment):
 
 		# Search for pointer
-		pointer = self.__get_element_from_memsync_path__(args, segment['p'])
+		pointer = self.__get_argument_by_memsync_path__(args, segment['p'])
 
 		# Search for length
-		length = self.__get_element_from_memsync_path__(args, segment['l'])
+		length = self.__get_argument_by_memsync_path__(args, segment['l'])
 
 		# Compute actual length - might come from ctypes or a Python datatype
 		if hasattr(length, 'value'):
