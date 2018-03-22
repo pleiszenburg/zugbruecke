@@ -68,10 +68,10 @@ class memory_class():
 		memory_handle = []
 
 		# Iterate over memory segments, which must be kept in sync
-		for memsync_item_index, memsync_item in enumerate(memsync):
+		for memsync_item in memsync:
 
 			# Pack data for one pointer
-			item_data, item_pointer = self.__pack_memory_item__(args, memsync_item_index, memsync_item)
+			item_data, item_pointer = self.__pack_memory_item__(args, memsync_item)
 
 			# Append data to package
 			mem_package_list.append(item_data)
@@ -143,7 +143,7 @@ class memory_class():
 		return element
 
 
-	def __pack_memory_item__(self, args, segment_index, segment):
+	def __pack_memory_item__(self, args, segment):
 
 		# Search for pointer
 		pointer = self.__get_argument_by_memsync_path__(args, segment['p'])
