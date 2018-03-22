@@ -152,10 +152,7 @@ class memory_class():
 		length = self.__get_argument_by_memsync_path__(args, memsync_d['l'])
 
 		# Compute actual length - might come from ctypes or a Python datatype
-		if hasattr(length, 'value'):
-			length_value = length.value * ctypes.sizeof(memsync_d['_t'])
-		else:
-			length_value = length * ctypes.sizeof(memsync_d['_t'])
+		length_value = getattr(length, 'value', length) * ctypes.sizeof(memsync_d['_t'])
 
 		# Convert argument into ctypes datatype TODO more checks needed!
 		if '_c' in memsync_d.keys():
