@@ -111,6 +111,12 @@ void __stdcall DEMODLL bubblesort_struct(
 	bubblesort_data *data
 	);
 
+void __stdcall DEMODLL bubblesort_segments(
+	float *a,
+	int number_of_segments,
+	int elements_per_segment
+	);
+
 void __stdcall DEMODLL mix_rgb_colors(
 	int8_t color_a[3],
 	int8_t color_b[3],
