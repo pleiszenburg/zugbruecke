@@ -68,48 +68,16 @@ class memory_class():
 		memory_handle = []
 
 		# Iterate over memory segments, which must be kept in sync
-		for segment_index, segment in enumerate(memsync):
+		for memsync_item_index, memsync_item in enumerate(memsync):
 
-			# Reference args - search for pointer
-			pointer = args
-			# Step through path to pointer ...
-			for path_element in segment['p']:
-				# Go deeper ...
-				if isinstance(path_element, int):
-					pointer = pointer[path_element]
-				else:
-					pointer = getattr(pointer, path_element)
-
-			# Reference args - search for length
-			length = args
-			# Step through path to pointer ...
-			for path_element in segment['l']:
-				# Go deeper ...
-				if isinstance(path_element, int):
-					length = length[path_element]
-				else:
-					length = getattr(length, path_element)
-
-			# Compute actual length - might come from ctypes or a Python datatype
-			if hasattr(length, 'value'):
-				length_value = length.value * ctypes.sizeof(segment['_t'])
-			else:
-				length_value = length * ctypes.sizeof(segment['_t'])
-
-			# Convert argument into ctypes datatype TODO more checks needed!
-			if '_c' in segment.keys():
-				arg_value = ctypes.pointer(segment['_c'].from_param(pointer))
-			else:
-				arg_value = pointer
-
-			# Serialize the data ...
-			data = serialize_pointer_into_int_list(arg_value, length_value)
+			# Pack data for one pointer
+			item_data, item_pointer = self.__pack_memory_item__(args, memsync_item_index, memsync_item)
 
 			# Append data to package
-			mem_package_list.append(data)
+			mem_package_list.append(item_data)
 
 			# Append actual pointer to handler list
-			memory_handle.append(arg_value)
+			memory_handle.append(item_pointer)
 
 		return mem_package_list, memory_handle
 
@@ -163,3 +131,43 @@ class memory_class():
 				memory_handle.append((getattr(pointer.contents, segment['p'][-1]), len(arg_memory_list[segment_index])))
 
 		return memory_handle
+
+
+	def __pack_memory_item__(self, args, segment_index, segment):
+
+		# Reference args - search for pointer
+		pointer = args
+		# Step through path to pointer ...
+		for path_element in segment['p']:
+			# Go deeper ...
+			if isinstance(path_element, int):
+				pointer = pointer[path_element]
+			else:
+				pointer = getattr(pointer, path_element)
+
+		# Reference args - search for length
+		length = args
+		# Step through path to pointer ...
+		for path_element in segment['l']:
+			# Go deeper ...
+			if isinstance(path_element, int):
+				length = length[path_element]
+			else:
+				length = getattr(length, path_element)
+
+		# Compute actual length - might come from ctypes or a Python datatype
+		if hasattr(length, 'value'):
+			length_value = length.value * ctypes.sizeof(segment['_t'])
+		else:
+			length_value = length * ctypes.sizeof(segment['_t'])
+
+		# Convert argument into ctypes datatype TODO more checks needed!
+		if '_c' in segment.keys():
+			arg_value = ctypes.pointer(segment['_c'].from_param(pointer))
+		else:
+			arg_value = pointer
+
+		# Serialize the data ...
+		data = serialize_pointer_into_int_list(arg_value, length_value)
+
+		return data, arg_value
