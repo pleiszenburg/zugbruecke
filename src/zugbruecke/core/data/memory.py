@@ -109,15 +109,8 @@ class memory_class():
 		# Iterate over memory segments, which must be kept in sync
 		for segment_index, segment in enumerate(memsync):
 
-			# Reference args - search for pointer
-			pointer = args
-			# Step through path to pointer ...
-			for path_element in segment['p'][:-1]:
-				# Go deeper ...
-				if isinstance(path_element, int):
-					pointer = pointer[path_element]
-				else:
-					pointer = getattr(pointer.contents, path_element)
+			# Search for pointer
+			pointer = self.__get_argument_by_memsync_path__(args, segment['p'][:-1])
 
 			if isinstance(segment['p'][-1], int):
 				# Handle deepest instance
@@ -145,7 +138,7 @@ class memory_class():
 			if isinstance(path_element, int):
 				element = element[path_element]
 			else:
-				element = getattr(element, path_element)
+				element = getattr(self.__item_pointer_strip__(element), path_element)
 
 		return element
 
