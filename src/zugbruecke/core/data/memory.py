@@ -143,23 +143,23 @@ class memory_class():
 		return element
 
 
-	def __pack_memory_item__(self, args, segment):
+	def __pack_memory_item__(self, args, memsync_d):
 
 		# Search for pointer
-		pointer = self.__get_argument_by_memsync_path__(args, segment['p'])
+		pointer = self.__get_argument_by_memsync_path__(args, memsync_d['p'])
 
 		# Search for length
-		length = self.__get_argument_by_memsync_path__(args, segment['l'])
+		length = self.__get_argument_by_memsync_path__(args, memsync_d['l'])
 
 		# Compute actual length - might come from ctypes or a Python datatype
 		if hasattr(length, 'value'):
-			length_value = length.value * ctypes.sizeof(segment['_t'])
+			length_value = length.value * ctypes.sizeof(memsync_d['_t'])
 		else:
-			length_value = length * ctypes.sizeof(segment['_t'])
+			length_value = length * ctypes.sizeof(memsync_d['_t'])
 
 		# Convert argument into ctypes datatype TODO more checks needed!
-		if '_c' in segment.keys():
-			arg_value = ctypes.pointer(segment['_c'].from_param(pointer))
+		if '_c' in memsync_d.keys():
+			arg_value = ctypes.pointer(memsync_d['_c'].from_param(pointer))
 		else:
 			arg_value = pointer
 
