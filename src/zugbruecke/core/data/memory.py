@@ -148,8 +148,25 @@ class memory_class():
 		# Search for pointer
 		pointer = self.__get_argument_by_memsync_path__(args, memsync_d['p'])
 
-		# Search for length
-		length = self.__get_argument_by_memsync_path__(args, memsync_d['l'])
+		# Is there a function defining the length?
+		if 'f' in memsync_d.keys() and isinstance(memsync_d['l'], tuple):
+
+			# Start list for length function arguments
+			length_func_arg_list = []
+
+			# Iterate over length components
+			for length_component in memsync_d['l']:
+
+				# Append length argument to list
+				length_func_arg_list.append(self.__get_argument_by_memsync_path__(args, length_component))
+
+			# Compute length
+			length = memsync_d['f'](*length_func_arg_list)
+
+		else:
+
+			# Search for length
+			length = self.__get_argument_by_memsync_path__(args, memsync_d['l'])
 
 		# Compute actual length - might come from ctypes or a Python datatype
 		length_value = getattr(length, 'value', length) * ctypes.sizeof(memsync_d['_t'])
