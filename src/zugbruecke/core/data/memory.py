@@ -141,7 +141,7 @@ class memory_class():
 		# Step through path
 		for path_element in memsync_path:
 
-			# Go deeper ...
+			# Go deeper ... # TODO use __item_pointer_strip__ ?
 			if isinstance(path_element, int):
 				element = element[path_element]
 			else:
