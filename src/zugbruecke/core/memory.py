@@ -44,11 +44,9 @@ def generate_pointer_from_int_list(int_array):
 
 def overwrite_pointer_with_int_list(ctypes_pointer, int_array):
 
-	(ctypes.c_ubyte * len(int_array)).from_address(ctypes.c_void_p.from_buffer(ctypes_pointer).value)[:] = int_array[:]
+	ctypes.cast(ctypes_pointer, ctypes.POINTER(ctypes.c_ubyte * len(int_array))).contents[:] = int_array[:]
 
 
 def serialize_pointer_into_int_list(ctypes_pointer, size_bytes):
 
-	return (ctypes.c_ubyte * size_bytes).from_address(ctypes.c_void_p.from_buffer(
-		ctypes.cast(ctypes_pointer, ctypes.POINTER(ctypes.c_ubyte * size_bytes))
-		).value)[:]
+	return ctypes.cast(ctypes_pointer, ctypes.POINTER(ctypes.c_ubyte * size_bytes)).contents[:]

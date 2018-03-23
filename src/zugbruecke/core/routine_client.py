@@ -121,7 +121,7 @@ class routine_client_class():
 			)
 
 		# Log status
-		self.log.out('[routine-client] ... received feedback from server, unpacking ...')
+		self.log.out('[routine-client] ... received feedback from server, unpacking & syncing arguments ...')
 
 		# Unpack return dict (call may have failed partially only)
 		self.data.arg_list_sync(
@@ -130,11 +130,17 @@ class routine_client_class():
 			self.argtypes_d
 			)
 
+		# Log status
+		self.log.out('[routine-client] ... overwriting memory ...')
+
 		# Unpack memory (call may have failed partially only)
 		self.data.client_unpack_memory_list(return_dict['memory'], memory_transport_handle)
 
 		# Unpacking a return value only makes sense if the call was a success
 		if return_dict['success']:
+
+			# Log status
+			self.log.out('[routine-client] ... unpacking return value ...')
 
 			# Unpack return value of routine
 			return_value = self.data.return_msg_unpack(return_dict['return_value'], self.restype_d)

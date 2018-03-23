@@ -57,6 +57,14 @@ class sample_class:
 			ctypes.c_char,
 			ctypes.c_char
 			)
+		self.__replace_letter_in_null_terminated_string__.memsync = [
+			{
+				'p': [0],
+				'l': ([0],),
+				'_f': lambda x: ctypes.sizeof(x),
+				'_t': ctypes.c_char
+				}
+			]
 
 
 	def replace_letter_in_null_terminated_string(self, in_string, old_letter, new_letter):
@@ -79,7 +87,7 @@ class sample_class:
 # TEST(s)
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-def test_callback_simple():
+def test_replace_letter_in_null_terminated_string():
 
 	sample = sample_class()
 
