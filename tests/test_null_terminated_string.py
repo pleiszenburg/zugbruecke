@@ -61,8 +61,7 @@ class sample_class_a:
 			{
 				'p': [0],
 				'l': ([0],),
-				'_f': lambda x: ctypes.sizeof(x),
-				'_t': ctypes.c_ubyte
+				'_f': lambda x: ctypes.sizeof(x)
 				}
 			]
 
@@ -100,8 +99,7 @@ class sample_class_b:
 			{
 				'p': [0],
 				'l': ([0],),
-				'_f': lambda x: ctypes.sizeof(x),
-				'_t': ctypes.c_ubyte
+				'_f': lambda x: ctypes.sizeof(x)
 				}
 			]
 
@@ -140,8 +138,7 @@ class sample_class_unicode_a:
 				'p': [0],
 				'l': ([0],),
 				'w': ctypes.sizeof(ctypes.c_wchar),
-				'_f': lambda x: ctypes.sizeof(x),
-				'_t': ctypes.c_ubyte
+				'_f': lambda x: ctypes.sizeof(x)
 				}
 			]
 
@@ -180,8 +177,7 @@ class sample_class_unicode_b:
 				'p': [0],
 				'l': ([0],),
 				'w': ctypes.sizeof(ctypes.c_wchar),
-				'_f': lambda x: ctypes.sizeof(x),
-				'_t': ctypes.c_ubyte
+				'_f': lambda x: ctypes.sizeof(x)
 				}
 			]
 
