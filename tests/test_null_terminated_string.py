@@ -62,7 +62,7 @@ class sample_class_a:
 				'p': [0],
 				'l': ([0],),
 				'_f': lambda x: ctypes.sizeof(x),
-				'_t': ctypes.c_char
+				'_t': ctypes.c_ubyte
 				}
 			]
 
@@ -101,7 +101,7 @@ class sample_class_b:
 				'p': [0],
 				'l': ([0],),
 				'_f': lambda x: ctypes.sizeof(x),
-				'_t': ctypes.c_char
+				'_t': ctypes.c_ubyte
 				}
 			]
 
@@ -122,6 +122,84 @@ class sample_class_b:
 		return string_buffer.value.decode('utf-8')
 
 
+class sample_class_unicode_a:
+
+
+	def __init__(self):
+
+		self.__dll__ = ctypes.windll.LoadLibrary('tests/demo_dll.dll')
+
+		self.__replace_letter_in_null_terminated_string_unicode__ = self.__dll__.replace_letter_in_null_terminated_string_unicode_a
+		self.__replace_letter_in_null_terminated_string_unicode__.argtypes = (
+			ctypes.POINTER(ctypes.c_wchar), # Generate pointer to wchar manually
+			ctypes.c_wchar,
+			ctypes.c_wchar
+			)
+		self.__replace_letter_in_null_terminated_string_unicode__.memsync = [
+			{
+				'p': [0],
+				'l': ([0],),
+				'_f': lambda x: ctypes.sizeof(x),
+				'_t': ctypes.c_ubyte
+				}
+			]
+
+
+	def replace_letter_in_null_terminated_string_unicode(self, in_string, old_letter, new_letter):
+
+		BUFFER_LENGTH = 128
+
+		string_buffer = ctypes.create_unicode_buffer(BUFFER_LENGTH)
+		string_buffer.value = in_string
+
+		self.__replace_letter_in_null_terminated_string_unicode__(
+			string_buffer,
+			old_letter,
+			new_letter
+			)
+
+		return string_buffer.value
+
+
+class sample_class_unicode_b:
+
+
+	def __init__(self):
+
+		self.__dll__ = ctypes.windll.LoadLibrary('tests/demo_dll.dll')
+
+		self.__replace_letter_in_null_terminated_string_unicode__ = self.__dll__.replace_letter_in_null_terminated_string_unicode_b
+		self.__replace_letter_in_null_terminated_string_unicode__.argtypes = (
+			ctypes.c_wchar_p, # Use built-in wchar pointer type
+			ctypes.c_wchar,
+			ctypes.c_wchar
+			)
+		self.__replace_letter_in_null_terminated_string_unicode__.memsync = [
+			{
+				'p': [0],
+				'l': ([0],),
+				'_f': lambda x: ctypes.sizeof(x),
+				'_t': ctypes.c_ubyte
+				}
+			]
+
+
+	def replace_letter_in_null_terminated_string_unicode(self, in_string, old_letter, new_letter):
+
+		BUFFER_LENGTH = 128
+
+		string_buffer = ctypes.create_unicode_buffer(BUFFER_LENGTH)
+		string_buffer.value = in_string
+
+		self.__replace_letter_in_null_terminated_string_unicode__(
+			string_buffer,
+			old_letter,
+			new_letter
+			)
+
+		return string_buffer.value
+
+
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # TEST(s)
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -138,3 +216,17 @@ def test_replace_letter_in_null_terminated_string_b():
 	sample = sample_class_b()
 
 	assert 'zetegehube' == sample.replace_letter_in_null_terminated_string('zategahuba', 'a', 'e')
+
+
+def test_replace_letter_in_null_terminated_string_unicode_a():
+
+	sample = sample_class_unicode_a()
+
+	assert 'zetegehube' == sample.replace_letter_in_null_terminated_string_unicode('zategahuba', 'a', 'e')
+
+
+def test_replace_letter_in_null_terminated_string_unicode_b():
+
+	sample = sample_class_unicode_b()
+
+	assert 'zetegehube' == sample.replace_letter_in_null_terminated_string_unicode('zategahuba', 'a', 'e')
