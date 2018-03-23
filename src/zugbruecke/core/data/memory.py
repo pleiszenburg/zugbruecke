@@ -41,6 +41,8 @@ from ..memory import (
 	serialize_pointer_into_int_list
 	)
 
+WCHAR_BYTES = ctypes.sizeof(ctypes.c_wchar)
+
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # CLASS: Memory content packing and unpacking
@@ -89,14 +91,22 @@ class memory_class():
 			overwrite_pointer_with_int_list(pointer, mem_package_list[pointer_index])
 
 
-	def server_pack_memory_list(self, memory_handle):
+	def server_pack_memory_list(self, memory_handle, memsync_d):
 
 		# Generate new list for arrays of ints to be shipped back to the client
 		mem_package_list = []
 
 		# Iterate through pointers and serialize them
-		for pointer in memory_handle:
-			mem_package_list.append(serialize_pointer_into_int_list(*pointer))
+		for pointer, memsync_item in zip(memory_handle, memsync_d):
+
+			memory_list = serialize_pointer_into_int_list(*pointer)
+
+			if 'w' in memsync_item.keys():
+				memory_list = self.__adjust_wchar_length__(
+					memory_list, WCHAR_BYTES, memsync_item['w']
+					)
+
+			mem_package_list.append(memory_list)
 
 		return mem_package_list
 
@@ -112,18 +122,47 @@ class memory_class():
 			# Search for pointer
 			pointer = self.__get_argument_by_memsync_path__(args, memsync_item['p'][:-1])
 
+			memory_list = arg_memory_list[memsync_item_index]
+
+			if 'w' in memsync_item.keys():
+				memory_list = self.__adjust_wchar_length__(
+					memory_list, memsync_item['w'], WCHAR_BYTES
+					)
+
 			if isinstance(memsync_item['p'][-1], int):
 				# Handle deepest instance
-				pointer[memsync_item['p'][-1]] = generate_pointer_from_int_list(arg_memory_list[memsync_item_index])
+				pointer[memsync_item['p'][-1]] = generate_pointer_from_int_list(memory_list)
 				# Append to handle
-				memory_handle.append((pointer[memsync_item['p'][-1]], len(arg_memory_list[memsync_item_index])))
+				memory_handle.append((pointer[memsync_item['p'][-1]], len(memory_list)))
 			else:
 				# Handle deepest instance
-				setattr(pointer.contents, memsync_item['p'][-1], generate_pointer_from_int_list(arg_memory_list[memsync_item_index]))
+				setattr(pointer.contents, memsync_item['p'][-1], generate_pointer_from_int_list(memory_list))
 				# Append to handle
-				memory_handle.append((getattr(pointer.contents, memsync_item['p'][-1]), len(arg_memory_list[memsync_item_index])))
+				memory_handle.append((getattr(pointer.contents, memsync_item['p'][-1]), len(memory_list)))
 
 		return memory_handle
+
+
+	def __adjust_wchar_length__(self, in_byte_list, old_len, new_len):
+
+		def mix_lists(*in_lists):
+			def mix_lists_generator():
+				for item_tuple in zip(*in_lists):
+					for item in item_tuple:
+						yield item
+			return list(mix_lists_generator())
+
+		if old_len == new_len:
+			return in_byte_list
+
+		elif new_len > old_len:
+			tmp = [in_byte_list[byte_nr::old_len] for byte_nr in range(0, old_len)]
+			for _ in range(0, new_len - old_len):
+				tmp.append([0 for __ in range(0, len(tmp[0]))])
+			return mix_lists(*tmp)
+
+		else:
+			return mix_lists(*[in_byte_list[byte_nr::old_len] for byte_nr in range(0, new_len)])
 
 
 	def __get_argument_by_memsync_path__(self, args, memsync_path):
