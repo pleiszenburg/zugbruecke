@@ -169,6 +169,29 @@ void __stdcall DEMODLL bubblesort_struct(
 }
 
 
+void __stdcall DEMODLL bubblesort_segments(
+	float *a,
+	int number_of_segments,
+	int elements_per_segment
+	)
+{
+	int i, j;
+	int n = number_of_segments * elements_per_segment;
+	for (i = 0; i < n - 1; ++i)
+	{
+		for (j = 0; j < n - i - 1; ++j)
+		{
+			if (a[j] > a[j + 1])
+			{
+				float tmp = a[j];
+				a[j] = a[j + 1];
+				a[j + 1] = tmp;
+			}
+		}
+	}
+}
+
+
 void __stdcall DEMODLL mix_rgb_colors(
 	int8_t color_a[3],
 	int8_t color_b[3],
