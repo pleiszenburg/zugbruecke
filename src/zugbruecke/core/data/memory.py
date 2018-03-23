@@ -49,17 +49,17 @@ from ..memory import (
 class memory_class():
 
 
-	def client_fix_memsync_ctypes(self, memsync):
+	def client_fix_memsync_ctypes(self, memsync_d):
 
 		# Iterate over memory segments, which must be kept in sync
-		for segment in memsync:
+		for memsync_item in memsync_d:
 
 			# Defaut type, if nothing is given, is unsigned byte
-			if '_t' not in segment.keys():
-				segment['_t'] = ctypes.c_ubyte
+			if '_t' not in memsync_item.keys():
+				memsync_item['_t'] = ctypes.c_ubyte
 
 
-	def client_pack_memory_list(self, args, memsync):
+	def client_pack_memory_list(self, args, memsync_d):
 
 		# Start empty package for transfer
 		mem_package_list = []
@@ -68,7 +68,7 @@ class memory_class():
 		memory_handle = []
 
 		# Iterate over memory segments, which must be kept in sync
-		for memsync_item in memsync:
+		for memsync_item in memsync_d:
 
 			# Pack data for one pointer
 			item_data, item_pointer = self.__pack_memory_item__(args, memsync_item)
@@ -101,27 +101,27 @@ class memory_class():
 		return mem_package_list
 
 
-	def server_unpack_memory_list(self, args, arg_memory_list, memsync):
+	def server_unpack_memory_list(self, args, arg_memory_list, memsync_d):
 
 		# Generate temporary handle for faster packing
 		memory_handle = []
 
 		# Iterate over memory segments, which must be kept in sync
-		for segment_index, segment in enumerate(memsync):
+		for memsync_item_index, memsync_item in enumerate(memsync_d):
 
 			# Search for pointer
-			pointer = self.__get_argument_by_memsync_path__(args, segment['p'][:-1])
+			pointer = self.__get_argument_by_memsync_path__(args, memsync_item['p'][:-1])
 
-			if isinstance(segment['p'][-1], int):
+			if isinstance(memsync_item['p'][-1], int):
 				# Handle deepest instance
-				pointer[segment['p'][-1]] = generate_pointer_from_int_list(arg_memory_list[segment_index])
+				pointer[memsync_item['p'][-1]] = generate_pointer_from_int_list(arg_memory_list[memsync_item_index])
 				# Append to handle
-				memory_handle.append((pointer[segment['p'][-1]], len(arg_memory_list[segment_index])))
+				memory_handle.append((pointer[memsync_item['p'][-1]], len(arg_memory_list[memsync_item_index])))
 			else:
 				# Handle deepest instance
-				setattr(pointer.contents, segment['p'][-1], generate_pointer_from_int_list(arg_memory_list[segment_index]))
+				setattr(pointer.contents, memsync_item['p'][-1], generate_pointer_from_int_list(arg_memory_list[memsync_item_index]))
 				# Append to handle
-				memory_handle.append((getattr(pointer.contents, segment['p'][-1]), len(arg_memory_list[segment_index])))
+				memory_handle.append((getattr(pointer.contents, memsync_item['p'][-1]), len(arg_memory_list[memsync_item_index])))
 
 		return memory_handle
 
