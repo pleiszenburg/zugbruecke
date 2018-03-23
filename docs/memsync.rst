@@ -20,8 +20,8 @@ through the ``memsync`` protocol. ``memsync`` implements special directives,
 which do not interfere with *ctypes* should the code be required to run on
 *Windows* as well.
 
-A simple example
-----------------
+A simple example: An array of floating point numbers of variable length
+-----------------------------------------------------------------------
 
 Consider the following example DLL routine in C:
 
@@ -186,6 +186,98 @@ The above definition will extract the values of the ``image_width`` and
 ``image_height`` parameters for every function call and feed them into the
 specified lambda function.
 
+Using string buffers, null-terminated strings and Unicode
+---------------------------------------------------------
+
+Let's assume you are confronted with a regular Python (3) string. With the help of a
+DLL function, you want to replace all occurrences of a letter with another letter.
+
+.. code:: python
+
+	some_string = 'zategahuba'
+
+The DLL function's definition looks like this:
+
+.. code:: C
+
+	void __stdcall __declspec(dllimport) replace_letter(
+		char *in_string,
+		char old_letter,
+		char new_letter
+		);
+
+In Python, it can be configured as follows:
+
+.. code:: python
+
+	replace_letter.argtypes = (
+		ctypes.POINTER(ctypes.c_char),
+		ctypes.c_char,
+		ctypes.c_char
+		)
+	replace_letter.memsync = [
+		{
+			'p': [0],
+			'l': ([0],),
+			'_f': lambda x: ctypes.sizeof(x)
+			}
+		]
+
+The above configuration exploits the field for specifying a function for computing
+the length of the memory section, ``_f``. The function is pointed to the parameter
+containing the string buffer and determines its length.
+
+While Python (3) strings are actually Unicode strings, the function accepts an
+array of type ``char`` - a bytes array in Python terms. I.e. you have to encode the
+string before it is copied into a string buffer. The following example illustrates
+how the function ``replace_letter`` can be called on the string ``some_string``,
+exchanging all letters ``a`` with ``e``. Subsequently, the result is printed.
+
+.. code:: python
+
+	string_buffer = ctypes.create_string_buffer(some_string.encode('utf-8'))
+	replace_letter(string_buffer, 'a'.encode('utf-8'), 'e'.encode('utf-8'))
+	print(string_buffer.value.decode('utf-8'))
+
+The process differs if the DLL function accepts Unicode strings. Let's assume
+the DLL function is defined as follows:
+
+.. code:: C
+
+	void __stdcall __declspec(dllimport) replace_letter_w(
+		wchar_t *in_string,
+		wchar_t old_letter,
+		wchar_t new_letter
+		);
+
+In Python, it can be configured like this:
+
+.. code:: python
+
+	replace_letter_w.argtypes = (
+		ctypes.POINTER(ctypes.c_wchar),
+		ctypes.c_wchar,
+		ctypes.c_wchar
+		)
+	replace_letter_w.memsync = [
+		{
+			'p': [0],
+			'l': ([0],),
+			'w': ctypes.sizeof(ctypes.c_wchar),
+			'_f': lambda x: ctypes.sizeof(x)
+			}
+		]
+
+One key aspect has changed: ``memsync`` contains another field, ``w``. It must
+be initialized with the actual length of a Unicode character in the current environment.
+Now you can call the function as follows:
+
+.. code:: python
+
+	unicode_buffer = ctypes.create_unicode_buffer(some_string)
+	replace_letter_w(unicode_buffer, 'a', 'e')
+	print(unicode_buffer.value)
+
 Attribute: ``memsync`` (list of dict)
 ----------------------------------------
 
@@ -194,7 +286,8 @@ section, which must be kept in sync. It has the following keys:
 
 * ``p`` (:ref:`path to pointer <pathpointer>`)
 * ``l`` (:ref:`path to length <pathlength>`)
-* ``_t`` (:ref:`data type of pointer <pointertype>`)
+* ``w`` (:ref:`size of Unicode character <unicodechar>`, optional)
+* ``_t`` (:ref:`data type of pointer <pointertype>`, optional)
 * ``_f`` (:ref:`custom length function <length function>`, optional)
 * ``_c`` (:ref:`custom data type <customtype>`, optional)
 
@@ -246,14 +339,23 @@ the length of the memory block.
 It is expected to be either a single path list like ``[0, 'field_a']`` or a tuple
 of multiple (or even zero) path lists, if the optional ``_f`` key is defined.
 
+.. _unicodechar:
+
+Key: ``w``, size of Unicode character (optional)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+If a Unicode string (buffer) is passed into a function, this parameter must be
+initialized with the length of one Unicode character in bytes in the current
+environment - ``ctypes.sizeof(ctypes.c_wchar)`` in most cases.
+
 .. _pointertype:
 
-Key: ``_t``, data type of pointer (PyCSimpleType or PyCStructType)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Key: ``_t``, data type of pointer (PyCSimpleType or PyCStructType) (optional)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This parameter will be fed into ``ctypes.sizeof`` for determining its size in bytes.
 The result is then multiplied with the ``length`` to get an actual size of the
-memory block in bytes.
+memory block in bytes. If it is not explicitly defined, it defaults to ``ctypes.c_ubyte``.
 
 For details on ``sizeof``, consult the `Python documentation on sizeof`_.
 It will accept `fundamental types`_ as well as `structure types`_.
