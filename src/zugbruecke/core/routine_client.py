@@ -113,7 +113,7 @@ class routine_client_class():
 		self.log.out('[routine-client] ... parameters are "%r". Packing and pushing to server ...' % (args,))
 
 		# Handle memory
-		mem_package_list, memory_transport_handle = self.data.client_pack_memory_list(args, self.memsync)
+		mem_package_list, memory_transport_handle = self.data.client_pack_memory_list(args, self.memsync_d)
 
 		# Actually call routine in DLL! TODO Handle kw ...
 		return_dict = self.__handle_call_on_server__(
@@ -167,8 +167,9 @@ class routine_client_class():
 		# Fix missing ctypes in memsync
 		self.data.client_fix_memsync_ctypes(self.__memsync__)
 
-		# Reduce memsync for transfer
-		self.memsync_d = self.data.pack_definition_memsync(self.__memsync__)
+		# Store and reduce memsync for transfer
+		self.memsync_d = self.__memsync__
+		memsync_d_packed = self.data.pack_definition_memsync(self.__memsync__)
 
 		# Adjust definitions with void pointers
 		self.data.apply_memsync_to_argtypes_definition(self.__memsync__, self.argtypes_d)
@@ -182,7 +183,7 @@ class routine_client_class():
 
 		# Pass argument and return value types as strings ...
 		result = self.__configure_on_server__(
-			self.argtypes_d, self.restype_d, self.memsync_d
+			self.argtypes_d, self.restype_d, memsync_d_packed
 			)
 
 

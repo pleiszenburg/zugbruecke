@@ -82,6 +82,19 @@ class sample_class_a:
 		return string_buffer.value.decode('utf-8')
 
 
+	def replace_letter_in_null_terminated_string_buff(self, in_string, old_letter, new_letter):
+
+		string_buffer = ctypes.create_string_buffer(in_string.encode('utf-8'))
+
+		self.__replace_letter_in_null_terminated_string__(
+			string_buffer,
+			old_letter.encode('utf-8'),
+			new_letter.encode('utf-8')
+			)
+
+		return string_buffer.value.decode('utf-8')
+
+
 class sample_class_b:
 
 
@@ -110,6 +123,19 @@ class sample_class_b:
 
 		string_buffer = ctypes.create_string_buffer(BUFFER_LENGTH)
 		string_buffer.value = in_string.encode('utf-8')
+
+		self.__replace_letter_in_null_terminated_string__(
+			string_buffer,
+			old_letter.encode('utf-8'),
+			new_letter.encode('utf-8')
+			)
+
+		return string_buffer.value.decode('utf-8')
+
+
+	def replace_letter_in_null_terminated_string_buff(self, in_string, old_letter, new_letter):
+
+		string_buffer = ctypes.create_string_buffer(in_string.encode('utf-8'))
 
 		self.__replace_letter_in_null_terminated_string__(
 			string_buffer,
@@ -159,6 +185,19 @@ class sample_class_unicode_a:
 		return string_buffer.value
 
 
+	def replace_letter_in_null_terminated_string_buff_unicode(self, in_string, old_letter, new_letter):
+
+		string_buffer = ctypes.create_unicode_buffer(in_string)
+
+		self.__replace_letter_in_null_terminated_string_unicode__(
+			string_buffer,
+			old_letter,
+			new_letter
+			)
+
+		return string_buffer.value
+
+
 class sample_class_unicode_b:
 
 
@@ -198,6 +237,19 @@ class sample_class_unicode_b:
 		return string_buffer.value
 
 
+	def replace_letter_in_null_terminated_string_buff_unicode(self, in_string, old_letter, new_letter):
+
+		string_buffer = ctypes.create_unicode_buffer(in_string)
+
+		self.__replace_letter_in_null_terminated_string_unicode__(
+			string_buffer,
+			old_letter,
+			new_letter
+			)
+
+		return string_buffer.value
+
+
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # TEST(s)
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -209,11 +261,25 @@ def test_replace_letter_in_null_terminated_string_a():
 	assert 'zetegehube' == sample.replace_letter_in_null_terminated_string('zategahuba', 'a', 'e')
 
 
+def test_replace_letter_in_null_terminated_string_buff_a():
+
+	sample = sample_class_a()
+
+	assert 'zetegehube' == sample.replace_letter_in_null_terminated_string_buff('zategahuba', 'a', 'e')
+
+
 def test_replace_letter_in_null_terminated_string_b():
 
 	sample = sample_class_b()
 
 	assert 'zetegehube' == sample.replace_letter_in_null_terminated_string('zategahuba', 'a', 'e')
+
+
+def test_replace_letter_in_null_terminated_string_buff_b():
+
+	sample = sample_class_b()
+
+	assert 'zetegehube' == sample.replace_letter_in_null_terminated_string_buff('zategahuba', 'a', 'e')
 
 
 def test_replace_letter_in_null_terminated_string_unicode_a():
@@ -223,8 +289,22 @@ def test_replace_letter_in_null_terminated_string_unicode_a():
 	assert 'zetegehube' == sample.replace_letter_in_null_terminated_string_unicode('zategahuba', 'a', 'e')
 
 
+def test_replace_letter_in_null_terminated_string_buff_unicode_a():
+
+	sample = sample_class_unicode_a()
+
+	assert 'zetegehube' == sample.replace_letter_in_null_terminated_string_buff_unicode('zategahuba', 'a', 'e')
+
+
 def test_replace_letter_in_null_terminated_string_unicode_b():
 
 	sample = sample_class_unicode_b()
 
 	assert 'zetegehube' == sample.replace_letter_in_null_terminated_string_unicode('zategahuba', 'a', 'e')
+
+
+def test_replace_letter_in_null_terminated_string_buff_unicode_b():
+
+	sample = sample_class_unicode_b()
+
+	assert 'zetegehube' == sample.replace_letter_in_null_terminated_string_buff_unicode('zategahuba', 'a', 'e')
