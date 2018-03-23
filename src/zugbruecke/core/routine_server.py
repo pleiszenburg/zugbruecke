@@ -71,20 +71,47 @@ class routine_server_class():
 		# Log status
 		self.log.out('[routine-server] Trying call routine "%s" ...' % self.name)
 
-		# Unpack passed arguments, handle pointers and structs ...
-		args_list = self.data.arg_list_unpack(arg_message_list, self.argtypes_d)
+		try:
 
-		# Unpack pointer data
-		memory_handle = self.data.server_unpack_memory_list(args_list, arg_memory_list, self.memsync_d)
+			# Unpack passed arguments, handle pointers and structs ...
+			args_list = self.data.arg_list_unpack(arg_message_list, self.argtypes_d)
 
-		# Default return value
-		return_value = None
+			# Unpack pointer data
+			memory_handle = self.data.server_unpack_memory_list(args_list, arg_memory_list, self.memsync_d)
 
-		# This is risky
+			# Default return value
+			return_value = None
+
+		except Exception as e:
+
+			# Push traceback to log
+			self.log.err(traceback.format_exc())
+
+			raise e
+
 		try:
 
 			# Call into dll
 			return_value = self.handler(*tuple(args_list))
+
+		except Exception as e:
+
+			# Log status
+			self.log.out('[routine-server] ... failed!')
+
+			# Push traceback to log
+			self.log.err(traceback.format_exc())
+
+			# Pack return package and return it
+			return {
+				'args': arg_message_list,
+				'return_value': return_value,
+				'memory': arg_memory_list,
+				'success': False,
+				'exception': e
+				}
+
+		try:
 
 			# Pack memory for return
 			arg_memory_list = self.data.server_pack_memory_list(memory_handle)
@@ -107,43 +134,42 @@ class routine_server_class():
 				'exception': None
 				}
 
-		except Exception as e:
-
-			# Log status
-			self.log.out('[routine-server] ... failed!')
+		except:
 
 			# Push traceback to log
 			self.log.err(traceback.format_exc())
 
-			# Pack return package and return it
-			return {
-				'args': arg_message_list,
-				'return_value': return_value,
-				'memory': arg_memory_list,
-				'success': False,
-				'exception': e
-				}
+			raise e
 
 
 	def __configure__(self, argtypes_d, restype_d, memsync_d):
 
-		# Store memory sync instructions
-		self.memsync_d = memsync_d
-
 		# Store argtype definition dict
 		self.argtypes_d = argtypes_d
-
-		# Parse and apply argtype definition dict to actual ctypes routine
-		_argtypes = self.data.unpack_definition_argtypes(argtypes_d)
-		# Only configure if there are definitions, otherwise calls with int parameters without definition fail
-		if len(_argtypes) > 0:
-			self.handler.argtypes = _argtypes
 
 		# Store return value definition dict
 		self.restype_d = restype_d
 
-		# Parse and apply restype definition dict to actual ctypes routine
-		self.handler.restype = self.data.unpack_definition_returntype(restype_d)
+		# Store memory sync instructions
+		self.memsync_d = memsync_d
+
+		try:
+
+			# Parse and apply argtype definition dict to actual ctypes routine
+			_argtypes = self.data.unpack_definition_argtypes(argtypes_d)
+			# Only configure if there are definitions, otherwise calls with int parameters without definition fail
+			if len(_argtypes) > 0:
+				self.handler.argtypes = _argtypes
+
+			# Parse and apply restype definition dict to actual ctypes routine
+			self.handler.restype = self.data.unpack_definition_returntype(restype_d)
+
+		except Exception as e:
+
+			# Push traceback to log
+			self.log.err(traceback.format_exc())
+
+			raise e
 
 		# Log status
 		self.log.out(' memsync: \n%s' % pf(self.memsync_d))
