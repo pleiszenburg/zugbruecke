@@ -149,6 +149,43 @@ The complete example, which will run on *Unix* and on *Windows* looks just like 
 	test_vector = [5.74, 3.72, 6.28, 8.6, 9.34, 6.47, 2.05, 9.09, 4.39, 4.75]
 	bubblesort(test_vector)
 
+
+A more complex example: Computing the size of the memory from multiple arguments
+--------------------------------------------------------------------------------
+
+There are plenty of cases where you will encounter function (or structure)
+definitions like the following:
+
+.. code:: C
+
+	void __stdcall __declspec(dllimport) process_image(
+		float *image_data,
+		int image_width,
+		int image_height
+		);
+
+The ``image_data`` parameter is a flattened 1D array representing a 2D image.
+It's length is defined by its width and its height. So the length of array equals
+``image_width * image_height``. For cases like this, ``memsync`` has the ability
+to dynamically compute the length of the memory through custom functions.
+Let's have a look at how the above function would be configured in *Python*:
+
+.. code:: python
+
+	process_image.argtypes = (ctypes.POINTER(ctypes.c_float), ctypes.c_int, ctypes.c_int)
+	process_image.memsync = [
+		{
+			'p': [0],
+			'l': ([1], [2]),
+			'_f': lambda x, y: x * y,
+			'_t': ctypes.c_float
+			}
+		]
+
+The above definition will extract the values of the ``image_width`` and
+``image_height`` parameters for every function call and feed them into the
+specified lambda function.
+
 Attribute: ``memsync`` (list of dict)
 ----------------------------------------
 
@@ -158,6 +195,7 @@ section, which must be kept in sync. It has the following keys:
 * ``p`` (:ref:`path to pointer <pathpointer>`)
 * ``l`` (:ref:`path to length <pathlength>`)
 * ``_t`` (:ref:`data type of pointer <pointertype>`)
+* ``_f`` (:ref:`custom <length function>`, optional)
 * ``_c`` (:ref:`custom data type <customtype>`, optional)
 
 .. _pathpointer:
@@ -198,12 +236,15 @@ You should be able to extrapolate from here.
 
 .. _pathlength:
 
-Key: ``l``, path to length (list of int and/or str)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Key: ``l``, path to length (list of int and/or str OR tuple of lists of int and/or str)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This parameter works just like the :ref:`path to pointer <pathpointer>` parameter.
 It is expected to tell the parser, where it can find a number (int) which represents
 the length of the memory block.
+
+It is expected to be either a single path list like ``[0, 'field_a']`` or a tuple
+of multiple (or even zero) path lists, if the optional ``_f`` key is defined.
 
 .. _pointertype:
 
@@ -220,6 +261,15 @@ It will accept `fundamental types`_ as well as `structure types`_.
 .. _Python documentation on sizeof: https://docs.python.org/3/library/ctypes.html?highlight=ctypes#ctypes.sizeof
 .. _fundamental types: https://docs.python.org/3/library/ctypes.html?highlight=ctypes#fundamental-data-types
 .. _structure types: https://docs.python.org/3/library/ctypes.html?highlight=ctypes#ctypes.Structure
+
+.. _length function:
+
+Key: ``_f``, custom function for computing the length of the memory segment (optional)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+This field can be used to plug in a function or lambda expression for computing the ``length``
+of the memory section from multiple parameters. The function is expected to accept a number of
+arguments equal to the number of elements of the tuple of length paths defined in ``l``.
 
 .. _customtype:
 
