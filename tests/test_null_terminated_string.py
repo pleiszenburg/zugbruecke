@@ -44,14 +44,14 @@ elif platform.startswith('win'):
 # CLASSES AND ROUTINES
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-class sample_class:
+class sample_class_a:
 
 
 	def __init__(self):
 
 		self.__dll__ = ctypes.windll.LoadLibrary('tests/demo_dll.dll')
 
-		self.__replace_letter_in_null_terminated_string__ = self.__dll__.replace_letter_in_null_terminated_string
+		self.__replace_letter_in_null_terminated_string__ = self.__dll__.replace_letter_in_null_terminated_string_a
 		self.__replace_letter_in_null_terminated_string__.argtypes = (
 			ctypes.POINTER(ctypes.c_char),
 			ctypes.c_char,
@@ -87,8 +87,8 @@ class sample_class:
 # TEST(s)
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-def test_replace_letter_in_null_terminated_string():
+def test_replace_letter_in_null_terminated_string_a():
 
-	sample = sample_class()
+	sample = sample_class_a()
 
 	assert 'zetegehube' == sample.replace_letter_in_null_terminated_string('zategahuba', 'a', 'e')

@@ -167,7 +167,13 @@ int16_t __stdcall DEMODLL pow_ints(
 
 int16_t __stdcall DEMODLL get_const_int(void);
 
-void __stdcall DEMODLL replace_letter_in_null_terminated_string(
+void __stdcall DEMODLL replace_letter_in_null_terminated_string_a(
+	char *in_string,
+	char old_letter,
+	char new_letter
+	);
+
+void __stdcall DEMODLL replace_letter_in_null_terminated_string_b(
 	char *in_string,
 	char old_letter,
 	char new_letter
