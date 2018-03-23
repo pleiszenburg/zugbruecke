@@ -164,8 +164,8 @@ class routine_client_class():
 		# Reduce memsync for transfer
 		self.memsync_d = self.data.pack_definition_memsync(self.__memsync__)
 
-		# Generate handles on relevant argtype definitions for memsync, adjust definitions with void pointers
-		self.memsync_handle = self.data.apply_memsync_to_argtypes_definition(self.__memsync__, self.argtypes_d)
+		# Adjust definitions with void pointers
+		self.data.apply_memsync_to_argtypes_definition(self.__memsync__, self.argtypes_d)
 
 		# Log status
 		self.log.out(' memsync: \n%s' % pf(self.__memsync__))

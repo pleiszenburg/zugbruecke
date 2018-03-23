@@ -57,32 +57,15 @@ class definition_class():
 
 	def apply_memsync_to_argtypes_definition(self, memsync_d, argtypes_d):
 
-		# Start empty handle list
-		memsync_handle = []
-
 		# Iterate over memory segments, which must be kept in sync
 		for memsync_item in memsync_d:
 
 			# Get type of pointer argument
 			arg_type = self.__get_argument_type_by_memsync_path__(memsync_item['p'], argtypes_d)
 
-			# Get type of length argument
-			if isinstance(memsync_item['l'], tuple):
-				len_type = self.__get_argument_type_by_memsync_path__(memsync_item['l'][0], argtypes_d)
-			else:
-				len_type = self.__get_argument_type_by_memsync_path__(memsync_item['l'], argtypes_d)
-
 			# HACK make memory sync pointers type agnostic
 			arg_type['g'] = GROUP_VOID
 			arg_type['t'] = None # no type string
-
-			# Add to list
-			memsync_handle.append({
-				'p': arg_type, # Handle on pointer argument definition
-				'l': len_type # Handle on length argument definition
-				})
-
-		return memsync_handle
 
 
 	def generate_callback_decorator(self, flags, restype, *argtypes):
