@@ -4,7 +4,7 @@ Changes
 0.0.10 (2018-XX-XX)
 -------------------
 
-* ...
+* FEATURE: Support for functions calculating the length of memory sections in memsync protocol, see issue #33.
 
 0.0.9 (2018-03-21)
 ------------------
