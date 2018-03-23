@@ -317,6 +317,21 @@ int16_t __stdcall DEMODLL get_const_int(void)
 }
 
 
+void __stdcall DEMODLL replace_letter_in_null_terminated_string(
+	char *in_string,
+	char old_letter,
+	char new_letter
+	)
+{
+	int i;
+	for (i = 0; i < strlen(in_string); i++) {
+		if(in_string[i] == old_letter) {
+			in_string[i] = new_letter;
+		}
+	}
+}
+
+
 float __stdcall DEMODLL simple_demo_routine(
 	float param_a,
 	float param_b
