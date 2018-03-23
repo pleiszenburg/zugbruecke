@@ -195,7 +195,7 @@ section, which must be kept in sync. It has the following keys:
 * ``p`` (:ref:`path to pointer <pathpointer>`)
 * ``l`` (:ref:`path to length <pathlength>`)
 * ``_t`` (:ref:`data type of pointer <pointertype>`)
-* ``_f`` (:ref:`custom <length function>`, optional)
+* ``_f`` (:ref:`custom length function <length function>`, optional)
 * ``_c`` (:ref:`custom data type <customtype>`, optional)
 
 .. _pathpointer:
