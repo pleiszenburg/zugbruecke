@@ -53,7 +53,46 @@ class sample_class_a:
 
 		self.__replace_letter_in_null_terminated_string__ = self.__dll__.replace_letter_in_null_terminated_string_a
 		self.__replace_letter_in_null_terminated_string__.argtypes = (
-			ctypes.POINTER(ctypes.c_char),
+			ctypes.POINTER(ctypes.c_char), # Generate pointer to char manually
+			ctypes.c_char,
+			ctypes.c_char
+			)
+		self.__replace_letter_in_null_terminated_string__.memsync = [
+			{
+				'p': [0],
+				'l': ([0],),
+				'_f': lambda x: ctypes.sizeof(x),
+				'_t': ctypes.c_char
+				}
+			]
+
+
+	def replace_letter_in_null_terminated_string(self, in_string, old_letter, new_letter):
+
+		BUFFER_LENGTH = 128
+
+		string_buffer = ctypes.create_string_buffer(BUFFER_LENGTH)
+		string_buffer.value = in_string.encode('utf-8')
+
+		self.__replace_letter_in_null_terminated_string__(
+			string_buffer,
+			old_letter.encode('utf-8'),
+			new_letter.encode('utf-8')
+			)
+
+		return string_buffer.value.decode('utf-8')
+
+
+class sample_class_b:
+
+
+	def __init__(self):
+
+		self.__dll__ = ctypes.windll.LoadLibrary('tests/demo_dll.dll')
+
+		self.__replace_letter_in_null_terminated_string__ = self.__dll__.replace_letter_in_null_terminated_string_b
+		self.__replace_letter_in_null_terminated_string__.argtypes = (
+			ctypes.c_char_p, # Use built-in char pointer type
 			ctypes.c_char,
 			ctypes.c_char
 			)
@@ -90,5 +129,12 @@ class sample_class_a:
 def test_replace_letter_in_null_terminated_string_a():
 
 	sample = sample_class_a()
+
+	assert 'zetegehube' == sample.replace_letter_in_null_terminated_string('zategahuba', 'a', 'e')
+
+
+def test_replace_letter_in_null_terminated_string_b():
+
+	sample = sample_class_b()
 
 	assert 'zetegehube' == sample.replace_letter_in_null_terminated_string('zategahuba', 'a', 'e')
