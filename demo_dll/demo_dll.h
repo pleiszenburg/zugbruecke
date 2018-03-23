@@ -111,6 +111,12 @@ void __stdcall DEMODLL bubblesort_struct(
 	bubblesort_data *data
 	);
 
+void __stdcall DEMODLL bubblesort_segments(
+	float *a,
+	int number_of_segments,
+	int elements_per_segment
+	);
+
 void __stdcall DEMODLL mix_rgb_colors(
 	int8_t color_a[3],
 	int8_t color_b[3],
@@ -161,6 +167,30 @@ int16_t __stdcall DEMODLL pow_ints(
 
 int16_t __stdcall DEMODLL get_const_int(void);
 
+void __stdcall DEMODLL replace_letter_in_null_terminated_string_a(
+	char *in_string,
+	char old_letter,
+	char new_letter
+	);
+
+void __stdcall DEMODLL replace_letter_in_null_terminated_string_b(
+	char *in_string,
+	char old_letter,
+	char new_letter
+	);
+
+void __stdcall DEMODLL replace_letter_in_null_terminated_string_unicode_a(
+	wchar_t *in_string,
+	wchar_t old_letter,
+	wchar_t new_letter
+	);
+
+void __stdcall DEMODLL replace_letter_in_null_terminated_string_unicode_b(
+	wchar_t *in_string,
+	wchar_t old_letter,
+	wchar_t new_letter
+	);
+
 struct test
 {
 	char el_char;
@@ -202,6 +232,16 @@ typedef struct conveyor_belt_data {
 
 int16_t __stdcall DEMODLL sum_elements_from_callback_in_struct(
 	struct conveyor_belt_data *data
+	);
+
+int16_t __stdcall DEMODLL use_optional_callback_a(
+	int16_t in_data,
+	conveyor_belt process_data
+	);
+
+int16_t __stdcall DEMODLL use_optional_callback_b(
+	int16_t in_data,
+	conveyor_belt process_data
 	);
 
 

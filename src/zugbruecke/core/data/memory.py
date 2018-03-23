@@ -41,6 +41,8 @@ from ..memory import (
 	serialize_pointer_into_int_list
 	)
 
+WCHAR_BYTES = ctypes.sizeof(ctypes.c_wchar)
+
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # CLASS: Memory content packing and unpacking
@@ -49,17 +51,17 @@ from ..memory import (
 class memory_class():
 
 
-	def client_fix_memsync_ctypes(self, memsync):
+	def client_fix_memsync_ctypes(self, memsync_d):
 
 		# Iterate over memory segments, which must be kept in sync
-		for segment in memsync:
+		for memsync_item in memsync_d:
 
 			# Defaut type, if nothing is given, is unsigned byte
-			if '_t' not in segment.keys():
-				segment['_t'] = ctypes.c_ubyte
+			if '_t' not in memsync_item.keys():
+				memsync_item['_t'] = ctypes.c_ubyte
 
 
-	def client_pack_memory_list(self, args, memsync):
+	def client_pack_memory_list(self, args, memsync_d):
 
 		# Start empty package for transfer
 		mem_package_list = []
@@ -68,48 +70,16 @@ class memory_class():
 		memory_handle = []
 
 		# Iterate over memory segments, which must be kept in sync
-		for segment_index, segment in enumerate(memsync):
+		for memsync_item in memsync_d:
 
-			# Reference args - search for pointer
-			pointer = args
-			# Step through path to pointer ...
-			for path_element in segment['p']:
-				# Go deeper ...
-				if isinstance(path_element, int):
-					pointer = pointer[path_element]
-				else:
-					pointer = getattr(pointer, path_element)
-
-			# Reference args - search for length
-			length = args
-			# Step through path to pointer ...
-			for path_element in segment['l']:
-				# Go deeper ...
-				if isinstance(path_element, int):
-					length = length[path_element]
-				else:
-					length = getattr(length, path_element)
-
-			# Compute actual length - might come from ctypes or a Python datatype
-			if hasattr(length, 'value'):
-				length_value = length.value * ctypes.sizeof(segment['_t'])
-			else:
-				length_value = length * ctypes.sizeof(segment['_t'])
-
-			# Convert argument into ctypes datatype TODO more checks needed!
-			if '_c' in segment.keys():
-				arg_value = ctypes.pointer(segment['_c'].from_param(pointer))
-			else:
-				arg_value = pointer
-
-			# Serialize the data ...
-			data = serialize_pointer_into_int_list(arg_value, length_value)
+			# Pack data for one pointer
+			item_data, item_pointer = self.__pack_memory_item__(args, memsync_item)
 
 			# Append data to package
-			mem_package_list.append(data)
+			mem_package_list.append(item_data)
 
 			# Append actual pointer to handler list
-			memory_handle.append(arg_value)
+			memory_handle.append(item_pointer)
 
 		return mem_package_list, memory_handle
 
@@ -121,45 +91,132 @@ class memory_class():
 			overwrite_pointer_with_int_list(pointer, mem_package_list[pointer_index])
 
 
-	def server_pack_memory_list(self, memory_handle):
+	def server_pack_memory_list(self, memory_handle, memsync_d):
 
 		# Generate new list for arrays of ints to be shipped back to the client
 		mem_package_list = []
 
 		# Iterate through pointers and serialize them
-		for pointer in memory_handle:
-			mem_package_list.append(serialize_pointer_into_int_list(*pointer))
+		for pointer, memsync_item in zip(memory_handle, memsync_d):
+
+			memory_list = serialize_pointer_into_int_list(*pointer)
+
+			if 'w' in memsync_item.keys():
+				memory_list = self.__adjust_wchar_length__(
+					memory_list, WCHAR_BYTES, memsync_item['w']
+					)
+
+			mem_package_list.append(memory_list)
 
 		return mem_package_list
 
 
-	def server_unpack_memory_list(self, args, arg_memory_list, memsync):
+	def server_unpack_memory_list(self, args, arg_memory_list, memsync_d):
 
 		# Generate temporary handle for faster packing
 		memory_handle = []
 
 		# Iterate over memory segments, which must be kept in sync
-		for segment_index, segment in enumerate(memsync):
+		for memsync_item_index, memsync_item in enumerate(memsync_d):
 
-			# Reference args - search for pointer
-			pointer = args
-			# Step through path to pointer ...
-			for path_element in segment['p'][:-1]:
-				# Go deeper ...
-				if isinstance(path_element, int):
-					pointer = pointer[path_element]
-				else:
-					pointer = getattr(pointer.contents, path_element)
+			# Search for pointer
+			pointer = self.__get_argument_by_memsync_path__(args, memsync_item['p'][:-1])
 
-			if isinstance(segment['p'][-1], int):
+			memory_list = arg_memory_list[memsync_item_index]
+
+			if 'w' in memsync_item.keys():
+				memory_list = self.__adjust_wchar_length__(
+					memory_list, memsync_item['w'], WCHAR_BYTES
+					)
+
+			if isinstance(memsync_item['p'][-1], int):
 				# Handle deepest instance
-				pointer[segment['p'][-1]] = generate_pointer_from_int_list(arg_memory_list[segment_index])
+				pointer[memsync_item['p'][-1]] = generate_pointer_from_int_list(memory_list)
 				# Append to handle
-				memory_handle.append((pointer[segment['p'][-1]], len(arg_memory_list[segment_index])))
+				memory_handle.append((pointer[memsync_item['p'][-1]], len(memory_list)))
 			else:
 				# Handle deepest instance
-				setattr(pointer.contents, segment['p'][-1], generate_pointer_from_int_list(arg_memory_list[segment_index]))
+				setattr(pointer.contents, memsync_item['p'][-1], generate_pointer_from_int_list(memory_list))
 				# Append to handle
-				memory_handle.append((getattr(pointer.contents, segment['p'][-1]), len(arg_memory_list[segment_index])))
+				memory_handle.append((getattr(pointer.contents, memsync_item['p'][-1]), len(memory_list)))
 
 		return memory_handle
+
+
+	def __adjust_wchar_length__(self, in_byte_list, old_len, new_len):
+
+		def mix_lists(*in_lists):
+			def mix_lists_generator():
+				for item_tuple in zip(*in_lists):
+					for item in item_tuple:
+						yield item
+			return list(mix_lists_generator())
+
+		if old_len == new_len:
+			return in_byte_list
+
+		elif new_len > old_len:
+			tmp = [in_byte_list[byte_nr::old_len] for byte_nr in range(0, old_len)]
+			for _ in range(0, new_len - old_len):
+				tmp.append([0 for __ in range(0, len(tmp[0]))])
+			return mix_lists(*tmp)
+
+		else:
+			return mix_lists(*[in_byte_list[byte_nr::old_len] for byte_nr in range(0, new_len)])
+
+
+	def __get_argument_by_memsync_path__(self, args, memsync_path):
+
+		# Reference args as initial value
+		element = args
+
+		# Step through path
+		for path_element in memsync_path:
+
+			# Go deeper ... # TODO use __item_pointer_strip__ ?
+			if isinstance(path_element, int):
+				element = element[path_element]
+			else:
+				element = getattr(self.__item_pointer_strip__(element), path_element)
+
+		return element
+
+
+	def __pack_memory_item__(self, args, memsync_d):
+
+		# Search for pointer
+		pointer = self.__get_argument_by_memsync_path__(args, memsync_d['p'])
+
+		# Is there a function defining the length?
+		if '_f' in memsync_d.keys() and isinstance(memsync_d['l'], tuple):
+
+			# Start list for length function arguments
+			length_func_arg_list = []
+
+			# Iterate over length components
+			for length_component in memsync_d['l']:
+
+				# Append length argument to list
+				length_func_arg_list.append(self.__get_argument_by_memsync_path__(args, length_component))
+
+			# Compute length
+			length = memsync_d['_f'](*length_func_arg_list)
+
+		else:
+
+			# Search for length
+			length = self.__get_argument_by_memsync_path__(args, memsync_d['l'])
+
+		# Compute actual length - might come from ctypes or a Python datatype
+		length_value = getattr(length, 'value', length) * ctypes.sizeof(memsync_d['_t'])
+
+		# Convert argument into ctypes datatype TODO more checks needed!
+		if '_c' in memsync_d.keys():
+			arg_value = ctypes.pointer(memsync_d['_c'].from_param(pointer))
+		else:
+			arg_value = pointer
+
+		# Serialize the data ...
+		data = serialize_pointer_into_int_list(arg_value, length_value)
+
+		return data, arg_value

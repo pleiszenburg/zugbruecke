@@ -169,6 +169,29 @@ void __stdcall DEMODLL bubblesort_struct(
 }
 
 
+void __stdcall DEMODLL bubblesort_segments(
+	float *a,
+	int number_of_segments,
+	int elements_per_segment
+	)
+{
+	int i, j;
+	int n = number_of_segments * elements_per_segment;
+	for (i = 0; i < n - 1; ++i)
+	{
+		for (j = 0; j < n - i - 1; ++j)
+		{
+			if (a[j] > a[j + 1])
+			{
+				float tmp = a[j];
+				a[j] = a[j + 1];
+				a[j + 1] = tmp;
+			}
+		}
+	}
+}
+
+
 void __stdcall DEMODLL mix_rgb_colors(
 	int8_t color_a[3],
 	int8_t color_b[3],
@@ -294,6 +317,66 @@ int16_t __stdcall DEMODLL get_const_int(void)
 }
 
 
+void __stdcall DEMODLL replace_letter_in_null_terminated_string_a(
+	char *in_string,
+	char old_letter,
+	char new_letter
+	)
+{
+	int i;
+	for (i = 0; i < strlen(in_string); i++) {
+		if(in_string[i] == old_letter) {
+			in_string[i] = new_letter;
+		}
+	}
+}
+
+
+void __stdcall DEMODLL replace_letter_in_null_terminated_string_b(
+	char *in_string,
+	char old_letter,
+	char new_letter
+	)
+{
+	int i;
+	for (i = 0; i < strlen(in_string); i++) {
+		if(in_string[i] == old_letter) {
+			in_string[i] = new_letter;
+		}
+	}
+}
+
+
+void __stdcall DEMODLL replace_letter_in_null_terminated_string_unicode_a(
+	wchar_t *in_string,
+	wchar_t old_letter,
+	wchar_t new_letter
+	)
+{
+	int i;
+	for (i = 0; i < wcslen(in_string); i++) {
+		if(in_string[i] == old_letter) {
+			in_string[i] = new_letter;
+		}
+	}
+}
+
+
+void __stdcall DEMODLL replace_letter_in_null_terminated_string_unicode_b(
+	wchar_t *in_string,
+	wchar_t old_letter,
+	wchar_t new_letter
+	)
+{
+	int i;
+	for (i = 0; i < wcslen(in_string); i++) {
+		if(in_string[i] == old_letter) {
+			in_string[i] = new_letter;
+		}
+	}
+}
+
+
 float __stdcall DEMODLL simple_demo_routine(
 	float param_a,
 	float param_b
@@ -366,6 +449,36 @@ int16_t __stdcall DEMODLL sum_elements_from_callback_in_struct(
 
 	return sum;
 
+}
+
+
+int16_t __stdcall DEMODLL use_optional_callback_a(
+	int16_t in_data,
+	conveyor_belt process_data
+	)
+{
+	int16_t tmp;
+	if(process_data) {
+		tmp = process_data(in_data);
+	} else {
+		tmp = in_data;
+	}
+	return tmp * 2;
+}
+
+
+int16_t __stdcall DEMODLL use_optional_callback_b(
+	int16_t in_data,
+	conveyor_belt process_data
+	)
+{
+	int16_t tmp;
+	if(process_data) {
+		tmp = process_data(in_data);
+	} else {
+		tmp = in_data;
+	}
+	return tmp * 2;
 }
 
 

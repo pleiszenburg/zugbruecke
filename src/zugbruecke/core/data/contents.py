@@ -116,6 +116,7 @@ class contents_class():
 				old_arg, new_arg, arg_def_dict
 				)
 
+
 	def __item_pointer_strip__(self, arg_in):
 
 		# Handle pointer object

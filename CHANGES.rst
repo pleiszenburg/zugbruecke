@@ -1,6 +1,13 @@
 Changes
 =======
 
+0.0.10 (2018-03-23)
+-------------------
+
+* FEATURE: Support for functions calculating the length of memory sections in memsync protocol, see issue #33.
+* FEATURE: Support for string buffers (and null-terminated strings), see issue #7.
+* FIX: Memsync definition sometimes lost information during first call of function, second call subsequently failed, see issue #36.
+
 0.0.9 (2018-03-21)
 ------------------
 

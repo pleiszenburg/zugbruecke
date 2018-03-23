@@ -113,7 +113,7 @@ class routine_client_class():
 		self.log.out('[routine-client] ... parameters are "%r". Packing and pushing to server ...' % (args,))
 
 		# Handle memory
-		mem_package_list, memory_transport_handle = self.data.client_pack_memory_list(args, self.memsync)
+		mem_package_list, memory_transport_handle = self.data.client_pack_memory_list(args, self.memsync_d)
 
 		# Actually call routine in DLL! TODO Handle kw ...
 		return_dict = self.__handle_call_on_server__(
@@ -121,7 +121,7 @@ class routine_client_class():
 			)
 
 		# Log status
-		self.log.out('[routine-client] ... received feedback from server, unpacking ...')
+		self.log.out('[routine-client] ... received feedback from server, unpacking & syncing arguments ...')
 
 		# Unpack return dict (call may have failed partially only)
 		self.data.arg_list_sync(
@@ -130,11 +130,17 @@ class routine_client_class():
 			self.argtypes_d
 			)
 
+		# Log status
+		self.log.out('[routine-client] ... overwriting memory ...')
+
 		# Unpack memory (call may have failed partially only)
 		self.data.client_unpack_memory_list(return_dict['memory'], memory_transport_handle)
 
 		# Unpacking a return value only makes sense if the call was a success
 		if return_dict['success']:
+
+			# Log status
+			self.log.out('[routine-client] ... unpacking return value ...')
 
 			# Unpack return value of routine
 			return_value = self.data.return_msg_unpack(return_dict['return_value'], self.restype_d)
@@ -161,11 +167,12 @@ class routine_client_class():
 		# Fix missing ctypes in memsync
 		self.data.client_fix_memsync_ctypes(self.__memsync__)
 
-		# Reduce memsync for transfer
-		self.memsync_d = self.data.pack_definition_memsync(self.__memsync__)
+		# Store and reduce memsync for transfer
+		self.memsync_d = self.__memsync__
+		memsync_d_packed = self.data.pack_definition_memsync(self.__memsync__)
 
-		# Generate handles on relevant argtype definitions for memsync, adjust definitions with void pointers
-		self.memsync_handle = self.data.apply_memsync_to_argtypes_definition(self.__memsync__, self.argtypes_d)
+		# Adjust definitions with void pointers
+		self.data.apply_memsync_to_argtypes_definition(self.__memsync__, self.argtypes_d)
 
 		# Log status
 		self.log.out(' memsync: \n%s' % pf(self.__memsync__))
@@ -176,7 +183,7 @@ class routine_client_class():
 
 		# Pass argument and return value types as strings ...
 		result = self.__configure_on_server__(
-			self.argtypes_d, self.restype_d, self.memsync_d
+			self.argtypes_d, self.restype_d, memsync_d_packed
 			)
 
 

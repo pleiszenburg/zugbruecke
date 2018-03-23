@@ -20,8 +20,8 @@ through the ``memsync`` protocol. ``memsync`` implements special directives,
 which do not interfere with *ctypes* should the code be required to run on
 *Windows* as well.
 
-A simple example
-----------------
+A simple example: An array of floating point numbers of variable length
+-----------------------------------------------------------------------
 
 Consider the following example DLL routine in C:
 
@@ -149,6 +149,135 @@ The complete example, which will run on *Unix* and on *Windows* looks just like 
 	test_vector = [5.74, 3.72, 6.28, 8.6, 9.34, 6.47, 2.05, 9.09, 4.39, 4.75]
 	bubblesort(test_vector)
 
+
+A more complex example: Computing the size of the memory from multiple arguments
+--------------------------------------------------------------------------------
+
+There are plenty of cases where you will encounter function (or structure)
+definitions like the following:
+
+.. code:: C
+
+	void __stdcall __declspec(dllimport) process_image(
+		float *image_data,
+		int image_width,
+		int image_height
+		);
+
+The ``image_data`` parameter is a flattened 1D array representing a 2D image.
+It's length is defined by its width and its height. So the length of array equals
+``image_width * image_height``. For cases like this, ``memsync`` has the ability
+to dynamically compute the length of the memory through custom functions.
+Let's have a look at how the above function would be configured in *Python*:
+
+.. code:: python
+
+	process_image.argtypes = (ctypes.POINTER(ctypes.c_float), ctypes.c_int, ctypes.c_int)
+	process_image.memsync = [
+		{
+			'p': [0],
+			'l': ([1], [2]),
+			'_f': lambda x, y: x * y,
+			'_t': ctypes.c_float
+			}
+		]
+
+The above definition will extract the values of the ``image_width`` and
+``image_height`` parameters for every function call and feed them into the
+specified lambda function.
+
+Using string buffers, null-terminated strings and Unicode
+---------------------------------------------------------
+
+Let's assume you are confronted with a regular Python (3) string. With the help of a
+DLL function, you want to replace all occurrences of a letter with another letter.
+
+.. code:: python
+
+	some_string = 'zategahuba'
+
+The DLL function's definition looks like this:
+
+.. code:: C
+
+	void __stdcall __declspec(dllimport) replace_letter(
+		char *in_string,
+		char old_letter,
+		char new_letter
+		);
+
+In Python, it can be configured as follows:
+
+.. code:: python
+
+	replace_letter.argtypes = (
+		ctypes.POINTER(ctypes.c_char),
+		ctypes.c_char,
+		ctypes.c_char
+		)
+	replace_letter.memsync = [
+		{
+			'p': [0],
+			'l': ([0],),
+			'_f': lambda x: ctypes.sizeof(x)
+			}
+		]
+
+The above configuration exploits the field for specifying a function for computing
+the length of the memory section, ``_f``. The function is pointed to the parameter
+containing the string buffer and determines its length.
+
+While Python (3) strings are actually Unicode strings, the function accepts an
+array of type ``char`` - a bytes array in Python terms. I.e. you have to encode the
+string before it is copied into a string buffer. The following example illustrates
+how the function ``replace_letter`` can be called on the string ``some_string``,
+exchanging all letters ``a`` with ``e``. Subsequently, the result is printed.
+
+.. code:: python
+
+	string_buffer = ctypes.create_string_buffer(some_string.encode('utf-8'))
+	replace_letter(string_buffer, 'a'.encode('utf-8'), 'e'.encode('utf-8'))
+	print(string_buffer.value.decode('utf-8'))
+
+The process differs if the DLL function accepts Unicode strings. Let's assume
+the DLL function is defined as follows:
+
+.. code:: C
+
+	void __stdcall __declspec(dllimport) replace_letter_w(
+		wchar_t *in_string,
+		wchar_t old_letter,
+		wchar_t new_letter
+		);
+
+In Python, it can be configured like this:
+
+.. code:: python
+
+	replace_letter_w.argtypes = (
+		ctypes.POINTER(ctypes.c_wchar),
+		ctypes.c_wchar,
+		ctypes.c_wchar
+		)
+	replace_letter_w.memsync = [
+		{
+			'p': [0],
+			'l': ([0],),
+			'w': ctypes.sizeof(ctypes.c_wchar),
+			'_f': lambda x: ctypes.sizeof(x)
+			}
+		]
+
+One key aspect has changed: ``memsync`` contains another field, ``w``. It must
+be initialized with the actual length of a Unicode character in the current environment.
+Now you can call the function as follows:
+
+.. code:: python
+
+	unicode_buffer = ctypes.create_unicode_buffer(some_string)
+	replace_letter_w(unicode_buffer, 'a', 'e')
+	print(unicode_buffer.value)
+
 Attribute: ``memsync`` (list of dict)
 ----------------------------------------
 
@@ -157,7 +286,9 @@ section, which must be kept in sync. It has the following keys:
 
 * ``p`` (:ref:`path to pointer <pathpointer>`)
 * ``l`` (:ref:`path to length <pathlength>`)
-* ``_t`` (:ref:`data type of pointer <pointertype>`)
+* ``w`` (:ref:`size of Unicode character <unicodechar>`, optional)
+* ``_t`` (:ref:`data type of pointer <pointertype>`, optional)
+* ``_f`` (:ref:`custom length function <length function>`, optional)
 * ``_c`` (:ref:`custom data type <customtype>`, optional)
 
 .. _pathpointer:
@@ -198,21 +329,33 @@ You should be able to extrapolate from here.
 
 .. _pathlength:
 
-Key: ``l``, path to length (list of int and/or str)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Key: ``l``, path to length (list of int and/or str OR tuple of lists of int and/or str)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This parameter works just like the :ref:`path to pointer <pathpointer>` parameter.
 It is expected to tell the parser, where it can find a number (int) which represents
 the length of the memory block.
 
+It is expected to be either a single path list like ``[0, 'field_a']`` or a tuple
+of multiple (or even zero) path lists, if the optional ``_f`` key is defined.
+
+.. _unicodechar:
+
+Key: ``w``, size of Unicode character (optional)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+If a Unicode string (buffer) is passed into a function, this parameter must be
+initialized with the length of one Unicode character in bytes in the current
+environment - ``ctypes.sizeof(ctypes.c_wchar)`` in most cases.
+
 .. _pointertype:
 
-Key: ``_t``, data type of pointer (PyCSimpleType or PyCStructType)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Key: ``_t``, data type of pointer (PyCSimpleType or PyCStructType) (optional)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This parameter will be fed into ``ctypes.sizeof`` for determining its size in bytes.
 The result is then multiplied with the ``length`` to get an actual size of the
-memory block in bytes.
+memory block in bytes. If it is not explicitly defined, it defaults to ``ctypes.c_ubyte``.
 
 For details on ``sizeof``, consult the `Python documentation on sizeof`_.
 It will accept `fundamental types`_ as well as `structure types`_.
@@ -220,6 +363,15 @@ It will accept `fundamental types`_ as well as `structure types`_.
 .. _Python documentation on sizeof: https://docs.python.org/3/library/ctypes.html?highlight=ctypes#ctypes.sizeof
 .. _fundamental types: https://docs.python.org/3/library/ctypes.html?highlight=ctypes#fundamental-data-types
 .. _structure types: https://docs.python.org/3/library/ctypes.html?highlight=ctypes#ctypes.Structure
+
+.. _length function:
+
+Key: ``_f``, custom function for computing the length of the memory segment (optional)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+This field can be used to plug in a function or lambda expression for computing the ``length``
+of the memory section from multiple parameters. The function is expected to accept a number of
+arguments equal to the number of elements of the tuple of length paths defined in ``l``.
 
 .. _customtype:
 
