@@ -117,12 +117,10 @@ class memory_class():
 		memory_handle = []
 
 		# Iterate over memory segments, which must be kept in sync
-		for memsync_item_index, memsync_item in enumerate(memsync_d):
+		for memory_list, memsync_item in zip(arg_memory_list, memsync_d):
 
 			# Search for pointer
 			pointer = self.__get_argument_by_memsync_path__(args, memsync_item['p'][:-1])
-
-			memory_list = arg_memory_list[memsync_item_index]
 
 			if 'w' in memsync_item.keys():
 				memory_list = self.__adjust_wchar_length__(
