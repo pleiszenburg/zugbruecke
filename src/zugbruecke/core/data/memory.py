@@ -61,7 +61,7 @@ class memory_class():
 				memsync_d['_t'] = ctypes.c_ubyte
 
 
-	def client_pack_memory_list(self, args, memsync_d_list):
+	def client_pack_memory_list(self, args_tuple, memsync_d_list):
 
 		# Start empty package for transfer
 		mem_package_list = []
@@ -73,7 +73,7 @@ class memory_class():
 		for memsync_d in memsync_d_list:
 
 			# Pack data for one pointer
-			item_data, item_pointer = self.__pack_memory_item__(args, memsync_d)
+			item_data, item_pointer = self.__pack_memory_item__(args_tuple, memsync_d)
 
 			# Append data to package
 			mem_package_list.append(item_data)
@@ -111,7 +111,7 @@ class memory_class():
 		return mem_package_list
 
 
-	def server_unpack_memory_list(self, args, arg_memory_list, memsync_d_list):
+	def server_unpack_memory_list(self, args_tuple, arg_memory_list, memsync_d_list):
 
 		# Generate temporary handle for faster packing
 		memory_handle = []
@@ -120,7 +120,7 @@ class memory_class():
 		for memory_list, memsync_d in zip(arg_memory_list, memsync_d_list):
 
 			# Search for pointer
-			pointer = self.__get_argument_by_memsync_path__(args, memsync_d['p'][:-1])
+			pointer = self.__get_argument_by_memsync_path__(args_tuple, memsync_d['p'][:-1])
 
 			if 'w' in memsync_d.keys():
 				memory_list = self.__adjust_wchar_length__(
@@ -159,10 +159,10 @@ class memory_class():
 			return bytes(tmp)
 
 
-	def __get_argument_by_memsync_path__(self, args, memsync_path):
+	def __get_argument_by_memsync_path__(self, args_tuple, memsync_path):
 
-		# Reference args as initial value
-		element = args
+		# Reference args_tuple as initial value
+		element = args_tuple
 
 		# Step through path
 		for path_element in memsync_path:
@@ -176,10 +176,10 @@ class memory_class():
 		return element
 
 
-	def __pack_memory_item__(self, args, memsync_d):
+	def __pack_memory_item__(self, args_tuple, memsync_d):
 
 		# Search for pointer
-		pointer = self.__get_argument_by_memsync_path__(args, memsync_d['p'])
+		pointer = self.__get_argument_by_memsync_path__(args_tuple, memsync_d['p'])
 
 		# Is there a function defining the length?
 		if '_f' in memsync_d.keys() and isinstance(memsync_d['l'], tuple):
@@ -191,7 +191,7 @@ class memory_class():
 			for length_component in memsync_d['l']:
 
 				# Append length argument to list
-				length_func_arg_list.append(self.__get_argument_by_memsync_path__(args, length_component))
+				length_func_arg_list.append(self.__get_argument_by_memsync_path__(args_tuple, length_component))
 
 			# Compute length
 			length = memsync_d['_f'](*length_func_arg_list)
@@ -199,7 +199,7 @@ class memory_class():
 		else:
 
 			# Search for length
-			length = self.__get_argument_by_memsync_path__(args, memsync_d['l'])
+			length = self.__get_argument_by_memsync_path__(args_tuple, memsync_d['l'])
 
 		# Compute actual length - might come from ctypes or a Python datatype
 		length_value = getattr(length, 'value', length) * ctypes.sizeof(memsync_d['_t'])
