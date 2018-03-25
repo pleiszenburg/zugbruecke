@@ -37,16 +37,16 @@ import ctypes
 # ROUTINES
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-def generate_pointer_from_int_list(int_array):
+def generate_pointer_from_bytes(in_bytes):
 
-	return ctypes.cast(ctypes.pointer((ctypes.c_ubyte * len(int_array))(*int_array)), ctypes.c_void_p)
-
-
-def overwrite_pointer_with_int_list(ctypes_pointer, int_array):
-
-	ctypes.cast(ctypes_pointer, ctypes.POINTER(ctypes.c_ubyte * len(int_array))).contents[:] = int_array[:]
+	return ctypes.cast(ctypes.pointer((ctypes.c_ubyte * len(in_bytes)).from_buffer_copy(in_bytes)), ctypes.c_void_p)
 
 
-def serialize_pointer_into_int_list(ctypes_pointer, size_bytes):
+def overwrite_pointer_with_bytes(ctypes_pointer, in_bytes):
 
-	return ctypes.cast(ctypes_pointer, ctypes.POINTER(ctypes.c_ubyte * size_bytes)).contents[:]
+	ctypes.memmove(ctypes_pointer, ctypes.pointer((ctypes.c_ubyte * len(in_bytes)).from_buffer_copy(in_bytes)), len(in_bytes))
+
+
+def serialize_pointer_into_bytes(ctypes_pointer, size_bytes):
+
+	return bytes(ctypes.cast(ctypes_pointer, ctypes.POINTER(ctypes.c_ubyte * size_bytes)).contents)

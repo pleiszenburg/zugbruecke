@@ -36,9 +36,9 @@ import ctypes
 #import traceback
 
 from ..memory import (
-	generate_pointer_from_int_list,
-	overwrite_pointer_with_int_list,
-	serialize_pointer_into_int_list
+	generate_pointer_from_bytes,
+	overwrite_pointer_with_bytes,
+	serialize_pointer_into_bytes
 	)
 
 WCHAR_BYTES = ctypes.sizeof(ctypes.c_wchar)
@@ -88,7 +88,7 @@ class memory_class():
 
 		# Overwrite the local pointers with new data
 		for pointer_index, pointer in enumerate(memory_handle):
-			overwrite_pointer_with_int_list(pointer, mem_package_list[pointer_index])
+			overwrite_pointer_with_bytes(pointer, mem_package_list[pointer_index])
 
 
 	def server_pack_memory_list(self, memory_handle, memsync_d):
@@ -99,7 +99,7 @@ class memory_class():
 		# Iterate through pointers and serialize them
 		for pointer, memsync_item in zip(memory_handle, memsync_d):
 
-			memory_list = serialize_pointer_into_int_list(*pointer)
+			memory_list = serialize_pointer_into_bytes(*pointer)
 
 			if 'w' in memsync_item.keys():
 				memory_list = self.__adjust_wchar_length__(
@@ -129,12 +129,12 @@ class memory_class():
 
 			if isinstance(memsync_item['p'][-1], int):
 				# Handle deepest instance
-				pointer[memsync_item['p'][-1]] = generate_pointer_from_int_list(memory_list)
+				pointer[memsync_item['p'][-1]] = generate_pointer_from_bytes(memory_list)
 				# Append to handle
 				memory_handle.append((pointer[memsync_item['p'][-1]], len(memory_list)))
 			else:
 				# Handle deepest instance
-				setattr(pointer.contents, memsync_item['p'][-1], generate_pointer_from_int_list(memory_list))
+				setattr(pointer.contents, memsync_item['p'][-1], generate_pointer_from_bytes(memory_list))
 				# Append to handle
 				memory_handle.append((getattr(pointer.contents, memsync_item['p'][-1]), len(memory_list)))
 
@@ -215,6 +215,6 @@ class memory_class():
 			arg_value = pointer
 
 		# Serialize the data ...
-		data = serialize_pointer_into_int_list(arg_value, length_value)
+		data = serialize_pointer_into_bytes(arg_value, length_value)
 
 		return data, arg_value
