@@ -4,7 +4,7 @@ Changes
 0.0.11 (2018-XX-XX)
 -------------------
 
-* ...
+* Memsync became more memory efficient and slightly faster.
 
 0.0.10 (2018-03-23)
 -------------------
