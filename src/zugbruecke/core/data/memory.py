@@ -141,26 +141,22 @@ class memory_class():
 		return memory_handle
 
 
-	def __adjust_wchar_length__(self, in_byte_list, old_len, new_len):
-
-		def mix_lists(*in_lists):
-			def mix_lists_generator():
-				for item_tuple in zip(*in_lists):
-					for item in item_tuple:
-						yield item
-			return list(mix_lists_generator())
+	def __adjust_wchar_length__(self, in_bytes, old_len, new_len):
 
 		if old_len == new_len:
-			return in_byte_list
+			return in_bytes
 
 		elif new_len > old_len:
-			tmp = [in_byte_list[byte_nr::old_len] for byte_nr in range(0, old_len)]
-			for _ in range(0, new_len - old_len):
-				tmp.append([0 for __ in range(0, len(tmp[0]))])
-			return mix_lists(*tmp)
+			tmp = bytearray(len(in_bytes) * new_len // old_len)
+			for index in range(old_len):
+				tmp[index::new_len] = in_bytes[index::old_len]
+			return bytes(tmp)
 
 		else:
-			return mix_lists(*[in_byte_list[byte_nr::old_len] for byte_nr in range(0, new_len)])
+			tmp = bytearray(len(in_bytes) * new_len // old_len)
+			for index in range(new_len):
+				tmp[index::new_len] = in_bytes[index::old_len]
+			return bytes(tmp)
 
 
 	def __get_argument_by_memsync_path__(self, args, memsync_path):
