@@ -51,17 +51,17 @@ WCHAR_BYTES = ctypes.sizeof(ctypes.c_wchar)
 class memory_class():
 
 
-	def client_fix_memsync_ctypes(self, memsync_d):
+	def client_fix_memsync_ctypes(self, memsync_d_list):
 
 		# Iterate over memory segments, which must be kept in sync
-		for memsync_item in memsync_d:
+		for memsync_d in memsync_d_list:
 
 			# Defaut type, if nothing is given, is unsigned byte
-			if '_t' not in memsync_item.keys():
-				memsync_item['_t'] = ctypes.c_ubyte
+			if '_t' not in memsync_d.keys():
+				memsync_d['_t'] = ctypes.c_ubyte
 
 
-	def client_pack_memory_list(self, args, memsync_d):
+	def client_pack_memory_list(self, args, memsync_d_list):
 
 		# Start empty package for transfer
 		mem_package_list = []
@@ -70,10 +70,10 @@ class memory_class():
 		memory_handle = []
 
 		# Iterate over memory segments, which must be kept in sync
-		for memsync_item in memsync_d:
+		for memsync_d in memsync_d_list:
 
 			# Pack data for one pointer
-			item_data, item_pointer = self.__pack_memory_item__(args, memsync_item)
+			item_data, item_pointer = self.__pack_memory_item__(args, memsync_d)
 
 			# Append data to package
 			mem_package_list.append(item_data)
@@ -91,19 +91,19 @@ class memory_class():
 			overwrite_pointer_with_bytes(pointer, mem_package_list[pointer_index])
 
 
-	def server_pack_memory_list(self, memory_handle, memsync_d):
+	def server_pack_memory_list(self, memory_handle, memsync_d_list):
 
 		# Generate new list for arrays of ints to be shipped back to the client
 		mem_package_list = []
 
 		# Iterate through pointers and serialize them
-		for pointer, memsync_item in zip(memory_handle, memsync_d):
+		for pointer, memsync_d in zip(memory_handle, memsync_d_list):
 
 			memory_list = serialize_pointer_into_bytes(*pointer)
 
-			if 'w' in memsync_item.keys():
+			if 'w' in memsync_d.keys():
 				memory_list = self.__adjust_wchar_length__(
-					memory_list, WCHAR_BYTES, memsync_item['w']
+					memory_list, WCHAR_BYTES, memsync_d['w']
 					)
 
 			mem_package_list.append(memory_list)
@@ -111,32 +111,32 @@ class memory_class():
 		return mem_package_list
 
 
-	def server_unpack_memory_list(self, args, arg_memory_list, memsync_d):
+	def server_unpack_memory_list(self, args, arg_memory_list, memsync_d_list):
 
 		# Generate temporary handle for faster packing
 		memory_handle = []
 
 		# Iterate over memory segments, which must be kept in sync
-		for memory_list, memsync_item in zip(arg_memory_list, memsync_d):
+		for memory_list, memsync_d in zip(arg_memory_list, memsync_d_list):
 
 			# Search for pointer
-			pointer = self.__get_argument_by_memsync_path__(args, memsync_item['p'][:-1])
+			pointer = self.__get_argument_by_memsync_path__(args, memsync_d['p'][:-1])
 
-			if 'w' in memsync_item.keys():
+			if 'w' in memsync_d.keys():
 				memory_list = self.__adjust_wchar_length__(
-					memory_list, memsync_item['w'], WCHAR_BYTES
+					memory_list, memsync_d['w'], WCHAR_BYTES
 					)
 
-			if isinstance(memsync_item['p'][-1], int):
+			if isinstance(memsync_d['p'][-1], int):
 				# Handle deepest instance
-				pointer[memsync_item['p'][-1]] = generate_pointer_from_bytes(memory_list)
+				pointer[memsync_d['p'][-1]] = generate_pointer_from_bytes(memory_list)
 				# Append to handle
-				memory_handle.append((pointer[memsync_item['p'][-1]], len(memory_list)))
+				memory_handle.append((pointer[memsync_d['p'][-1]], len(memory_list)))
 			else:
 				# Handle deepest instance
-				setattr(pointer.contents, memsync_item['p'][-1], generate_pointer_from_bytes(memory_list))
+				setattr(pointer.contents, memsync_d['p'][-1], generate_pointer_from_bytes(memory_list))
 				# Append to handle
-				memory_handle.append((getattr(pointer.contents, memsync_item['p'][-1]), len(memory_list)))
+				memory_handle.append((getattr(pointer.contents, memsync_d['p'][-1]), len(memory_list)))
 
 		return memory_handle
 
