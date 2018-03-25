@@ -113,7 +113,7 @@ class routine_client_class():
 		self.log.out('[routine-client] ... parameters are "%r". Packing and pushing to server ...' % (args,))
 
 		# Handle memory
-		mem_package_list, memory_transport_handle = self.data.client_pack_memory_list(args, self.memsync_d)
+		mem_package_list = self.data.client_pack_memory_list(args, self.memsync_d)
 
 		# Actually call routine in DLL! TODO Handle kw ...
 		return_dict = self.__handle_call_on_server__(
@@ -134,7 +134,7 @@ class routine_client_class():
 		self.log.out('[routine-client] ... overwriting memory ...')
 
 		# Unpack memory (call may have failed partially only)
-		self.data.client_unpack_memory_list(return_dict['memory'], memory_transport_handle)
+		self.data.client_unpack_memory_list(return_dict['memory'])
 
 		# Unpacking a return value only makes sense if the call was a success
 		if return_dict['success']:

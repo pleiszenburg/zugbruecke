@@ -77,7 +77,7 @@ class routine_server_class():
 			args_list = self.data.arg_list_unpack(arg_message_list, self.argtypes_d)
 
 			# Unpack pointer data
-			memory_handle = self.data.server_unpack_memory_list(args_list, arg_memory_list, self.memsync_d)
+			self.data.server_unpack_memory_list(args_list, arg_memory_list, self.memsync_d)
 
 			# Default return value
 			return_value = None
@@ -114,7 +114,7 @@ class routine_server_class():
 		try:
 
 			# Pack memory for return
-			arg_memory_list = self.data.server_pack_memory_list(memory_handle, self.memsync_d)
+			self.data.server_pack_memory_list(arg_memory_list, self.memsync_d)
 
 			# Get new arg message list
 			arg_message_list = self.data.arg_list_pack(args_list, self.argtypes_d)
