@@ -99,14 +99,14 @@ class memory_class():
 		# Iterate through pointers and serialize them
 		for pointer, memsync_d in zip(memory_handle, memsync_d_list):
 
-			memory_list = serialize_pointer_into_bytes(*pointer)
+			memory_bytes = serialize_pointer_into_bytes(*pointer)
 
 			if 'w' in memsync_d.keys():
-				memory_list = self.__adjust_wchar_length__(
-					memory_list, WCHAR_BYTES, memsync_d['w']
+				memory_bytes = self.__adjust_wchar_length__(
+					memory_bytes, WCHAR_BYTES, memsync_d['w']
 					)
 
-			mem_package_list.append(memory_list)
+			mem_package_list.append(memory_bytes)
 
 		return mem_package_list
 
@@ -117,26 +117,26 @@ class memory_class():
 		memory_handle = []
 
 		# Iterate over memory segments, which must be kept in sync
-		for memory_list, memsync_d in zip(arg_memory_list, memsync_d_list):
+		for memory_bytes, memsync_d in zip(arg_memory_list, memsync_d_list):
 
 			# Search for pointer
 			pointer = self.__get_argument_by_memsync_path__(args_tuple, memsync_d['p'][:-1])
 
 			if 'w' in memsync_d.keys():
-				memory_list = self.__adjust_wchar_length__(
-					memory_list, memsync_d['w'], WCHAR_BYTES
+				memory_bytes = self.__adjust_wchar_length__(
+					memory_bytes, memsync_d['w'], WCHAR_BYTES
 					)
 
 			if isinstance(memsync_d['p'][-1], int):
 				# Handle deepest instance
-				pointer[memsync_d['p'][-1]] = generate_pointer_from_bytes(memory_list)
+				pointer[memsync_d['p'][-1]] = generate_pointer_from_bytes(memory_bytes)
 				# Append to handle
-				memory_handle.append((pointer[memsync_d['p'][-1]], len(memory_list)))
+				memory_handle.append((pointer[memsync_d['p'][-1]], len(memory_bytes)))
 			else:
 				# Handle deepest instance
-				setattr(pointer.contents, memsync_d['p'][-1], generate_pointer_from_bytes(memory_list))
+				setattr(pointer.contents, memsync_d['p'][-1], generate_pointer_from_bytes(memory_bytes))
 				# Append to handle
-				memory_handle.append((getattr(pointer.contents, memsync_d['p'][-1]), len(memory_list)))
+				memory_handle.append((getattr(pointer.contents, memsync_d['p'][-1]), len(memory_bytes)))
 
 		return memory_handle
 
@@ -211,6 +211,6 @@ class memory_class():
 			arg_value = pointer
 
 		# Serialize the data ...
-		data = serialize_pointer_into_bytes(arg_value, length_value)
+		memory_bytes = serialize_pointer_into_bytes(arg_value, length_value)
 
-		return data, arg_value
+		return memory_bytes, arg_value
