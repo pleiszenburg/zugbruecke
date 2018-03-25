@@ -13,7 +13,7 @@ Bugs
 
 Please report bugs in *zugbruecke* in *zugbruecke*'s `GitHub issue tracker`_.
 
-Please report bugs *ctypes* in the `Python tracker`_.
+Please report bugs in *ctypes* in the `Python tracker`_.
 
 Please report bugs in *Wine* in the `WineHQ Bug Tracking System`_.
 
