@@ -87,7 +87,7 @@ class sample_class:
 # TEST(s)
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-def test_replace_letter_in_null_terminated_string_a():
+def test_tag_string():
 
 	sample = sample_class()
 
