@@ -317,6 +317,22 @@ int16_t __stdcall DEMODLL get_const_int(void)
 }
 
 
+void __stdcall DEMODLL square_int_array(
+	int16_t *in_array,
+	void *out_array,
+	int16_t len
+	)
+{
+	int i;
+	int16_t **out_array_p = out_array;
+	*out_array_p = malloc(sizeof(int16_t) * len);
+	for(i = 0; i < len; i++)
+	{
+		(*out_array_p)[i] = in_array[i] * in_array[i];
+	}
+}
+
+
 void __stdcall DEMODLL replace_letter_in_null_terminated_string_a(
 	char *in_string,
 	char old_letter,
