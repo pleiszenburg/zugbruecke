@@ -206,11 +206,10 @@ class memory_class():
 		if isinstance(memsync_d['p'][-1], int):
 			# Handle deepest instance (exchange element in list/tuple) HACK
 			pointer_arg[memsync_d['p'][-1]] = pointer_data
-			# Store the server's memory address
-			memory_d['a'] = ctypes.cast(pointer_arg[memsync_d['p'][-1]], ctypes.c_void_p).value
 		# If we're at a field of a struct
 		else:
 			# Handle deepest instance
 			setattr(pointer_arg.contents, memsync_d['p'][-1], pointer_data)
-			# Store the server's memory address
-			memory_d['a'] = pointer_data.value
+
+		# Store the server's memory address
+		memory_d['a'] = pointer_data.value
