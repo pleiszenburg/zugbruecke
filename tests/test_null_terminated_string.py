@@ -163,7 +163,7 @@ class sample_class_unicode_a:
 			{
 				'p': [0],
 				'l': ([0],),
-				'w': ctypes.sizeof(ctypes.c_wchar),
+				'w': True,
 				'_f': lambda x: ctypes.sizeof(x)
 				}
 			]
@@ -215,7 +215,7 @@ class sample_class_unicode_b:
 			{
 				'p': [0],
 				'l': ([0],),
-				'w': ctypes.sizeof(ctypes.c_wchar),
+				'w': True,
 				'_f': lambda x: ctypes.sizeof(x)
 				}
 			]

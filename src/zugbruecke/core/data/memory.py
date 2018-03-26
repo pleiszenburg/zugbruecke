@@ -60,6 +60,10 @@ class memory_class():
 			if '_t' not in memsync_d.keys():
 				memsync_d['_t'] = ctypes.c_ubyte
 
+			# Handle Unicode - off by default
+			if 'w' not in memsync_d.keys():
+				memsync_d['w'] = False
+
 
 	def client_pack_memory_list(self, args_tuple, memsync_d_list):
 
@@ -67,10 +71,14 @@ class memory_class():
 		return [self.__pack_memory_item__(args_tuple, memsync_d) for memsync_d in memsync_d_list]
 
 
-	def client_unpack_memory_list(self, mem_package_list):
+	def client_unpack_memory_list(self, mem_package_list, memsync_d_list):
 
 		# Iterate over memory package dicts
-		for memory_d in mem_package_list:
+		for memory_d, memsync_d in zip(mem_package_list, memsync_d_list):
+
+			# Adjust Unicode wchar length
+			if memsync_d['w']:
+				self.__adjust_wchar_length__(memory_d)
 
 			# Overwrite the local pointers with new data
 			overwrite_pointer_with_bytes(
@@ -89,13 +97,6 @@ class memory_class():
 				ctypes.c_void_p(memory_d['a']), memory_d['l']
 				)
 
-			# Fix Unicode wchar length
-			if 'w' in memsync_d.keys():
-				memory_d['d'] = self.__adjust_wchar_length__(
-					memory_d['d'], WCHAR_BYTES, memsync_d['w']
-					)
-				memory_d['l'] = len(memory_d['d'])
-
 
 	def server_unpack_memory_list(self, args_tuple, arg_memory_list, memsync_d_list):
 
@@ -106,22 +107,22 @@ class memory_class():
 			self.__unpack_memory_item__(args_tuple, memory_d, memsync_d)
 
 
-	def __adjust_wchar_length__(self, in_bytes, old_len, new_len):
+	def __adjust_wchar_length__(self, memory_d):
+
+		old_len = memory_d['w']
+		new_len = WCHAR_BYTES
 
 		if old_len == new_len:
-			return in_bytes
+			return
 
-		elif new_len > old_len:
-			tmp = bytearray(len(in_bytes) * new_len // old_len)
-			for index in range(old_len):
-				tmp[index::new_len] = in_bytes[index::old_len]
-			return bytes(tmp)
+		tmp = bytearray(memory_d['l'] * new_len // old_len)
 
-		else:
-			tmp = bytearray(len(in_bytes) * new_len // old_len)
-			for index in range(new_len):
-				tmp[index::new_len] = in_bytes[index::old_len]
-			return bytes(tmp)
+		for index in range(old_len if new_len > old_len else new_len):
+			tmp[index::new_len] = memory_d['d'][index::old_len]
+
+		memory_d['d'] = bytes(tmp)
+		memory_d['l'] = len(memory_d['d'])
+		memory_d['w'] = WCHAR_BYTES
 
 
 	def __get_argument_by_memsync_path__(self, args_tuple, memsync_path):
@@ -181,18 +182,16 @@ class memory_class():
 		return {
 			'd': memory_bytes, # serialized data
 			'l': len(memory_bytes), # length of serialized data
-			'a': ctypes.cast(arg_value, ctypes.c_void_p).value # local pointer address as integer
+			'a': ctypes.cast(arg_value, ctypes.c_void_p).value, # local pointer address as integer
+			'w': WCHAR_BYTES if memsync_d['w'] else None # local length of Unicode wchar if required
 			}
 
 
 	def __unpack_memory_item__(self, args_tuple, memory_d, memsync_d):
 
 		# Adjust Unicode wchar length
-		if 'w' in memsync_d.keys():
-			memory_d['d'] = self.__adjust_wchar_length__(
-				memory_d['d'], memsync_d['w'], WCHAR_BYTES
-				)
-			memory_d['l'] = len(memory_d['d'])
+		if memsync_d['w']:
+			self.__adjust_wchar_length__(memory_d)
 
 		# Search for pointer in passed arguments
 		pointer_arg = self.__get_argument_by_memsync_path__(args_tuple, memsync_d['p'][:-1])
