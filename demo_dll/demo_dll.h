@@ -197,6 +197,11 @@ void __stdcall DEMODLL replace_letter_in_null_terminated_string_unicode_b(
 	wchar_t new_letter
 	);
 
+void __stdcall DEMODLL tag_string(
+	char *in_string,
+	void *out_string
+	);
+
 struct test
 {
 	char el_char;

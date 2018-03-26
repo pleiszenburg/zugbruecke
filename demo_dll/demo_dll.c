@@ -393,6 +393,22 @@ void __stdcall DEMODLL replace_letter_in_null_terminated_string_unicode_b(
 }
 
 
+void __stdcall DEMODLL tag_string(
+	char *in_string,
+	void *out_string
+	)
+{
+	int str_len = strlen(in_string);
+
+	char **out_string_p = out_string;
+	*out_string_p = malloc(sizeof(char) * (str_len + 2));
+	strncpy((*out_string_p) + 1, in_string, str_len);
+	(*out_string_p)[0] = '<';
+	(*out_string_p)[str_len + 1] = '>';
+	(*out_string_p)[str_len + 2] = '\0';
+}
+
+
 float __stdcall DEMODLL simple_demo_routine(
 	float param_a,
 	float param_b
