@@ -5,6 +5,7 @@ Changes
 -------------------
 
 * Memsync became more memory efficient and slightly faster.
+* Memsync syntax for Unicode strings (buffers) has been simplified: ``w`` must be set to ``True`` instead of the length of ``ctypes.c_wchar``.
 
 0.0.10 (2018-03-23)
 -------------------
