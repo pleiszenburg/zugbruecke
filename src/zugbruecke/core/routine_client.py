@@ -134,7 +134,7 @@ class routine_client_class():
 		self.log.out('[routine-client] ... overwriting memory ...')
 
 		# Unpack memory (call may have failed partially only)
-		self.data.client_unpack_memory_list(return_dict['memory'])
+		self.data.client_unpack_memory_list(return_dict['memory'], self.memsync_d)
 
 		# Unpacking a return value only makes sense if the call was a success
 		if return_dict['success']:

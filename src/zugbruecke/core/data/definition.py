@@ -55,13 +55,13 @@ from ..lib import (
 class definition_class():
 
 
-	def apply_memsync_to_argtypes_definition(self, memsync_d, argtypes_d):
+	def apply_memsync_to_argtypes_definition(self, memsync_d_list, argtypes_d):
 
 		# Iterate over memory segments, which must be kept in sync
-		for memsync_item in memsync_d:
+		for memsync_d in memsync_d_list:
 
 			# Get type of pointer argument
-			arg_type = self.__get_argument_type_by_memsync_path__(memsync_item['p'], argtypes_d)
+			arg_type = self.__get_argument_type_by_memsync_path__(memsync_d['p'], argtypes_d)
 
 			# HACK make memory sync pointers type agnostic
 			arg_type['g'] = GROUP_VOID

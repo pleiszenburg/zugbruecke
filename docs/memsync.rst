@@ -263,13 +263,13 @@ In Python, it can be configured like this:
 		{
 			'p': [0],
 			'l': ([0],),
-			'w': ctypes.sizeof(ctypes.c_wchar),
+			'w': True,
 			'_f': lambda x: ctypes.sizeof(x)
 			}
 		]
 
-One key aspect has changed: ``memsync`` contains another field, ``w``. It must
-be initialized with the actual length of a Unicode character in the current environment.
+One key aspect has changed: ``memsync`` contains another field, ``w``.
+It must be set to ``True``, indicating that the argument is a Unicode string.
 Now you can call the function as follows:
 
 .. code:: python
@@ -286,7 +286,7 @@ section, which must be kept in sync. It has the following keys:
 
 * ``p`` (:ref:`path to pointer <pathpointer>`)
 * ``l`` (:ref:`path to length <pathlength>`)
-* ``w`` (:ref:`size of Unicode character <unicodechar>`, optional)
+* ``w`` (:ref:`Unicode character flag <unicodechar>`, optional)
 * ``_t`` (:ref:`data type of pointer <pointertype>`, optional)
 * ``_f`` (:ref:`custom length function <length function>`, optional)
 * ``_c`` (:ref:`custom data type <customtype>`, optional)
@@ -341,12 +341,11 @@ of multiple (or even zero) path lists, if the optional ``_f`` key is defined.
 
 .. _unicodechar:
 
-Key: ``w``, size of Unicode character (optional)
+Key: ``w``, Unicode character flag (optional)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 If a Unicode string (buffer) is passed into a function, this parameter must be
-initialized with the length of one Unicode character in bytes in the current
-environment - ``ctypes.sizeof(ctypes.c_wchar)`` in most cases.
+set to ``True``. If not specified, it will default to ``False``.
 
 .. _pointertype:
 
