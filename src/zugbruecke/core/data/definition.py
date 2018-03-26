@@ -186,6 +186,10 @@ class definition_class():
 		arg_type = argtypes_d[memsync_path[0]]
 		# Step through path to argument type ...
 		for path_element in memsync_path[1:]:
+			# Continue on special flags HACK
+			if isinstance(path_element, int):
+				if path_element < 0:
+					continue
 			# Keep track of whether or not a match has been found so an error can be raised if not
 			found_match = False
 			# Find field with matching name

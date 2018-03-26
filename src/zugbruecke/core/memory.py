@@ -49,4 +49,12 @@ def overwrite_pointer_with_bytes(ctypes_pointer, in_bytes):
 
 def serialize_pointer_into_bytes(ctypes_pointer, size_bytes):
 
-	return bytes(ctypes.cast(ctypes_pointer, ctypes.POINTER(ctypes.c_ubyte * size_bytes)).contents)
+	if is_null_pointer(ctypes_pointer):
+		return b''
+	else:
+		return bytes(ctypes.cast(ctypes_pointer, ctypes.POINTER(ctypes.c_ubyte * size_bytes)).contents)
+
+
+def is_null_pointer(ctypes_pointer):
+
+	return ctypes.cast(ctypes_pointer, ctypes.c_void_p).value is None

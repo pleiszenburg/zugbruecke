@@ -63,7 +63,7 @@ class sample_class:
 				'_f': lambda x: ctypes.sizeof(x)
 				},
 			{
-				'p': [1],
+				'p': [1, -1],
 				'l': ([0],),
 				'_f': lambda x: ctypes.sizeof(x) + 2
 				}

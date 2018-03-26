@@ -64,7 +64,7 @@ class sample_class:
 				'_t': ctypes.c_int16
 				},
 			{
-				'p': [1],
+				'p': [1, -1],
 				'l': [2],
 				'_t': ctypes.c_int16
 				}
