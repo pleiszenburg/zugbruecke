@@ -420,7 +420,7 @@ class session_client_class():
 		STATUS_DICT = {True: 'up', False: 'down'}
 
 		# Log status
-		self.log.out('[session-client] Waiting for session-server be %s ...' % STATUS_DICT[target_status])
+		self.log.out('[session-client] Waiting for session-server to be %s ...' % STATUS_DICT[target_status])
 
 		# Time-step
 		wait_for_seconds = 0.01
