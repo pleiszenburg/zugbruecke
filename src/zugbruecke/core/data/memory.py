@@ -65,23 +65,6 @@ class memory_class():
 			arg_type['t'] = None # no type string
 
 
-	def compile_memsync_ctypes(self, memsync_d_list):
-
-		# Iterate over memory segments, which must be kept in sync
-		for memsync_d in memsync_d_list:
-
-			# Defaut type, if nothing is given, is unsigned byte
-			if '_t' not in memsync_d.keys():
-				memsync_d['_t'] = ctypes.c_ubyte
-
-			# Compute the length of type '_t'
-			memsync_d['s'] = ctypes.sizeof(memsync_d['_t'])
-
-			# Handle Unicode - off by default
-			if 'w' not in memsync_d.keys():
-				memsync_d['w'] = False
-
-
 	def client_pack_memory_list(self, args_tuple, memsync_d_list):
 
 		# Pack data for every pointer, append data to package
@@ -147,6 +130,11 @@ class memory_class():
 
 			# Unpack one memory section / item
 			self.__unpack_memory_item__(args_tuple, memory_d, memsync_d)
+
+
+	def unpack_definition_memsync(self, memsync_d_list):
+
+		return [self.__unpack_memsync_definition_dict__(memsync_d) for memsync_d in memsync_d_list]
 
 
 	def __adjust_wchar_length__(self, memory_d):
@@ -259,10 +247,10 @@ class memory_class():
 			}
 
 
-	def __pack_memsync_definition_dict__(self, input_dict):
+	def __pack_memsync_definition_dict__(self, memsync_d):
 
 		# Keep everything, which is not private (does not start with '_')
-		return {key: input_dict[key] for key in input_dict.keys() if not key.startswith('_')}
+		return {key: memsync_d[key] for key in memsync_d.keys() if not key.startswith('_')}
 
 
 	def __swap_memory_addresses__(self, memory_d):
@@ -334,3 +322,19 @@ class memory_class():
 
 		# Store the server's memory address
 		memory_d['a'] = pointer_data.value
+
+
+	def __unpack_memsync_definition_dict__(self, memsync_d):
+
+		# Defaut type, if nothing is given, is unsigned byte
+		if '_t' not in memsync_d.keys():
+			memsync_d['_t'] = ctypes.c_ubyte
+
+		# Compute the length of type '_t'
+		memsync_d['s'] = ctypes.sizeof(memsync_d['_t'])
+
+		# Handle Unicode - off by default
+		if 'w' not in memsync_d.keys():
+			memsync_d['w'] = False
+
+		return memsync_d
