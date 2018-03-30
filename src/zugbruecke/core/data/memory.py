@@ -158,11 +158,11 @@ class memory_class():
 
 			# Go deeper ...
 			if isinstance(path_element, int):
-				if path_element < 0:
+				if path_element < 0: # Pointer to pointer for memory allocation by DLL
 					element = self.__item_pointer_strip__(element)
-				else:
+				else: # Dive into argument tuple
 					element = element[path_element]
-			else:
+			else: # Dive into struct
 				element = getattr(self.__item_pointer_strip__(element), path_element)
 
 		return element
