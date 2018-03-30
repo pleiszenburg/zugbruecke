@@ -151,7 +151,7 @@ class routine_server_class():
 		self.restype_d = restype_d
 
 		# Store memory sync instructions
-		self.memsync_d = memsync_d
+		self.memsync_d = self.data.unpack_definition_memsync(memsync_d)
 
 		try:
 

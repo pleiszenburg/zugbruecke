@@ -66,8 +66,11 @@ class memory_definition_class():
 			memsync_d['_f'] = eval(memsync_d['f']) # HACK?
 
 		# Defaut type, if nothing is given, is unsigned byte
-		if '_t' not in memsync_d.keys():
-			memsync_d['_t'] = ctypes.c_ubyte
+		if 't' not in memsync_d.keys():
+			memsync_d['t'] = 'c_ubyte'
+
+		# Get actual type class
+		memsync_d['_t'] = getattr(ctypes, memsync_d['t'], None) # TODO add support for custom struct types HERE
 
 		# Compute the size of type '_t'
 		memsync_d['s'] = ctypes.sizeof(memsync_d['_t'])

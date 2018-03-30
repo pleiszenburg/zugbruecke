@@ -65,7 +65,7 @@ class sample_class:
 			{
 				'p': [0, 'a'], # "path" to argument containing the pointer
 				'l': [0, 'n'], # "path" to argument containing the length
-				'_t': ctypes.c_float # type of argument (optional, default char/byte): sizeof(type) * length == bytes
+				't': 'c_float' # type of argument (optional, default char/byte): sizeof(type) * length == bytes
 				}
 			]
 		self.__bubblesort_struct__.argtypes = (ctypes.POINTER(bubblesort_data),)
