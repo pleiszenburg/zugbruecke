@@ -6,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	src/zugbruecke/core/data/memory.py: (Un-) packing of argument pointers
+	src/zugbruecke/core/data/mem_contents.py: (Un-) packing of memory
 
 	Required to run on platform / side: [UNIX, WINE]
 
@@ -49,7 +49,7 @@ WCHAR_BYTES = ctypes.sizeof(ctypes.c_wchar)
 # CLASS: Memory content packing and unpacking
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-class memory_class():
+class memory_contents_class():
 
 
 	def apply_memsync_to_argtypes_definition(self, memsync_d_list, argtypes_d):
@@ -99,11 +99,6 @@ class memory_class():
 					)
 
 
-	def pack_definition_memsync(self, memsync_d_list):
-
-		return [self.__pack_memsync_definition_dict__(memsync_d) for memsync_d in memsync_d_list]
-
-
 	def server_pack_memory_list(self, args_list, mem_package_list, memsync_d_list):
 
 		# Iterate through pointers and serialize them
@@ -130,11 +125,6 @@ class memory_class():
 
 			# Unpack one memory section / item
 			self.__unpack_memory_item__(args_tuple, memory_d, memsync_d)
-
-
-	def unpack_definition_memsync(self, memsync_d_list):
-
-		return [self.__unpack_memsync_definition_dict__(memsync_d) for memsync_d in memsync_d_list]
 
 
 	def __adjust_wchar_length__(self, memory_d):
@@ -247,12 +237,6 @@ class memory_class():
 			}
 
 
-	def __pack_memsync_definition_dict__(self, memsync_d):
-
-		# Keep everything, which is not private (does not start with '_')
-		return {key: memsync_d[key] for key in memsync_d.keys() if not key.startswith('_')}
-
-
 	def __swap_memory_addresses__(self, memory_d):
 
 		memory_d.update({
@@ -322,19 +306,3 @@ class memory_class():
 
 		# Store the server's memory address
 		memory_d['a'] = pointer_data.value
-
-
-	def __unpack_memsync_definition_dict__(self, memsync_d):
-
-		# Defaut type, if nothing is given, is unsigned byte
-		if '_t' not in memsync_d.keys():
-			memsync_d['_t'] = ctypes.c_ubyte
-
-		# Compute the length of type '_t'
-		memsync_d['s'] = ctypes.sizeof(memsync_d['_t'])
-
-		# Handle Unicode - off by default
-		if 'w' not in memsync_d.keys():
-			memsync_d['w'] = False
-
-		return memsync_d

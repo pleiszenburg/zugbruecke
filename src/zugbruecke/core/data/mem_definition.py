@@ -6,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	src/zugbruecke/core/data/__init__.py: Arguments, return values and memory
+	src/zugbruecke/core/data/mem_definition.py: (Un-) packing of memory definitions
 
 	Required to run on platform / side: [UNIX, WINE]
 
@@ -31,42 +31,45 @@ specific language governing rights and limitations under the License.
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-from ctypes import _FUNCFLAG_CDECL
-
-from .arg_contents import arguments_contents_class
-from .arg_definition import arguments_definition_class
-from .mem_contents import memory_contents_class
-from .mem_definition import memory_definition_class
-
-from ..const import _FUNCFLAG_STDCALL
+import ctypes
+from pprint import pformat as pf
+#import traceback
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# CLASS: DATA
+# CLASS: Memory content packing and unpacking
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-class data_class(
-	arguments_contents_class,
-	arguments_definition_class,
-	memory_contents_class,
-	memory_definition_class
-	):
+class memory_definition_class():
 
 
-	cache_dict = {
-		'func_type': {
-			_FUNCFLAG_CDECL: {},
-			_FUNCFLAG_STDCALL: {}
-			},
-		'func_handle': {},
-		'struct_type': {}
-		}
+	def pack_definition_memsync(self, memsync_d_list):
+
+		return [self.__pack_memsync_definition_dict__(memsync_d) for memsync_d in memsync_d_list]
 
 
-	def __init__(self, log, is_server, callback_client = None, callback_server = None):
+	def unpack_definition_memsync(self, memsync_d_list):
 
-		self.log = log
-		self.is_server = is_server
+		return [self.__unpack_memsync_definition_dict__(memsync_d) for memsync_d in memsync_d_list]
 
-		self.callback_client = callback_client
-		self.callback_server = callback_server
+
+	def __pack_memsync_definition_dict__(self, memsync_d):
+
+		# Keep everything, which is not private (does not start with '_')
+		return {key: memsync_d[key] for key in memsync_d.keys() if not key.startswith('_')}
+
+
+	def __unpack_memsync_definition_dict__(self, memsync_d):
+
+		# Defaut type, if nothing is given, is unsigned byte
+		if '_t' not in memsync_d.keys():
+			memsync_d['_t'] = ctypes.c_ubyte
+
+		# Compute the length of type '_t'
+		memsync_d['s'] = ctypes.sizeof(memsync_d['_t'])
+
+		# Handle Unicode - off by default
+		if 'w' not in memsync_d.keys():
+			memsync_d['w'] = False
+
+		return memsync_d
