@@ -191,33 +191,40 @@ class memory_contents_class():
 		return arg_type
 
 
+	def __get_element_length_of_memory__(self, args_tuple, memsync_d):
+
+		# There is no function defining the length?
+		if '_f' not in memsync_d.keys():
+
+			# Search for length
+			length = self.__get_argument_by_memsync_path__(args_tuple, memsync_d['l'])
+
+			# Length might come from ctypes or a Python datatype
+			return getattr(length, 'value', length)
+
+		# Make sure length can be computed from a tuple of arguments
+		assert isinstance(memsync_d['l'], tuple)
+
+		# Start list for length function arguments
+		length_func_arg_list = []
+
+		# Iterate over length components
+		for length_component in memsync_d['l']:
+
+			# Append length argument to list
+			length_func_arg_list.append(self.__get_argument_by_memsync_path__(args_tuple, length_component))
+
+		# Compute length and return
+		return memsync_d['_f'](*length_func_arg_list)
+
+
 	def __pack_memory_item__(self, args_tuple, memsync_d):
 
 		# Search for pointer
 		pointer = self.__get_argument_by_memsync_path__(args_tuple, memsync_d['p'])
 
-		# Is there a function defining the length?
-		if '_f' in memsync_d.keys() and isinstance(memsync_d['l'], tuple):
-
-			# Start list for length function arguments
-			length_func_arg_list = []
-
-			# Iterate over length components
-			for length_component in memsync_d['l']:
-
-				# Append length argument to list
-				length_func_arg_list.append(self.__get_argument_by_memsync_path__(args_tuple, length_component))
-
-			# Compute length
-			length = memsync_d['_f'](*length_func_arg_list)
-
-		else:
-
-			# Search for length
-			length = self.__get_argument_by_memsync_path__(args_tuple, memsync_d['l'])
-
-		# Compute actual length - might come from ctypes or a Python datatype
-		length_value = getattr(length, 'value', length) * memsync_d['s']
+		# Compute actual length
+		length_value = self.__get_element_length_of_memory__(args_tuple, memsync_d) * memsync_d['s']
 
 		# Convert argument into ctypes datatype TODO more checks needed!
 		if '_c' in memsync_d.keys():
