@@ -60,12 +60,12 @@ class sample_class:
 			{
 				'p': [0],
 				'l': ([0],),
-				'_f': lambda x: ctypes.sizeof(x)
+				'f': 'lambda x: ctypes.sizeof(x)'
 				},
 			{
 				'p': [1, -1],
 				'l': ([0],),
-				'_f': lambda x: ctypes.sizeof(x) + 2
+				'f': 'lambda x: ctypes.sizeof(x) + 2'
 				}
 			]
 

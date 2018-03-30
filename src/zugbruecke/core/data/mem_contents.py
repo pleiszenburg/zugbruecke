@@ -191,7 +191,7 @@ class memory_contents_class():
 		return arg_type
 
 
-	def __get_element_length_of_memory__(self, args_tuple, memsync_d):
+	def __get_number_of_elements__(self, args_tuple, memsync_d):
 
 		# There is no function defining the length?
 		if '_f' not in memsync_d.keys():
@@ -205,17 +205,10 @@ class memory_contents_class():
 		# Make sure length can be computed from a tuple of arguments
 		assert isinstance(memsync_d['l'], tuple)
 
-		# Start list for length function arguments
-		length_func_arg_list = []
-
-		# Iterate over length components
-		for length_component in memsync_d['l']:
-
-			# Append length argument to list
-			length_func_arg_list.append(self.__get_argument_by_memsync_path__(args_tuple, length_component))
-
-		# Compute length and return
-		return memsync_d['_f'](*length_func_arg_list)
+		# Compute length from arguments and return
+		return memsync_d['_f'](*(
+			self.__get_argument_by_memsync_path__(args_tuple, item) for item in memsync_d['l']
+			))
 
 
 	def __pack_memory_item__(self, args_tuple, memsync_d):
@@ -224,7 +217,7 @@ class memory_contents_class():
 		pointer = self.__get_argument_by_memsync_path__(args_tuple, memsync_d['p'])
 
 		# Compute actual length
-		length_value = self.__get_element_length_of_memory__(args_tuple, memsync_d) * memsync_d['s']
+		length_value = self.__get_number_of_elements__(args_tuple, memsync_d) * memsync_d['s']
 
 		# Convert argument into ctypes datatype TODO more checks needed!
 		if '_c' in memsync_d.keys():
