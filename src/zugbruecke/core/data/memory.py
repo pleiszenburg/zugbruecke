@@ -35,6 +35,7 @@ import ctypes
 from pprint import pformat as pf
 #import traceback
 
+from ..const import GROUP_VOID
 from ..memory import (
 	generate_pointer_from_bytes,
 	overwrite_pointer_with_bytes,
@@ -49,6 +50,19 @@ WCHAR_BYTES = ctypes.sizeof(ctypes.c_wchar)
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 class memory_class():
+
+
+	def apply_memsync_to_argtypes_definition(self, memsync_d_list, argtypes_d):
+
+		# Iterate over memory segments, which must be kept in sync
+		for memsync_d in memsync_d_list:
+
+			# Get type of pointer argument
+			arg_type = self.__get_argument_type_by_memsync_path__(memsync_d['p'], argtypes_d)
+
+			# HACK make memory sync pointers type agnostic
+			arg_type['g'] = GROUP_VOID
+			arg_type['t'] = None # no type string
 
 
 	def compile_memsync_ctypes(self, memsync_d_list):
@@ -166,6 +180,32 @@ class memory_class():
 				element = getattr(self.__item_pointer_strip__(element), path_element)
 
 		return element
+
+
+	def __get_argument_type_by_memsync_path__(self, memsync_path, argtypes_d):
+
+		# Reference processed argument types - start with depth 0
+		arg_type = argtypes_d[memsync_path[0]]
+		# Step through path to argument type ...
+		for path_element in memsync_path[1:]:
+			# Continue on special flags HACK
+			if isinstance(path_element, int):
+				if path_element < 0:
+					continue
+			# Keep track of whether or not a match has been found so an error can be raised if not
+			found_match = False
+			# Find field with matching name
+			for field_index, field in enumerate(arg_type['_fields_']):
+				if field['n'] == path_element:
+					found_match = True
+					break
+			# Raise an error if the definition does not make sense
+			if not found_match:
+				raise # TODO
+			# Go deeper ...
+			arg_type = arg_type['_fields_'][field_index]
+
+		return arg_type
 
 
 	def __pack_memory_item__(self, args_tuple, memsync_d):
