@@ -65,7 +65,7 @@ class memory_definition_class():
 		if '_t' not in memsync_d.keys():
 			memsync_d['_t'] = ctypes.c_ubyte
 
-		# Compute the length of type '_t'
+		# Compute the size of type '_t'
 		memsync_d['s'] = ctypes.sizeof(memsync_d['_t'])
 
 		# Handle Unicode - off by default
