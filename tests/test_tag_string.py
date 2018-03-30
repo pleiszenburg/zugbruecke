@@ -44,14 +44,14 @@ elif platform.startswith('win'):
 # CLASSES AND ROUTINES
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-class sample_class:
+class sample_class_a:
 
 
 	def __init__(self):
 
 		self.__dll__ = ctypes.windll.LoadLibrary('tests/demo_dll.dll')
 
-		self.__tag_string__ = self.__dll__.tag_string
+		self.__tag_string__ = self.__dll__.tag_string_a
 		self.__tag_string__.argtypes = (
 			ctypes.POINTER(ctypes.c_char),
 			ctypes.c_void_p
@@ -83,12 +83,58 @@ class sample_class:
 			).contents[:].decode('utf-8').rstrip('\0')
 
 
+class sample_class_b:
+
+
+	def __init__(self):
+
+		self.__dll__ = ctypes.windll.LoadLibrary('tests/demo_dll.dll')
+
+		self.__tag_string__ = self.__dll__.tag_string_b
+		self.__tag_string__.argtypes = (
+			ctypes.POINTER(ctypes.c_char),
+			ctypes.c_void_p
+			)
+		self.__tag_string__.memsync = [
+			{
+				'p': [0],
+				'l': ([0],),
+				'f': 'lambda x: ctypes.sizeof(x)'
+				},
+			{
+				'p': [1, -1],
+				'l': ([1],),
+				'f': 'lambda x: ctypes.sizeof(x)'
+				}
+			]
+
+
+	def tag_string(self, in_string):
+
+		in_buffer = ctypes.create_string_buffer(in_string.encode('utf-8'))
+		out_buffer = ctypes.pointer(ctypes.c_void_p())
+
+		self.__tag_string__(in_buffer, out_buffer)
+
+		return ctypes.cast(
+			out_buffer.contents,
+			ctypes.POINTER(ctypes.c_char * (len(in_buffer) + 2))
+			).contents[:].decode('utf-8').rstrip('\0')
+
+
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # TEST(s)
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 def test_tag_string():
 
-	sample = sample_class()
+	sample = sample_class_a()
+
+	assert '<html>' == sample.tag_string('html')
+
+
+def test_tag_string_serverside_length_computation():
+
+	sample = sample_class_b()
 
 	assert '<html>' == sample.tag_string('html')
