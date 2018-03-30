@@ -85,18 +85,8 @@ class memory_contents_class():
 			# If pointer pointed to data
 			else:
 
-				# Swap local and remote memory addresses
-				self.__swap_memory_addresses__(memory_d)
-
-				# Adjust Unicode wchar length
-				if memsync_d['w']:
-					self.__adjust_wchar_length__(memory_d)
-
-				# Overwrite the local pointers with new data
-				overwrite_pointer_with_bytes(
-					ctypes.c_void_p(memory_d['a']),
-					memory_d['d']
-					)
+				# Overwrite pointer
+				self.__unpack_memory_item_overwrite__(args_list, memory_d, memsync_d)
 
 
 	def server_pack_memory_list(self, args_list, mem_package_list, memsync_d_list):
@@ -254,7 +244,7 @@ class memory_contents_class():
 		# Generate pointer to passed data
 		pointer = generate_pointer_from_bytes(memory_d['d'])
 
-		# HACK Is this a pointer?
+		# Is this an already existing pointer, which has to be given a new value?
 		if hasattr(pointer_arg, 'contents'):
 			# Is the pointer pointing to another pointer?
 			if hasattr(pointer_arg.contents, 'value'):
@@ -300,3 +290,19 @@ class memory_contents_class():
 		else:
 			# Handle deepest instance
 			setattr(pointer_arg.contents, memsync_d['p'][-1], pointer)
+
+
+	def __unpack_memory_item_overwrite__(self, args_tuple, memory_d, memsync_d):
+
+		# Swap local and remote memory addresses
+		self.__swap_memory_addresses__(memory_d)
+
+		# Adjust Unicode wchar length
+		if memsync_d['w']:
+			self.__adjust_wchar_length__(memory_d)
+
+		# Overwrite the local pointers with new data
+		overwrite_pointer_with_bytes(
+			ctypes.c_void_p(memory_d['a']),
+			memory_d['d']
+			)
