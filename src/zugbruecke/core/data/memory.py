@@ -41,9 +41,6 @@ from ..memory import (
 	overwrite_pointer_with_bytes,
 	serialize_pointer_into_bytes
 	)
-from ..lib import (
-	reduce_dict
-	)
 
 WCHAR_BYTES = ctypes.sizeof(ctypes.c_wchar)
 
@@ -119,9 +116,9 @@ class memory_class():
 					)
 
 
-	def pack_definition_memsync(self, memsync):
+	def pack_definition_memsync(self, memsync_d_list):
 
-		return [reduce_dict(sync_element) for sync_element in memsync]
+		return [self.__pack_memsync_definition_dict__(memsync_d) for memsync_d in memsync_d_list]
 
 
 	def server_pack_memory_list(self, args_list, mem_package_list, memsync_d_list):
@@ -260,6 +257,12 @@ class memory_class():
 			'_a': None, # remote pointer has not been initialized
 			'w': WCHAR_BYTES if memsync_d['w'] else None # local length of Unicode wchar if required
 			}
+
+
+	def __pack_memsync_definition_dict__(self, input_dict):
+
+		# Keep everything, which is not private (does not start with '_')
+		return {key: input_dict[key] for key in input_dict.keys() if not key.startswith('_')}
 
 
 	def __swap_memory_addresses__(self, memory_d):
