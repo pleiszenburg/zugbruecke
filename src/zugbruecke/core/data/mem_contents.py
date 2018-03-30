@@ -169,24 +169,15 @@ class memory_contents_class():
 
 		# Reference processed argument types - start with depth 0
 		arg_type = argtypes_d[memsync_path[0]]
+
 		# Step through path to argument type ...
 		for path_element in memsync_path[1:]:
 			# Continue on special flags HACK
 			if isinstance(path_element, int):
 				if path_element < 0:
 					continue
-			# Keep track of whether or not a match has been found so an error can be raised if not
-			found_match = False
-			# Find field with matching name
-			for field_index, field in enumerate(arg_type['_fields_']):
-				if field['n'] == path_element:
-					found_match = True
-					break
-			# Raise an error if the definition does not make sense
-			if not found_match:
-				raise # TODO
 			# Go deeper ...
-			arg_type = arg_type['_fields_'][field_index]
+			arg_type = {field['n']: field for field in arg_type['_fields_']}[path_element]
 
 		return arg_type
 
