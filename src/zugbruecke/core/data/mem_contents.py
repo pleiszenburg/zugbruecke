@@ -80,7 +80,7 @@ class memory_contents_class():
 			if memory_d['_a'] is None:
 
 				# Unpack one memory section / item
-				self.__unpack_memory_item__(args_list, memory_d, memsync_d)
+				self.__unpack_memory_item_data__(args_list, memory_d, memsync_d)
 
 			# If pointer pointed to data
 			else:
@@ -123,8 +123,16 @@ class memory_contents_class():
 		# Iterate over memory segments, which must be kept in sync
 		for memory_d, memsync_d in zip(arg_memory_list, memsync_d_list):
 
-			# Unpack one memory section / item
-			self.__unpack_memory_item__(args_tuple, memory_d, memsync_d)
+			# Is this a null pointer?
+			if memory_d['a'] is None:
+
+				# Insert new NULL pointer
+				self.__unpack_memory_item_null__(args_tuple, memory_d, memsync_d)
+
+			else:
+
+				# Unpack one memory section / item
+				self.__unpack_memory_item_data__(args_tuple, memory_d, memsync_d)
 
 
 	def __adjust_wchar_length__(self, memory_d):
@@ -215,7 +223,7 @@ class memory_contents_class():
 			pointer = ctypes.pointer(memsync_d['_c'].from_param(pointer))
 
 		return {
-			'd': serialize_pointer_into_bytes(pointer, length), # serialized data
+			'd': serialize_pointer_into_bytes(pointer, length), # serialized data, '' if NULL pointer
 			'l': length, # length of serialized data
 			'a': ctypes.cast(pointer, ctypes.c_void_p).value, # local pointer address as integer
 			'_a': None, # remote pointer has not been initialized
@@ -231,34 +239,10 @@ class memory_contents_class():
 			})
 
 
-	def __unpack_memory_item__(self, args_tuple, memory_d, memsync_d):
+	def __unpack_memory_item_data__(self, args_tuple, memory_d, memsync_d):
 
 		# Swap local and remote memory addresses
 		self.__swap_memory_addresses__(memory_d)
-
-		# Is this a null pointer?
-		if memory_d['_a'] is None:
-
-			# Make sure this is a pointer to a pointer
-			assert memsync_d['p'][-1] == -1
-
-			# Search for pointer in passed arguments
-			pointer_arg = self.__get_argument_by_memsync_path__(args_tuple, memsync_d['p'][:-2])
-
-			# Generate empty pointer
-			pointer_data = ctypes.pointer(ctypes.c_void_p())
-
-			# If we're in the top level arguments or an array ...
-			if isinstance(memsync_d['p'][-2], int):
-				# Handle deepest instance (exchange element in list/tuple) HACK
-				pointer_arg[memsync_d['p'][-2]] = pointer_data
-			# If we're at a field of a struct
-			else:
-				# Handle deepest instance
-				setattr(pointer_arg.contents, memsync_d['p'][-1], pointer_data)
-
-			# Exit here
-			return
 
 		# Search for pointer in passed arguments
 		pointer_arg = self.__get_argument_by_memsync_path__(args_tuple, memsync_d['p'][:-1])
@@ -268,7 +252,7 @@ class memory_contents_class():
 			self.__adjust_wchar_length__(memory_d)
 
 		# Generate pointer to passed data
-		pointer_data = generate_pointer_from_bytes(memory_d['d'])
+		pointer = generate_pointer_from_bytes(memory_d['d'])
 
 		# HACK Is this a pointer?
 		if hasattr(pointer_arg, 'contents'):
@@ -277,18 +261,42 @@ class memory_contents_class():
 				# Is the pointer empty?
 				if pointer_arg.contents.value is None:
 					# Overwrite the pointer's value
-					pointer_arg.contents.value = pointer_data.value
+					pointer_arg.contents.value = pointer.value
 					# Get out of here HACK
 					return
 
 		# If we're in the top level arguments or an array ...
 		if isinstance(memsync_d['p'][-1], int):
 			# Handle deepest instance (exchange element in list/tuple) HACK
-			pointer_arg[memsync_d['p'][-1]] = pointer_data
+			pointer_arg[memsync_d['p'][-1]] = pointer
 		# If we're at a field of a struct
 		else:
 			# Handle deepest instance
-			setattr(pointer_arg.contents, memsync_d['p'][-1], pointer_data)
+			setattr(pointer_arg.contents, memsync_d['p'][-1], pointer)
 
 		# Store the server's memory address
-		memory_d['a'] = pointer_data.value
+		memory_d['a'] = pointer.value
+
+
+	def __unpack_memory_item_null__(self, args_tuple, memory_d, memsync_d):
+
+		# Swap local and remote memory addresses
+		self.__swap_memory_addresses__(memory_d)
+
+		# Make sure this is a pointer to a pointer
+		assert memsync_d['p'][-1] == -1
+
+		# Search for pointer in passed arguments
+		pointer_arg = self.__get_argument_by_memsync_path__(args_tuple, memsync_d['p'][:-2])
+
+		# Generate empty pointer
+		pointer = ctypes.pointer(ctypes.c_void_p())
+
+		# If we're in the top level arguments or an array ...
+		if isinstance(memsync_d['p'][-2], int):
+			# Handle deepest instance (exchange element in list/tuple) HACK
+			pointer_arg[memsync_d['p'][-2]] = pointer
+		# If we're at a field of a struct
+		else:
+			# Handle deepest instance
+			setattr(pointer_arg.contents, memsync_d['p'][-1], pointer)
