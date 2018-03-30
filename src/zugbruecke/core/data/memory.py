@@ -61,7 +61,7 @@ class memory_class():
 				memsync_d['_t'] = ctypes.c_ubyte
 
 			# Compute the length of type '_t'
-			memsync_d['t'] = ctypes.sizeof(memsync_d['_t'])
+			memsync_d['s'] = ctypes.sizeof(memsync_d['_t'])
 
 			# Handle Unicode - off by default
 			if 'w' not in memsync_d.keys():
@@ -194,7 +194,7 @@ class memory_class():
 			length = self.__get_argument_by_memsync_path__(args_tuple, memsync_d['l'])
 
 		# Compute actual length - might come from ctypes or a Python datatype
-		length_value = getattr(length, 'value', length) * memsync_d['t']
+		length_value = getattr(length, 'value', length) * memsync_d['s']
 
 		# Convert argument into ctypes datatype TODO more checks needed!
 		if '_c' in memsync_d.keys():
