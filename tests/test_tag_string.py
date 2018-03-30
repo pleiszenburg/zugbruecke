@@ -137,4 +137,4 @@ def test_tag_string_serverside_length_computation():
 
 	sample = sample_class_b()
 
-	assert '<html>' == sample.tag_string('html')
+	assert '<body>' == sample.tag_string('body')
