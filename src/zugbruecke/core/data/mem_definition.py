@@ -61,6 +61,10 @@ class memory_definition_class():
 
 	def __unpack_memsync_definition_dict__(self, memsync_d):
 
+		# Compile length function
+		if 'f' in memsync_d.keys():
+			memsync_d['_f'] = eval(memsync_d['f']) # HACK?
+
 		# Defaut type, if nothing is given, is unsigned byte
 		if '_t' not in memsync_d.keys():
 			memsync_d['_t'] = ctypes.c_ubyte
