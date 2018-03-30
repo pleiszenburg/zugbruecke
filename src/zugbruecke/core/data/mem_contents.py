@@ -217,21 +217,16 @@ class memory_contents_class():
 		pointer = self.__get_argument_by_memsync_path__(args_tuple, memsync_d['p'])
 
 		# Compute actual length
-		length_value = self.__get_number_of_elements__(args_tuple, memsync_d) * memsync_d['s']
+		length = self.__get_number_of_elements__(args_tuple, memsync_d) * memsync_d['s']
 
 		# Convert argument into ctypes datatype TODO more checks needed!
 		if '_c' in memsync_d.keys():
-			arg_value = ctypes.pointer(memsync_d['_c'].from_param(pointer))
-		else:
-			arg_value = pointer
-
-		# Serialize the data ...
-		memory_bytes = serialize_pointer_into_bytes(arg_value, length_value)
+			pointer = ctypes.pointer(memsync_d['_c'].from_param(pointer))
 
 		return {
-			'd': memory_bytes, # serialized data
-			'l': len(memory_bytes), # length of serialized data
-			'a': ctypes.cast(arg_value, ctypes.c_void_p).value, # local pointer address as integer
+			'd': serialize_pointer_into_bytes(pointer, length), # serialized data
+			'l': length, # length of serialized data
+			'a': ctypes.cast(pointer, ctypes.c_void_p).value, # local pointer address as integer
 			'_a': None, # remote pointer has not been initialized
 			'w': WCHAR_BYTES if memsync_d['w'] else None # local length of Unicode wchar if required
 			}
