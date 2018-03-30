@@ -41,6 +41,9 @@ from ..memory import (
 	overwrite_pointer_with_bytes,
 	serialize_pointer_into_bytes
 	)
+from ..lib import (
+	reduce_dict
+	)
 
 WCHAR_BYTES = ctypes.sizeof(ctypes.c_wchar)
 
@@ -114,6 +117,11 @@ class memory_class():
 					ctypes.c_void_p(memory_d['a']),
 					memory_d['d']
 					)
+
+
+	def pack_definition_memsync(self, memsync):
+
+		return [reduce_dict(sync_element) for sync_element in memsync]
 
 
 	def server_pack_memory_list(self, args_list, mem_package_list, memsync_d_list):

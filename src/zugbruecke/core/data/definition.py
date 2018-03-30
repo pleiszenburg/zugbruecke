@@ -43,9 +43,6 @@ from ..const import (
 	GROUP_STRUCT,
 	GROUP_FUNCTION
 	)
-from ..lib import (
-	reduce_dict
-	)
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -84,11 +81,6 @@ class definition_class():
 	def pack_definition_argtypes(self, argtypes):
 
 		return [self.__pack_definition_dict__(arg) for arg in argtypes]
-
-
-	def pack_definition_memsync(self, memsync):
-
-		return [reduce_dict(sync_element) for sync_element in memsync]
 
 
 	def pack_definition_returntype(self, restype):
