@@ -36,7 +36,7 @@ from pprint import pformat as pf
 #import traceback
 
 from ..const import GROUP_VOID
-from ..memory import (
+from .memory import (
 	generate_pointer_from_bytes,
 	is_null_pointer,
 	overwrite_pointer_with_bytes,

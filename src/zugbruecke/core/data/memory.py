@@ -6,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	src/zugbruecke/core/memory.py: Handles memory transfers between both sides
+	src/zugbruecke/core/data/memory.py: Handles memory transfers between both sides
 
 	Required to run on platform / side: [UNIX, WINE]
 
