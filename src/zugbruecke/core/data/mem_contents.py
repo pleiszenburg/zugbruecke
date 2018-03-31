@@ -38,6 +38,7 @@ from pprint import pformat as pf
 from ..const import GROUP_VOID
 from ..memory import (
 	generate_pointer_from_bytes,
+	is_null_pointer,
 	overwrite_pointer_with_bytes,
 	serialize_pointer_into_bytes
 	)
@@ -180,6 +181,18 @@ class memory_contents_class():
 		return arg_type
 
 
+	def __get_length_of_null_terminated_string__(self, in_pointer, is_unicode):
+
+		if is_unicode:
+			datatype = ctypes.c_wchar
+			datatype_p = ctypes.c_wchar_p
+		else:
+			datatype = ctypes.c_char
+			datatype_p = ctypes.c_char_p
+
+		return len(ctypes.cast(in_pointer, datatype_p).value) * ctypes.sizeof(datatype)
+
+
 	def __get_number_of_elements__(self, args_tuple, memsync_d):
 
 		# There is no function defining the length?
@@ -205,19 +218,36 @@ class memory_contents_class():
 		# Search for pointer
 		pointer = self.__get_argument_by_memsync_path__(args_tuple, memsync_d['p'])
 
-		# Compute actual length
-		length = self.__get_number_of_elements__(args_tuple, memsync_d) * memsync_d['s']
-
 		# Convert argument into ctypes datatype TODO more checks needed!
 		if '_c' in memsync_d.keys():
 			pointer = ctypes.pointer(memsync_d['_c'].from_param(pointer))
+
+		# Unicode char size if relevant
+		w = WCHAR_BYTES if memsync_d['w'] else None
+
+		# Check for NULL pointer
+		if is_null_pointer(pointer):
+			return {
+				'd': b'',
+				'l': 0,
+				'a': None,
+				'_a': None,
+				'w': w
+				}
+
+		if memsync_d['n']:
+			# Get length of null-terminated string
+			length = self.__get_length_of_null_terminated_string__(pointer, bool(w))
+		else:
+			# Compute actual length
+			length = self.__get_number_of_elements__(args_tuple, memsync_d) * memsync_d['s']
 
 		return {
 			'd': serialize_pointer_into_bytes(pointer, length), # serialized data, '' if NULL pointer
 			'l': length, # length of serialized data
 			'a': ctypes.cast(pointer, ctypes.c_void_p).value, # local pointer address as integer
 			'_a': None, # remote pointer has not been initialized
-			'w': WCHAR_BYTES if memsync_d['w'] else None # local length of Unicode wchar if required
+			'w': w # local length of Unicode wchar if required
 			}
 
 

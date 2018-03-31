@@ -98,13 +98,11 @@ class sample_class_b:
 		self.__tag_string__.memsync = [
 			{
 				'p': [0],
-				'l': ([0],),
-				'f': 'lambda x: ctypes.sizeof(x)'
+				'n': True
 				},
 			{
 				'p': [1, -1],
-				'l': ([1],),
-				'f': 'lambda x: ctypes.sizeof(x)'
+				'n': True
 				}
 			]
 
