@@ -333,6 +333,21 @@ void __stdcall DEMODLL square_int_array(
 }
 
 
+void __stdcall DEMODLL square_int_array_with_struct(
+	int_array_data *in_array,
+	int_array_data *out_array
+	)
+{
+	int i;
+	out_array->len = in_array->len;
+	out_array->data = malloc(sizeof(int16_t) * out_array->len);
+	for(i = 0; i < in_array->len; i++)
+	{
+		out_array->data[i] = in_array->data[i] * in_array->data[i];
+	}
+}
+
+
 void __stdcall DEMODLL replace_letter_in_null_terminated_string_a(
 	char *in_string,
 	char old_letter,
