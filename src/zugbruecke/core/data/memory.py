@@ -54,4 +54,7 @@ def serialize_pointer_into_bytes(ctypes_pointer, size_bytes):
 
 def is_null_pointer(ctypes_pointer):
 
-	return ctypes.cast(ctypes_pointer, ctypes.c_void_p).value is None
+	try:
+		return ctypes.cast(ctypes_pointer, ctypes.c_void_p).value is None
+	except ctypes.ArgumentError: # catch non-pointer arguments
+		return False

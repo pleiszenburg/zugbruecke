@@ -291,8 +291,19 @@ class memory_contents_class():
 			pointer_arg[memsync_d['p'][-1]] = pointer
 		# If we're at a field of a struct
 		else:
-			# Handle deepest instance
-			setattr(pointer_arg.contents, memsync_d['p'][-1], pointer)
+			# There is a chance that the pointer has been stripped away ...
+			if hasattr(pointer_arg, 'contents'):
+				pointer_arg = pointer_arg.contents
+			# A c_void_p NULL pointer in a struct is represented by None and must be substituted
+			if getattr(pointer_arg, memsync_d['p'][-1]) is None:
+				setattr(pointer_arg, memsync_d['p'][-1], pointer)
+			# Anything else must be overwritten with the right type (likely on client side)
+			else:
+				setattr(
+					pointer_arg,
+					memsync_d['p'][-1],
+					ctypes.cast(pointer, ctypes.POINTER(getattr(pointer_arg, memsync_d['p'][-1])._type_))
+					)
 
 		# Store the server's memory address
 		memory_d['a'] = pointer.value
@@ -303,23 +314,25 @@ class memory_contents_class():
 		# Swap local and remote memory addresses
 		self.__swap_memory_addresses__(memory_d)
 
-		# Make sure this is a pointer to a pointer
-		assert memsync_d['p'][-1] == -1
+		# If this is a pointer to a pointer
+		if memsync_d['p'][-1] == -1:
+			pointer = ctypes.pointer(ctypes.c_void_p())
+			path_shift = 1 # cut off 1 element from path
+		else:
+			pointer = ctypes.c_void_p()
+			path_shift = 0
 
 		# Search for pointer in passed arguments
-		pointer_arg = self.__get_argument_by_memsync_path__(args_tuple, memsync_d['p'][:-2])
-
-		# Generate empty pointer
-		pointer = ctypes.pointer(ctypes.c_void_p())
+		pointer_arg = self.__get_argument_by_memsync_path__(args_tuple, memsync_d['p'][:(-1 - path_shift)])
 
 		# If we're in the top level arguments or an array ...
-		if isinstance(memsync_d['p'][-2], int):
+		if isinstance(memsync_d['p'][-1 - path_shift], int):
 			# Handle deepest instance (exchange element in list/tuple) HACK
-			pointer_arg[memsync_d['p'][-2]] = pointer
+			pointer_arg[memsync_d['p'][-1 - path_shift]] = pointer
 		# If we're at a field of a struct
 		else:
 			# Handle deepest instance
-			setattr(pointer_arg.contents, memsync_d['p'][-1], pointer)
+			setattr(pointer_arg.contents, memsync_d['p'][-1 - path_shift], pointer)
 
 
 	def __unpack_memory_item_overwrite__(self, args_tuple, memory_d, memsync_d):
