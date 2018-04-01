@@ -44,6 +44,7 @@ from ..const import (
 	)
 from ..callback_client import callback_translator_client_class
 from ..callback_server import callback_translator_server_class
+from .memory import is_null_pointer
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -147,6 +148,9 @@ class arguments_contents_class():
 			for flag in arg_def_dict['f']:
 				if flag != FLAG_POINTER:
 					raise # TODO
+				if is_null_pointer(arg_in):
+					# Just return None - will (hopefully) be overwritten by memsync
+					return None
 				arg_in = self.__item_pointer_strip__(arg_in)
 
 			# Handle fundamental types
