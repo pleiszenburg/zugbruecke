@@ -291,8 +291,19 @@ class memory_contents_class():
 			pointer_arg[memsync_d['p'][-1]] = pointer
 		# If we're at a field of a struct
 		else:
-			# Handle deepest instance
-			setattr(pointer_arg.contents, memsync_d['p'][-1], pointer)
+			# There is a chance that the pointer has been stripped away ...
+			if hasattr(pointer_arg, 'contents'):
+				pointer_arg = pointer_arg.contents
+			# A c_void_p NULL pointer in a struct is represented by None and must be substituted
+			if getattr(pointer_arg, memsync_d['p'][-1]) is None:
+				setattr(pointer_arg, memsync_d['p'][-1], pointer)
+			# Anything else must be overwritten with the right type (likely on client side)
+			else:
+				setattr(
+					pointer_arg,
+					memsync_d['p'][-1],
+					ctypes.cast(pointer, ctypes.POINTER(getattr(pointer_arg, memsync_d['p'][-1])._type_))
+					)
 
 		# Store the server's memory address
 		memory_d['a'] = pointer.value
