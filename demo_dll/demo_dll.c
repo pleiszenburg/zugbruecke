@@ -348,6 +348,22 @@ void __stdcall DEMODLL square_int_array_with_struct(
 }
 
 
+int_array_data __stdcall DEMODLL *fibonacci_sequence_a(
+	int16_t len
+	)
+{
+	int16_t i;
+	int_array_data *out_data = malloc(sizeof(int_array_data));
+	out_data->len = len;
+	out_data->data = malloc(sizeof(int16_t) * out_data->len);
+	for(i = 0; i < len; i++){
+		if(i == 0 || i == 1) { out_data->data[i] = 1; continue; }
+		out_data->data[i] = out_data->data[i - 1] + out_data->data[i - 2];
+	}
+	return out_data;
+}
+
+
 void __stdcall DEMODLL replace_letter_in_null_terminated_string_a(
 	char *in_string,
 	char old_letter,
