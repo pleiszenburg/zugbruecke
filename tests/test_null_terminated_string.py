@@ -60,8 +60,7 @@ class sample_class_a:
 		self.__replace_letter_in_null_terminated_string__.memsync = [
 			{
 				'p': [0],
-				'l': ([0],),
-				'_f': lambda x: ctypes.sizeof(x)
+				'n': True
 				}
 			]
 
@@ -111,8 +110,7 @@ class sample_class_b:
 		self.__replace_letter_in_null_terminated_string__.memsync = [
 			{
 				'p': [0],
-				'l': ([0],),
-				'_f': lambda x: ctypes.sizeof(x)
+				'n': True
 				}
 			]
 
@@ -162,9 +160,8 @@ class sample_class_unicode_a:
 		self.__replace_letter_in_null_terminated_string_unicode__.memsync = [
 			{
 				'p': [0],
-				'l': ([0],),
-				'w': True,
-				'_f': lambda x: ctypes.sizeof(x)
+				'n': True,
+				'w': True
 				}
 			]
 
@@ -214,9 +211,8 @@ class sample_class_unicode_b:
 		self.__replace_letter_in_null_terminated_string_unicode__.memsync = [
 			{
 				'p': [0],
-				'l': ([0],),
-				'w': True,
-				'_f': lambda x: ctypes.sizeof(x)
+				'n': True,
+				'w': True
 				}
 			]
 

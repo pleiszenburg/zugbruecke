@@ -134,7 +134,7 @@ class routine_client_class():
 		self.log.out('[routine-client] ... overwriting memory ...')
 
 		# Unpack memory (call may have failed partially only)
-		self.data.client_unpack_memory_list(return_dict['memory'], self.memsync_d)
+		self.data.client_unpack_memory_list(args, return_dict['memory'], self.memsync_d)
 
 		# Unpacking a return value only makes sense if the call was a success
 		if return_dict['success']:
@@ -164,18 +164,17 @@ class routine_client_class():
 		# Parse return type
 		self.restype_d = self.data.pack_definition_returntype(self.__restype__)
 
-		# Fix missing ctypes in memsync
-		self.data.client_fix_memsync_ctypes(self.__memsync__)
+		# Compile memsync statements HACK just unpack the user input ...
+		self.memsync_d = self.data.unpack_definition_memsync(self.__memsync__)
 
-		# Store and reduce memsync for transfer
-		self.memsync_d = self.__memsync__
-		memsync_d_packed = self.data.pack_definition_memsync(self.__memsync__)
+		# Pack memsync_d again for shipping
+		memsync_d_packed = self.data.pack_definition_memsync(self.memsync_d)
 
 		# Adjust definitions with void pointers
-		self.data.apply_memsync_to_argtypes_definition(self.__memsync__, self.argtypes_d)
+		self.data.apply_memsync_to_argtypes_definition(self.memsync_d, self.argtypes_d)
 
 		# Log status
-		self.log.out(' memsync: \n%s' % pf(self.__memsync__))
+		self.log.out(' memsync: \n%s' % pf(self.memsync_d))
 		self.log.out(' argtypes: \n%s' % pf(self.__argtypes__))
 		self.log.out(' argtypes_d: \n%s' % pf(self.argtypes_d))
 		self.log.out(' restype: \n%s' % pf(self.__restype__))

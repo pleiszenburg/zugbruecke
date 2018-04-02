@@ -6,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	src/zugbruecke/core/data/definition.py: (Un-) packing of argument definitions
+	src/zugbruecke/core/data/arg_definition.py: (Un-) packing of argument definitions
 
 	Required to run on platform / side: [UNIX, WINE]
 
@@ -43,29 +43,13 @@ from ..const import (
 	GROUP_STRUCT,
 	GROUP_FUNCTION
 	)
-from ..lib import (
-	reduce_dict
-	)
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # CLASS: Definition packing and unpacking
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-class definition_class():
-
-
-	def apply_memsync_to_argtypes_definition(self, memsync_d_list, argtypes_d):
-
-		# Iterate over memory segments, which must be kept in sync
-		for memsync_d in memsync_d_list:
-
-			# Get type of pointer argument
-			arg_type = self.__get_argument_type_by_memsync_path__(memsync_d['p'], argtypes_d)
-
-			# HACK make memory sync pointers type agnostic
-			arg_type['g'] = GROUP_VOID
-			arg_type['t'] = None # no type string
+class arguments_definition_class():
 
 
 	def generate_callback_decorator(self, flags, restype, *argtypes):
@@ -97,11 +81,6 @@ class definition_class():
 	def pack_definition_argtypes(self, argtypes):
 
 		return [self.__pack_definition_dict__(arg) for arg in argtypes]
-
-
-	def pack_definition_memsync(self, memsync):
-
-		return [reduce_dict(sync_element) for sync_element in memsync]
 
 
 	def pack_definition_returntype(self, restype):
@@ -178,28 +157,6 @@ class definition_class():
 			(ctypes.Structure,),
 			{'_fields_': fields}
 			)
-
-
-	def __get_argument_type_by_memsync_path__(self, memsync_path, argtypes_d):
-
-		# Reference processed argument types - start with depth 0
-		arg_type = argtypes_d[memsync_path[0]]
-		# Step through path to argument type ...
-		for path_element in memsync_path[1:]:
-			# Keep track of whether or not a match has been found so an error can be raised if not
-			found_match = False
-			# Find field with matching name
-			for field_index, field in enumerate(arg_type['_fields_']):
-				if field['n'] == path_element:
-					found_match = True
-					break
-			# Raise an error if the definition does not make sense
-			if not found_match:
-				raise # TODO
-			# Go deeper ...
-			arg_type = arg_type['_fields_'][field_index]
-
-		return arg_type
 
 
 	def __pack_definition_dict__(self, datatype, field_name = None):

@@ -4,7 +4,9 @@ Changes
 0.0.11 (2018-XX-XX)
 -------------------
 
+* FEATURE: Memsync can handle pointers to memory, which was allocated by a DLL, see issue #37.
 * Memsync became more memory efficient and slightly faster.
+* Memsync syntax for NULL-terminated strings (both ``c_char`` and ``c_wchar``, i.e. Unicode, buffers) has been simplified: ``n`` must be set to ``True`` indicating a NULL-terminated string.
 * Memsync syntax for Unicode strings (buffers) has been simplified: ``w`` must be set to ``True`` instead of the length of ``ctypes.c_wchar``.
 
 0.0.10 (2018-03-23)

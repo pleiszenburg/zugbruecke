@@ -6,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	tests/test_bubblesort_struct.py: Test bidirectional memory sync for pointers in struct
+	tests/test_square_int_array_with_struct.py: Test allocation of memory by DLL in struct
 
 	Required to run on platform / side: [UNIX, WINE]
 
@@ -44,12 +44,12 @@ elif platform.startswith('win'):
 # CLASSES AND ROUTINES
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-class bubblesort_data(ctypes.Structure):
+class int_array_data(ctypes.Structure):
 
 
 	_fields_ = [
-		('a', ctypes.POINTER(ctypes.c_float)),
-		('n', ctypes.c_int)
+		('data', ctypes.POINTER(ctypes.c_int16)),
+		('len', ctypes.c_int16)
 		]
 
 
@@ -60,45 +60,53 @@ class sample_class:
 
 		self.__dll__ = ctypes.windll.LoadLibrary('tests/demo_dll.dll')
 
-		self.__bubblesort_struct__ = self.__dll__.bubblesort_struct
-		self.__bubblesort_struct__.memsync = [ # Regular ctypes on Windows should ignore this statement
+		self.__square_int_array_with_struct__ = self.__dll__.square_int_array_with_struct
+		self.__square_int_array_with_struct__.argtypes = (
+			ctypes.POINTER(int_array_data),
+			ctypes.POINTER(int_array_data)
+			)
+		self.__square_int_array_with_struct__.memsync = [
 			{
-				'p': [0, 'a'], # "path" to argument containing the pointer
-				'l': [0, 'n'], # "path" to argument containing the length
-				't': 'c_float' # type of argument (optional, default char/byte): sizeof(type) * length == bytes
+				'p': [0, 'data'],
+				'l': [0, 'len'],
+				't': 'c_int16'
+				},
+			{
+				'p': [1, 'data'],
+				'l': [1, 'len'],
+				't': 'c_int16'
 				}
 			]
-		self.__bubblesort_struct__.argtypes = (ctypes.POINTER(bubblesort_data),)
 
 
-	def bubblesort_struct(self, values):
+	def square_int_array_with_struct(self, in_array):
 
-		ctypes_float_values = ((ctypes.c_float)*len(values))(*values)
-		ctypes_float_pointer_firstelement = ctypes.cast(
-			ctypes.pointer(ctypes_float_values), ctypes.POINTER(ctypes.c_float)
+		in_array_obj = int_array_data()
+		out_array_obj = int_array_data()
+
+		in_array_obj.data = ctypes.cast(
+			ctypes.pointer((ctypes.c_int16 * len(in_array))(*in_array)),
+			ctypes.POINTER(ctypes.c_int16)
+			)
+		in_array_obj.len = len(in_array)
+
+		self.__square_int_array_with_struct__(
+			in_array_obj,
+			out_array_obj
 			)
 
-		data = bubblesort_data(
-			ctypes_float_pointer_firstelement,
-			len(values)
-			)
-
-		self.__bubblesort_struct__(data)
-		values[:] = ctypes_float_values[:]
+		return ctypes.cast(
+			out_array_obj.data,
+			ctypes.POINTER(ctypes.c_int16 * len(in_array))
+			).contents[:]
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # TEST(s)
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-def test_bubblesort_struct():
+def test_square_int_array_with_struct():
 
 	sample = sample_class()
 
-	test_vector = [5.74, 3.72, 6.28, 8.6, 9.34, 6.47, 2.05, 9.09, 4.39, 4.75]
-	sample.bubblesort_struct(test_vector)
-	test_vector = [round(element, 2) for element in test_vector]
-	result_vector = [2.05, 3.72, 4.39, 4.75, 5.74, 6.28, 6.47, 8.6, 9.09, 9.34]
-	vector_diff = sum([abs(test_vector[index] - result_vector[index]) for index in range(len(result_vector))])
-
-	assert pytest.approx(0.0, 0.0000001) == vector_diff
+	assert [4, 16, 9, 25] == sample.square_int_array_with_struct([2, 4, 3, 5])

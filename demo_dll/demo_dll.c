@@ -317,6 +317,37 @@ int16_t __stdcall DEMODLL get_const_int(void)
 }
 
 
+void __stdcall DEMODLL square_int_array(
+	int16_t *in_array,
+	void *out_array,
+	int16_t len
+	)
+{
+	int i;
+	int16_t **out_array_p = out_array;
+	*out_array_p = malloc(sizeof(int16_t) * len);
+	for(i = 0; i < len; i++)
+	{
+		(*out_array_p)[i] = in_array[i] * in_array[i];
+	}
+}
+
+
+void __stdcall DEMODLL square_int_array_with_struct(
+	int_array_data *in_array,
+	int_array_data *out_array
+	)
+{
+	int i;
+	out_array->len = in_array->len;
+	out_array->data = malloc(sizeof(int16_t) * out_array->len);
+	for(i = 0; i < in_array->len; i++)
+	{
+		out_array->data[i] = in_array->data[i] * in_array->data[i];
+	}
+}
+
+
 void __stdcall DEMODLL replace_letter_in_null_terminated_string_a(
 	char *in_string,
 	char old_letter,
@@ -374,6 +405,38 @@ void __stdcall DEMODLL replace_letter_in_null_terminated_string_unicode_b(
 			in_string[i] = new_letter;
 		}
 	}
+}
+
+
+void __stdcall DEMODLL tag_string_a(
+	char *in_string,
+	void *out_string
+	)
+{
+	int str_len = strlen(in_string);
+
+	char **out_string_p = out_string;
+	*out_string_p = malloc(sizeof(char) * (str_len + 2));
+	strncpy((*out_string_p) + 1, in_string, str_len);
+	(*out_string_p)[0] = '<';
+	(*out_string_p)[str_len + 1] = '>';
+	(*out_string_p)[str_len + 2] = '\0';
+}
+
+
+void __stdcall DEMODLL tag_string_b(
+	char *in_string,
+	void *out_string
+	)
+{
+	int str_len = strlen(in_string);
+
+	char **out_string_p = out_string;
+	*out_string_p = malloc(sizeof(char) * (str_len + 2));
+	strncpy((*out_string_p) + 1, in_string, str_len);
+	(*out_string_p)[0] = '<';
+	(*out_string_p)[str_len + 1] = '>';
+	(*out_string_p)[str_len + 2] = '\0';
 }
 
 

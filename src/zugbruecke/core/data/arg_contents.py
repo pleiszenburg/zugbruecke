@@ -6,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	src/zugbruecke/core/data/contents.py: (Un-) packing of argument contents
+	src/zugbruecke/core/data/arg_contents.py: (Un-) packing of argument contents
 
 	Required to run on platform / side: [UNIX, WINE]
 
@@ -44,13 +44,14 @@ from ..const import (
 	)
 from ..callback_client import callback_translator_client_class
 from ..callback_server import callback_translator_server_class
+from .memory import is_null_pointer
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # CLASS: Content packing and unpacking
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-class contents_class():
+class arguments_contents_class():
 
 
 	def arg_list_pack(self, args_tuple, argtypes_list):
@@ -147,6 +148,9 @@ class contents_class():
 			for flag in arg_def_dict['f']:
 				if flag != FLAG_POINTER:
 					raise # TODO
+				if is_null_pointer(arg_in):
+					# Just return None - will (hopefully) be overwritten by memsync
+					return None
 				arg_in = self.__item_pointer_strip__(arg_in)
 
 			# Handle fundamental types

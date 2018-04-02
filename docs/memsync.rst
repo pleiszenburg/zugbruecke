@@ -92,7 +92,7 @@ example demonstrates how you must modify the above example so it works with
 		{
 			'p': [0],
 			'l': [1],
-			'_t': c_float
+			't': 'c_float'
 			}
 		]
 
@@ -133,7 +133,7 @@ The complete example, which will run on *Unix* and on *Windows* looks just like 
 		{
 			'p': [0],
 			'l': [1],
-			'_t': c_float
+			't': 'c_float'
 			}
 		]
 
@@ -165,7 +165,7 @@ definitions like the following:
 		);
 
 The ``image_data`` parameter is a flattened 1D array representing a 2D image.
-It's length is defined by its width and its height. So the length of array equals
+Its length is defined by its width and its height. So the length of array equals
 ``image_width * image_height``. For cases like this, ``memsync`` has the ability
 to dynamically compute the length of the memory through custom functions.
 Let's have a look at how the above function would be configured in *Python*:
@@ -177,8 +177,8 @@ Let's have a look at how the above function would be configured in *Python*:
 		{
 			'p': [0],
 			'l': ([1], [2]),
-			'_f': lambda x, y: x * y,
-			'_t': ctypes.c_float
+			'f': 'lambda x, y: x * y',
+			't': 'c_float'
 			}
 		]
 
@@ -218,14 +218,12 @@ In Python, it can be configured as follows:
 	replace_letter.memsync = [
 		{
 			'p': [0],
-			'l': ([0],),
-			'_f': lambda x: ctypes.sizeof(x)
+			'n': True
 			}
 		]
 
-The above configuration exploits the field for specifying a function for computing
-the length of the memory section, ``_f``. The function is pointed to the parameter
-containing the string buffer and determines its length.
+The above configuration indicates that the first argument of the function is a
+pointer to a NULL-terminated string.
 
 While Python (3) strings are actually Unicode strings, the function accepts an
 array of type ``char`` - a bytes array in Python terms. I.e. you have to encode the
@@ -262,9 +260,8 @@ In Python, it can be configured like this:
 	replace_letter_w.memsync = [
 		{
 			'p': [0],
-			'l': ([0],),
-			'w': True,
-			'_f': lambda x: ctypes.sizeof(x)
+			'n': True,
+			'w': True
 			}
 		]
 
@@ -285,10 +282,11 @@ Attribute: ``memsync`` (list of dict)
 section, which must be kept in sync. It has the following keys:
 
 * ``p`` (:ref:`path to pointer <pathpointer>`)
-* ``l`` (:ref:`path to length <pathlength>`)
+* ``l`` (:ref:`path to length <pathlength>`, optional)
+* ``n`` (:ref:`NULL-terminated string flag <nullstring>`, optional)
 * ``w`` (:ref:`Unicode character flag <unicodechar>`, optional)
-* ``_t`` (:ref:`data type of pointer <pointertype>`, optional)
-* ``_f`` (:ref:`custom length function <length function>`, optional)
+* ``t`` (:ref:`data type of pointer <pointertype>`, optional)
+* ``f`` (:ref:`custom length function <length function>`, optional)
 * ``_c`` (:ref:`custom data type <customtype>`, optional)
 
 .. _pathpointer:
@@ -329,32 +327,44 @@ You should be able to extrapolate from here.
 
 .. _pathlength:
 
-Key: ``l``, path to length (list of int and/or str OR tuple of lists of int and/or str)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Key: ``l``, path to length (list of int and/or str OR tuple of lists of int and/or str) (optional)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This parameter works just like the :ref:`path to pointer <pathpointer>` parameter.
 It is expected to tell the parser, where it can find a number (int) which represents
 the length of the memory block.
 
 It is expected to be either a single path list like ``[0, 'field_a']`` or a tuple
-of multiple (or even zero) path lists, if the optional ``_f`` key is defined.
+of multiple (or even zero) path lists, if the optional ``f`` key is defined.
+
+.. _nullstring:
+
+Key: ``n``, NULL-terminated string flag (optional)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Can be set to ``True`` is a NULL-terminated string is passed as an argument.
+``memsync`` will automatically determine the length of the string, so no
+extra information on its length (through ``l`` is required).
 
 .. _unicodechar:
 
 Key: ``w``, Unicode character flag (optional)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 If a Unicode string (buffer) is passed into a function, this parameter must be
 set to ``True``. If not specified, it will default to ``False``.
 
 .. _pointertype:
 
-Key: ``_t``, data type of pointer (PyCSimpleType or PyCStructType) (optional)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Key: ``t``, data type of pointer (PyCSimpleType or PyCStructType) (optional)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-This parameter will be fed into ``ctypes.sizeof`` for determining its size in bytes.
+This field expects a string representing the name of a ctypes datatype.
+If you want to specify a custom structure type, you simple specify its class name as a string instead.
+
+This parameter will be used by ``ctypes.sizeof`` for determining the datatype's size in bytes.
 The result is then multiplied with the ``length`` to get an actual size of the
-memory block in bytes. If it is not explicitly defined, it defaults to ``ctypes.c_ubyte``.
+memory block in bytes. If it is not explicitly defined, it defaults to ``'c_ubyte'``.
 
 For details on ``sizeof``, consult the `Python documentation on sizeof`_.
 It will accept `fundamental types`_ as well as `structure types`_.
@@ -365,12 +375,13 @@ It will accept `fundamental types`_ as well as `structure types`_.
 
 .. _length function:
 
-Key: ``_f``, custom function for computing the length of the memory segment (optional)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Key: ``f``, custom function for computing the length of the memory segment (optional)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-This field can be used to plug in a function or lambda expression for computing the ``length``
-of the memory section from multiple parameters. The function is expected to accept a number of
-arguments equal to the number of elements of the tuple of length paths defined in ``l``.
+This field can be used to plug in a string, which can be parsed into a function or
+lambda expression for computing the ``length`` of the memory section from multiple parameters.
+The function is expected to accept a number of arguments equal to the number of elements
+of the tuple of length paths defined in ``l``.
 
 .. _customtype:
 

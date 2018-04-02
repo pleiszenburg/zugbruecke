@@ -47,34 +47,34 @@ elif platform.startswith('win'):
 def test_missingdll_cll():
 
 	with pytest.raises(OSError):
-		dll = ctypes.cdll.LoadLibrary('tests/nonexistent_dll.dll')
+		dll = ctypes.cdll.LoadLibrary('tests/nonexistent1_dll.dll')
 
 
 def test_missingdll_windll():
 
 	with pytest.raises(OSError):
-		dll = ctypes.windll.LoadLibrary('tests/nonexistent_dll.dll')
+		dll = ctypes.windll.LoadLibrary('tests/nonexistent2_dll.dll')
 
 
 def test_missingdll_oledll():
 
 	with pytest.raises(OSError):
-		dll = ctypes.oledll.LoadLibrary('tests/nonexistent_dll.dll')
+		dll = ctypes.oledll.LoadLibrary('tests/nonexistent3_dll.dll')
 
 
 def test_missingdll_cll_attr():
 
 	with pytest.raises(OSError):
-		dll = ctypes.cdll.nonexistent_dll
+		dll = ctypes.cdll.nonexistent11_dll
 
 
 def test_missingdll_windll_attr():
 
 	with pytest.raises(OSError):
-		dll = ctypes.windll.nonexistent_dll
+		dll = ctypes.windll.nonexistent22_dll
 
 
 def test_missingdll_oledll_attr():
 
 	with pytest.raises(OSError):
-		dll = ctypes.oledll.nonexistent_dll
+		dll = ctypes.oledll.nonexistent33_dll

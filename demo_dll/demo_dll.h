@@ -167,6 +167,22 @@ int16_t __stdcall DEMODLL pow_ints(
 
 int16_t __stdcall DEMODLL get_const_int(void);
 
+void __stdcall DEMODLL square_int_array(
+	int16_t *in_array,
+	void *out_array,
+	int16_t len
+	);
+
+typedef struct int_array_data {
+	int16_t *data;
+	int16_t len;
+} int_array_data;
+
+void __stdcall DEMODLL square_int_array_with_struct(
+	int_array_data *in_array,
+	int_array_data *out_array
+	);
+
 void __stdcall DEMODLL replace_letter_in_null_terminated_string_a(
 	char *in_string,
 	char old_letter,
@@ -189,6 +205,16 @@ void __stdcall DEMODLL replace_letter_in_null_terminated_string_unicode_b(
 	wchar_t *in_string,
 	wchar_t old_letter,
 	wchar_t new_letter
+	);
+
+void __stdcall DEMODLL tag_string_a(
+	char *in_string,
+	void *out_string
+	);
+
+void __stdcall DEMODLL tag_string_b(
+	char *in_string,
+	void *out_string
 	);
 
 struct test
