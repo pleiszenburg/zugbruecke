@@ -150,16 +150,40 @@ class memory_contents_class():
 		element = args_tuple
 
 		# Step through path
-		for path_element in memsync_path:
+		for element_index, path_element in enumerate(memsync_path):
 
-			# Go deeper ...
+			# Element is an int
 			if isinstance(path_element, int):
-				if path_element < 0: # Pointer to pointer for memory allocation by DLL
+
+				# Pointer to pointer (in top-level arguments) for memory allocation by DLL
+				if path_element < 0:
 					element = self.__item_pointer_strip__(element)
-				else: # Dive into argument tuple
+
+				# Dive into argument tuple
+				else:
 					element = element[path_element]
-			else: # Dive into struct
+
+			# Element equals 'r' and index 0: Return value
+			elif isinstance(path_element, str) and element_index == 0:
+
+				if path_element != 'r':
+					raise ValueError()
+
+				element = return_value
+
+				if element is None:
+					return None
+
+			# Field name in struct
+			elif isinstance(path_element, str) and element_index > 0:
+
 				element = getattr(self.__item_pointer_strip__(element), path_element)
+
+			# TODO elements of arrays
+			else:
+
+				print(path_element)
+				raise # TODO
 
 		return element
 
@@ -231,7 +255,7 @@ class memory_contents_class():
 		w = WCHAR_BYTES if memsync_d['w'] else None
 
 		# Check for NULL pointer
-		if is_null_pointer(pointer):
+		if pointer is None or is_null_pointer(pointer):
 			return {
 				'd': b'',
 				'l': 0,
