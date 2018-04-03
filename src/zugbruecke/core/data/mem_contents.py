@@ -53,13 +53,13 @@ WCHAR_BYTES = ctypes.sizeof(ctypes.c_wchar)
 class memory_contents_class():
 
 
-	def apply_memsync_to_argtypes_definition(self, memsync_d_list, argtypes_d):
+	def apply_memsync_to_argtypes_and_restype_definition(self, memsync_d_list, argtypes_d, restype_d):
 
 		# Iterate over memory segments, which must be kept in sync
 		for memsync_d in memsync_d_list:
 
 			# Get type of pointer argument
-			arg_type = self.__get_argument_type_by_memsync_path__(memsync_d['p'], argtypes_d)
+			arg_type = self.__get_argument_type_by_memsync_path__(memsync_d['p'], argtypes_d, restype_d)
 
 			# HACK make memory sync pointers type agnostic
 			arg_type['g'] = GROUP_VOID
@@ -69,38 +69,38 @@ class memory_contents_class():
 	def client_pack_memory_list(self, args_tuple, memsync_d_list):
 
 		# Pack data for every pointer, append data to package
-		return [self.__pack_memory_item__(args_tuple, memsync_d) for memsync_d in memsync_d_list]
+		return [self.__pack_memory_item__(memsync_d, args_tuple) for memsync_d in memsync_d_list]
 
 
-	def client_unpack_memory_list(self, args_list, mem_package_list, memsync_d_list):
+	def client_unpack_memory_list(self, args_list, return_value, mem_package_list, memsync_d_list):
 
 		# Iterate over memory package dicts
 		for memory_d, memsync_d in zip(mem_package_list, memsync_d_list):
 
-			# If pointer was passed as a Null pointer
+			# If memory for pointer has been allocated by remote side
 			if memory_d['_a'] is None:
 
 				# Unpack one memory section / item
-				self.__unpack_memory_item_data__(args_list, memory_d, memsync_d)
+				self.__unpack_memory_item_data__(memory_d, memsync_d, args_list, return_value)
 
 			# If pointer pointed to data
 			else:
 
 				# Overwrite pointer
-				self.__unpack_memory_item_overwrite__(args_list, memory_d, memsync_d)
+				self.__unpack_memory_item_overwrite__(memory_d, memsync_d, args_list)
 
 
-	def server_pack_memory_list(self, args_list, mem_package_list, memsync_d_list):
+	def server_pack_memory_list(self, args_list, return_value, mem_package_list, memsync_d_list):
 
 		# Iterate through pointers and serialize them
 		for memory_d, memsync_d in zip(mem_package_list, memsync_d_list):
 
-			# If pointer was passed as a Null pointer
+			# If memory for pointer was allocated here on server side
 			if memory_d['a'] is None:
 
-				memory_d.update(self.__pack_memory_item__(args_list, memsync_d))
+				memory_d.update(self.__pack_memory_item__(memsync_d, args_list, return_value))
 
-			# If pointer pointed to data
+			# If pointer pointed to data on client side
 			else:
 
 				# Overwrite old data in package with new data from memory
@@ -118,12 +118,12 @@ class memory_contents_class():
 			if memory_d['a'] is None:
 
 				# Insert new NULL pointer
-				self.__unpack_memory_item_null__(args_tuple, memory_d, memsync_d)
+				self.__unpack_memory_item_null__(memory_d, memsync_d, args_tuple)
 
 			else:
 
 				# Unpack one memory section / item
-				self.__unpack_memory_item_data__(args_tuple, memory_d, memsync_d)
+				self.__unpack_memory_item_data__(memory_d, memsync_d, args_tuple)
 
 
 	def __adjust_wchar_length__(self, memory_d):
@@ -144,30 +144,59 @@ class memory_contents_class():
 		memory_d['w'] = WCHAR_BYTES
 
 
-	def __get_argument_by_memsync_path__(self, args_tuple, memsync_path):
+	def __get_argument_by_memsync_path__(self, memsync_path, args_tuple, return_value = None):
 
 		# Reference args_tuple as initial value
 		element = args_tuple
 
 		# Step through path
-		for path_element in memsync_path:
+		for element_index, path_element in enumerate(memsync_path):
 
-			# Go deeper ...
+			# Element is an int
 			if isinstance(path_element, int):
-				if path_element < 0: # Pointer to pointer for memory allocation by DLL
+
+				# Pointer to pointer (in top-level arguments) for memory allocation by DLL
+				if path_element < 0:
 					element = self.__item_pointer_strip__(element)
-				else: # Dive into argument tuple
+
+				# Dive into argument tuple
+				else:
 					element = element[path_element]
-			else: # Dive into struct
+
+			# Element equals 'r' and index 0: Return value
+			elif isinstance(path_element, str) and element_index == 0:
+
+				if path_element != 'r':
+					raise ValueError()
+
+				element = return_value
+
+				if element is None:
+					return None
+
+			# Field name in struct
+			elif isinstance(path_element, str) and element_index > 0:
+
 				element = getattr(self.__item_pointer_strip__(element), path_element)
+
+			# TODO elements of arrays
+			else:
+
+				print(path_element)
+				raise # TODO
 
 		return element
 
 
-	def __get_argument_type_by_memsync_path__(self, memsync_path, argtypes_d):
+	def __get_argument_type_by_memsync_path__(self, memsync_path, argtypes_d, restype_d):
 
-		# Reference processed argument types - start with depth 0
-		arg_type = argtypes_d[memsync_path[0]]
+		# Is path targetting an argument or the return value?
+		if isinstance(memsync_path[0], int):
+			arg_type = argtypes_d[memsync_path[0]]
+		elif memsync_path[0] == 'r':
+			arg_type = restype_d
+		else:
+			raise # TODO
 
 		# Step through path to argument type ...
 		for path_element in memsync_path[1:]:
@@ -193,13 +222,13 @@ class memory_contents_class():
 		return len(ctypes.cast(in_pointer, datatype_p).value) * ctypes.sizeof(datatype)
 
 
-	def __get_number_of_elements__(self, args_tuple, memsync_d):
+	def __get_number_of_elements__(self, memsync_d, args_tuple, return_value = None):
 
 		# There is no function defining the length?
 		if '_f' not in memsync_d.keys():
 
 			# Search for length
-			length = self.__get_argument_by_memsync_path__(args_tuple, memsync_d['l'])
+			length = self.__get_argument_by_memsync_path__(memsync_d['l'], args_tuple, return_value)
 
 			# Length might come from ctypes or a Python datatype
 			return getattr(length, 'value', length)
@@ -209,14 +238,14 @@ class memory_contents_class():
 
 		# Compute length from arguments and return
 		return memsync_d['_f'](*(
-			self.__get_argument_by_memsync_path__(args_tuple, item) for item in memsync_d['l']
+			self.__get_argument_by_memsync_path__(item, args_tuple, return_value) for item in memsync_d['l']
 			))
 
 
-	def __pack_memory_item__(self, args_tuple, memsync_d):
+	def __pack_memory_item__(self, memsync_d, args_tuple, return_value = None):
 
 		# Search for pointer
-		pointer = self.__get_argument_by_memsync_path__(args_tuple, memsync_d['p'])
+		pointer = self.__get_argument_by_memsync_path__(memsync_d['p'], args_tuple, return_value)
 
 		# Convert argument into ctypes datatype TODO more checks needed!
 		if '_c' in memsync_d.keys():
@@ -226,7 +255,7 @@ class memory_contents_class():
 		w = WCHAR_BYTES if memsync_d['w'] else None
 
 		# Check for NULL pointer
-		if is_null_pointer(pointer):
+		if pointer is None or is_null_pointer(pointer):
 			return {
 				'd': b'',
 				'l': 0,
@@ -240,7 +269,7 @@ class memory_contents_class():
 			length = self.__get_length_of_null_terminated_string__(pointer, bool(w))
 		else:
 			# Compute actual length
-			length = self.__get_number_of_elements__(args_tuple, memsync_d) * memsync_d['s']
+			length = self.__get_number_of_elements__(memsync_d, args_tuple, return_value) * memsync_d['s']
 
 		return {
 			'd': serialize_pointer_into_bytes(pointer, length), # serialized data, '' if NULL pointer
@@ -259,13 +288,13 @@ class memory_contents_class():
 			})
 
 
-	def __unpack_memory_item_data__(self, args_tuple, memory_d, memsync_d):
+	def __unpack_memory_item_data__(self, memory_d, memsync_d, args_tuple, return_value = None):
 
 		# Swap local and remote memory addresses
 		self.__swap_memory_addresses__(memory_d)
 
 		# Search for pointer in passed arguments
-		pointer_arg = self.__get_argument_by_memsync_path__(args_tuple, memsync_d['p'][:-1])
+		pointer_arg = self.__get_argument_by_memsync_path__(memsync_d['p'][:-1], args_tuple, return_value)
 
 		# Adjust Unicode wchar length
 		if memsync_d['w']:
@@ -309,10 +338,14 @@ class memory_contents_class():
 		memory_d['a'] = pointer.value
 
 
-	def __unpack_memory_item_null__(self, args_tuple, memory_d, memsync_d):
+	def __unpack_memory_item_null__(self, memory_d, memsync_d, args_tuple):
 
 		# Swap local and remote memory addresses
 		self.__swap_memory_addresses__(memory_d)
+
+		# If this is a return value, do nothing at this stage
+		if memsync_d['p'][0] == 'r':
+			return
 
 		# If this is a pointer to a pointer
 		if memsync_d['p'][-1] == -1:
@@ -323,7 +356,7 @@ class memory_contents_class():
 			path_shift = 0
 
 		# Search for pointer in passed arguments
-		pointer_arg = self.__get_argument_by_memsync_path__(args_tuple, memsync_d['p'][:(-1 - path_shift)])
+		pointer_arg = self.__get_argument_by_memsync_path__(memsync_d['p'][:(-1 - path_shift)], args_tuple)
 
 		# If we're in the top level arguments or an array ...
 		if isinstance(memsync_d['p'][-1 - path_shift], int):
@@ -335,7 +368,7 @@ class memory_contents_class():
 			setattr(pointer_arg.contents, memsync_d['p'][-1 - path_shift], pointer)
 
 
-	def __unpack_memory_item_overwrite__(self, args_tuple, memory_d, memsync_d):
+	def __unpack_memory_item_overwrite__(self, memory_d, memsync_d, args_tuple):
 
 		# Swap local and remote memory addresses
 		self.__swap_memory_addresses__(memory_d)
