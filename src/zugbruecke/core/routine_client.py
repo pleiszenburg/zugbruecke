@@ -131,26 +131,27 @@ class routine_client_class():
 			)
 
 		# Log status
+		self.log.out('[routine-client] ... unpacking return value ...')
+
+		# Unpack return value of routine
+		return_value = self.data.return_msg_unpack(return_dict['return_value'], self.restype_d)
+
+		# Log status
 		self.log.out('[routine-client] ... overwriting memory ...')
 
 		# Unpack memory (call may have failed partially only)
 		self.data.client_unpack_memory_list(args, return_dict['memory'], self.memsync_d)
 
-		# Unpacking a return value only makes sense if the call was a success
-		if return_dict['success']:
-
-			# Log status
-			self.log.out('[routine-client] ... unpacking return value ...')
-
-			# Unpack return value of routine
-			return_value = self.data.return_msg_unpack(return_dict['return_value'], self.restype_d)
-
 		# Log status
-		self.log.out('[routine-client] ... unpacked, return.')
+		self.log.out('[routine-client] ... everything unpacked and overwritten ...')
 
 		# Raise the original error if call was not a success
 		if not return_dict['success']:
+			self.log.out('[routine-client] ... call raised an error.')
 			raise return_dict['exception']
+
+		# Log status
+		self.log.out('[routine-client] ... return.')
 
 		# Return result. return_value will be None if there was not a result.
 		return return_value
