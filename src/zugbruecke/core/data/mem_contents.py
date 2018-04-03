@@ -59,7 +59,7 @@ class memory_contents_class():
 		for memsync_d in memsync_d_list:
 
 			# Get type of pointer argument
-			arg_type = self.__get_argument_type_by_memsync_path__(memsync_d['p'], argtypes_d)
+			arg_type = self.__get_argument_type_by_memsync_path__(memsync_d['p'], argtypes_d, restype_d)
 
 			# HACK make memory sync pointers type agnostic
 			arg_type['g'] = GROUP_VOID
@@ -164,7 +164,7 @@ class memory_contents_class():
 		return element
 
 
-	def __get_argument_type_by_memsync_path__(self, memsync_path, argtypes_d):
+	def __get_argument_type_by_memsync_path__(self, memsync_path, argtypes_d, restype_d):
 
 		# Reference processed argument types - start with depth 0
 		arg_type = argtypes_d[memsync_path[0]]
