@@ -81,13 +81,13 @@ class memory_contents_class():
 			if memory_d['_a'] is None:
 
 				# Unpack one memory section / item
-				self.__unpack_memory_item_data__(args_list, memory_d, memsync_d)
+				self.__unpack_memory_item_data__(memory_d, memsync_d, args_list)
 
 			# If pointer pointed to data
 			else:
 
 				# Overwrite pointer
-				self.__unpack_memory_item_overwrite__(args_list, memory_d, memsync_d)
+				self.__unpack_memory_item_overwrite__(memory_d, memsync_d, args_list)
 
 
 	def server_pack_memory_list(self, args_list, return_value, mem_package_list, memsync_d_list):
@@ -118,12 +118,12 @@ class memory_contents_class():
 			if memory_d['a'] is None:
 
 				# Insert new NULL pointer
-				self.__unpack_memory_item_null__(args_tuple, memory_d, memsync_d)
+				self.__unpack_memory_item_null__(memory_d, memsync_d, args_tuple)
 
 			else:
 
 				# Unpack one memory section / item
-				self.__unpack_memory_item_data__(args_tuple, memory_d, memsync_d)
+				self.__unpack_memory_item_data__(memory_d, memsync_d, args_tuple)
 
 
 	def __adjust_wchar_length__(self, memory_d):
@@ -264,7 +264,7 @@ class memory_contents_class():
 			})
 
 
-	def __unpack_memory_item_data__(self, args_tuple, memory_d, memsync_d):
+	def __unpack_memory_item_data__(self, memory_d, memsync_d, args_tuple):
 
 		# Swap local and remote memory addresses
 		self.__swap_memory_addresses__(memory_d)
@@ -314,7 +314,7 @@ class memory_contents_class():
 		memory_d['a'] = pointer.value
 
 
-	def __unpack_memory_item_null__(self, args_tuple, memory_d, memsync_d):
+	def __unpack_memory_item_null__(self, memory_d, memsync_d, args_tuple):
 
 		# Swap local and remote memory addresses
 		self.__swap_memory_addresses__(memory_d)
@@ -340,7 +340,7 @@ class memory_contents_class():
 			setattr(pointer_arg.contents, memsync_d['p'][-1 - path_shift], pointer)
 
 
-	def __unpack_memory_item_overwrite__(self, args_tuple, memory_d, memsync_d):
+	def __unpack_memory_item_overwrite__(self, memory_d, memsync_d, args_tuple):
 
 		# Swap local and remote memory addresses
 		self.__swap_memory_addresses__(memory_d)
