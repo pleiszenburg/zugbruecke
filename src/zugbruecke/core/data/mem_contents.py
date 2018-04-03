@@ -144,7 +144,7 @@ class memory_contents_class():
 		memory_d['w'] = WCHAR_BYTES
 
 
-	def __get_argument_by_memsync_path__(self, memsync_path, args_tuple):
+	def __get_argument_by_memsync_path__(self, memsync_path, args_tuple, return_value = None):
 
 		# Reference args_tuple as initial value
 		element = args_tuple
@@ -198,13 +198,13 @@ class memory_contents_class():
 		return len(ctypes.cast(in_pointer, datatype_p).value) * ctypes.sizeof(datatype)
 
 
-	def __get_number_of_elements__(self, args_tuple, memsync_d):
+	def __get_number_of_elements__(self, memsync_d, args_tuple, return_value = None):
 
 		# There is no function defining the length?
 		if '_f' not in memsync_d.keys():
 
 			# Search for length
-			length = self.__get_argument_by_memsync_path__(memsync_d['l'], args_tuple)
+			length = self.__get_argument_by_memsync_path__(memsync_d['l'], args_tuple, return_value)
 
 			# Length might come from ctypes or a Python datatype
 			return getattr(length, 'value', length)
@@ -214,14 +214,14 @@ class memory_contents_class():
 
 		# Compute length from arguments and return
 		return memsync_d['_f'](*(
-			self.__get_argument_by_memsync_path__(item, args_tuple) for item in memsync_d['l']
+			self.__get_argument_by_memsync_path__(item, args_tuple, return_value) for item in memsync_d['l']
 			))
 
 
 	def __pack_memory_item__(self, memsync_d, args_tuple, return_value = None):
 
 		# Search for pointer
-		pointer = self.__get_argument_by_memsync_path__(memsync_d['p'], args_tuple)
+		pointer = self.__get_argument_by_memsync_path__(memsync_d['p'], args_tuple, return_value)
 
 		# Convert argument into ctypes datatype TODO more checks needed!
 		if '_c' in memsync_d.keys():
@@ -245,7 +245,7 @@ class memory_contents_class():
 			length = self.__get_length_of_null_terminated_string__(pointer, bool(w))
 		else:
 			# Compute actual length
-			length = self.__get_number_of_elements__(args_tuple, memsync_d) * memsync_d['s']
+			length = self.__get_number_of_elements__(memsync_d, args_tuple, return_value) * memsync_d['s']
 
 		return {
 			'd': serialize_pointer_into_bytes(pointer, length), # serialized data, '' if NULL pointer
@@ -270,7 +270,7 @@ class memory_contents_class():
 		self.__swap_memory_addresses__(memory_d)
 
 		# Search for pointer in passed arguments
-		pointer_arg = self.__get_argument_by_memsync_path__(memsync_d['p'][:-1], args_tuple)
+		pointer_arg = self.__get_argument_by_memsync_path__(memsync_d['p'][:-1], args_tuple, return_value)
 
 		# Adjust Unicode wchar length
 		if memsync_d['w']:
