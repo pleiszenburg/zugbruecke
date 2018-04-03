@@ -584,6 +584,21 @@ void _image_pixel_set_(
 }
 
 
+void _image_copy_segment_to_buffer_(
+	image_data *in_image, image_data *in_buffer, int16_t x, int16_t y
+	)
+{
+	int16_t i, j;
+	for(i = 0; i < in_buffer->width; i++)
+	{
+		for(j = 0; j < in_buffer->height; j++)
+		{
+			_image_pixel_set_(in_buffer, i, j, _image_pixel_get_(in_image, x + i, y + j));
+		}
+	}
+}
+
+
 void __stdcall DEMODLL apply_filter_to_image(
 	image_data *in_image,
 	image_data *out_image,
@@ -594,6 +609,8 @@ void __stdcall DEMODLL apply_filter_to_image(
 	int16_t i, j;
 	const int16_t F_W = 3;
 	const int16_t F_H = 3;
+	const int16_t F_W_off = F_W / 2;
+	const int16_t F_H_off = F_H / 2;
 
 	out_image->data = malloc(sizeof(int16_t) * in_image->width * in_image->height);
 	out_image->width = in_image->width;
@@ -608,15 +625,7 @@ void __stdcall DEMODLL apply_filter_to_image(
 	{
 		for(j = 0; j < in_image->height; j++)
 		{
-			_image_pixel_set_(buffer, 0, 0, _image_pixel_get_(in_image, i - 1, j - 1));
-			_image_pixel_set_(buffer, 1, 0, _image_pixel_get_(in_image, i, j - 1));
-			_image_pixel_set_(buffer, 2, 0, _image_pixel_get_(in_image, i + 1, j - 1));
-			_image_pixel_set_(buffer, 0, 1, _image_pixel_get_(in_image, i - 1, j));
-			_image_pixel_set_(buffer, 1, 1, _image_pixel_get_(in_image, i, j));
-			_image_pixel_set_(buffer, 2, 1, _image_pixel_get_(in_image, i + 1, j));
-			_image_pixel_set_(buffer, 0, 2, _image_pixel_get_(in_image, i - 1, j + 1));
-			_image_pixel_set_(buffer, 1, 2, _image_pixel_get_(in_image, i, j + 1));
-			_image_pixel_set_(buffer, 2, 2, _image_pixel_get_(in_image, i + 1, j + 1));
+			_image_copy_segment_to_buffer_(in_image, buffer, i - F_W_off, j - F_H_off);
 			_image_pixel_set_(out_image, i, j, filter_func(buffer));
 		}
 	}
