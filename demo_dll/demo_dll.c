@@ -556,6 +556,77 @@ int16_t __stdcall DEMODLL sum_elements_from_callback_in_struct(
 }
 
 
+int16_t _coordinates_in_image_(
+	image_data *in_image, int16_t x, int16_t y
+	)
+{
+	if(x < 0 || x >= in_image->width || y < 0 || y >= in_image->height)
+		return 0;
+	return 1;
+}
+
+
+int16_t _image_pixel_get_(
+	image_data *in_image, int16_t x, int16_t y
+	)
+{
+	if(!_coordinates_in_image_(in_image, x, y)) { return 0; }
+	return in_image->data[in_image->width * y + x];
+}
+
+
+void _image_pixel_set_(
+	image_data *in_image, int16_t x, int16_t y, int16_t value
+	)
+{
+	if(!_coordinates_in_image_(in_image, x, y)) { return; }
+	in_image->data[in_image->width * y + x] = value;
+}
+
+
+void __stdcall DEMODLL apply_filter_to_image(
+	image_data *in_image,
+	image_data *out_image,
+	filter_func_type filter_func
+	)
+{
+
+	int16_t i, j;
+	const int16_t F_W = 3;
+	const int16_t F_H = 3;
+
+	out_image->data = malloc(sizeof(int16_t) * in_image->width * in_image->height);
+	out_image->width = in_image->width;
+	out_image->height = in_image->height;
+
+	image_data *buffer = malloc(sizeof(image_data));
+	buffer->data = malloc(sizeof(int16_t) * F_W * F_H);
+	buffer->width = F_W;
+	buffer->height = F_H;
+
+	for(i = 0; i < in_image->width; i++)
+	{
+		for(j = 0; j < in_image->height; j++)
+		{
+			_image_pixel_set_(buffer, 0, 0, _image_pixel_get_(in_image, i - 1, j - 1));
+			_image_pixel_set_(buffer, 1, 0, _image_pixel_get_(in_image, i, j - 1));
+			_image_pixel_set_(buffer, 2, 0, _image_pixel_get_(in_image, i + 1, j - 1));
+			_image_pixel_set_(buffer, 0, 1, _image_pixel_get_(in_image, i - 1, j));
+			_image_pixel_set_(buffer, 1, 1, _image_pixel_get_(in_image, i, j));
+			_image_pixel_set_(buffer, 2, 1, _image_pixel_get_(in_image, i + 1, j));
+			_image_pixel_set_(buffer, 0, 2, _image_pixel_get_(in_image, i - 1, j + 1));
+			_image_pixel_set_(buffer, 1, 2, _image_pixel_get_(in_image, i, j + 1));
+			_image_pixel_set_(buffer, 2, 2, _image_pixel_get_(in_image, i + 1, j + 1));
+			_image_pixel_set_(out_image, i, j, filter_func(buffer));
+		}
+	}
+
+	free(buffer->data);
+	free(buffer);
+
+}
+
+
 int16_t __stdcall DEMODLL use_optional_callback_a(
 	int16_t in_data,
 	conveyor_belt process_data

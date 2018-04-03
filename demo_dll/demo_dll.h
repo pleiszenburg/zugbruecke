@@ -269,6 +269,20 @@ int16_t __stdcall DEMODLL sum_elements_from_callback_in_struct(
 	struct conveyor_belt_data *data
 	);
 
+typedef struct image_data {
+	int16_t *data;
+	int16_t width;
+	int16_t height;
+} image_data;
+
+typedef int16_t __stdcall (*filter_func_type)(image_data *section);
+
+void __stdcall DEMODLL apply_filter_to_image(
+	image_data *in_image,
+	image_data *out_image,
+	filter_func_type filter_func
+	);
+
 int16_t __stdcall DEMODLL use_optional_callback_a(
 	int16_t in_data,
 	conveyor_belt process_data
