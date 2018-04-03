@@ -72,7 +72,7 @@ class memory_contents_class():
 		return [self.__pack_memory_item__(args_tuple, memsync_d) for memsync_d in memsync_d_list]
 
 
-	def client_unpack_memory_list(self, args_list, mem_package_list, memsync_d_list):
+	def client_unpack_memory_list(self, args_list, return_value, mem_package_list, memsync_d_list):
 
 		# Iterate over memory package dicts
 		for memory_d, memsync_d in zip(mem_package_list, memsync_d_list):
@@ -90,7 +90,7 @@ class memory_contents_class():
 				self.__unpack_memory_item_overwrite__(args_list, memory_d, memsync_d)
 
 
-	def server_pack_memory_list(self, args_list, mem_package_list, memsync_d_list):
+	def server_pack_memory_list(self, args_list, return_value, mem_package_list, memsync_d_list):
 
 		# Iterate through pointers and serialize them
 		for memory_d, memsync_d in zip(mem_package_list, memsync_d_list):

@@ -114,7 +114,7 @@ class routine_server_class():
 		try:
 
 			# Pack memory for return
-			self.data.server_pack_memory_list(args_list, arg_memory_list, self.memsync_d)
+			self.data.server_pack_memory_list(args_list, return_value, arg_memory_list, self.memsync_d)
 
 			# Get new arg message list
 			arg_message_list = self.data.arg_list_pack(args_list, self.argtypes_d)
