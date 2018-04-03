@@ -54,7 +54,7 @@ class vector3d(ctypes.Structure):
 		]
 
 
-class sample_class:
+class sample_class_a:
 
 
 	def __init__(self):
@@ -79,6 +79,42 @@ class sample_class:
 			))
 
 
+class sample_class_b:
+
+
+	def __init__(self):
+
+		self.__dll__ = ctypes.windll.LoadLibrary('tests/demo_dll.dll')
+
+		self.__vector3d_add_array__ = self.__dll__.vector3d_add_array
+		self.__vector3d_add_array__.argtypes = (ctypes.POINTER(vector3d), ctypes.c_int16)
+		self.__vector3d_add_array__.restype = ctypes.POINTER(vector3d)
+		self.__vector3d_add_array__.memsync = [
+			{
+				'p': [0],
+				'l': [1],
+				't': 'vector3d'
+				}
+			]
+
+
+	def vector3d_add_array(self, v):
+
+		length = len(v)
+
+		def dict_from_struct(in_struct):
+			return {key: getattr(in_struct.contents, key) for key in ['x', 'y', 'z']}
+
+		v_ctypes = (vector3d * length)()
+		for i in range(length):
+			for key in v[i].keys():
+				setattr(v_ctypes[i], key, v[i][key])
+
+		return dict_from_struct(self.__vector3d_add_array__(
+			ctypes.cast(ctypes.pointer(v_ctypes), ctypes.POINTER(vector3d)), length
+			))
+
+
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # TEST(s)
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -89,6 +125,19 @@ def test_vector3d_add():
 	v2 = {'x': 1, 'y': 9, 'z': 8}
 	added = {'x': 6, 'y': 16, 'z': 10}
 
-	sample = sample_class()
+	sample = sample_class_a()
 
 	assert added == sample.vector3d_add(v1, v2)
+
+
+def test_vector3d_add_array():
+
+	v = [
+		{'x': 5, 'y': 7, 'z': 2},
+		{'x': 1, 'y': 9, 'z': 8}
+		]
+	added = {'x': 6, 'y': 16, 'z': 10}
+
+	sample = sample_class_b()
+
+	assert added == sample.vector3d_add_array(v)
