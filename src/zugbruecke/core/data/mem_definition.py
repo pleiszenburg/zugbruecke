@@ -73,8 +73,10 @@ class memory_definition_class():
 		if 't' not in memsync_d.keys():
 			memsync_d['t'] = 'c_ubyte'
 
-		# Get actual type class
-		memsync_d['_t'] = getattr(ctypes, memsync_d['t'], None) # TODO add support for custom struct types HERE
+		# Get actual type class - if it is not a ctypes member, try struct cache
+		memsync_d['_t'] = getattr(ctypes, memsync_d['t'], None)
+		if memsync_d['_t'] is None:
+			memsync_d['_t'] = self.cache_dict['struct_type'][memsync_d['t']]
 
 		# Compute the size of type '_t'
 		memsync_d['s'] = ctypes.sizeof(memsync_d['_t'])

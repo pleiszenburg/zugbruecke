@@ -89,6 +89,13 @@ class sample_class_b:
 		self.__vector3d_add_array__ = self.__dll__.vector3d_add_array
 		self.__vector3d_add_array__.argtypes = (ctypes.POINTER(vector3d), ctypes.c_int16)
 		self.__vector3d_add_array__.restype = ctypes.POINTER(vector3d)
+		self.__vector3d_add_array__.memsync = [
+			{
+				'p': [0],
+				'l': [1],
+				't': 'vector3d'
+				}
+			]
 
 
 	def vector3d_add_array(self, v):
