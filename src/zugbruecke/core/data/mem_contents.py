@@ -69,7 +69,7 @@ class memory_contents_class():
 	def client_pack_memory_list(self, args_tuple, memsync_d_list):
 
 		# Pack data for every pointer, append data to package
-		return [self.__pack_memory_item__(args_tuple, memsync_d) for memsync_d in memsync_d_list]
+		return [self.__pack_memory_item__(memsync_d, args_tuple) for memsync_d in memsync_d_list]
 
 
 	def client_unpack_memory_list(self, args_list, return_value, mem_package_list, memsync_d_list):
@@ -98,7 +98,7 @@ class memory_contents_class():
 			# If pointer was passed as a Null pointer
 			if memory_d['a'] is None:
 
-				memory_d.update(self.__pack_memory_item__(args_list, memsync_d))
+				memory_d.update(self.__pack_memory_item__(memsync_d, args_list))
 
 			# If pointer pointed to data
 			else:
@@ -218,7 +218,7 @@ class memory_contents_class():
 			))
 
 
-	def __pack_memory_item__(self, args_tuple, memsync_d):
+	def __pack_memory_item__(self, memsync_d, args_tuple):
 
 		# Search for pointer
 		pointer = self.__get_argument_by_memsync_path__(memsync_d['p'], args_tuple)
