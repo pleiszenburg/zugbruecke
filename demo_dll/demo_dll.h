@@ -137,6 +137,11 @@ vector3d __stdcall DEMODLL *vector3d_add(
 	vector3d *p2
 	);
 
+vector3d __stdcall DEMODLL *vector3d_add_array(
+	vector3d *v,
+	int16_t len
+	);
+
 int16_t __stdcall DEMODLL sqrt_int(
 	int16_t a
 	);
