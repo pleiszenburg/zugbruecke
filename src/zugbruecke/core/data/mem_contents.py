@@ -77,11 +77,11 @@ class memory_contents_class():
 		# Iterate over memory package dicts
 		for memory_d, memsync_d in zip(mem_package_list, memsync_d_list):
 
-			# If pointer was passed as a Null pointer
+			# If memory for pointer has been allocated by remote side
 			if memory_d['_a'] is None:
 
 				# Unpack one memory section / item
-				self.__unpack_memory_item_data__(memory_d, memsync_d, args_list)
+				self.__unpack_memory_item_data__(memory_d, memsync_d, args_list, return_value)
 
 			# If pointer pointed to data
 			else:
@@ -95,12 +95,12 @@ class memory_contents_class():
 		# Iterate through pointers and serialize them
 		for memory_d, memsync_d in zip(mem_package_list, memsync_d_list):
 
-			# If pointer was passed as a Null pointer
+			# If memory for pointer was allocated here on server side
 			if memory_d['a'] is None:
 
-				memory_d.update(self.__pack_memory_item__(memsync_d, args_list))
+				memory_d.update(self.__pack_memory_item__(memsync_d, args_list, return_value))
 
-			# If pointer pointed to data
+			# If pointer pointed to data on client side
 			else:
 
 				# Overwrite old data in package with new data from memory
@@ -218,7 +218,7 @@ class memory_contents_class():
 			))
 
 
-	def __pack_memory_item__(self, memsync_d, args_tuple):
+	def __pack_memory_item__(self, memsync_d, args_tuple, return_value = None):
 
 		# Search for pointer
 		pointer = self.__get_argument_by_memsync_path__(memsync_d['p'], args_tuple)
@@ -264,7 +264,7 @@ class memory_contents_class():
 			})
 
 
-	def __unpack_memory_item_data__(self, memory_d, memsync_d, args_tuple):
+	def __unpack_memory_item_data__(self, memory_d, memsync_d, args_tuple, return_value = None):
 
 		# Swap local and remote memory addresses
 		self.__swap_memory_addresses__(memory_d)
