@@ -53,7 +53,7 @@ WCHAR_BYTES = ctypes.sizeof(ctypes.c_wchar)
 class memory_contents_class():
 
 
-	def apply_memsync_to_argtypes_definition(self, memsync_d_list, argtypes_d):
+	def apply_memsync_to_argtypes_and_restype_definition(self, memsync_d_list, argtypes_d, restype_d):
 
 		# Iterate over memory segments, which must be kept in sync
 		for memsync_d in memsync_d_list:

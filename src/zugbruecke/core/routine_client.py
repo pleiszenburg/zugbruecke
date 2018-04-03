@@ -172,7 +172,9 @@ class routine_client_class():
 		memsync_d_packed = self.data.pack_definition_memsync(self.memsync_d)
 
 		# Adjust definitions with void pointers
-		self.data.apply_memsync_to_argtypes_definition(self.memsync_d, self.argtypes_d)
+		self.data.apply_memsync_to_argtypes_and_restype_definition(
+			self.memsync_d, self.argtypes_d, self.restype_d
+			)
 
 		# Log status
 		self.log.out(' memsync: \n%s' % pf(self.memsync_d))
