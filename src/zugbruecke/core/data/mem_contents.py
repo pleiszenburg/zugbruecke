@@ -343,6 +343,10 @@ class memory_contents_class():
 		# Swap local and remote memory addresses
 		self.__swap_memory_addresses__(memory_d)
 
+		# If this is a return value, do nothing at this stage
+		if memsync_d['p'][0] == 'r':
+			return
+
 		# If this is a pointer to a pointer
 		if memsync_d['p'][-1] == -1:
 			pointer = ctypes.pointer(ctypes.c_void_p())
