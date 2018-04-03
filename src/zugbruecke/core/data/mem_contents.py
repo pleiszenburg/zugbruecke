@@ -166,8 +166,13 @@ class memory_contents_class():
 
 	def __get_argument_type_by_memsync_path__(self, memsync_path, argtypes_d, restype_d):
 
-		# Reference processed argument types - start with depth 0
-		arg_type = argtypes_d[memsync_path[0]]
+		# Is path targetting an argument or the return value?
+		if isinstance(memsync_path[0], int):
+			arg_type = argtypes_d[memsync_path[0]]
+		elif memsync_path[0] == 'r':
+			arg_type = restype_d
+		else:
+			raise # TODO
 
 		# Step through path to argument type ...
 		for path_element in memsync_path[1:]:
