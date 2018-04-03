@@ -144,7 +144,7 @@ class memory_contents_class():
 		memory_d['w'] = WCHAR_BYTES
 
 
-	def __get_argument_by_memsync_path__(self, args_tuple, memsync_path):
+	def __get_argument_by_memsync_path__(self, memsync_path, args_tuple):
 
 		# Reference args_tuple as initial value
 		element = args_tuple
@@ -199,7 +199,7 @@ class memory_contents_class():
 		if '_f' not in memsync_d.keys():
 
 			# Search for length
-			length = self.__get_argument_by_memsync_path__(args_tuple, memsync_d['l'])
+			length = self.__get_argument_by_memsync_path__(memsync_d['l'], args_tuple)
 
 			# Length might come from ctypes or a Python datatype
 			return getattr(length, 'value', length)
@@ -209,14 +209,14 @@ class memory_contents_class():
 
 		# Compute length from arguments and return
 		return memsync_d['_f'](*(
-			self.__get_argument_by_memsync_path__(args_tuple, item) for item in memsync_d['l']
+			self.__get_argument_by_memsync_path__(item, args_tuple) for item in memsync_d['l']
 			))
 
 
 	def __pack_memory_item__(self, args_tuple, memsync_d):
 
 		# Search for pointer
-		pointer = self.__get_argument_by_memsync_path__(args_tuple, memsync_d['p'])
+		pointer = self.__get_argument_by_memsync_path__(memsync_d['p'], args_tuple)
 
 		# Convert argument into ctypes datatype TODO more checks needed!
 		if '_c' in memsync_d.keys():
@@ -265,7 +265,7 @@ class memory_contents_class():
 		self.__swap_memory_addresses__(memory_d)
 
 		# Search for pointer in passed arguments
-		pointer_arg = self.__get_argument_by_memsync_path__(args_tuple, memsync_d['p'][:-1])
+		pointer_arg = self.__get_argument_by_memsync_path__(memsync_d['p'][:-1], args_tuple)
 
 		# Adjust Unicode wchar length
 		if memsync_d['w']:
@@ -323,7 +323,7 @@ class memory_contents_class():
 			path_shift = 0
 
 		# Search for pointer in passed arguments
-		pointer_arg = self.__get_argument_by_memsync_path__(args_tuple, memsync_d['p'][:(-1 - path_shift)])
+		pointer_arg = self.__get_argument_by_memsync_path__(memsync_d['p'][:(-1 - path_shift)], args_tuple)
 
 		# If we're in the top level arguments or an array ...
 		if isinstance(memsync_d['p'][-1 - path_shift], int):
