@@ -294,7 +294,8 @@ section, which must be kept in sync. It has the following keys:
 Key: ``p``, path to pointer (list of int and/or str)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-This parameter describes where in the arguments (along the lines of ``argtypes``)
+This parameter describes where in the arguments or return value
+(along the lines of ``argtypes`` and ``restype``)
 *zugbruecke*'s parser can find the pointer, which it is expected to handle.
 Consider the following example:
 
@@ -323,7 +324,9 @@ representing something like a "path":
 Let's assume that ``param_a`` is of type ``some_struct`` and ``field_a`` contains
 the pointer. ``p`` would look like this: ``[0, 'field_a']``. The pointer is found
 in ``field_a`` of the first parameter of ``some_other_routine``, ``param_a``.
-You should be able to extrapolate from here.
+
+Return values or elements within can be targeted by setting the first element
+of a path to ``'r'`` (instead of an integer targeting an argument).
 
 .. _pathlength:
 
@@ -332,10 +335,10 @@ Key: ``l``, path to length (list of int and/or str OR tuple of lists of int and/
 
 This parameter works just like the :ref:`path to pointer <pathpointer>` parameter.
 It is expected to tell the parser, where it can find a number (int) which represents
-the length of the memory block.
+the length of the memory block or, alternatively, arguments for a custom length function.
 
 It is expected to be either a single path list like ``[0, 'field_a']`` or a tuple
-of multiple (or even zero) path lists, if the optional ``f`` key is defined.
+of multiple (or even zero) path lists, if the optional ``f`` key (custom length function) is defined.
 
 .. _nullstring:
 
