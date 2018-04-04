@@ -6,8 +6,9 @@ Changes
 
 * FEATURE: Memsync can handle pointers to memory, which was allocated by a DLL, see issue #37.
 * FEATURE: Memsync can target return values or elements within, see issue #40.
+* FEATURE: Memsync can be applied to callback functions, see issue #41 - support at this stage is largely untested.
 * Memsync became more memory efficient and slightly faster.
-* Memsync syntax for custom length functions has been changed. ``_f`` becomes obsolete. ``f`` expects a string, which be parsed into a function.
+* Memsync syntax for custom length functions has been changed. ``_f`` becomes obsolete. ``f`` expects a string, which can be parsed into a function.
 * Memsync syntax for NULL-terminated strings (both ``c_char`` and ``c_wchar``, i.e. Unicode, buffers) has been simplified: ``n`` must be set to ``True`` indicating a NULL-terminated string. ``l`` becomes optional in this context.
 * Memsync syntax for Unicode strings (buffers) has been simplified: ``w`` must be set to ``True`` instead of the length of ``ctypes.c_wchar``.
 

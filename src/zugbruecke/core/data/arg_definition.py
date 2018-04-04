@@ -52,7 +52,9 @@ from ..const import (
 class arguments_definition_class():
 
 
-	def generate_callback_decorator(self, flags, restype, *argtypes):
+	def generate_callback_decorator(self, flags, restype, *argtypes, **kwargs):
+
+		_memsync_ = kwargs.pop('memsync', [])
 
 		if not(flags & _FUNCFLAG_STDCALL):
 			func_type_key = _FUNCFLAG_CDECL
@@ -71,6 +73,7 @@ class arguments_definition_class():
 
 				_argtypes_ = argtypes
 				_restype_ = restype
+				memsync = self.unpack_definition_memsync(_memsync_)
 				_flags_ = flags
 
 			# Store the new type and return
@@ -260,6 +263,7 @@ class arguments_definition_class():
 				'g': GROUP_FUNCTION,
 				'_argtypes_': self.pack_definition_argtypes(datatype._argtypes_),
 				'_restype_': self.pack_definition_returntype(datatype._restype_),
+				'_memsync_': self.pack_definition_memsync(datatype.memsync),
 				'_flags_': datatype._flags_
 				}
 
@@ -338,7 +342,8 @@ class arguments_definition_class():
 		factory_type = self.generate_callback_decorator(
 			datatype_d_dict['_flags_'],
 			self.unpack_definition_returntype(datatype_d_dict['_restype_']),
-			*self.unpack_definition_argtypes(datatype_d_dict['_argtypes_'])
+			*self.unpack_definition_argtypes(datatype_d_dict['_argtypes_']),
+			memsync = self.unpack_definition_memsync(datatype_d_dict['_memsync_'])
 			)
 
 		# Store function pointer type for subsequent use as decorator

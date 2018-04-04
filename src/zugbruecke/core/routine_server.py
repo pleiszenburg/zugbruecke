@@ -97,7 +97,7 @@ class routine_server_class():
 		except Exception as e:
 
 			# Log status
-			self.log.out('[routine-server] ... failed!')
+			self.log.out('[routine-server] ... call failed!')
 
 			# Push traceback to log
 			self.log.err(traceback.format_exc())
@@ -128,13 +128,16 @@ class routine_server_class():
 			# Pack return package and return it
 			return {
 				'args': arg_message_list,
-				'return_value': return_message, # TODO handle memory allocated by DLL in "free form" pointers
+				'return_value': return_message,
 				'memory': arg_memory_list,
 				'success': True,
 				'exception': None
 				}
 
 		except Exception as e:
+
+			# Log status
+			self.log.out('[routine-server] ... packing call failed!')
 
 			# Push traceback to log
 			self.log.err(traceback.format_exc())
