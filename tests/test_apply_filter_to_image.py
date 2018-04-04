@@ -71,20 +71,40 @@ class sample_class:
 			)
 
 		@filter_func_type
-		def filter_sharpen(in_buffer):
-			print('BING! %s' % str(in_buffer))
-			return 1
+		def filter_edge_detection(in_buffer):
 
-		self.__filter_sharpen__ = filter_sharpen
+			filter_matrix = [
+				[0,  1, 0],
+				[1, -4, 1],
+				[0,  1, 0]
+				]
+
+			width = in_buffer.contents.width
+			height = in_buffer.contents.height
+
+			assert width == 3 and height == 3
+
+			in_matrix = self.array_to_matrix(
+				ctypes.cast(
+					in_buffer.contents.data,
+					ctypes.POINTER(ctypes.c_int16 * (width * height))
+					).contents[:],
+				width,
+				height
+				)
+
+			print(in_matrix)
+
+			out_value = 0
+			for matrix_line, filter_line in zip(in_matrix, filter_matrix):
+				out_value += sum([a * b for a, b in zip(matrix_line, filter_line)])
+
+			return out_value
+
+		self.__filter_edge_detection__ = filter_edge_detection
 
 
 	def apply_filter_to_image(self, in_image):
-
-		def matrix_to_array(in_matrix):
-			return [item for line_list in in_matrix for item in line_list]
-
-		def array_to_matrix(in_array, a_width, a_height):
-			return [in_array[i:i+a_width] for i in range(a_height)]
 
 		width = len(in_image[0])
 		height = len(in_image)
@@ -95,20 +115,29 @@ class sample_class:
 		in_image_ctypes.width = ctypes.c_int16(width)
 		in_image_ctypes.height = ctypes.c_int16(height)
 		in_image_ctypes.data = ctypes.cast(
-			ctypes.pointer((ctypes.c_int16 * (width * height))(*matrix_to_array(in_image))),
+			ctypes.pointer((ctypes.c_int16 * (width * height))(*self.matrix_to_array(in_image))),
 			ctypes.POINTER(ctypes.c_int16)
 			)
 
 		self.__apply_filter_to_image__(
 			ctypes.pointer(in_image_ctypes),
 			ctypes.pointer(out_image_ctypes),
-			self.__filter_sharpen__
+			self.__filter_edge_detection__
 			)
 
-		return array_to_matrix(
+		return self.array_to_matrix(
 			ctypes.cast(out_image_ctypes.data, ctypes.POINTER(ctypes.c_int16 * (width * height))).contents[:],
-			width, height
+			width,
+			height
 			)
+
+
+	def array_to_matrix(self, in_array, a_width, a_height):
+		return [in_array[(i * a_width):((i + 1) * a_width)] for i in range(a_height)]
+
+
+	def matrix_to_array(self, in_matrix):
+		return [item for line_list in in_matrix for item in line_list]
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -119,16 +148,28 @@ def test_apply_filter_to_image():
 
 	sample = sample_class()
 
-	assert [
-		[1, 1, 1, 1, 1],
-		[1, 1, 1, 1, 1],
-		[1, 1, 1, 1, 1],
-		[1, 1, 1, 1, 1],
-		[1, 1, 1, 1, 1]
-		] == sample.apply_filter_to_image([
-		[0, 0, 0, 0, 0],
-		[0, 0, 0, 0, 0],
-		[0, 0, 0, 0, 0],
-		[0, 0, 0, 0, 0],
-		[0, 0, 0, 0, 0]
+	result = sample.apply_filter_to_image([
+		[253, 252, 254, 243, 243, 230, 251, 247, 255, 254],
+		[252, 254, 239, 144, 253, 247, 220, 252, 235, 255],
+		[252, 246, 166, 123, 168, 237, 244, 252, 235, 255],
+		[255, 228, 176, 103, 138, 250, 228, 252, 252, 252],
+		[219, 217, 146, 152, 146, 170, 250, 253, 246, 243],
+		[254, 162, 116, 128, 133, 154, 247, 255, 244, 253],
+		[224, 116, 136, 154, 129, 147, 189, 248, 254, 205],
+		[192, 105, 117, 138, 148, 101, 111, 248, 248, 239],
+		[254, 231, 168, 153, 124, 113, 111, 207, 238, 245],
+		[216, 255, 251, 235, 247, 227, 175, 182, 249, 248]
 		])
+
+	assert [
+		[-508, -247, -282, -331, -246, -179, -307, -230, -284, -506],
+		[-249,  -27, -138,  282, -210,  -48,  114,  -54,   57, -276],
+		[-255,  -84,  120,   89,   79,  -39,  -39,  -25,   54, -278],
+		[-321,  -18,  -61,  177,  115, -227,   84,  -23,  -23, -258],
+		[-150, -113,   77,  -85,    9,  120, -102,   -9,    8, -221],
+		[-411,   55,  108,   43,   25,   81, -140,  -28,   32, -320],
+		[-334,  163,  -41,  -85,   66,  -15,   -3,  -46,  -71,  -74],
+		[-185,  236,   79,   20, -100,  115,  205, -178,  -13, -258],
+		[-377, -142,   80,   53,  165,  111,  162,  -49,   -3, -255],
+		[-355, -322, -346, -289, -402, -373, -180,  -97, -328, -498]
+		] == result

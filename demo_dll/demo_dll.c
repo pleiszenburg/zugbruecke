@@ -560,8 +560,7 @@ int16_t _coordinates_in_image_(
 	image_data *in_image, int16_t x, int16_t y
 	)
 {
-	if(x < 0 || x >= in_image->width || y < 0 || y >= in_image->height)
-		return 0;
+	if(x < 0 || x >= in_image->width || y < 0 || y >= in_image->height){ return 0; }
 	return 1;
 }
 
@@ -571,7 +570,7 @@ int16_t _image_pixel_get_(
 	)
 {
 	if(!_coordinates_in_image_(in_image, x, y)) { return 0; }
-	return in_image->data[in_image->width * y + x];
+	return in_image->data[(in_image->width * y) + x];
 }
 
 
@@ -580,7 +579,7 @@ void _image_pixel_set_(
 	)
 {
 	if(!_coordinates_in_image_(in_image, x, y)) { return; }
-	in_image->data[in_image->width * y + x] = value;
+	in_image->data[(in_image->width * y) + x] = value;
 }
 
 
@@ -588,12 +587,12 @@ void _image_copy_segment_to_buffer_(
 	image_data *in_image, image_data *in_buffer, int16_t x, int16_t y
 	)
 {
-	int16_t i, j;
-	for(i = 0; i < in_buffer->width; i++)
+	int16_t m, n;
+	for(m = 0; m < in_buffer->width; m++)
 	{
-		for(j = 0; j < in_buffer->height; j++)
+		for(n = 0; n < in_buffer->height; n++)
 		{
-			_image_pixel_set_(in_buffer, i, j, _image_pixel_get_(in_image, x + i, y + j));
+			_image_pixel_set_(in_buffer, m, n, _image_pixel_get_(in_image, x + m, y + n));
 		}
 	}
 }
