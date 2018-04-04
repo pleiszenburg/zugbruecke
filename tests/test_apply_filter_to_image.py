@@ -59,7 +59,7 @@ class sample_class:
 
 	def __init__(self):
 
-		self.__dll__ = ctypes.windll.LoadLibrary('demo_dll.dll') # tests/
+		self.__dll__ = ctypes.windll.LoadLibrary('tests/demo_dll.dll')
 
 		filter_func_type = ctypes.WINFUNCTYPE(ctypes.c_int16, ctypes.POINTER(image_data))
 
@@ -92,8 +92,6 @@ class sample_class:
 				width,
 				height
 				)
-
-			print(in_matrix)
 
 			out_value = 0
 			for matrix_line, filter_line in zip(in_matrix, filter_matrix):
