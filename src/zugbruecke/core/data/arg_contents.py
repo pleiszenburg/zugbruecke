@@ -230,7 +230,8 @@ class arguments_contents_class():
 
 		# Generate and store callback translator in cache
 		self.cache_dict['func_handle'][func_name] = callback_translator_client_class(
-			self, func_name, func_ptr, func_def_dict['_argtypes_'], func_def_dict['_restype_']
+			self, func_name, func_ptr, func_def_dict['_argtypes_'], func_def_dict['_restype_'],
+			self.unpack_definition_memsync(func_def_dict['_memsync_'])
 			)
 
 		# Register translator at RPC server
@@ -445,7 +446,8 @@ class arguments_contents_class():
 		self.cache_dict['func_handle'][func_name] = func_def_dict['_factory_type_'](
 			callback_translator_server_class(
 				self, func_name, getattr(self.callback_client, func_name),
-				func_def_dict['_argtypes_'], func_def_dict['_restype_']
+				func_def_dict['_argtypes_'], func_def_dict['_restype_'],
+				self.unpack_definition_memsync(func_def_dict['_memsync_'])
 				)
 			)
 

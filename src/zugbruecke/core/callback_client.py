@@ -42,7 +42,7 @@ import traceback
 class callback_translator_client_class:
 
 
-	def __init__(self, data, routine_name, routine_handler, argtypes_d, restype_d):
+	def __init__(self, data, routine_name, routine_handler, argtypes_d, restype_d, memsync_d):
 
 		# Store my own name
 		self.name = routine_name
@@ -61,6 +61,9 @@ class callback_translator_client_class:
 
 		# Store definition of return value type
 		self.restype_d = restype_d
+
+		# Store memsync definition
+		self.memsync_d = memsync_d
 
 
 	def __call__(self, arg_message_list):

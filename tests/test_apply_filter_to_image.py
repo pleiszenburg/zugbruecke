@@ -62,6 +62,13 @@ class sample_class:
 		self.__dll__ = ctypes.windll.LoadLibrary('tests/demo_dll.dll')
 
 		filter_func_type = ctypes.WINFUNCTYPE(ctypes.c_int16, ctypes.POINTER(image_data))
+		filter_func_type.memsync = [
+			{
+				'p': [0, 'data'],
+				'l': ([0, 'width'], [0, 'height']),
+				'f': 'lambda x, y: x * y'
+				}
+			]
 
 		self.__apply_filter_to_image__ = self.__dll__.apply_filter_to_image
 		self.__apply_filter_to_image__.argtypes = (
