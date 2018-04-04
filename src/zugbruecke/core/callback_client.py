@@ -66,22 +66,56 @@ class callback_translator_client_class:
 		self.memsync_d = memsync_d
 
 
-	def __call__(self, arg_message_list):
+	def __call__(self, arg_message_list, arg_memory_list):
 
 		# Log status
 		self.log.out('[callback-client] Trying to call callback routine "%s" ...' % self.name)
 
-		# Unpack arguments
-		args_list = self.data.arg_list_unpack(arg_message_list, self.argtypes_d)
+		try:
 
-		# Default return value
-		return_value = None
+			# Unpack arguments
+			args_list = self.data.arg_list_unpack(arg_message_list, self.argtypes_d)
+
+			# Unpack pointer data
+			self.data.server_unpack_memory_list(args_list, arg_memory_list, self.memsync_d)
+
+			# Default return value
+			return_value = None
+
+		except Exception as e:
+
+			# Push traceback to log
+			self.log.err(traceback.format_exc())
+
+			raise e
 
 		# This is risky
 		try:
 
 			# Call actual callback function (ctypes function pointer)
-			return_value = self.handler(*args_list)
+			return_value = self.handler(*tuple(args_list))
+
+		except Exception as e:
+
+			# Log status
+			self.log.out('[callback-client] ... call failed!')
+
+			# Push traceback to log
+			self.log.err(traceback.format_exc())
+
+			# Pack return package and return it
+			return {
+				'args': arg_message_list,
+				'return_value': return_value,
+				'memory': arg_memory_list,
+				'success': False,
+				'exception': e
+				}
+
+		try:
+
+			# Pack memory for return
+			self.data.server_pack_memory_list(args_list, return_value, arg_memory_list, self.memsync_d)
 
 			# Get new arg message list
 			arg_message_list = self.data.arg_list_pack(args_list, self.argtypes_d)
@@ -95,23 +129,18 @@ class callback_translator_client_class:
 			# Ship data back to Wine side
 			return {
 				'args': arg_message_list,
-				'return_value': return_message, # TODO handle memory allocated by callback in "free form" pointers
-				'memory': None, # TODO memsync not included
-				'success': True
+				'return_value': return_message,
+				'memory': arg_memory_list,
+				'success': True,
+				'exception': None
 				}
 
-		except:
+		except Exception as e:
 
 			# Log status
-			self.log.out('[callback-client] ... failed!')
+			self.log.out('[callback-client] ... packing failed!')
 
 			# Push traceback to log
 			self.log.err(traceback.format_exc())
 
-			# Pack return package and return it
-			return {
-				'args': arg_message_list,
-				'return_value': return_value,
-				'memory': None, # TODO memsync not included
-				'success': False
-				}
+			raise e

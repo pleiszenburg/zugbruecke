@@ -66,7 +66,8 @@ class sample_class:
 			{
 				'p': [0, 'data'],
 				'l': ([0, 'width'], [0, 'height']),
-				'f': 'lambda x, y: x * y'
+				'f': 'lambda x, y: x * y',
+				't': 'c_int16'
 				}
 			]
 
@@ -80,12 +81,14 @@ class sample_class:
 			{
 				'p': [0, 'data'],
 				'l': ([0, 'width'], [0, 'height']),
-				'f': 'lambda x, y: x * y'
+				'f': 'lambda x, y: x * y',
+				't': 'c_int16'
 				},
 			{
 				'p': [1, 'data'],
 				'l': ([1, 'width'], [1, 'height']),
-				'f': 'lambda x, y: x * y'
+				'f': 'lambda x, y: x * y',
+				't': 'c_int16'
 				}
 			]
 

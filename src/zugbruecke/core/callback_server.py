@@ -74,21 +74,68 @@ class callback_translator_server_class:
 		# Log status
 		self.log.out('[callback-server] ... parameters are "%r". Packing and pushing to client ...' % (args,))
 
-		# Pack arguments and call RPC callback function (packed arguments are shipped to Unix side)
-		return_dict = self.handler(self.data.arg_list_pack(args, self.argtypes_d))
+		try:
 
-		# Log status
-		self.log.out('[callback-server] ... received feedback from client, unpacking ...')
+			# Handle memory
+			mem_package_list = self.data.client_pack_memory_list(args, self.memsync_d)
 
-		# Unpack return dict (for pointers and structs)
-		self.data.arg_list_sync(
-			args,
-			self.data.arg_list_unpack(return_dict['args'], self.argtypes_d),
-			self.argtypes_d
-			)
+		except Exception as e:
 
-		# Unpack return value
-		return_value = self.data.return_msg_unpack(return_dict['return_value'], self.restype_d)
+			# Log status
+			self.log.out('[callback-server] ... memory packing failed!')
+
+			# Push traceback to log
+			self.log.err(traceback.format_exc())
+
+			raise e
+
+		try:
+
+			# Pack arguments and call RPC callback function (packed arguments are shipped to Unix side)
+			return_dict = self.handler(self.data.arg_list_pack(args, self.argtypes_d), mem_package_list)
+
+		except Exception as e:
+
+			# Log status
+			self.log.out('[callback-server] ... call failed!')
+
+			# Push traceback to log
+			self.log.err(traceback.format_exc())
+
+			raise e
+
+		try:
+
+			# Log status
+			self.log.out('[callback-server] ... received feedback from client, unpacking ...')
+
+			# Unpack return dict (for pointers and structs)
+			self.data.arg_list_sync(
+				args,
+				self.data.arg_list_unpack(return_dict['args'], self.argtypes_d),
+				self.argtypes_d
+				)
+
+			# Unpack return value
+			return_value = self.data.return_msg_unpack(return_dict['return_value'], self.restype_d)
+
+			# Unpack memory (call may have failed partially only)
+			self.data.client_unpack_memory_list(args, return_value, return_dict['memory'], self.memsync_d)
+
+		except Exception as e:
+
+			# Log status
+			self.log.out('[callback-server] ... unpacking failed!')
+
+			# Push traceback to log
+			self.log.err(traceback.format_exc())
+
+			raise e
+
+		# Raise the original error if call was not a success
+		if not return_dict['success']:
+			self.log.out('[callback-server] ... call raised an error.')
+			raise return_dict['exception']
 
 		# Log status
 		self.log.out('[callback-server] ... unpacked, return.')

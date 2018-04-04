@@ -467,10 +467,22 @@ class arguments_contents_class():
 			if field_arg[1] is None:
 				continue
 
-			setattr(
-				struct_inst, # struct instance to be modified
-				field_arg[0], # parameter name (from tuple)
-				self.__unpack_item__(field_arg[1], field_def_dict) # parameter value
-				)
+			field_value = self.__unpack_item__(field_arg[1], field_def_dict)
+
+			try:
+
+				setattr(
+					struct_inst, # struct instance to be modified
+					field_arg[0], # field name (from tuple)
+					field_value # field value
+					)
+
+			except TypeError: # TODO HACK relevant for structs & callbacks & memsync together
+
+				setattr(
+					struct_inst, # struct instance to be modified
+					field_arg[0], # field name (from tuple)
+					ctypes.cast(field_value, ctypes.c_void_p)
+					)
 
 		return struct_inst
