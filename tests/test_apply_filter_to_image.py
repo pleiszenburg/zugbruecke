@@ -69,6 +69,18 @@ class sample_class:
 			ctypes.POINTER(image_data),
 			filter_func_type
 			)
+		self.__apply_filter_to_image__.memsync = [
+			{
+				'p': [0, 'data'],
+				'l': ([0, 'width'], [0, 'height']),
+				'f': 'lambda x, y: x * y'
+				},
+			{
+				'p': [1, 'data'],
+				'l': ([1, 'width'], [1, 'height']),
+				'f': 'lambda x, y: x * y'
+				}
+			]
 
 		@filter_func_type
 		def filter_edge_detection(in_buffer):
