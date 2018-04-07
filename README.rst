@@ -155,7 +155,7 @@ Bugs & issues
 
 - Report bugs in zugbruecke here: `GitHub issue tracker`_
 - Report bugs in ctypes here: `Python tracker`_
-- Report bug in Wine here: `WineHQ Bug Tracking System`_
+- Report bugs in Wine here: `WineHQ Bug Tracking System`_
 
 Make sure you have read the chapter on `bugs`_ in zugbruecke's documentation.
 
@@ -182,7 +182,7 @@ Miscellaneous
 - `Upstream issues`_ (relevant bugs in dependencies)
 
 .. _Read the Docs: http://zugbruecke.readthedocs.io/en/latest/
-.. _zugbruecke repository: docs/index.rst
+.. _zugbruecke repository: https://github.com/pleiszenburg/zugbruecke/blob/master/docs/index.rst
 .. _License: https://github.com/pleiszenburg/zugbruecke/blob/master/LICENSE
 .. _Contributing: https://github.com/pleiszenburg/zugbruecke/blob/master/CONTRIBUTING.rst
 .. _FAQ: http://zugbruecke.readthedocs.io/en/stable/faq.html
