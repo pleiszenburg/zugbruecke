@@ -6,7 +6,7 @@ Changes
 
 Caution: This release features a significant re-implementation (with additional, new functionality) of the memory synchronization protocol, ``memsync``.
 As a part of it, overcoming old limitations, its syntax changed - effectively breaking backwards compatibility in almost call cases.
-Please check the (updated) documentation for details.
+Please check the updated documentation, examples and tests for details.
 
 * FEATURE: Memsync can handle pointers to memory, which was allocated by a DLL, see issue #37.
 * FEATURE: Memsync can target return values or elements within, see issue #40.
