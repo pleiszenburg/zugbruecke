@@ -18,11 +18,11 @@ on Unix.
 
 .. code:: python
 
-	from zugbruecke import windll, c_float
+	import zugbruecke as ctypes
 
-	simple_demo_routine = windll.LoadLibrary('demo_dll.dll').simple_demo_routine
-	simple_demo_routine.argtypes = [c_float, c_float]
-	simple_demo_routine.restype = c_float
+	simple_demo_routine = ctypes.windll.LoadLibrary('demo_dll.dll').simple_demo_routine
+	simple_demo_routine.argtypes = (ctypes.c_float, ctypes.c_float)
+	simple_demo_routine.restype = ctypes.c_float
 	return_value = simple_demo_routine(20.0, 1.07)
 	print('Got "%f".' % return_value)
 
@@ -41,16 +41,18 @@ Because of the drop-in replacement design of *zugbruecke*, it is possible to wri
 
 	from sys import platform
 	if any([platform.startswith(os_name) for os_name in ['linux', 'darwin', 'freebsd']]):
-		from zugbruecke import cdll
+		import zugbruecke as ctypes
 	elif platform.startswith('win'):
-		from ctypes import cdll
+		import ctypes
 	else:
 		# Handle unsupported platforms
 
 For more examples check the `examples directory`_ of this project.
-For the full DLL source code check the `demo_dll directory`_ of this project.
+For an overview over its entire range of capabilities have a look at zugbruecke's `test suite`_.
+For the full demo DLL source code check the `demo_dll directory`_ of this project.
 
 .. _examples directory: https://github.com/pleiszenburg/zugbruecke/tree/master/examples
+.. _test suite: https://github.com/pleiszenburg/zugbruecke/tree/master/tests
 .. _demo_dll directory: https://github.com/pleiszenburg/zugbruecke/tree/master/demo_dll
 
 Please also consult the `documentation of ctypes`_.
