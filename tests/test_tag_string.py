@@ -6,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	tests/test_bubblesort_struct.py: Test bidirectional memory sync for pointers in struct
+	tests/test_tag_string.py: Demonstrates memory allocation by DLL
 
 	Required to run on platform / side: [UNIX, WINE]
 
@@ -31,7 +31,7 @@ specific language governing rights and limitations under the License.
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-import pytest
+# import pytest
 
 from sys import platform
 if any([platform.startswith(os_name) for os_name in ['linux', 'darwin', 'freebsd']]):
@@ -44,61 +44,95 @@ elif platform.startswith('win'):
 # CLASSES AND ROUTINES
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-class bubblesort_data(ctypes.Structure):
-
-
-	_fields_ = [
-		('a', ctypes.POINTER(ctypes.c_float)),
-		('n', ctypes.c_int)
-		]
-
-
-class sample_class:
+class sample_class_a:
 
 
 	def __init__(self):
 
 		self.__dll__ = ctypes.windll.LoadLibrary('tests/demo_dll.dll')
 
-		self.__bubblesort_struct__ = self.__dll__.bubblesort_struct
-		self.__bubblesort_struct__.memsync = [ # Regular ctypes on Windows should ignore this statement
+		self.__tag_string__ = self.__dll__.tag_string_a
+		self.__tag_string__.argtypes = (
+			ctypes.POINTER(ctypes.c_char),
+			ctypes.c_void_p
+			)
+		self.__tag_string__.memsync = [
 			{
-				'p': [0, 'a'], # "path" to argument containing the pointer
-				'l': [0, 'n'], # "path" to argument containing the length
-				't': 'c_float' # type of argument (optional, default char/byte): sizeof(type) * length == bytes
+				'p': [0],
+				'l': ([0],),
+				'f': 'lambda x: ctypes.sizeof(x)'
+				},
+			{
+				'p': [1, -1],
+				'l': ([0],),
+				'f': 'lambda x: ctypes.sizeof(x) + 2'
 				}
 			]
-		self.__bubblesort_struct__.argtypes = (ctypes.POINTER(bubblesort_data),)
 
 
-	def bubblesort_struct(self, values):
+	def tag_string(self, in_string):
 
-		ctypes_float_values = ((ctypes.c_float)*len(values))(*values)
-		ctypes_float_pointer_firstelement = ctypes.cast(
-			ctypes.pointer(ctypes_float_values), ctypes.POINTER(ctypes.c_float)
+		in_buffer = ctypes.create_string_buffer(in_string.encode('utf-8'))
+		out_buffer = ctypes.pointer(ctypes.c_void_p())
+
+		self.__tag_string__(in_buffer, out_buffer)
+
+		return ctypes.cast(
+			out_buffer.contents,
+			ctypes.POINTER(ctypes.c_char * (len(in_buffer) + 2))
+			).contents[:].decode('utf-8').rstrip('\0')
+
+
+class sample_class_b:
+
+
+	def __init__(self):
+
+		self.__dll__ = ctypes.windll.LoadLibrary('tests/demo_dll.dll')
+
+		self.__tag_string__ = self.__dll__.tag_string_b
+		self.__tag_string__.argtypes = (
+			ctypes.POINTER(ctypes.c_char),
+			ctypes.c_void_p
 			)
+		self.__tag_string__.memsync = [
+			{
+				'p': [0],
+				'n': True
+				},
+			{
+				'p': [1, -1],
+				'n': True
+				}
+			]
 
-		data = bubblesort_data(
-			ctypes_float_pointer_firstelement,
-			len(values)
-			)
 
-		self.__bubblesort_struct__(data)
-		values[:] = ctypes_float_values[:]
+	def tag_string(self, in_string):
+
+		in_buffer = ctypes.create_string_buffer(in_string.encode('utf-8'))
+		out_buffer = ctypes.pointer(ctypes.c_void_p())
+
+		self.__tag_string__(in_buffer, out_buffer)
+
+		return ctypes.cast(
+			out_buffer.contents,
+			ctypes.POINTER(ctypes.c_char * (len(in_buffer) + 2))
+			).contents[:].decode('utf-8').rstrip('\0')
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # TEST(s)
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-def test_bubblesort_struct():
+def test_tag_string():
 
-	sample = sample_class()
+	sample = sample_class_a()
 
-	test_vector = [5.74, 3.72, 6.28, 8.6, 9.34, 6.47, 2.05, 9.09, 4.39, 4.75]
-	sample.bubblesort_struct(test_vector)
-	test_vector = [round(element, 2) for element in test_vector]
-	result_vector = [2.05, 3.72, 4.39, 4.75, 5.74, 6.28, 6.47, 8.6, 9.09, 9.34]
-	vector_diff = sum([abs(test_vector[index] - result_vector[index]) for index in range(len(result_vector))])
+	assert '<html>' == sample.tag_string('html')
 
-	assert pytest.approx(0.0, 0.0000001) == vector_diff
+
+def test_tag_string_serverside_length_computation():
+
+	sample = sample_class_b()
+
+	assert '<body>' == sample.tag_string('body')

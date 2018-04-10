@@ -56,8 +56,8 @@ class sample_class:
 			{
 				'p': [0], # "path" to argument containing the pointer
 				'l': ([1], [2]), # "path" to arguments containing information on length
-				'_f': lambda x, y: x * y, # function computing length from relevant arguments
-				'_t': ctypes.c_float # type of argument (optional, default char/byte): sizeof(type) * length == bytes
+				'f': 'lambda x, y: x * y', # function computing length from relevant arguments
+				't': 'c_float' # type of argument (optional, default char/byte): sizeof(type) * length == bytes
 				}
 			]
 		self.__bubblesort_segments__.argtypes = (ctypes.POINTER(ctypes.c_float), ctypes.c_int, ctypes.c_int)

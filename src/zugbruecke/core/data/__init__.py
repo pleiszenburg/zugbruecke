@@ -33,9 +33,10 @@ specific language governing rights and limitations under the License.
 
 from ctypes import _FUNCFLAG_CDECL
 
-from .contents import contents_class
-from .definition import definition_class
-from .memory import memory_class
+from .arg_contents import arguments_contents_class
+from .arg_definition import arguments_definition_class
+from .mem_contents import memory_contents_class
+from .mem_definition import memory_definition_class
 
 from ..const import _FUNCFLAG_STDCALL
 
@@ -44,7 +45,12 @@ from ..const import _FUNCFLAG_STDCALL
 # CLASS: DATA
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-class data_class(contents_class, definition_class, memory_class):
+class data_class(
+	arguments_contents_class,
+	arguments_definition_class,
+	memory_contents_class,
+	memory_definition_class
+	):
 
 
 	cache_dict = {

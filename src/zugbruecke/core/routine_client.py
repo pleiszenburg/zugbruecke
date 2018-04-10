@@ -113,7 +113,7 @@ class routine_client_class():
 		self.log.out('[routine-client] ... parameters are "%r". Packing and pushing to server ...' % (args,))
 
 		# Handle memory
-		mem_package_list, memory_transport_handle = self.data.client_pack_memory_list(args, self.memsync_d)
+		mem_package_list = self.data.client_pack_memory_list(args, self.memsync_d)
 
 		# Actually call routine in DLL! TODO Handle kw ...
 		return_dict = self.__handle_call_on_server__(
@@ -131,26 +131,27 @@ class routine_client_class():
 			)
 
 		# Log status
+		self.log.out('[routine-client] ... unpacking return value ...')
+
+		# Unpack return value of routine
+		return_value = self.data.return_msg_unpack(return_dict['return_value'], self.restype_d)
+
+		# Log status
 		self.log.out('[routine-client] ... overwriting memory ...')
 
 		# Unpack memory (call may have failed partially only)
-		self.data.client_unpack_memory_list(return_dict['memory'], memory_transport_handle)
-
-		# Unpacking a return value only makes sense if the call was a success
-		if return_dict['success']:
-
-			# Log status
-			self.log.out('[routine-client] ... unpacking return value ...')
-
-			# Unpack return value of routine
-			return_value = self.data.return_msg_unpack(return_dict['return_value'], self.restype_d)
+		self.data.client_unpack_memory_list(args, return_value, return_dict['memory'], self.memsync_d)
 
 		# Log status
-		self.log.out('[routine-client] ... unpacked, return.')
+		self.log.out('[routine-client] ... everything unpacked and overwritten ...')
 
 		# Raise the original error if call was not a success
 		if not return_dict['success']:
+			self.log.out('[routine-client] ... call raised an error.')
 			raise return_dict['exception']
+
+		# Log status
+		self.log.out('[routine-client] ... return.')
 
 		# Return result. return_value will be None if there was not a result.
 		return return_value
@@ -164,18 +165,19 @@ class routine_client_class():
 		# Parse return type
 		self.restype_d = self.data.pack_definition_returntype(self.__restype__)
 
-		# Fix missing ctypes in memsync
-		self.data.client_fix_memsync_ctypes(self.__memsync__)
+		# Compile memsync statements HACK just unpack the user input ...
+		self.memsync_d = self.data.unpack_definition_memsync(self.__memsync__)
 
-		# Store and reduce memsync for transfer
-		self.memsync_d = self.__memsync__
-		memsync_d_packed = self.data.pack_definition_memsync(self.__memsync__)
+		# Pack memsync_d again for shipping
+		memsync_d_packed = self.data.pack_definition_memsync(self.memsync_d)
 
 		# Adjust definitions with void pointers
-		self.data.apply_memsync_to_argtypes_definition(self.__memsync__, self.argtypes_d)
+		self.data.apply_memsync_to_argtypes_and_restype_definition(
+			self.memsync_d, self.argtypes_d, self.restype_d
+			)
 
 		# Log status
-		self.log.out(' memsync: \n%s' % pf(self.__memsync__))
+		self.log.out(' memsync: \n%s' % pf(self.memsync_d))
 		self.log.out(' argtypes: \n%s' % pf(self.__argtypes__))
 		self.log.out(' argtypes_d: \n%s' % pf(self.argtypes_d))
 		self.log.out(' restype: \n%s' % pf(self.__restype__))

@@ -3,11 +3,13 @@ How to release zugbruecke
 
 #. Merge all relevant changes into branch ``develop`` - this is where development and pre-release testing happens.
 
-#. In branch ``develop``, run tests and examples ...
+#. In branch ``develop``, run tests and examples and check that the documentation builds without errors.
 
-#. In branch ``develop``, adjust package version in ``setup.py`` by changing the ``version`` string.
+	.. code:: bash
 
-#. In branch ``develop``, add changes to ``CHANGES.rst``.
+		make test
+
+#. In branch ``develop``, add missing changes to ``CHANGES.rst`` and commit.
 
 #. Push branch ``develop`` to GitHub.
 
@@ -15,7 +17,7 @@ How to release zugbruecke
 
 #. Change to branch ``master``.
 
-#. Merge branch ``develop`` into branch ``master``.
+#. Merge branch ``develop`` into branch ``master`` (comment ``"%s release"  % version``).
 
 #. Push branch ``master`` to GitHub.
 
@@ -48,3 +50,13 @@ How to release zugbruecke
 	.. code:: bash
 
 		make upload
+
+#. Change to branch ``develop``.
+
+#. In branch ``develop``, bump the package version in ``setup.py`` by changing the ``version`` string.
+
+#. In ``CHANGES.rst``, indicate that a new development cycle has started.
+
+#. Commit to branch ``develop``.
+
+#. Push branch ``develop`` to GitHub.

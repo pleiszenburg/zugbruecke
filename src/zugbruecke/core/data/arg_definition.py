@@ -6,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	src/zugbruecke/core/data/definition.py: (Un-) packing of argument definitions
+	src/zugbruecke/core/data/arg_definition.py: (Un-) packing of argument definitions
 
 	Required to run on platform / side: [UNIX, WINE]
 
@@ -43,32 +43,18 @@ from ..const import (
 	GROUP_STRUCT,
 	GROUP_FUNCTION
 	)
-from ..lib import (
-	reduce_dict
-	)
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # CLASS: Definition packing and unpacking
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-class definition_class():
+class arguments_definition_class():
 
 
-	def apply_memsync_to_argtypes_definition(self, memsync_d, argtypes_d):
+	def generate_callback_decorator(self, flags, restype, *argtypes, **kwargs):
 
-		# Iterate over memory segments, which must be kept in sync
-		for memsync_item in memsync_d:
-
-			# Get type of pointer argument
-			arg_type = self.__get_argument_type_by_memsync_path__(memsync_item['p'], argtypes_d)
-
-			# HACK make memory sync pointers type agnostic
-			arg_type['g'] = GROUP_VOID
-			arg_type['t'] = None # no type string
-
-
-	def generate_callback_decorator(self, flags, restype, *argtypes):
+		_memsync_ = kwargs.pop('memsync', [])
 
 		if not(flags & _FUNCFLAG_STDCALL):
 			func_type_key = _FUNCFLAG_CDECL
@@ -87,6 +73,7 @@ class definition_class():
 
 				_argtypes_ = argtypes
 				_restype_ = restype
+				memsync = self.unpack_definition_memsync(_memsync_)
 				_flags_ = flags
 
 			# Store the new type and return
@@ -97,11 +84,6 @@ class definition_class():
 	def pack_definition_argtypes(self, argtypes):
 
 		return [self.__pack_definition_dict__(arg) for arg in argtypes]
-
-
-	def pack_definition_memsync(self, memsync):
-
-		return [reduce_dict(sync_element) for sync_element in memsync]
 
 
 	def pack_definition_returntype(self, restype):
@@ -178,28 +160,6 @@ class definition_class():
 			(ctypes.Structure,),
 			{'_fields_': fields}
 			)
-
-
-	def __get_argument_type_by_memsync_path__(self, memsync_path, argtypes_d):
-
-		# Reference processed argument types - start with depth 0
-		arg_type = argtypes_d[memsync_path[0]]
-		# Step through path to argument type ...
-		for path_element in memsync_path[1:]:
-			# Keep track of whether or not a match has been found so an error can be raised if not
-			found_match = False
-			# Find field with matching name
-			for field_index, field in enumerate(arg_type['_fields_']):
-				if field['n'] == path_element:
-					found_match = True
-					break
-			# Raise an error if the definition does not make sense
-			if not found_match:
-				raise # TODO
-			# Go deeper ...
-			arg_type = arg_type['_fields_'][field_index]
-
-		return arg_type
 
 
 	def __pack_definition_dict__(self, datatype, field_name = None):
@@ -303,6 +263,7 @@ class definition_class():
 				'g': GROUP_FUNCTION,
 				'_argtypes_': self.pack_definition_argtypes(datatype._argtypes_),
 				'_restype_': self.pack_definition_returntype(datatype._restype_),
+				'_memsync_': self.pack_definition_memsync(datatype.memsync),
 				'_flags_': datatype._flags_
 				}
 
@@ -381,7 +342,8 @@ class definition_class():
 		factory_type = self.generate_callback_decorator(
 			datatype_d_dict['_flags_'],
 			self.unpack_definition_returntype(datatype_d_dict['_restype_']),
-			*self.unpack_definition_argtypes(datatype_d_dict['_argtypes_'])
+			*self.unpack_definition_argtypes(datatype_d_dict['_argtypes_']),
+			memsync = self.unpack_definition_memsync(datatype_d_dict['_memsync_'])
 			)
 
 		# Store function pointer type for subsequent use as decorator

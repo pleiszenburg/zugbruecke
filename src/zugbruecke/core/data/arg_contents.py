@@ -6,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	src/zugbruecke/core/data/contents.py: (Un-) packing of argument contents
+	src/zugbruecke/core/data/arg_contents.py: (Un-) packing of argument contents
 
 	Required to run on platform / side: [UNIX, WINE]
 
@@ -44,13 +44,14 @@ from ..const import (
 	)
 from ..callback_client import callback_translator_client_class
 from ..callback_server import callback_translator_server_class
+from .memory import is_null_pointer
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # CLASS: Content packing and unpacking
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-class contents_class():
+class arguments_contents_class():
 
 
 	def arg_list_pack(self, args_tuple, argtypes_list):
@@ -147,6 +148,9 @@ class contents_class():
 			for flag in arg_def_dict['f']:
 				if flag != FLAG_POINTER:
 					raise # TODO
+				if is_null_pointer(arg_in):
+					# Just return None - will (hopefully) be overwritten by memsync
+					return None
 				arg_in = self.__item_pointer_strip__(arg_in)
 
 			# Handle fundamental types
@@ -226,7 +230,8 @@ class contents_class():
 
 		# Generate and store callback translator in cache
 		self.cache_dict['func_handle'][func_name] = callback_translator_client_class(
-			self, func_name, func_ptr, func_def_dict['_argtypes_'], func_def_dict['_restype_']
+			self, func_name, func_ptr, func_def_dict['_argtypes_'], func_def_dict['_restype_'],
+			self.unpack_definition_memsync(func_def_dict['_memsync_'])
 			)
 
 		# Register translator at RPC server
@@ -441,7 +446,8 @@ class contents_class():
 		self.cache_dict['func_handle'][func_name] = func_def_dict['_factory_type_'](
 			callback_translator_server_class(
 				self, func_name, getattr(self.callback_client, func_name),
-				func_def_dict['_argtypes_'], func_def_dict['_restype_']
+				func_def_dict['_argtypes_'], func_def_dict['_restype_'],
+				self.unpack_definition_memsync(func_def_dict['_memsync_'])
 				)
 			)
 
@@ -461,10 +467,22 @@ class contents_class():
 			if field_arg[1] is None:
 				continue
 
-			setattr(
-				struct_inst, # struct instance to be modified
-				field_arg[0], # parameter name (from tuple)
-				self.__unpack_item__(field_arg[1], field_def_dict) # parameter value
-				)
+			field_value = self.__unpack_item__(field_arg[1], field_def_dict)
+
+			try:
+
+				setattr(
+					struct_inst, # struct instance to be modified
+					field_arg[0], # field name (from tuple)
+					field_value # field value
+					)
+
+			except TypeError: # TODO HACK relevant for structs & callbacks & memsync together
+
+				setattr(
+					struct_inst, # struct instance to be modified
+					field_arg[0], # field name (from tuple)
+					ctypes.cast(field_value, ctypes.c_void_p)
+					)
 
 		return struct_inst

@@ -51,7 +51,7 @@ If run on *Windows*, the regular *ctypes* will just ignore any ``memsync``
 directive in the code.
 
 Pointers returned by a DLL pointing to memory allocated by the DLL are
-currently not handled. Null-terminated strings are not handled yet, too.
+currently not handled.
 
 Is it thread-safe?
 ------------------

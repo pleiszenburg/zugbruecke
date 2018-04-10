@@ -77,7 +77,7 @@ class routine_server_class():
 			args_list = self.data.arg_list_unpack(arg_message_list, self.argtypes_d)
 
 			# Unpack pointer data
-			memory_handle = self.data.server_unpack_memory_list(args_list, arg_memory_list, self.memsync_d)
+			self.data.server_unpack_memory_list(args_list, arg_memory_list, self.memsync_d)
 
 			# Default return value
 			return_value = None
@@ -97,7 +97,7 @@ class routine_server_class():
 		except Exception as e:
 
 			# Log status
-			self.log.out('[routine-server] ... failed!')
+			self.log.out('[routine-server] ... call failed!')
 
 			# Push traceback to log
 			self.log.err(traceback.format_exc())
@@ -114,7 +114,7 @@ class routine_server_class():
 		try:
 
 			# Pack memory for return
-			arg_memory_list = self.data.server_pack_memory_list(memory_handle, self.memsync_d)
+			self.data.server_pack_memory_list(args_list, return_value, arg_memory_list, self.memsync_d)
 
 			# Get new arg message list
 			arg_message_list = self.data.arg_list_pack(args_list, self.argtypes_d)
@@ -128,13 +128,16 @@ class routine_server_class():
 			# Pack return package and return it
 			return {
 				'args': arg_message_list,
-				'return_value': return_message, # TODO handle memory allocated by DLL in "free form" pointers
+				'return_value': return_message,
 				'memory': arg_memory_list,
 				'success': True,
 				'exception': None
 				}
 
-		except:
+		except Exception as e:
+
+			# Log status
+			self.log.out('[routine-server] ... packing call failed!')
 
 			# Push traceback to log
 			self.log.err(traceback.format_exc())
@@ -151,7 +154,7 @@ class routine_server_class():
 		self.restype_d = restype_d
 
 		# Store memory sync instructions
-		self.memsync_d = memsync_d
+		self.memsync_d = self.data.unpack_definition_memsync(memsync_d)
 
 		try:
 

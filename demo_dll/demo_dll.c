@@ -259,6 +259,31 @@ vector3d __stdcall DEMODLL *vector3d_add(
 }
 
 
+vector3d __stdcall DEMODLL *vector3d_add_array(
+	vector3d *v,
+	int16_t len
+	)
+{
+
+	int16_t i;
+
+	vector3d *v_out = malloc(sizeof(vector3d));
+	v_out->x = 0;
+	v_out->y = 0;
+	v_out->z = 0;
+
+	for(i = 0; i < len; i++)
+	{
+		v_out->x += v[i].x;
+		v_out->y += v[i].y;
+		v_out->z += v[i].z;
+	}
+
+	return v_out;
+
+}
+
+
 int16_t __stdcall DEMODLL sqrt_int(
 	int16_t a
 	)
@@ -314,6 +339,53 @@ int16_t __stdcall DEMODLL pow_ints(
 int16_t __stdcall DEMODLL get_const_int(void)
 {
 	return sqrt(49);
+}
+
+
+void __stdcall DEMODLL square_int_array(
+	int16_t *in_array,
+	void *out_array,
+	int16_t len
+	)
+{
+	int i;
+	int16_t **out_array_p = out_array;
+	*out_array_p = malloc(sizeof(int16_t) * len);
+	for(i = 0; i < len; i++)
+	{
+		(*out_array_p)[i] = in_array[i] * in_array[i];
+	}
+}
+
+
+void __stdcall DEMODLL square_int_array_with_struct(
+	int_array_data *in_array,
+	int_array_data *out_array
+	)
+{
+	int i;
+	out_array->len = in_array->len;
+	out_array->data = malloc(sizeof(int16_t) * out_array->len);
+	for(i = 0; i < in_array->len; i++)
+	{
+		out_array->data[i] = in_array->data[i] * in_array->data[i];
+	}
+}
+
+
+int_array_data __stdcall DEMODLL *fibonacci_sequence_a(
+	int16_t len
+	)
+{
+	int16_t i;
+	int_array_data *out_data = malloc(sizeof(int_array_data));
+	out_data->len = len;
+	out_data->data = malloc(sizeof(int16_t) * out_data->len);
+	for(i = 0; i < len; i++){
+		if(i == 0 || i == 1) { out_data->data[i] = 1; continue; }
+		out_data->data[i] = out_data->data[i - 1] + out_data->data[i - 2];
+	}
+	return out_data;
 }
 
 
@@ -374,6 +446,38 @@ void __stdcall DEMODLL replace_letter_in_null_terminated_string_unicode_b(
 			in_string[i] = new_letter;
 		}
 	}
+}
+
+
+void __stdcall DEMODLL tag_string_a(
+	char *in_string,
+	void *out_string
+	)
+{
+	int str_len = strlen(in_string);
+
+	char **out_string_p = out_string;
+	*out_string_p = malloc(sizeof(char) * (str_len + 2));
+	strncpy((*out_string_p) + 1, in_string, str_len);
+	(*out_string_p)[0] = '<';
+	(*out_string_p)[str_len + 1] = '>';
+	(*out_string_p)[str_len + 2] = '\0';
+}
+
+
+void __stdcall DEMODLL tag_string_b(
+	char *in_string,
+	void *out_string
+	)
+{
+	int str_len = strlen(in_string);
+
+	char **out_string_p = out_string;
+	*out_string_p = malloc(sizeof(char) * (str_len + 2));
+	strncpy((*out_string_p) + 1, in_string, str_len);
+	(*out_string_p)[0] = '<';
+	(*out_string_p)[str_len + 1] = '>';
+	(*out_string_p)[str_len + 2] = '\0';
 }
 
 
@@ -448,6 +552,85 @@ int16_t __stdcall DEMODLL sum_elements_from_callback_in_struct(
 	}
 
 	return sum;
+
+}
+
+
+int16_t _coordinates_in_image_(
+	image_data *in_image, int16_t x, int16_t y
+	)
+{
+	if(x < 0 || x >= in_image->width || y < 0 || y >= in_image->height){ return 0; }
+	return 1;
+}
+
+
+int16_t _image_pixel_get_(
+	image_data *in_image, int16_t x, int16_t y
+	)
+{
+	if(!_coordinates_in_image_(in_image, x, y)) { return 0; }
+	return in_image->data[(in_image->width * y) + x];
+}
+
+
+void _image_pixel_set_(
+	image_data *in_image, int16_t x, int16_t y, int16_t value
+	)
+{
+	if(!_coordinates_in_image_(in_image, x, y)) { return; }
+	in_image->data[(in_image->width * y) + x] = value;
+}
+
+
+void _image_copy_segment_to_buffer_(
+	image_data *in_image, image_data *in_buffer, int16_t x, int16_t y
+	)
+{
+	int16_t m, n;
+	for(m = 0; m < in_buffer->width; m++)
+	{
+		for(n = 0; n < in_buffer->height; n++)
+		{
+			_image_pixel_set_(in_buffer, m, n, _image_pixel_get_(in_image, x + m, y + n));
+		}
+	}
+}
+
+
+void __stdcall DEMODLL apply_filter_to_image(
+	image_data *in_image,
+	image_data *out_image,
+	filter_func_type filter_func
+	)
+{
+
+	int16_t i, j;
+	const int16_t F_W = 3;
+	const int16_t F_H = 3;
+	const int16_t F_W_off = F_W / 2;
+	const int16_t F_H_off = F_H / 2;
+
+	out_image->data = malloc(sizeof(int16_t) * in_image->width * in_image->height);
+	out_image->width = in_image->width;
+	out_image->height = in_image->height;
+
+	image_data *buffer = malloc(sizeof(image_data));
+	buffer->data = malloc(sizeof(int16_t) * F_W * F_H);
+	buffer->width = F_W;
+	buffer->height = F_H;
+
+	for(i = 0; i < in_image->width; i++)
+	{
+		for(j = 0; j < in_image->height; j++)
+		{
+			_image_copy_segment_to_buffer_(in_image, buffer, i - F_W_off, j - F_H_off);
+			_image_pixel_set_(out_image, i, j, filter_func(buffer));
+		}
+	}
+
+	free(buffer->data);
+	free(buffer);
 
 }
 

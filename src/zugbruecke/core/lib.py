@@ -74,15 +74,3 @@ def generate_session_id():
 
 	# A session id by default is an 8 digit hash string
 	return get_randhashstr(8)
-
-
-def reduce_dict(input_dict):
-
-	output_dict = {}
-
-	# Keep everything, which is not private (does not start with '_')
-	for key in input_dict.keys():
-		if not key.startswith('_'):
-			output_dict[key] = input_dict[key]
-
-	return output_dict

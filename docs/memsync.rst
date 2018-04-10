@@ -20,6 +20,13 @@ through the ``memsync`` protocol. ``memsync`` implements special directives,
 which do not interfere with *ctypes* should the code be required to run on
 *Windows* as well.
 
+*zugbruecke* can handle some types of pointers on its own, without additional ``memsync`` directives.
+Pointers to variables containing a single element (e.g. a floating pointer number or a structure) and
+pointers to fixed-length arrays are handled transparently without additional directives.
+If, on the other hand, the size of the memory a pointer is pointing to is dynamically determined at runtime,
+*zugbruecke* must be provided with a hint on where it can find information on the size of the memory section
+within the arguments or return value of a routine call. Those hints can be provided through ``memsync``.
+
 A simple example: An array of floating point numbers of variable length
 -----------------------------------------------------------------------
 
@@ -92,7 +99,7 @@ example demonstrates how you must modify the above example so it works with
 		{
 			'p': [0],
 			'l': [1],
-			'_t': c_float
+			't': 'c_float'
 			}
 		]
 
@@ -133,7 +140,7 @@ The complete example, which will run on *Unix* and on *Windows* looks just like 
 		{
 			'p': [0],
 			'l': [1],
-			'_t': c_float
+			't': 'c_float'
 			}
 		]
 
@@ -165,7 +172,7 @@ definitions like the following:
 		);
 
 The ``image_data`` parameter is a flattened 1D array representing a 2D image.
-It's length is defined by its width and its height. So the length of array equals
+Its length is defined by its width and its height. So the length of array equals
 ``image_width * image_height``. For cases like this, ``memsync`` has the ability
 to dynamically compute the length of the memory through custom functions.
 Let's have a look at how the above function would be configured in *Python*:
@@ -177,8 +184,8 @@ Let's have a look at how the above function would be configured in *Python*:
 		{
 			'p': [0],
 			'l': ([1], [2]),
-			'_f': lambda x, y: x * y,
-			'_t': ctypes.c_float
+			'f': 'lambda x, y: x * y',
+			't': 'c_float'
 			}
 		]
 
@@ -218,14 +225,12 @@ In Python, it can be configured as follows:
 	replace_letter.memsync = [
 		{
 			'p': [0],
-			'l': ([0],),
-			'_f': lambda x: ctypes.sizeof(x)
+			'n': True
 			}
 		]
 
-The above configuration exploits the field for specifying a function for computing
-the length of the memory section, ``_f``. The function is pointed to the parameter
-containing the string buffer and determines its length.
+The above configuration indicates that the first argument of the function is a
+pointer to a NULL-terminated string.
 
 While Python (3) strings are actually Unicode strings, the function accepts an
 array of type ``char`` - a bytes array in Python terms. I.e. you have to encode the
@@ -262,14 +267,13 @@ In Python, it can be configured like this:
 	replace_letter_w.memsync = [
 		{
 			'p': [0],
-			'l': ([0],),
-			'w': ctypes.sizeof(ctypes.c_wchar),
-			'_f': lambda x: ctypes.sizeof(x)
+			'n': True,
+			'w': True
 			}
 		]
 
-One key aspect has changed: ``memsync`` contains another field, ``w``. It must
-be initialized with the actual length of a Unicode character in the current environment.
+One key aspect has changed: ``memsync`` contains another field, ``w``.
+It must be set to ``True``, indicating that the argument is a Unicode string.
 Now you can call the function as follows:
 
 .. code:: python
@@ -278,17 +282,67 @@ Now you can call the function as follows:
 	replace_letter_w(unicode_buffer, 'a', 'e')
 	print(unicode_buffer.value)
 
+
+Applying memory synchronization to callback functions (function pointers)
+-------------------------------------------------------------------------
+
+Let's assume that you're dealing with structures of the following kind:
+
+.. code:: python
+
+	class image_data(ctypes.Structure):
+		_fields_ = [
+			('data', ctypes.POINTER(ctypes.c_int16)),
+			('width', ctypes.c_int16),
+			('height', ctypes.c_int16)
+			]
+
+2D monochrome image data is represented as a flattened 1D array, field ``data``,
+with size information attached to it in the fields ``width`` and ``height``.
+You furthermore have a function prototype which accepts an ``image_data`` structure
+as an argument:
+
+.. code:: python
+
+	filter_func_type = ctypes.WINFUNCTYPE(ctypes.c_int16, ctypes.POINTER(image_data))
+
+Before you actually decorate a *Python* function with it, all you have to do is
+to change the contents of the ``memsync`` attribute of the function prototype,
+``filter_func_type``:
+
+.. code:: python
+
+	filter_func_type.memsync = [
+		{
+			'p': [0, 'data'],
+			'l': ([0, 'width'], [0, 'height']),
+			'f': 'lambda x, y: x * y',
+			't': 'c_int16'
+			}
+		]
+
+The above syntax also does not interfere with ``ctypes`` on *Windows*, i.e.
+the code remains perfectly platform-independent. Once the function prototype
+has been configured though ``memsync``, it can be applied to a *Python* function:
+
+.. code:: python
+
+	@filter_func_type
+	def filter_edge_detection(in_buffer):
+		# do something ...
+
 Attribute: ``memsync`` (list of dict)
-----------------------------------------
+-------------------------------------
 
 ``memsync`` is a list of dictionaries. Every dictionary represents one memory
 section, which must be kept in sync. It has the following keys:
 
 * ``p`` (:ref:`path to pointer <pathpointer>`)
-* ``l`` (:ref:`path to length <pathlength>`)
-* ``w`` (:ref:`size of Unicode character <unicodechar>`, optional)
-* ``_t`` (:ref:`data type of pointer <pointertype>`, optional)
-* ``_f`` (:ref:`custom length function <length function>`, optional)
+* ``l`` (:ref:`path to length <pathlength>`, optional)
+* ``n`` (:ref:`NULL-terminated string flag <nullstring>`, optional)
+* ``w`` (:ref:`Unicode character flag <unicodechar>`, optional)
+* ``t`` (:ref:`data type of pointer <pointertype>`, optional)
+* ``f`` (:ref:`custom length function <length function>`, optional)
 * ``_c`` (:ref:`custom data type <customtype>`, optional)
 
 .. _pathpointer:
@@ -296,7 +350,8 @@ section, which must be kept in sync. It has the following keys:
 Key: ``p``, path to pointer (list of int and/or str)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-This parameter describes where in the arguments (along the lines of ``argtypes``)
+This parameter describes where in the arguments or return value
+(along the lines of ``argtypes`` and ``restype``)
 *zugbruecke*'s parser can find the pointer, which it is expected to handle.
 Consider the following example:
 
@@ -325,37 +380,50 @@ representing something like a "path":
 Let's assume that ``param_a`` is of type ``some_struct`` and ``field_a`` contains
 the pointer. ``p`` would look like this: ``[0, 'field_a']``. The pointer is found
 in ``field_a`` of the first parameter of ``some_other_routine``, ``param_a``.
-You should be able to extrapolate from here.
+
+Return values or elements within can be targeted by setting the first element
+of a path to ``'r'`` (instead of an integer targeting an argument).
 
 .. _pathlength:
 
-Key: ``l``, path to length (list of int and/or str OR tuple of lists of int and/or str)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Key: ``l``, path to length (list of int and/or str OR tuple of lists of int and/or str) (optional)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This parameter works just like the :ref:`path to pointer <pathpointer>` parameter.
 It is expected to tell the parser, where it can find a number (int) which represents
-the length of the memory block.
+the length of the memory block or, alternatively, arguments for a custom length function.
 
 It is expected to be either a single path list like ``[0, 'field_a']`` or a tuple
-of multiple (or even zero) path lists, if the optional ``_f`` key is defined.
+of multiple (or even zero) path lists, if the optional ``f`` key (custom length function) is defined.
+
+.. _nullstring:
+
+Key: ``n``, NULL-terminated string flag (optional)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Can be set to ``True`` is a NULL-terminated string is passed as an argument.
+``memsync`` will automatically determine the length of the string, so no
+extra information on its length (through ``l`` is required).
 
 .. _unicodechar:
 
-Key: ``w``, size of Unicode character (optional)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Key: ``w``, Unicode character flag (optional)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 If a Unicode string (buffer) is passed into a function, this parameter must be
-initialized with the length of one Unicode character in bytes in the current
-environment - ``ctypes.sizeof(ctypes.c_wchar)`` in most cases.
+set to ``True``. If not specified, it will default to ``False``.
 
 .. _pointertype:
 
-Key: ``_t``, data type of pointer (PyCSimpleType or PyCStructType) (optional)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Key: ``t``, data type of pointer (PyCSimpleType or PyCStructType) (optional)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-This parameter will be fed into ``ctypes.sizeof`` for determining its size in bytes.
+This field expects a string representing the name of a ctypes datatype.
+If you want to specify a custom structure type, you simple specify its class name as a string instead.
+
+This parameter will be used by ``ctypes.sizeof`` for determining the datatype's size in bytes.
 The result is then multiplied with the ``length`` to get an actual size of the
-memory block in bytes. If it is not explicitly defined, it defaults to ``ctypes.c_ubyte``.
+memory block in bytes. If it is not explicitly defined, it defaults to ``'c_ubyte'``.
 
 For details on ``sizeof``, consult the `Python documentation on sizeof`_.
 It will accept `fundamental types`_ as well as `structure types`_.
@@ -366,12 +434,13 @@ It will accept `fundamental types`_ as well as `structure types`_.
 
 .. _length function:
 
-Key: ``_f``, custom function for computing the length of the memory segment (optional)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Key: ``f``, custom function for computing the length of the memory segment (optional)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-This field can be used to plug in a function or lambda expression for computing the ``length``
-of the memory section from multiple parameters. The function is expected to accept a number of
-arguments equal to the number of elements of the tuple of length paths defined in ``l``.
+This field can be used to plug in a string, which can be parsed into a function or
+lambda expression for computing the ``length`` of the memory section from multiple parameters.
+The function is expected to accept a number of arguments equal to the number of elements
+of the tuple of length paths defined in ``l``.
 
 .. _customtype:
 
