@@ -1,8 +1,12 @@
 Changes
 =======
 
-0.0.11 (2018-XX-XX)
+0.0.11 (2018-04-10)
 -------------------
+
+Caution: This release features a significant re-implementation (with additional, new functionality) of the memory synchronization protocol, ``memsync``.
+As a part of it, overcoming old limitations, its syntax changed - effectively breaking backwards compatibility in almost call cases.
+Please check the (updated) documentation for details.
 
 * FEATURE: Memsync can handle pointers to memory, which was allocated by a DLL, see issue #37.
 * FEATURE: Memsync can target return values or elements within, see issue #40.
@@ -21,6 +25,8 @@ Changes
 
 0.0.9 (2018-03-21)
 ------------------
+
+Caution: This release introduces a change in configuration parameter naming, breaking backwards compatibility in rare cases.
 
 * FIX: Arch "win64" was broken because of wrong download URL for embedded CPython for win64/amd64, see issue #27.
 * FIX: Function pointers in struct types were not handled, see issue #28.
