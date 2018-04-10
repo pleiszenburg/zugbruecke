@@ -92,15 +92,13 @@ Prerequisites
 Installation
 ============
 
-+--------------------+--------------------------------------------------------------------------+
-| master / release   + .. code:: bash                                                           +
-|                    +                                                                          +
-| |build_master|     +  pip install zugbruecke                                                  +
-+--------------------+--------------------------------------------------------------------------+
-| development branch + .. code:: bash                                                           +
-|                    +                                                                          +
-| |build_develop|    +  pip install git+https://github.com/pleiszenburg/zugbruecke.git@develop  +
-+--------------------+--------------------------------------------------------------------------+
++--------------------+--------------------+-----------------------------------------------------------------------------+--------------------+
+| *branch*           + *status*           + *installation*                                                              + *documentation*    +
++--------------------+--------------------+-----------------------------------------------------------------------------+--------------------+
+| master (release)   + |build_master|     + ``pip install zugbruecke``                                                  + |docs_master|      +
++--------------------+--------------------+-----------------------------------------------------------------------------+--------------------+
+| develop            + |build_develop|    + ``pip install git+https://github.com/pleiszenburg/zugbruecke.git@develop``  + |docs_develop|     +
++--------------------+--------------------+-----------------------------------------------------------------------------+--------------------+
 
 Examples
 ========
@@ -109,21 +107,30 @@ Start an interactive Python session under Unix and try the following:
 
 .. code:: python
 
-	from zugbruecke import cdll, c_double
-	dll_pow = cdll.msvcrt.pow
-	dll_pow.argtypes = (c_double, c_double)
-	dll_pow.restype = c_double
+	import zugbruecke as ctypes
+	dll_pow = ctypes.cdll.msvcrt.pow
+	dll_pow.argtypes = (ctypes.c_double, ctypes.c_double)
+	dll_pow.restype = ctypes.c_double
 	print('You should expect "1024.0" to show up here: "%.1f".' % dll_pow(2.0, 10.0))
 
-You have just witnessed ``msvcrt.dll`` in action on Unix. Interested in more?
-Check the `examples`_ in zugbruecke's documentation or read `ctypes' documentation`_.
+You have just witnessed ``msvcrt.dll``, Microsoft's C standard library (or Wine's implementation of it), in action on Unix.
+
+**Interested in more?**
+
+- Check the `examples`_ in zugbruecke's documentation,
+- Read `ctypes' documentation`_,
+- Beyond ctypes syntax, learn about `memory synchronization`_ with the ``memsync`` routine attribute [or]
+- Have a look at zugbruecke's `test suite`_ showcasing its entire range of capabilities.
 
 A lot of code, which was written with ``ctypes``' ``cdll``, ``windll`` or ``oledll``
 in mind and which runs under Windows, should run just fine with zugbruecke
 on Unix (assuming it does not use Windows features not supported by Wine).
+For more complex calls, `memory synchronization`_ is potentially necessary.
 
 .. _examples: http://zugbruecke.readthedocs.io/en/stable/examples.html
 .. _ctypes' documentation: https://docs.python.org/3/library/ctypes.html
+.. _test suite: https://github.com/pleiszenburg/zugbruecke/tree/master/tests
+.. _memory synchronization: http://zugbruecke.readthedocs.io/en/latest/memsync.html
 
 Speed
 =====
@@ -172,13 +179,14 @@ Miscellaneous
   - at `Read the Docs`_
   - at `zugbruecke repository`_
 
-- `License`_ (**LGPL v2.1**)
+- `Authors`_
+- `Change log (current)`_ (changes in development branch since last release)
+- `Change log (past)`_ (release history)
 - `Contributing`_ (**Contributions are highly welcomed!**)
 - `FAQ`_
-- `Authors`_
-- `Changes`_
-- `Missing features`_ (for full ctypes compatibility)
+- `License`_ (**LGPL v2.1**)
 - `Long-term ideas`_
+- `Missing features`_ (for full ctypes compatibility)
 - `Upstream issues`_ (relevant bugs in dependencies)
 
 .. _Read the Docs: http://zugbruecke.readthedocs.io/en/latest/
@@ -187,7 +195,8 @@ Miscellaneous
 .. _Contributing: https://github.com/pleiszenburg/zugbruecke/blob/master/CONTRIBUTING.rst
 .. _FAQ: http://zugbruecke.readthedocs.io/en/stable/faq.html
 .. _Authors: https://github.com/pleiszenburg/zugbruecke/blob/master/AUTHORS.rst
-.. _Changes: https://github.com/pleiszenburg/zugbruecke/blob/master/CHANGES.rst
+.. _Change log (past): https://github.com/pleiszenburg/zugbruecke/blob/master/CHANGES.rst
+.. _Change log (current): https://github.com/pleiszenburg/zugbruecke/blob/develop/CHANGES.rst
 .. _Missing features: https://github.com/pleiszenburg/zugbruecke/issues?q=is%3Aissue+is%3Aopen+label%3A%22missing+ctypes+feature%22
 .. _Long-term ideas: https://github.com/pleiszenburg/zugbruecke/milestone/2
 .. _Upstream issues: https://github.com/pleiszenburg/zugbruecke/issues?q=is%3Aissue+is%3Aopen+label%3Aupstream
