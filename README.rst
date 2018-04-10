@@ -103,7 +103,7 @@ Installation
 Examples
 ========
 
-Start an interactive Python session under Unix and try the following:
+Start an interactive Python session on your favorite Unix(-like) operating system and try the following:
 
 .. code:: python
 
