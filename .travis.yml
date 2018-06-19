@@ -28,7 +28,8 @@
 sudo: enabled
 
 # A 'recent' version of Ubuntu for a recent version of Wine is required
-dist: trusty
+# dist: trusty
+dist: xenial
 
 # Get wine and mingw cross compiler
 # http://ubuntuhandbook.org/index.php/2017/01/install-wine-2-0-ubuntu-16-04-14-04-16-10/
@@ -58,6 +59,7 @@ python:
   - "3.4"
   - "3.5"
   - "3.6"
+  - "3.7-dev"
 
 # command to install dependencies and module
 install:
