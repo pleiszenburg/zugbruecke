@@ -4,8 +4,7 @@ Changes
 0.0.12 (2018-XX-XX)
 -------------------
 
-This release has been successfully tested against Python 3.7.0rc1. 
-
+* FEATURE: Added official support for CPython 3.7.
 * FIX: Build folder was not automatically cleaned up before wheels were build, therefore they sometimes contained obsolete files & code.
 
 0.0.11 (2018-04-10)
