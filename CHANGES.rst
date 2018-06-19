@@ -4,7 +4,7 @@ Changes
 0.0.12 (2018-XX-XX)
 -------------------
 
-* FIX: Build folder was not cleaned up before wheels were build, therefore they contained obsolete files & code.
+* FIX: Build folder was not automatically cleaned up before wheels were build, therefore they sometimes contained obsolete files & code.
 
 0.0.11 (2018-04-10)
 -------------------
