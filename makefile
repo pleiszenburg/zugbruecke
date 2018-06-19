@@ -28,6 +28,7 @@ docu:
 	@(cd docs; make clean; make html)
 
 release:
+	-rm build/*
 	-rm dist/*
 	-rm -r src/*.egg-info
 	python setup.py sdist bdist_wheel
