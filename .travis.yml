@@ -27,9 +27,21 @@
 # A virtual machine is required to run wine - is it?
 sudo: enabled
 
+# Repository language
+language: python
+
 # A 'recent' version of Ubuntu for a recent version of Wine is required
-# dist: trusty
-dist: xenial
+# Python 3.4 appears to not being offered for xenial at the moment
+matrix:
+    include:
+        - dist: trusty
+          python:
+            - "3.4"
+        - dist: xenial
+          python:
+            - "3.5"
+            - "3.6"
+            - "3.7-dev"
 
 # Get wine and mingw cross compiler
 # http://ubuntuhandbook.org/index.php/2017/01/install-wine-2-0-ubuntu-16-04-14-04-16-10/
@@ -50,16 +62,6 @@ before_install:
   - python --version
   - uname -a
   - lsb_release -a
-
-# Repository language
-language: python
-
-# Python version
-python:
-  - "3.4"
-  - "3.5"
-  - "3.6"
-  - "3.7-dev"
 
 # command to install dependencies and module
 install:
