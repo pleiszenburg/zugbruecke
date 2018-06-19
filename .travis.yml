@@ -35,13 +35,13 @@ language: python
 matrix:
     include:
         - dist: trusty
-          python:
-            - "3.4"
+          python: "3.4"
         - dist: xenial
-          python:
-            - "3.5"
-            - "3.6"
-            - "3.7-dev"
+          python: "3.5"
+        - dist: xenial
+          python: "3.6"
+        - dist: xenial
+          python: "3.7-dev"
 
 # Get wine and mingw cross compiler
 # http://ubuntuhandbook.org/index.php/2017/01/install-wine-2-0-ubuntu-16-04-14-04-16-10/
