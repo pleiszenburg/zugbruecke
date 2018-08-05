@@ -449,6 +449,21 @@ void __stdcall DEMODLL replace_letter_in_null_terminated_string_unicode_b(
 }
 
 
+void __stdcall DEMODLL replace_letter_in_null_terminated_string_r(
+	char **in_string,
+	char old_letter,
+	char new_letter
+	)
+{
+	int i;
+	for (i = 0; i < strlen((*in_string)); i++) {
+		if((*in_string)[i] == old_letter) {
+			(*in_string)[i] = new_letter;
+		}
+	}
+}
+
+
 void __stdcall DEMODLL tag_string_a(
 	char *in_string,
 	void *out_string
