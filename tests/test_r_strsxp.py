@@ -84,7 +84,7 @@ class sample_class:
 # TEST(s)
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-if __name__ == '__main__':
+def test_r_strsxp():
 
 	sample = sample_class()
 	assert 'zetegehube' == sample.replace_r('zategahuba', 'a', 'e')
