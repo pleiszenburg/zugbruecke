@@ -36,6 +36,14 @@ import argparse
 import importlib
 import os
 import sys
+import traceback
+
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# CONST
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+ZB_CONFIG_FN = '.zugbruecke.json'
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -63,6 +71,30 @@ def run_test(test_module, test_routine):
 	getattr(importlib.import_module(test_module), test_routine)()
 
 
+def overwrite_configuration():
+
+	if os.path.isfile(ZB_CONFIG_FN):
+		with open(ZB_CONFIG_FN, 'r') as f:
+			old_config = f.read()
+	else:
+		old_config = None
+
+	with open(ZB_CONFIG_FN, 'w') as f:
+		f.write('{"log_level": 10}\n')
+
+	return old_config
+
+
+def restore_configuration(old_config):
+
+	if old_config is None:
+		os.remove(ZB_CONFIG_FN)
+		return
+
+	with open(ZB_CONFIG_FN, 'w') as f:
+		f.write(old_config)
+
+
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # INIT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -78,4 +110,11 @@ if __name__ == '__main__':
 		)
 	args = parser.parse_args()
 
-	run_test(args.module[0], args.routine[0])
+	old_config = overwrite_configuration()
+
+	try:
+		run_test(args.module[0], args.routine[0])
+	except:
+		traceback.print_exc()
+
+	restore_configuration(old_config)
