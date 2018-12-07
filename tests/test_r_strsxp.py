@@ -55,12 +55,12 @@ class sample_class:
 			ctypes.c_char,
 			ctypes.c_char
 			)
-		# self.__replace_r__.memsync = [
-		# 	{
-		# 		'p': [0],
-		# 		'n': True
-		# 		}
-		# 	]
+		self.__replace_r__.memsync = [
+			{
+				'p': [0, -1],
+				'n': True
+				}
+			]
 
 
 	def replace_r(self, in_string, old_letter, new_letter):
