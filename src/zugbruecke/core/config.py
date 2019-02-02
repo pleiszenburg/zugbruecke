@@ -127,7 +127,7 @@ def __locate_and_read_config_files__():
 
 	# Look for config in the usual spots
 	for file_location in [
-		os.curdir,
+		os.getcwd(), # os.curdir
 		os.environ.get('ZUGBRUECKE'),
 		__get_default_config_directory__(),
 		'/etc/zugbruecke'

@@ -204,6 +204,12 @@ void __stdcall DEMODLL replace_letter_in_null_terminated_string_b(
 	char new_letter
 	);
 
+void __stdcall DEMODLL replace_letter_in_null_terminated_string_r(
+	char **in_string,
+	char old_letter,
+	char new_letter
+	);
+
 void __stdcall DEMODLL replace_letter_in_null_terminated_string_unicode_a(
 	wchar_t *in_string,
 	wchar_t old_letter,
