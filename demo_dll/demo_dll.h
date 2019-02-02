@@ -8,7 +8,7 @@ https://github.com/pleiszenburg/zugbruecke
 
 	Required to run on platform / side: [WINE]
 
-	Copyright (C) 2017-2018 Sebastian M. Ernst <ernst@pleiszenburg.de>
+	Copyright (C) 2017-2019 Sebastian M. Ernst <ernst@pleiszenburg.de>
 
 <LICENSE_BLOCK>
 The contents of this file are subject to the GNU Lesser General Public License
@@ -200,6 +200,12 @@ void __stdcall DEMODLL replace_letter_in_null_terminated_string_a(
 
 void __stdcall DEMODLL replace_letter_in_null_terminated_string_b(
 	char *in_string,
+	char old_letter,
+	char new_letter
+	);
+
+void __stdcall DEMODLL replace_letter_in_null_terminated_string_r(
+	char **in_string,
 	char old_letter,
 	char new_letter
 	);

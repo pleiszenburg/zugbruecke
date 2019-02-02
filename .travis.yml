@@ -6,7 +6,7 @@
 #
 # 	Required to run on platform / side: [UNIX]
 #
-# 	Copyright (C) 2017 Sebastian M. Ernst <ernst@pleiszenburg.de>
+# 	Copyright (C) 2017-2019 Sebastian M. Ernst <ernst@pleiszenburg.de>
 #
 # <LICENSE_BLOCK>
 # The contents of this file are subject to the GNU Lesser General Public License
@@ -27,8 +27,21 @@
 # A virtual machine is required to run wine - is it?
 sudo: enabled
 
+# Repository language
+language: python
+
 # A 'recent' version of Ubuntu for a recent version of Wine is required
-dist: trusty
+# Python 3.4 appears to not being offered for xenial at the moment
+matrix:
+    include:
+        - dist: trusty
+          python: "3.4"
+        - dist: xenial
+          python: "3.5"
+        - dist: xenial
+          python: "3.6"
+        - dist: xenial
+          python: "3.7"
 
 # Get wine and mingw cross compiler
 # http://ubuntuhandbook.org/index.php/2017/01/install-wine-2-0-ubuntu-16-04-14-04-16-10/
@@ -38,6 +51,8 @@ before_install:
   - sudo dpkg --add-architecture i386
   - wget https://dl.winehq.org/wine-builds/Release.key
   - sudo apt-key add Release.key
+  - wget https://dl.winehq.org/wine-builds/winehq.key
+  - sudo apt-key add winehq.key
   - sudo apt-add-repository 'https://dl.winehq.org/wine-builds/ubuntu/'
   - sudo apt-get -qq update
   - sudo apt-get install -y wine-staging
@@ -49,15 +64,6 @@ before_install:
   - python --version
   - uname -a
   - lsb_release -a
-
-# Repository language
-language: python
-
-# Python version
-python:
-  - "3.4"
-  - "3.5"
-  - "3.6"
 
 # command to install dependencies and module
 install:

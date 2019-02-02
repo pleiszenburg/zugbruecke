@@ -172,7 +172,7 @@ definitions like the following:
 		);
 
 The ``image_data`` parameter is a flattened 1D array representing a 2D image.
-Its length is defined by its width and its height. So the length of array equals
+Its length is defined by its width and its height. So the length of the array equals
 ``image_width * image_height``. For cases like this, ``memsync`` has the ability
 to dynamically compute the length of the memory through custom functions.
 Let's have a look at how the above function would be configured in *Python*:
@@ -196,7 +196,7 @@ specified lambda function.
 Using string buffers, null-terminated strings and Unicode
 ---------------------------------------------------------
 
-Let's assume you are confronted with a regular Python (3) string. With the help of a
+Let's assume you are confronted with a regular *Python* (3) string. With the help of a
 DLL function, you want to replace all occurrences of a letter with another letter.
 
 .. code:: python
@@ -213,7 +213,7 @@ The DLL function's definition looks like this:
 		char new_letter
 		);
 
-In Python, it can be configured as follows:
+In *Python*, it can be configured as follows:
 
 .. code:: python
 
@@ -232,8 +232,8 @@ In Python, it can be configured as follows:
 The above configuration indicates that the first argument of the function is a
 pointer to a NULL-terminated string.
 
-While Python (3) strings are actually Unicode strings, the function accepts an
-array of type ``char`` - a bytes array in Python terms. I.e. you have to encode the
+While *Python* (3) strings are actually Unicode strings, the function accepts an
+array of type ``char`` - a bytes array in *Python* terms. I.e. you have to encode the
 string before it is copied into a string buffer. The following example illustrates
 how the function ``replace_letter`` can be called on the string ``some_string``,
 exchanging all letters ``a`` with ``e``. Subsequently, the result is printed.
@@ -323,7 +323,7 @@ to change the contents of the ``memsync`` attribute of the function prototype,
 
 The above syntax also does not interfere with ``ctypes`` on *Windows*, i.e.
 the code remains perfectly platform-independent. Once the function prototype
-has been configured though ``memsync``, it can be applied to a *Python* function:
+has been configured through ``memsync``, it can be applied to a *Python* function:
 
 .. code:: python
 
@@ -401,7 +401,7 @@ of multiple (or even zero) path lists, if the optional ``f`` key (custom length 
 Key: ``n``, NULL-terminated string flag (optional)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Can be set to ``True`` is a NULL-terminated string is passed as an argument.
+Can be set to ``True`` if a NULL-terminated string is passed as an argument.
 ``memsync`` will automatically determine the length of the string, so no
 extra information on its length (through ``l`` is required).
 
@@ -419,7 +419,7 @@ Key: ``t``, data type of pointer (PyCSimpleType or PyCStructType) (optional)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This field expects a string representing the name of a ctypes datatype.
-If you want to specify a custom structure type, you simple specify its class name as a string instead.
+If you want to specify a custom structure type, you simply specify its class name as a string instead.
 
 This parameter will be used by ``ctypes.sizeof`` for determining the datatype's size in bytes.
 The result is then multiplied with the ``length`` to get an actual size of the

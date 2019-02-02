@@ -6,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	tests/test_sqrt_int.py: Test function call without parameters
+	tests/test_sqrt_int.py: Test function with single parameter
 
 	Required to run on platform / side: [UNIX, WINE]
 
@@ -31,46 +31,63 @@ specific language governing rights and limitations under the License.
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-import pytest
-
 from sys import platform
 if any([platform.startswith(os_name) for os_name in ['linux', 'darwin', 'freebsd']]):
 	import zugbruecke as ctypes
 elif platform.startswith('win'):
 	import ctypes
 
+import pytest
+
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# CLASSES AND ROUTINES
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+class sample_class:
+
+
+	def __init__(self):
+
+		self.__dll__ = ctypes.windll.LoadLibrary('tests/demo_dll.dll')
+
+		self.__replace_r__ = self.__dll__.replace_letter_in_null_terminated_string_r
+		self.__replace_r__.argtypes = (
+			ctypes.POINTER(ctypes.POINTER(ctypes.c_char)), # Generate pointer to char manually
+			ctypes.c_char,
+			ctypes.c_char
+			)
+		self.__replace_r__.memsync = [
+			{
+				'p': [0, -1],
+				'n': True
+				}
+			]
+
+
+	def replace_r(self, in_string, old_letter, new_letter):
+
+		string_buffer = (ctypes.c_char_p * 1)(in_string.encode('utf-8'))
+		string_buffer_p = ctypes.cast(
+			string_buffer,
+			ctypes.POINTER(ctypes.POINTER(ctypes.c_char))
+			)
+
+		self.__replace_r__(
+			string_buffer_p,
+			old_letter.encode('utf-8'),
+			new_letter.encode('utf-8')
+			)
+
+		return string_buffer[:][0].decode('utf-8')
+
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # TEST(s)
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-def test_sqrt_int():
+@pytest.mark.xfail(strict = False, reason = 'not yet implemented')
+def test_r_strsxp():
 
-		dll = ctypes.windll.LoadLibrary('tests/demo_dll.dll')
-
-		get_const_int = dll.get_const_int
-		get_const_int.restype = ctypes.c_int16
-
-		assert 7 == get_const_int()
-
-
-def test_sqrt_int_with_tuple():
-
-		dll = ctypes.windll.LoadLibrary('tests/demo_dll.dll')
-
-		get_const_int = dll.get_const_int
-		get_const_int.argtypes = tuple()
-		get_const_int.restype = ctypes.c_int16
-
-		assert 7 == get_const_int()
-
-
-def test_sqrt_int_with_list():
-
-		dll = ctypes.windll.LoadLibrary('tests/demo_dll.dll')
-
-		get_const_int = dll.get_const_int
-		get_const_int.argtypes = []
-		get_const_int.restype = ctypes.c_int16
-
-		assert 7 == get_const_int()
+	sample = sample_class()
+	assert 'zetegehube' == sample.replace_r('zategahuba', 'a', 'e')

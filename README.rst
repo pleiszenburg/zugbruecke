@@ -72,8 +72,8 @@ Prerequisites
 =============
 
 +--------------------+-------------------------------------------------------------------------------------------------------------+
-| for usage          + - `CPython`_ 3.x (tested with 3.{4,5,6}) - no additional Python packages required                           +
-|                    + - `Wine`_ 2.x/3.x (tested with 2.{5 to 21} regular & `staging`_) - expected to be in the user's `PATH`_     +
+| for usage          + - `CPython`_ 3.x (tested with 3.{4,5,6,7}) - no additional Python packages required                         +
+|                    + - `Wine`_ 2.x/3.x/4.x (tested with regular & `staging`_) - expected to be in the user's `PATH`_             +
 +--------------------+-------------------------------------------------------------------------------------------------------------+
 | for tests          + - `pytest`_                                                                                                 +
 |                    + - `mingw cross-compiler`_ - for building DLLs against which examples and tests can be run                   +
@@ -103,7 +103,7 @@ Installation
 Examples
 ========
 
-Start an interactive Python session under Unix and try the following:
+Start an interactive Python session on your favorite Unix(-like) operating system and try the following:
 
 .. code:: python
 

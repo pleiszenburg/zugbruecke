@@ -10,7 +10,7 @@ https://github.com/pleiszenburg/zugbruecke
 
 	Required to run on platform / side: [UNIX]
 
-	Copyright (C) 2017-2018 Sebastian M. Ernst <ernst@pleiszenburg.de>
+	Copyright (C) 2017-2019 Sebastian M. Ernst <ernst@pleiszenburg.de>
 
 <LICENSE_BLOCK>
 The contents of this file are subject to the GNU Lesser General Public License
@@ -127,7 +127,7 @@ def __locate_and_read_config_files__():
 
 	# Look for config in the usual spots
 	for file_location in [
-		os.curdir,
+		os.getcwd(), # os.curdir
 		os.environ.get('ZUGBRUECKE'),
 		__get_default_config_directory__(),
 		'/etc/zugbruecke'

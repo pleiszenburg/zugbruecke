@@ -6,7 +6,7 @@
 #
 #	Required to run on platform / side: [UNIX]
 #
-# 	Copyright (C) 2017-2018 Sebastian M. Ernst <ernst@pleiszenburg.de>
+# 	Copyright (C) 2017-2019 Sebastian M. Ernst <ernst@pleiszenburg.de>
 #
 # <LICENSE_BLOCK>
 # The contents of this file are subject to the GNU Lesser General Public License
@@ -28,6 +28,7 @@ docu:
 	@(cd docs; make clean; make html)
 
 release:
+	-rm build/*
 	-rm dist/*
 	-rm -r src/*.egg-info
 	python setup.py sdist bdist_wheel
