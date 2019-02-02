@@ -1,11 +1,15 @@
 Changes
 =======
 
-0.0.12 (2018-XX-XX)
+0.0.12 (2019-02-02)
 -------------------
 
 * FEATURE: Added official support for CPython 3.7.
+* FEATURE: Added official support for Wine 4.
 * FIX: Build folder was not automatically cleaned up before wheels were build, therefore they sometimes contained obsolete files & code.
+* FIX: Travis configuration was missing new Wine repository key, which was breaking builds.
+* Lots of fixes in documentation.
+* New test script for easier development of new tests and features.
 
 0.0.11 (2018-04-10)
 -------------------
