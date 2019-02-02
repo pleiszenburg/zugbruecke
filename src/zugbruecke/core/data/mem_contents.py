@@ -157,15 +157,11 @@ class memory_contents_class():
 
 				# Pointer to pointer (in top-level arguments) for memory allocation by DLL
 				if path_element < 0:
-					self.log.err(pf(('A', element)))
 					element = self.__item_pointer_strip__(element)
-					self.log.err(pf(('B', element)))
 
 				# Dive into argument tuple
 				else:
-					self.log.err(pf(('a', element)))
 					element = element[path_element]
-					self.log.err(pf(('b', element)))
 
 			# Element equals 'r' and index 0: Return value
 			elif isinstance(path_element, str) and element_index == 0:
@@ -189,7 +185,6 @@ class memory_contents_class():
 				print(path_element)
 				raise # TODO
 
-		self.log.err(pf(('C', element)))
 		return element
 
 
@@ -321,7 +316,6 @@ class memory_contents_class():
 
 		# If we're in the top level arguments or an array ...
 		if isinstance(memsync_d['p'][-1], int):
-			self.log.err(pf(('Z', pointer_arg)))
 			# Handle deepest instance (exchange element in list/tuple) HACK
 			pointer_arg[memsync_d['p'][-1]] = pointer
 		# If we're at a field of a struct
