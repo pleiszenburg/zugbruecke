@@ -37,6 +37,8 @@ if any([platform.startswith(os_name) for os_name in ['linux', 'darwin', 'freebsd
 elif platform.startswith('win'):
 	import ctypes
 
+import pytest
+
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # CLASSES AND ROUTINES
@@ -84,6 +86,7 @@ class sample_class:
 # TEST(s)
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+@pytest.mark.xfail(strict = False, reason = 'not yet implemented')
 def test_r_strsxp():
 
 	sample = sample_class()
