@@ -18,7 +18,7 @@ https://github.com/pleiszenburg/zugbruecke
 	https://github.com/python/cpython/blob/3.6/LICENSE
 
 	Modifications from original:
-	Copyright (C) 2017-2018 Sebastian M. Ernst <ernst@pleiszenburg.de>
+	Copyright (C) 2017-2019 Sebastian M. Ernst <ernst@pleiszenburg.de>
 
 <LICENSE_BLOCK>
 The contents of this file are subject to the GNU Lesser General Public License
