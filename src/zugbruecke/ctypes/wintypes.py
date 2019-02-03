@@ -6,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	src/zugbruecke/wintypes.py: ctypes-based wintypes, hacks for VARIANT_BOOL
+	src/zugbruecke/ctypes/wintypes.py: ctypes-based wintypes, hacks for VARIANT_BOOL
 
 	Required to run on platform / side: [UNIX]
 

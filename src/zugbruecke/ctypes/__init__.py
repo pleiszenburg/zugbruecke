@@ -6,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	src/zugbruecke/__init__.py: Module init file
+	src/zugbruecke/ctypes/__init__.py: ctypes drop-in replacement
 
 	Required to run on platform / side: [UNIX]
 

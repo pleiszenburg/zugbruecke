@@ -6,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	src/zugbruecke/_wrapper_.py: Patches platform-specific ctypes features
+	src/zugbruecke/ctypes/_wrapper_.py: Patches platform-specific ctypes features
 
 	Required to run on platform / side: [UNIX]
 
