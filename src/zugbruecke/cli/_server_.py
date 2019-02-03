@@ -7,7 +7,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	src/zugbruecke/_server_.py: Started with Python on Wine, executing DLL calls
+	src/zugbruecke/cli/_server_.py: Started with Python on Wine, executing DLL calls
 
 	Required to run on platform / side: [WINE]
 
@@ -34,7 +34,7 @@ specific language governing rights and limitations under the License.
 
 import argparse
 
-from core.session_server import session_server_class
+from zugbruecke.core.session_server import session_server_class
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

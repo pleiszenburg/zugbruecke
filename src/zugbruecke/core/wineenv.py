@@ -105,6 +105,9 @@ def setup_wine_python(arch, version, directory, overwrite = False):
 		# Create folder
 		os.makedirs(directory)
 
+	# Get (potentially future) path of Python standard library
+	library_path = os.path.join(target_directory, 'Lib')
+
 	# Only do if Python is not there OR if should be overwritten
 	if overwrite or not preexisting:
 
@@ -130,12 +133,32 @@ def setup_wine_python(arch, version, directory, overwrite = False):
 
 		# Unpack Python library from embedded zip on disk
 		f = zipfile.ZipFile(library_zip_path, 'r')
-		f.extractall(path = os.path.join(target_directory, 'Lib')) # Directory created if required
+		f.extractall(path = library_path) # Directory created if required
 		f.close()
 
 		# Remove Python library zip from disk
 		os.remove(library_zip_path)
 
+	# Get wine-python site-packages path
+	sitepackage_path = os.path.join(library_path, 'site-packages')
+
+	# Create site-packages folder if it does not exist
+	if not os.path.exists(sitepackage_path):
+		# Create folder
+		os.makedirs(sitepackage_path)
+
+	# Package path in wine-python site-packages
+	wine_pkg_path = os.path.abspath(os.path.join(sitepackage_path, 'zugbruecke'))
+
+	# Package path in unix-python site-packages
+	unix_pkg_path = os.path.abspath(os.path.join(
+		os.path.dirname(__file__), os.path.pardir
+		))
+
+	# If package has not been linked into site-packages ...
+	if not os.path.exists(wine_pkg_path):
+		# Link zugbruecke package into wine-python site-packages
+		os.symlink(unix_pkg_path, wine_pkg_path)
 
 def set_wine_env(cfg_dir, arch):
 

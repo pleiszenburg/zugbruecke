@@ -397,7 +397,7 @@ class session_client_class():
 		# Prepare command with minimal meta info. All other info can be passed via sockets.
 		self.p['command_dict'] = [
 			os.path.join(
-				os.path.abspath(os.path.join(get_location_of_file(__file__), os.pardir)),
+				os.path.abspath(os.path.join(get_location_of_file(__file__), os.pardir, 'cli')),
 				'_server_.py'
 				),
 			'--id', self.id,
