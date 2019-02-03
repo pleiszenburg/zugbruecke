@@ -93,7 +93,7 @@ def find_library(name):
 
 		# Start wine-python
 		winepython_p = subprocess.Popen(
-			'wine-python -c' + command,
+			'wine-python -c' + command, # BUG command should be list instead of string!
 			stdout = subprocess.PIPE,
 			stderr = subprocess.PIPE,
 			shell = True
