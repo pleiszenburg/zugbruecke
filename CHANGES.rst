@@ -1,7 +1,12 @@
 Changes
 =======
 
-0.0.12 (2019-02-03)
+0.0.14 (2019-XX-XX)
+-------------------
+
+...
+
+0.0.13 (2019-02-03)
 -------------------
 
 * FIX: Documentation could (sometimes) not be built on readthedocs.
