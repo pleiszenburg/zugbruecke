@@ -79,6 +79,11 @@ def __get_wine_python_paths__(arch, version, directory):
 	pip_path = os.path.join(scripts_path, 'pip.exe')
 	# pytest
 	pytest_path = os.path.join(scripts_path, 'pytest.exe')
+	# stdlib zip filename
+	stdlibzip_path = os.path.join(
+		root_path,
+		'python%s%s.zip' % (version.split('.')[0], version.split('.')[1])
+		)
 
 	# Return dict
 	return dict(
@@ -89,6 +94,7 @@ def __get_wine_python_paths__(arch, version, directory):
 		interpreter = interpreter_path,
 		pip = pip_path,
 		pytest = pytest_path,
+		stdlibzip = stdlibzip_path,
 		)
 
 
@@ -122,7 +128,8 @@ def setup_wine_python(arch, version, directory, overwrite = False):
 
 	# File name for python stand-alone zip file
 	pyarchive = 'python-%s-embed-%s.zip' % (version, 'amd64' if arch == 'win64' else arch)
-
+	# Compute full URL of Python stand-alone zip file
+	pyurl = 'https://www.python.org/ftp/python/%s/%s' % (version, pyarchive)
 	# Environment paths
 	path_dict = __get_wine_python_paths__(arch, version, directory)
 
@@ -144,31 +151,18 @@ def setup_wine_python(arch, version, directory, overwrite = False):
 
 		# Generate in-memory file-like-object
 		archive_zip = BytesIO()
-
 		# Download zip file from Python website into file-like-object
-		archive_req = urllib.request.urlopen(
-			'https://www.python.org/ftp/python/%s/%s' % (version, pyarchive)
-			)
-		archive_zip.write(archive_req.read())
-		archive_req.close()
-
+		with urllib.request.urlopen(pyurl) as u:
+			archive_zip.write(u.read())
 		# Unpack from memory to disk
-		f = zipfile.ZipFile(archive_zip)
-		f.extractall(path = path_dict['root']) # Directory created if required
-		f.close()
-
-		# Get path of Python library zip
-		library_zip_path = os.path.join(path_dict['root'], 'python%s%s.zip' % (
-			version.split('.')[0], version.split('.')[1]
-			))
+		with zipfile.ZipFile(archive_zip) as f:
+			f.extractall(path = path_dict['root']) # Directory created if required
 
 		# Unpack Python library from embedded zip on disk
-		f = zipfile.ZipFile(library_zip_path, 'r')
-		f.extractall(path = path_dict['lib']) # Directory created if required
-		f.close()
-
+		with zipfile.ZipFile(path_dict['stdlibzip'], 'r') as f:
+			f.extractall(path = path_dict['lib']) # Directory created if required
 		# Remove Python library zip from disk
-		os.remove(library_zip_path)
+		os.remove(path_dict['stdlibzip'])
 
 	# Create site-packages folder if it does not exist
 	if not os.path.exists(path_dict['sitepackages']):
