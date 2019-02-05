@@ -88,23 +88,13 @@ def __get_default_config_directory__():
 
 def __join_config_by_priority__(config_dict_list):
 
-	# Gather all the keys ...
-	key_set = set()
-	for config_dict in config_dict_list:
-		key_set = key_set | set(list(config_dict.keys()))
-
 	# New parameter dict
 	parameter_dict = {}
 
 	# Go through list, from low priority to high
 	for config_dict in reversed(config_dict_list):
-
-		# Go through keys
-		for key in key_set:
-
-			# Change config is needed
-			if key in config_dict.keys():
-				parameter_dict[key] = config_dict[key]
+		# Update parameter dict
+		parameter_dict.update(config_dict)
 
 	return parameter_dict
 
