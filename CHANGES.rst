@@ -4,7 +4,27 @@ Changes
 0.0.14 (2019-XX-XX)
 -------------------
 
-...
+Caution: **IMPORT LAYOUT CHANGE BREAKING BACKWARDS COMPATIBILITY!**
+
+Previously, *zugbruecke* or parts of it could be imported as follows:
+
+.. code:: python
+
+	import zugbruecke as ctypes
+	from zugbruecke import c_double
+
+From now on, the ``ctypes`` drop-in replacement interface is located inside a new sub-module, ``zugbruecke.ctypes``. Import as follows:
+
+.. code:: python
+
+	import zugbruecke.ctypes as ctypes
+	from zugbruecke.ctypes import c_double
+
+The above significant change was mandatory for allowing to cleanup a lot of old code and remove long-standing bugs. The main issue was that importing ``zugbruecke`` was implying that new wine-python session was started automatically. This could not be prohibited. With the new package layout, it becomes possible to import sub-modules of ``zugbruecke`` without implicitly starting a session. One of the more significant added benefits therefore is that this change also allows much more fine-grained tests.
+
+* FEATURE: ``wineprefix`` becomes a configuration parameter definable by users allowing custom wine prefixes, see issue #44.
+* FEATURE: Introduced new error types specific to this package.
+* The configuration module was refactored and made clearer and faster, allowing to implement new options.
 
 0.0.13 (2019-02-03)
 -------------------
