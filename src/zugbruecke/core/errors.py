@@ -6,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	src/zugbruecke/core/const.py: Holds constant values, flags, types
+	src/zugbruecke/core/errors.py: Exceptions
 
 	Required to run on platform / side: [UNIX, WINE]
 
@@ -31,23 +31,5 @@ specific language governing rights and limitations under the License.
 # TYPES
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-FLAG_POINTER = -1
-GROUP_VOID = 1
-GROUP_FUNDAMENTAL = 2
-GROUP_STRUCT = 4
-GROUP_FUNCTION = 8
-
-
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# CTYPES FLAGS
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-# Required for WINFUNCTYPE
-_FUNCFLAG_STDCALL = 0 # EXPORT
-
-
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# FILENAMES
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-CONFIG_FN = '.zugbruecke'
+class config_parser_error(Exception):
+	pass

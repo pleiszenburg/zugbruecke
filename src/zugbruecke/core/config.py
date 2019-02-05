@@ -34,6 +34,8 @@ specific language governing rights and limitations under the License.
 import os
 import json
 
+from .const import CONFIG_FN
+from .errors import config_parser_error
 from .lib import generate_session_id
 
 
@@ -94,7 +96,7 @@ def get_module_config(override_dict = {}):
 
 def __get_default_config_directory__():
 
-	return os.path.join(os.path.expanduser('~'), '.zugbruecke')
+	return os.path.join(os.path.expanduser('~'), CONFIG_FN)
 
 
 def __join_config_by_priority__(config_dict_list):
@@ -133,28 +135,28 @@ def __locate_and_read_config_files__():
 		'/etc/zugbruecke'
 		]:
 
-		# Compile path
-		try:
-			try_path = os.path.join(file_location, '.zugbruecke.json')
-		except:
-			try_path = None
-
 		# If there is a path ...
-		if try_path is not None:
+		if file_location is None:
+			continue
 
-			# Is this a file?
-			if os.path.isfile(try_path):
+		# Compile path
+		try_path = os.path.join(file_location, CONFIG_FN)
 
-				# Read file
-				f = open(try_path, 'r')
+		# Is this a file?
+		if not os.path.isfile(try_path):
+			continue
+
+		# Read file
+		try:
+			with open(try_path, 'r', encoding = 'utf-8') as f:
 				cnt = f.read()
-				f.close()
+		except:
+			raise config_parser_error('Config file could not be read: "%s"' % try_path)
 
-				# Try to parse it
-				try:
-					cnt_json = json.loads(cnt)
-					config_dict_list.append(cnt_json)
-				except:
-					pass # TODO produce an error
+		# Try to parse it
+		try:
+			config_dict_list.append(json.loads(cnt))
+		except:
+			raise config_parser_error('Config file could not be parsed: "%s"' % try_path)
 
 	return config_dict_list
