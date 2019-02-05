@@ -79,7 +79,11 @@ def get_default_config():
 	return cfg
 
 
-def get_module_config(override_dict = {}):
+def get_module_config(override_dict = None):
+
+	# Default override_dict is empty
+	if override_dict is None:
+		override_dict = {}
 
 	# Get config from files as a prioritized list
 	config = __locate_and_read_config_files__()
