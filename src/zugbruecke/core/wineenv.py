@@ -66,9 +66,8 @@ def create_wine_prefix(dir_wineprefix):
 def setup_wine_pip(arch, version, directory):
 
 	# Download get-pip.py into memory
-	getpip_req = urllib.request.urlopen('https://bootstrap.pypa.io/get-pip.py')
-	getpip_bin = getpip_req.read()
-	getpip_req.close()
+	with urllib.request.urlopen('https://bootstrap.pypa.io/get-pip.py') as u:
+		getpip_bin = u.read()
 
 	# Start Python on top of Wine
 	proc_getpip = subprocess.Popen(
