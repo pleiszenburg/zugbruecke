@@ -87,19 +87,16 @@ def setup_wine_python(arch, version, directory, overwrite = False):
 	# File name for python stand-alone zip file
 	pyarchive = 'python-%s-embed-%s.zip' % (version, 'amd64' if arch == 'win64' else arch)
 
-	# Name of target subfolder
-	pydir = '%s-python%s' % (arch, version)
-
 	# Target directory
-	target_directory = os.path.join(directory, pydir)
+	pydir = os.path.join(directory, '%s-python%s' % (arch, version))
 
 	# Is there a pre-existing Python installation with identical parameters?
-	preexisting = os.path.isfile(os.path.join(target_directory, 'python.exe'))
+	preexisting = os.path.isfile(os.path.join(pydir, 'python.exe'))
 
 	# Is there a preexisting installation and should it be overwritten?
 	if preexisting and overwrite:
 		# Delete folder
-		shutil.rmtree(target_directory)
+		shutil.rmtree(pydir)
 
 	# Make sure the target directory exists
 	if not os.path.exists(directory):
@@ -107,7 +104,7 @@ def setup_wine_python(arch, version, directory, overwrite = False):
 		os.makedirs(directory)
 
 	# Get (potentially future) path of Python standard library
-	library_path = os.path.join(target_directory, 'Lib')
+	library_path = os.path.join(pydir, 'Lib')
 
 	# Only do if Python is not there OR if should be overwritten
 	if overwrite or not preexisting:
@@ -124,11 +121,11 @@ def setup_wine_python(arch, version, directory, overwrite = False):
 
 		# Unpack from memory to disk
 		f = zipfile.ZipFile(archive_zip)
-		f.extractall(path = target_directory) # Directory created if required
+		f.extractall(path = pydir) # Directory created if required
 		f.close()
 
 		# Get path of Python library zip
-		library_zip_path = os.path.join(target_directory, 'python%s%s.zip' % (
+		library_zip_path = os.path.join(pydir, 'python%s%s.zip' % (
 			version.split('.')[0], version.split('.')[1]
 			))
 
