@@ -88,23 +88,26 @@ def setup_wine_python(arch, version, directory, overwrite = False):
 	pyarchive = 'python-%s-embed-%s.zip' % (version, 'amd64' if arch == 'win64' else arch)
 
 	# Target directory
-	pydir = os.path.join(directory, '%s-python%s' % (arch, version))
+	py_path = os.path.join(directory, '%s-python%s' % (arch, version))
+
+	# Get (potentially future) path of Python standard library
+	py_lib_path = os.path.join(py_path, 'Lib')
+
+	# Get wine-python site-packages path
+	py_sitepackage_path = os.path.join(py_lib_path, 'site-packages')
 
 	# Is there a pre-existing Python installation with identical parameters?
-	preexisting = os.path.isfile(os.path.join(pydir, 'python.exe'))
+	preexisting = os.path.isfile(os.path.join(py_path, 'python.exe'))
 
 	# Is there a preexisting installation and should it be overwritten?
 	if preexisting and overwrite:
 		# Delete folder
-		shutil.rmtree(pydir)
+		shutil.rmtree(py_path)
 
 	# Make sure the target directory exists
 	if not os.path.exists(directory):
 		# Create folder
 		os.makedirs(directory)
-
-	# Get (potentially future) path of Python standard library
-	library_path = os.path.join(pydir, 'Lib')
 
 	# Only do if Python is not there OR if should be overwritten
 	if overwrite or not preexisting:
@@ -121,32 +124,29 @@ def setup_wine_python(arch, version, directory, overwrite = False):
 
 		# Unpack from memory to disk
 		f = zipfile.ZipFile(archive_zip)
-		f.extractall(path = pydir) # Directory created if required
+		f.extractall(path = py_path) # Directory created if required
 		f.close()
 
 		# Get path of Python library zip
-		library_zip_path = os.path.join(pydir, 'python%s%s.zip' % (
+		library_zip_path = os.path.join(py_path, 'python%s%s.zip' % (
 			version.split('.')[0], version.split('.')[1]
 			))
 
 		# Unpack Python library from embedded zip on disk
 		f = zipfile.ZipFile(library_zip_path, 'r')
-		f.extractall(path = library_path) # Directory created if required
+		f.extractall(path = py_lib_path) # Directory created if required
 		f.close()
 
 		# Remove Python library zip from disk
 		os.remove(library_zip_path)
 
-	# Get wine-python site-packages path
-	sitepackage_path = os.path.join(library_path, 'site-packages')
-
 	# Create site-packages folder if it does not exist
-	if not os.path.exists(sitepackage_path):
+	if not os.path.exists(py_sitepackage_path):
 		# Create folder
-		os.makedirs(sitepackage_path)
+		os.makedirs(py_sitepackage_path)
 
 	# Package path in wine-python site-packages
-	wine_pkg_path = os.path.abspath(os.path.join(sitepackage_path, 'zugbruecke'))
+	wine_pkg_path = os.path.abspath(os.path.join(py_sitepackage_path, 'zugbruecke'))
 
 	# Package path in unix-python site-packages
 	unix_pkg_path = os.path.abspath(os.path.join(
