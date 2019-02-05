@@ -46,19 +46,21 @@ import zipfile
 def create_wine_prefix(dir_wineprefix):
 
 	# Does it exist?
-	if not os.path.exists(dir_wineprefix):
+	if os.path.exists(dir_wineprefix):
+		# Nothing to do
+		return
 
-		# Start wine server into prepared environment
-		proc_winecfg = subprocess.Popen(
-			['wineboot', '-i'],
-			stdin = subprocess.PIPE,
-			stdout = subprocess.PIPE,
-			stderr = subprocess.PIPE,
-			shell = False
-			)
+	# Start wine server into prepared environment
+	proc_winecfg = subprocess.Popen(
+		['wineboot', '-i'],
+		stdin = subprocess.PIPE,
+		stdout = subprocess.PIPE,
+		stderr = subprocess.PIPE,
+		shell = False
+		)
 
-		# Get feedback
-		cfg_out, cfg_err = proc_winecfg.communicate()
+	# Get feedback
+	cfg_out, cfg_err = proc_winecfg.communicate()
 
 
 def setup_wine_pip(arch, version, directory):
