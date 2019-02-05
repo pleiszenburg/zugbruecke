@@ -160,6 +160,7 @@ def setup_wine_python(arch, version, directory, overwrite = False):
 		# Link zugbruecke package into wine-python site-packages
 		os.symlink(unix_pkg_path, wine_pkg_path)
 
+
 def set_wine_env(cfg_dir, arch):
 
 	# Change the environment for Wine: Architecture
