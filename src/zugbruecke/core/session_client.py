@@ -334,8 +334,8 @@ class session_client_class():
 		setup_wine_python(self.p['arch'], self.p['version'], self.p['dir'])
 
 		# Initialize Wine session
-		self.dir_wineprefix = set_wine_env(self.p['dir'], self.p['arch'])
-		create_wine_prefix(self.dir_wineprefix)
+		set_wine_env(self.p['wineprefix'], self.p['arch'])
+		create_wine_prefix(self.p['wineprefix'])
 
 		# Prepare python command for ctypes server or interpreter
 		self.__prepare_python_command__()

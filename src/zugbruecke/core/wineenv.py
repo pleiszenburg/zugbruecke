@@ -161,15 +161,10 @@ def setup_wine_python(arch, version, directory, overwrite = False):
 		os.symlink(unix_pkg_path, wine_pkg_path)
 
 
-def set_wine_env(cfg_dir, arch):
+def set_wine_env(wineprefix, arch):
 
 	# Change the environment for Wine: Architecture
 	os.environ['WINEARCH'] = arch
 
 	# Change the environment for Wine: Wine prefix / profile directory
-	dir_wineprefix = os.path.join(
-		cfg_dir, arch + '-wine'
-		)
-	os.environ['WINEPREFIX'] = dir_wineprefix
-
-	return dir_wineprefix
+	os.environ['WINEPREFIX'] = wineprefix
