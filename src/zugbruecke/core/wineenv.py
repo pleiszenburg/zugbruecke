@@ -190,3 +190,6 @@ def set_wine_env(wineprefix, arch):
 
 	# Change the environment for Wine: Wine prefix / profile directory
 	os.environ['WINEPREFIX'] = wineprefix
+
+	# Disable MONO: https://unix.stackexchange.com/a/191609
+	os.environ['WINEDLLOVERRIDES'] = 'mscoree=d'
