@@ -79,7 +79,7 @@ setup(
 	download_url = 'https://github.com/pleiszenburg/zugbruecke/archive/v%s.tar.gz' % _version_,
 	license = 'LGPLv2',
 	keywords = ['ctypes', 'wine'],
-	scripts = glob(os.path.join('scripts', '*')),
+	scripts = [],
 	include_package_data = True,
 	install_requires = [],
 	extras_require = {'dev': [
@@ -92,7 +92,9 @@ setup(
 		'wheel'
 		]},
 	zip_safe = False,
-	entry_points = {},
+	entry_points = {'console_scripts': [
+		'wenv = zugbruecke.wenv.cli:cli'
+		]},
 	classifiers = [
 		'Development Status :: 3 - Alpha',
 		'Intended Audience :: Developers',
