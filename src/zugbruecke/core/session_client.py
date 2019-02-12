@@ -42,7 +42,7 @@ import signal
 import time
 
 from .const import _FUNCFLAG_STDCALL
-from .config import get_module_config
+from .config import config_class
 from .data import data_class
 from .dll_client import dll_client_class
 from .interpreter import interpreter_session_class
@@ -278,7 +278,7 @@ class session_client_class():
 	def __init_stage_1__(self, parameter, force_stage_2):
 
 		# Fill empty parameters with default values and/or config file contents
-		self.p = get_module_config(parameter)
+		self.p = config_class(**parameter)
 
 		# Get and set session id
 		self.id = self.p['id']
