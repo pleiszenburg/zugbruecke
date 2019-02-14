@@ -38,6 +38,8 @@ import subprocess
 import urllib.request
 import zipfile
 
+from ..core.config import config_class
+
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # WINE-PYTHON ENVIRONMENT CLASS
@@ -46,51 +48,61 @@ import zipfile
 class env_class:
 
 
-	def create_wine_prefix(dir_wineprefix):
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# INIT
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-		# Does it exist?
-		if os.path.exists(dir_wineprefix):
-			# Nothing to do
-			return
+	def __init__(self, parameter = None):
 
-		# Start wine server into prepared environment
-		proc_winecfg = subprocess.Popen(
-			['wineboot', '-i'],
-			stdin = subprocess.PIPE,
-			stdout = subprocess.PIPE,
-			stderr = subprocess.PIPE,
-			shell = False
-			)
+		# Get config
+		if parameter is None:
+			self.p = config_class()
+		else:
+			self.p = parameter
 
-		# Get feedback
-		cfg_out, cfg_err = proc_winecfg.communicate()
+		# Get paths
+		self.paths = env_class.__get_wine_python_paths__(self.p['pythonprefix'], self.p['version'])
+
+		# Set environment variables
+		env_class.__init_environment_variables__(self.p['wineprefix'], self.p['arch'])
 
 
-	def __get_wine_python_paths__(arch, version, directory):
+	@staticmethod
+	def __init_environment_variables__(wineprefix, arch):
 
-		# root path
-		root_path = os.path.join(directory, '%s-python%s' % (arch, version))
+		# Change the environment for Wine: Architecture
+		os.environ['WINEARCH'] = arch
+
+		# Change the environment for Wine: Wine prefix / profile directory
+		os.environ['WINEPREFIX'] = wineprefix
+
+		# Disable MONO: https://unix.stackexchange.com/a/191609
+		os.environ['WINEDLLOVERRIDES'] = 'mscoree=d'
+
+
+	@staticmethod
+	def __get_wine_python_paths__(pythonprefix, version):
+
 		# python standard library
-		lib_path = os.path.join(root_path, 'Lib')
+		lib_path = os.path.join(pythonprefix, 'Lib')
 		# site-packages
 		sitepackages_path = os.path.join(lib_path, 'site-packages')
 		# python interpreter
-		interpreter_path = os.path.join(root_path, 'python.exe')
+		interpreter_path = os.path.join(pythonprefix, 'python.exe')
 		# scripts
-		scripts_path = os.path.join(root_path, 'Scripts')
+		scripts_path = os.path.join(pythonprefix, 'Scripts')
 		# pip
 		pip_path = os.path.join(scripts_path, 'pip.exe')
 		# pytest
 		pytest_path = os.path.join(scripts_path, 'pytest.exe')
 		# stdlib zip filename
 		stdlibzip_path = os.path.join(
-			root_path,
+			pythonprefix,
 			'python%s%s.zip' % (version.split('.')[0], version.split('.')[1])
 			)
 
 		# Return dict
 		return dict(
-			root = root_path,
 			lib = lib_path,
 			sitepackages = sitepackages_path,
 			scripts = scripts_path,
@@ -101,53 +113,46 @@ class env_class:
 			)
 
 
-	def setup_wine_pip(arch, version, directory):
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# SETUP
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-		# Environment paths
-		path_dict = __get_wine_python_paths__(arch, version, directory)
+	def create_wine_prefix(self, overwrite = False):
 
-		# Exit if it exists
-		if os.path.isfile(path_dict['pip']):
-			return
+		# Does it exist?
+		if os.path.exists(self.p['wineprefix']):
+			# Exit if overwrite flag is not set
+			if not overwrite:
+				return
+			# Delete if overwrite is set
+			shutil.rmtree(self.p['wineprefix'])
 
-		# Download get-pip.py into memory
-		with urllib.request.urlopen('https://bootstrap.pypa.io/get-pip.py') as u:
-			getpip_bin = u.read()
-
-		# Start Python on top of Wine
-		proc_getpip = subprocess.Popen(
-			['wine-python'],
-			stdin = subprocess.PIPE,
-			stdout = subprocess.PIPE,
-			stderr = subprocess.PIPE,
-			shell = False
-			)
-
-		# Pipe script into interpreter and get feedback
-		getpip_out, getpip_err = proc_getpip.communicate(input = getpip_bin)
+		# Start wine server into prepared environment
+		subprocess.Popen(['wineboot', '-i']).wait()
 
 
-	def setup_wine_python(arch, version, directory, overwrite = False):
+	def setup_wine_python(self, overwrite = False):
 
 		# File name for python stand-alone zip file
-		pyarchive = 'python-%s-embed-%s.zip' % (version, 'amd64' if arch == 'win64' else arch)
+		pyarchive = 'python-%s-embed-%s.zip' % (
+			self.p['version'],
+			'amd64' if self.p['arch'] == 'win64' else self.p['arch']
+			)
 		# Compute full URL of Python stand-alone zip file
-		pyurl = 'https://www.python.org/ftp/python/%s/%s' % (version, pyarchive)
-		# Environment paths
-		path_dict = __get_wine_python_paths__(arch, version, directory)
+		pyurl = 'https://www.python.org/ftp/python/%s/%s' % (self.p['version'], pyarchive)
 
 		# Is there a pre-existing Python installation with identical parameters?
-		preexisting = os.path.isfile(path_dict['interpreter'])
+		preexisting = os.path.isfile(self.paths['interpreter'])
 
 		# Is there a preexisting installation and should it be overwritten?
 		if preexisting and overwrite:
 			# Delete folder
-			shutil.rmtree(path_dict['root'])
+			shutil.rmtree(self.p['pythonprefix'])
 
 		# Make sure the target directory exists
-		if not os.path.exists(directory):
+		if not os.path.exists(self.p['pythonprefix']):
 			# Create folder
-			os.makedirs(directory)
+			os.makedirs(self.p['pythonprefix'])
 
 		# Only do if Python is not there OR if should be overwritten
 		if overwrite or not preexisting:
@@ -159,21 +164,21 @@ class env_class:
 				archive_zip.write(u.read())
 			# Unpack from memory to disk
 			with zipfile.ZipFile(archive_zip) as f:
-				f.extractall(path = path_dict['root']) # Directory created if required
+				f.extractall(path = self.p['pythonprefix']) # Directory created if required
 
 			# Unpack Python library from embedded zip on disk
-			with zipfile.ZipFile(path_dict['stdlibzip'], 'r') as f:
-				f.extractall(path = path_dict['lib']) # Directory created if required
+			with zipfile.ZipFile(self.paths['stdlibzip'], 'r') as f:
+				f.extractall(path = self.paths['lib']) # Directory created if required
 			# Remove Python library zip from disk
-			os.remove(path_dict['stdlibzip'])
+			os.remove(self.paths['stdlibzip'])
 
 		# Create site-packages folder if it does not exist
-		if not os.path.exists(path_dict['sitepackages']):
+		if not os.path.exists(self.paths['sitepackages']):
 			# Create folder
-			os.makedirs(path_dict['sitepackages'])
+			os.makedirs(self.paths['sitepackages'])
 
 		# Package path in wine-python site-packages
-		wine_pkg_path = os.path.abspath(os.path.join(path_dict['sitepackages'], 'zugbruecke'))
+		wine_pkg_path = os.path.abspath(os.path.join(self.paths['sitepackages'], 'zugbruecke'))
 
 		# Package path in unix-python site-packages
 		unix_pkg_path = os.path.abspath(os.path.join(
@@ -186,13 +191,18 @@ class env_class:
 			os.symlink(unix_pkg_path, wine_pkg_path)
 
 
-	def set_wine_env(wineprefix, arch):
+	def setup_wine_pip(self):
 
-		# Change the environment for Wine: Architecture
-		os.environ['WINEARCH'] = arch
+		# Exit if it exists
+		if os.path.isfile(self.paths['pip']):
+			return
 
-		# Change the environment for Wine: Wine prefix / profile directory
-		os.environ['WINEPREFIX'] = wineprefix
+		# Download get-pip.py into memory
+		with urllib.request.urlopen('https://bootstrap.pypa.io/get-pip.py') as u:
+			getpip_bin = u.read()
 
-		# Disable MONO: https://unix.stackexchange.com/a/191609
-		os.environ['WINEDLLOVERRIDES'] = 'mscoree=d'
+		# Start Python on top of Wine
+		proc_getpip = subprocess.Popen(['wine-python'], stdin = subprocess.PIPE)
+
+		# Pipe script into interpreter and get feedback
+		proc_getpip.communicate(input = getpip_bin)
