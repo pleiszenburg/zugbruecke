@@ -4,7 +4,7 @@
 # Calling routines in Windows DLLs from Python scripts running on unixlike systems
 # https://github.com/pleiszenburg/zugbruecke
 #
-#	scripts/wine-pytest: Running tests with py.test
+#	scripts/wenv: Running Python on Wine using zugbruecke's configuration
 #
 #	Required to run on platform / side: [UNIX]
 #
@@ -22,26 +22,26 @@
 # specific language governing rights and limitations under the License.
 # </LICENSE_BLOCK>
 
-# Get parameters from zugbruecke configuration
-arch=$(python3 -c 'from zugbruecke.core.config import echo_parameter; echo_parameter("arch")')
-version=$(python3 -c 'from zugbruecke.core.config import echo_parameter; echo_parameter("version")')
-zugbruecke_dir=$(python3 -c 'from zugbruecke.core.config import echo_parameter; echo_parameter("dir")')
+data=$(python3 -m zugbruecke.wenv $1)
 
-# Process parameters
-dir_py=$zugbruecke_dir/$arch-python$version
-dir_wine=$zugbruecke_dir/$arch-wine
-
-# Set environment variables
-export WINEARCH="$arch"
-export WINEPREFIX="$dir_wine"
-
-# Silence Wine ...
-export WINEDEBUG=-all
-
-# Install pytest if it is not there ...
-if [ ! -f $dir_py/Scripts/pytest.exe ]; then
-	wine-pip install pytest
-fi
-
-# Fire up py.test under Wine, pass cmd line arguments
-wine $dir_py/Scripts/pytest.exe "$@"
+i=1 # counter
+while true ; do # loop infinitely
+	segment=$(echo $data | cut -d ';' -f$i)
+	if [ -z "$segment" ] ; then # is segment empty?
+		break
+	fi
+	if [[ $segment == ___* ]] ; then # is this a command?
+		cmd="${segment:7}" # strip command prefix
+		if [[ $segment == ___1___* ]] ; then # keep options?
+			$cmd "${@:2}" # run interactive command with options
+			# cat | $cmd "${@:2}" # TODO pass data from stdin ONLY IF THERE IS A PIPE
+		else
+			$cmd # run interactive command without options
+		fi
+	else
+		varname=$(echo $segment | cut -d '=' -f1)
+		vardata=$(echo $segment | cut -d '=' -f2)
+		export $varname=$vardata # export environment variable
+	fi
+	i=$((i + 1)) # increment counter
+done

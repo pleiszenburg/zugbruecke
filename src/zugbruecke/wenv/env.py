@@ -35,6 +35,7 @@ from io import BytesIO
 import os
 import shutil
 import subprocess
+import sys
 import urllib.request
 import zipfile
 
@@ -58,27 +59,31 @@ class env_class:
 		if parameter is None:
 			self.p = config_class()
 		else:
+			if not isinstance(parameter, dict):
+				raise TypeError('parameter is not a dictionary')
 			self.p = parameter
 
-		# Get paths
-		self.paths = env_class.__get_wine_python_paths__(self.p['pythonprefix'], self.p['version'])
-
-		# Set environment variables
-		env_class.__init_environment_variables__(self.p['wineprefix'], self.p['arch'])
+		# Get Python environment paths
+		self._path_dict_ = env_class.__get_wine_python_paths__(
+			self.p['pythonprefix'], self.p['version']
+			)
+		# Get environment variables
+		self._envvar_dict_ = env_class.__get_environment_variables__(
+			self.p['wineprefix'], self.p['arch']
+			)
+		# Get Wine cmd names
+		self._wine_dict_ = {'win32': 'wine', 'win64': 'wine64'}
 
 
 	@staticmethod
-	def __init_environment_variables__(wineprefix, arch):
+	def __get_environment_variables__(wineprefix, arch):
 
-		# Change the environment for Wine: Architecture
-		os.environ['WINEARCH'] = arch
-
-		# Change the environment for Wine: Wine prefix / profile directory
-		os.environ['WINEPREFIX'] = wineprefix
-
-		# Disable MONO: https://unix.stackexchange.com/a/191609
-		os.environ['WINEDLLOVERRIDES'] = 'mscoree=d'
-
+		return dict(
+			WINEARCH = arch, # Architecture
+			WINEPREFIX = wineprefix, # Wine prefix / directory
+			WINEDLLOVERRIDES = 'mscoree=d', # Disable MONO: https://unix.stackexchange.com/a/191609
+			WINEDEBUG = '-all', # Silence Wine!
+			)
 
 	@staticmethod
 	def __get_wine_python_paths__(pythonprefix, version):
@@ -117,7 +122,10 @@ class env_class:
 # SETUP
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-	def create_wine_prefix(self, overwrite = False):
+	def setup_prefix(self, overwrite = False):
+
+		if not isinstance(overwrite, bool):
+			raise TypeError('overwrite is not a boolean')
 
 		# Does it exist?
 		if os.path.exists(self.p['wineprefix']):
@@ -131,7 +139,10 @@ class env_class:
 		subprocess.Popen(['wineboot', '-i']).wait()
 
 
-	def setup_wine_python(self, overwrite = False):
+	def setup_python(self, overwrite = False):
+
+		if not isinstance(overwrite, bool):
+			raise TypeError('overwrite is not a boolean')
 
 		# File name for python stand-alone zip file
 		pyarchive = 'python-%s-embed-%s.zip' % (
@@ -142,7 +153,7 @@ class env_class:
 		pyurl = 'https://www.python.org/ftp/python/%s/%s' % (self.p['version'], pyarchive)
 
 		# Is there a pre-existing Python installation with identical parameters?
-		preexisting = os.path.isfile(self.paths['interpreter'])
+		preexisting = os.path.isfile(self._path_dict_['interpreter'])
 
 		# Is there a preexisting installation and should it be overwritten?
 		if preexisting and overwrite:
@@ -167,18 +178,18 @@ class env_class:
 				f.extractall(path = self.p['pythonprefix']) # Directory created if required
 
 			# Unpack Python library from embedded zip on disk
-			with zipfile.ZipFile(self.paths['stdlibzip'], 'r') as f:
-				f.extractall(path = self.paths['lib']) # Directory created if required
+			with zipfile.ZipFile(self._path_dict_['stdlibzip'], 'r') as f:
+				f.extractall(path = self._path_dict_['lib']) # Directory created if required
 			# Remove Python library zip from disk
-			os.remove(self.paths['stdlibzip'])
+			os.remove(self._path_dict_['stdlibzip'])
 
 		# Create site-packages folder if it does not exist
-		if not os.path.exists(self.paths['sitepackages']):
+		if not os.path.exists(self._path_dict_['sitepackages']):
 			# Create folder
-			os.makedirs(self.paths['sitepackages'])
+			os.makedirs(self._path_dict_['sitepackages'])
 
 		# Package path in wine-python site-packages
-		wine_pkg_path = os.path.abspath(os.path.join(self.paths['sitepackages'], 'zugbruecke'))
+		wine_pkg_path = os.path.abspath(os.path.join(self._path_dict_['sitepackages'], 'zugbruecke'))
 
 		# Package path in unix-python site-packages
 		unix_pkg_path = os.path.abspath(os.path.join(
@@ -191,10 +202,10 @@ class env_class:
 			os.symlink(unix_pkg_path, wine_pkg_path)
 
 
-	def setup_wine_pip(self):
+	def setup_pip(self):
 
 		# Exit if it exists
-		if os.path.isfile(self.paths['pip']):
+		if os.path.isfile(self._path_dict_['pip']):
 			return
 
 		# Download get-pip.py into memory
@@ -202,7 +213,53 @@ class env_class:
 			getpip_bin = u.read()
 
 		# Start Python on top of Wine
-		proc_getpip = subprocess.Popen(['wine-python'], stdin = subprocess.PIPE)
+		proc_getpip = subprocess.Popen(['wenv python'], stdin = subprocess.PIPE)
 
 		# Pipe script into interpreter and get feedback
 		proc_getpip.communicate(input = getpip_bin)
+
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# ROUTINES
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+	def set_environment_variables(self):
+
+		for k, v in self._envvar_dict_.items():
+			os.environ[k] = v
+
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# CLI HELPER
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+	def cli(self):
+
+		cmd_list = ['%s=%s' % (k, v) for k, v in self._envvar_dict_.items()]
+
+		def push():
+			sys.stdout.write(';'.join(cmd_list))
+			sys.stdout.flush()
+			sys.exit()
+
+		try:
+			cmd = sys.argv[1]
+			# TODO switch here to alternative cli routine for special commands (e.g. help, install)
+		except IndexError:
+			cmd_list.append('___0___echo "Something strange just happened ..."')
+			push()
+
+		cmd_dict = {
+			'python': self._path_dict_['interpreter'],
+			'pip': self._path_dict_['pip'],
+			'pytest': self._path_dict_['pytest'],
+			}
+		# TODO extend by all exe-files in pythonprefix
+		# TODO allow "install" command to run setup-routines
+
+		try:
+			cmd_list.append('___1___%s %s' % (self._wine_dict_[self.p['arch']], cmd_dict[cmd]))
+			push()
+		except KeyError:
+			cmd_list.append('___0___echo "Something even stranger just happened ..."')
+			push()
