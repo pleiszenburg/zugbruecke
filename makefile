@@ -57,11 +57,11 @@ upload_test:
 
 install:
 	pip install .[dev]
-	# wine-pytest --version # TODO replace by wenv setup/init cli
+	wenv init
 
 install_link:
 	pip install -e .[dev]
-	# wine-pytest --version # TODO replace by wenv setup/init cli
+	wenv init
 
 test:
 	make docu

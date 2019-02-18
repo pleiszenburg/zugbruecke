@@ -43,6 +43,16 @@ from ..core.config import config_class
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# CONST
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+HELP_STR = """Pla
+Blub
+Blubber
+"""
+
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # WINE-PYTHON ENVIRONMENT CLASS
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -67,6 +77,10 @@ class env_class:
 		self._path_dict_ = env_class.__get_wine_python_paths__(
 			self.p['pythonprefix'], self.p['version']
 			)
+		# Get Python commands and scripts
+		self._cmd_dict_ = env_class.__get_command_dict__(
+			self._path_dict_['interpreter'], self._path_dict_['scripts']
+			)
 		# Get environment variables
 		self._envvar_dict_ = env_class.__get_environment_variables__(
 			self.p['wineprefix'], self.p['arch']
@@ -84,6 +98,19 @@ class env_class:
 			WINEDLLOVERRIDES = 'mscoree=d', # Disable MONO: https://unix.stackexchange.com/a/191609
 			WINEDEBUG = '-all', # Silence Wine!
 			)
+
+
+	@staticmethod
+	def __get_command_dict__(interpreter_path, scripts_path):
+
+		out = {'python': interpreter_path}
+		scripts = os.listdir(scripts_path)
+		for script in scripts:
+			if not script.lower().endswith('.exe'):
+				continue
+			out[script[:-4]] = os.path.join(scripts_path, script)
+		return out
+
 
 	@staticmethod
 	def __get_wine_python_paths__(pythonprefix, version):
@@ -213,10 +240,20 @@ class env_class:
 			getpip_bin = u.read()
 
 		# Start Python on top of Wine
-		proc_getpip = subprocess.Popen(['wenv python'], stdin = subprocess.PIPE)
+		proc_getpip = subprocess.Popen(['wenv', 'python'], stdin = subprocess.PIPE)
 
 		# Pipe script into interpreter and get feedback
 		proc_getpip.communicate(input = getpip_bin)
+
+
+	def setup_pytest(self):
+
+		# Exit if it exists
+		if os.path.isfile(self._path_dict_['pytest']):
+			return
+
+		# Run pip install
+		subprocess.Popen(['wenv', 'pip', 'install', 'pytest']).wait()
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -233,33 +270,74 @@ class env_class:
 # CLI HELPER
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+	def __cmd_init__(self):
+		self.set_environment_variables()
+		self.setup_prefix()
+		self.setup_python()
+		self.setup_pip()
+		self.setup_pytest()
+
+
+	def __cmd_help__(self):
+		sys.stdout.write(HELP_STR)
+		sys.stdout.flush()
+
+
 	def cli(self):
 
-		cmd_list = ['%s=%s' % (k, v) for k, v in self._envvar_dict_.items()]
-
-		def push():
-			sys.stdout.write(';'.join(cmd_list))
+		def prefix(data, options = False):
+			return '___%d___%s' % ((1 if options else 0), data)
+		def push_return(data):
+			sys.stdout.write(data)
 			sys.stdout.flush()
 			sys.exit()
 
-		try:
-			cmd = sys.argv[1]
-			# TODO switch here to alternative cli routine for special commands (e.g. help, install)
-		except IndexError:
-			cmd_list.append('___0___echo "Something strange just happened ..."')
-			push()
+		# No command was passed?
+		if len(sys.argv) < 2:
+			# Exit: Nothing to do
+			return
 
-		cmd_dict = {
-			'python': self._path_dict_['interpreter'],
-			'pip': self._path_dict_['pip'],
-			'pytest': self._path_dict_['pytest'],
-			}
-		# TODO extend by all exe-files in pythonprefix
-		# TODO allow "install" command to run setup-routines
+		# Not (yet) a configuration call
+		configure = False
+		# Are there one or more arguments / options?
+		if len(sys.argv) >= 3:
+			# Is this a configuration call?
+			if sys.argv[2] == '--configure':
+				# Re-set flag
+				configure = True
 
-		try:
-			cmd_list.append('___1___%s %s' % (self._wine_dict_[self.p['arch']], cmd_dict[cmd]))
-			push()
-		except KeyError:
-			cmd_list.append('___0___echo "Something even stranger just happened ..."')
-			push()
+		# Get command
+		cmd = sys.argv[1]
+
+		# Special commands
+		special_list = ['init', 'help']
+		# Special command, first stage?
+		if configure and (cmd in special_list):
+			# Push new Python command for "interactive" second stage
+			push_return(prefix(
+				'python3 -m zugbruecke.wenv %s' % cmd, options = False
+				))
+		# Special command, second stage?
+		if not configure and (cmd in special_list):
+			# Run matching routine
+			getattr(self, '__cmd_%s__' % cmd)()
+			# Nothing more to do, leave
+			return
+
+		# If the command is unknown ...
+		if configure and (cmd not in self._cmd_dict_.keys()):
+			push_return(prefix('echo Unknown command or script: "%s"' % cmd, options = False))
+
+		# Nothing more to do
+		if not configure:
+			return
+
+		# Prepare environment variables for shell export
+		cmd_list = ['%s=%s' % (k, v) for k, v in self._envvar_dict_.items()]
+		# Append actual "interactive" command
+		cmd_list.append(prefix(
+			'%s "%s"' % (self._wine_dict_[self.p['arch']], self._cmd_dict_[cmd]),
+			options = True,
+			))
+		# Push command stack and leave
+		push_return('#'.join(cmd_list))

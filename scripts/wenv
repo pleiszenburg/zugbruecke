@@ -22,26 +22,25 @@
 # specific language governing rights and limitations under the License.
 # </LICENSE_BLOCK>
 
-data=$(python3 -m zugbruecke.wenv $1)
+conf=$(python3 -m zugbruecke.wenv $1 --configure)
+param=$(printf "%q" "${@:2}")
 
-i=1 # counter
-while true ; do # loop infinitely
-	segment=$(echo $data | cut -d ';' -f$i)
-	if [ -z "$segment" ] ; then # is segment empty?
-		break
-	fi
+IFS="#"
+for segment in $conf; do
 	if [[ $segment == ___* ]] ; then # is this a command?
 		cmd="${segment:7}" # strip command prefix
 		if [[ $segment == ___1___* ]] ; then # keep options?
-			$cmd "${@:2}" # run interactive command with options
-			# cat | $cmd "${@:2}" # TODO pass data from stdin ONLY IF THERE IS A PIPE
+			if [ "$#" -gt 1 ]; then # are there arguments?
+				eval "$cmd $param" # run interactive command with options
+			else
+				eval "$cmd"
+			fi
 		else
-			$cmd # run interactive command without options
+			eval "$cmd" # run interactive command without options
 		fi
 	else
 		varname=$(echo $segment | cut -d '=' -f1)
 		vardata=$(echo $segment | cut -d '=' -f2)
 		export $varname=$vardata # export environment variable
 	fi
-	i=$((i + 1)) # increment counter
 done
