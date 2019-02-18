@@ -22,25 +22,25 @@
 # specific language governing rights and limitations under the License.
 # </LICENSE_BLOCK>
 
-conf=$(python3 -m zugbruecke.wenv $1 --configure)
-param=$(printf "%q" "${@:2}")
+conf=$(python3 -m zugbruecke.wenv $1 --configure) # get command configuration string
+param=$(printf "%q" "${@:2}") # escape parameter string
 
-IFS="#"
-for segment in $conf; do
+IFS="#" # split character for command configuration string
+for segment in $conf; do # iterate over segments from command configuration string
 	if [[ $segment == ___* ]] ; then # is this a command?
 		cmd="${segment:7}" # strip command prefix
 		if [[ $segment == ___1___* ]] ; then # keep options?
 			if [ "$#" -gt 1 ]; then # are there arguments?
 				eval "$cmd $param" # run interactive command with options
 			else
-				eval "$cmd"
+				eval "$cmd" # no options were given, i.e. call without options
 			fi
 		else
 			eval "$cmd" # run interactive command without options
 		fi
 	else
-		varname=$(echo $segment | cut -d '=' -f1)
-		vardata=$(echo $segment | cut -d '=' -f2)
+		varname=$(echo $segment | cut -d '=' -f1) # get variable name
+		vardata=$(echo $segment | cut -d '=' -f2) # get variable content
 		export $varname=$vardata # export environment variable
 	fi
 done
