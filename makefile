@@ -66,12 +66,12 @@ install_link:
 test:
 	make docu
 	make clean
-	wine-pytest
+	wenv pytest
 	make clean
 	pytest
 
 test_quick:
 	make clean
-	wine-pytest
+	wenv pytest
 	make clean
 	pytest
