@@ -55,11 +55,6 @@ from .rpc import (
 	mp_client_safe_connect,
 	mp_server_class
 	)
-from .wineenv import (
-	create_wine_prefix,
-	setup_wine_python,
-	set_wine_env
-	)
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -330,13 +325,6 @@ class session_client_class():
 		# Log status
 		self.log.out('[session-client] STARTING (STAGE 2) ...')
 
-		# Install wine-python
-		setup_wine_python(self.p['arch'], self.p['version'], self.p['dir'])
-
-		# Initialize Wine session
-		set_wine_env(self.p['wineprefix'], self.p['arch'])
-		create_wine_prefix(self.p['wineprefix'])
-
 		# Prepare python command for ctypes server or interpreter
 		self.__prepare_python_command__()
 
@@ -395,11 +383,8 @@ class session_client_class():
 		self.p['port_socket_wine'] = get_free_port()
 
 		# Prepare command with minimal meta info. All other info can be passed via sockets.
-		self.p['command_dict'] = [
-			os.path.join(
-				os.path.abspath(os.path.join(get_location_of_file(__file__), os.pardir, 'cli')),
-				'_server_.py'
-				),
+		self.p['server_command_list'] = [
+			'-m', 'zugbruecke._server_',
 			'--id', self.id,
 			'--port_socket_wine', str(self.p['port_socket_wine']),
 			'--port_socket_unix', str(self.p['port_socket_unix']),

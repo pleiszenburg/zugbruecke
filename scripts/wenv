@@ -23,7 +23,10 @@
 # </LICENSE_BLOCK>
 
 conf=$(python3 -m zugbruecke.wenv $1 --configure) # get command configuration string
-param=$(printf "%q" "${@:2}") # escape parameter string
+param="" # escape parameter string
+for arg in "${@:2}" ; do
+	param+=$(printf " %q" "$arg")
+done
 
 IFS="#" # split character for command configuration string
 for segment in $conf; do # iterate over segments from command configuration string

@@ -59,7 +59,7 @@ class interpreter_session_class():
 		self.up = True
 
 		# Start wine python
-		self.__python_start__(self.__compile_python_command__())
+		self.__python_start__()
 
 		# Log status
 		self.log.out('[interpreter] STARTED.')
@@ -83,23 +83,6 @@ class interpreter_session_class():
 			self.up = False
 
 
-	def __compile_python_command__(self):
-
-		# Python interpreter's directory seen from this script
-		dir_python = os.path.join(self.p['dir'], self.p['arch'] + '-python' + self.p['version'])
-
-		# Identify wine command for 32 or 64 bit
-		if self.p['arch'] == 'win32':
-			wine_cmd = 'wine'
-		elif self.p['arch'] == 'win64':
-			wine_cmd = 'wine64'
-		else:
-			raise # TODO error
-
-		# Prepare full python interpreter command
-		return [wine_cmd, os.path.join(dir_python, 'python.exe')] + self.p['command_dict']
-
-
 	def __read_output_from_pipe__(self, pipe, func):
 
 		for line in iter(pipe.readline, b''):
@@ -107,15 +90,14 @@ class interpreter_session_class():
 		pipe.close()
 
 
-	def __python_start__(self, command_list):
+	def __python_start__(self):
 
 		# Log status
-		self.log.out('[interpreter] Command: ' + ' '.join(command_list))
+		self.log.out('[interpreter] Command: ' + ' '.join(self.p['server_command_list']))
 
 		# Fire up Wine-Python process
 		self.proc_winepython = subprocess.Popen(
-			command_list,
-			stdin = subprocess.PIPE,
+			['wenv', 'python'] + self.p['server_command_list'],
 			stdout = subprocess.PIPE,
 			stderr = subprocess.PIPE,
 			shell = False,
