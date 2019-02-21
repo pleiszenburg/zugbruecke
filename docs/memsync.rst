@@ -90,7 +90,7 @@ example demonstrates how you must modify the above example so it works with
 
 .. code:: python
 
-	from zugbruecke import windll, cast, pointer, POINTER, c_float, c_int
+	from zugbruecke.ctypes import windll, cast, pointer, POINTER, c_float, c_int
 
 	__dll__ = windll.LoadLibrary('demo_dll.dll')
 	__bubblesort__ = __dll__.bubblesort
@@ -127,7 +127,7 @@ The complete example, which will run on *Unix* and on *Windows* looks just like 
 
 	from sys import platform
 	if any([platform.startswith(os_name) for os_name in ['linux', 'darwin', 'freebsd']]):
-		from zugbruecke import windll, cast, pointer, POINTER, c_float, c_int
+		from zugbruecke.ctypes import windll, cast, pointer, POINTER, c_float, c_int
 	elif platform.startswith('win'):
 		from ctypes import windll, cast, pointer, POINTER, c_float, c_int
 	else:

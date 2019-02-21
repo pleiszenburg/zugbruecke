@@ -18,7 +18,7 @@ on Unix.
 
 .. code:: python
 
-	import zugbruecke as ctypes
+	import zugbruecke.ctypes as ctypes
 
 	simple_demo_routine = ctypes.windll.LoadLibrary('demo_dll.dll').simple_demo_routine
 	simple_demo_routine.argtypes = (ctypes.c_float, ctypes.c_float)
@@ -41,7 +41,7 @@ Because of the drop-in replacement design of *zugbruecke*, it is possible to wri
 
 	from sys import platform
 	if any([platform.startswith(os_name) for os_name in ['linux', 'darwin', 'freebsd']]):
-		import zugbruecke as ctypes
+		import zugbruecke.ctypes as ctypes
 	elif platform.startswith('win'):
 		import ctypes
 	else:

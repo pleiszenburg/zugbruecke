@@ -7,7 +7,7 @@
 	triple: python; arch; architecture
 	triple: wine; arch; architecture
 	triple: log; level; write
-	statement: zugbruecke.current_session.set_parameter
+	statement: zugbruecke.ctypes.current_session.set_parameter
 	module: zugbruecke.core.config
 
 Configuration
@@ -18,15 +18,15 @@ be (re-) configured during run-time. The configuration allows you to fine-tune
 its verbosity, architecture and other relevant parameters on a per-session basis.
 
 During import, the *zugbruecke* module starts a default session which is referenced as
-``zugbruecke.current_session``. Alternatively, you can create your own sessions with
-``zugbruecke.session()``. See the :ref:`chapter on the session model <session>` for details.
+``zugbruecke.ctypes.current_session``. Alternatively, you can create your own sessions with
+``zugbruecke.ctypes.session()``. See the :ref:`chapter on the session model <session>` for details.
 
 .. _configconstructor:
 
 Configuring the session constructor
 -----------------------------------
 
-If you chose to start your own session with ``zugbruecke.session()``, the session
+If you chose to start your own session with ``zugbruecke.ctypes.session()``, the session
 constructor can be provided with a dictionary containing parameters.
 
 Configuration files

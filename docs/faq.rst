@@ -60,7 +60,7 @@ in your code manually. You can do this as follows:
 
 .. code:: python
 
-	from zugbruecke import session
+	from zugbruecke.ctypes import session
 	# start new thread or process (multiprocessing) - then, inside, do:
 	a = session()
 	# now you can do stuff like

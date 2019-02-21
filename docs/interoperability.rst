@@ -16,8 +16,8 @@ Leveraging the features of *Wine*, *zugbruecke* tries to make things as easy
 as possible for the user. Some issues remain, though, which must be handled
 manually by the user. *zugbruecke* offers special APIs for this purpose.
 
-Module: ``zugbruecke.wine``
----------------------------
+Module: ``zugbruecke.ctypes.wine``
+----------------------------------
 
 Method: ``path_unix_to_wine``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

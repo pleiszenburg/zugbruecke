@@ -19,8 +19,8 @@ automatically when the *Python* interpreter quits.
 
 .. _sessionclass:
 
-Class: ``zugbruecke.session``
------------------------------
+Class: ``zugbruecke.ctypes.session``
+------------------------------------
 
 By creating an instance of this class, a new session can be started. The number
 of instances/sessions is only (theoretically) limited by the amount of available memory
@@ -93,8 +93,8 @@ it will be set to ``False``.
 
 .. _currentsessionobject:
 
-Instance: ``zugbruecke.current_session``
-----------------------------------------
+Instance: ``zugbruecke.ctypes.current_session``
+-----------------------------------------------
 
 This is the default session of *zugbruecke*. It will be started during import.
 Like every session, it can be :ref:`re-configured <reconfiguration>`
