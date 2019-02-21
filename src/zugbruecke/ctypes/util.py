@@ -49,15 +49,15 @@ def find_msvcrt():
 	Offered for full compatibility, though.
 	"""
 
-	# Compile Python command for wine-python
-	command = '"from ctypes.util import find_msvcrt; print(find_msvcrt())"'
-
 	# Start wine-python
 	winepython_p = subprocess.Popen(
-		'wine-python -c' + command,
+		[
+			'wenv', 'python', '-c',
+			'from ctypes.util import find_msvcrt; print(find_msvcrt())'
+			],
 		stdout = subprocess.PIPE,
 		stderr = subprocess.PIPE,
-		shell = True
+		shell = False
 		)
 
 	# Get stdout and stderr
@@ -88,15 +88,15 @@ def find_library(name):
 	# If library was not found on Unix side or is DLL for sure
 	if result is None or is_dll:
 
-		# Compile Python command for wine-python
-		command = '"from ctypes.util import find_library; print(find_library(\'%s\'))"' % name
-
 		# Start wine-python
 		winepython_p = subprocess.Popen(
-			'wine-python -c' + command, # BUG command should be list instead of string!
+			[
+				'wenv', 'python', '-c',
+				'from ctypes.util import find_library; print(find_library(\'%s\'))' % name
+				],
 			stdout = subprocess.PIPE,
 			stderr = subprocess.PIPE,
-			shell = True
+			shell = False
 			)
 
 		# Get stdout and stderr
