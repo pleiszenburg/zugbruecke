@@ -6,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	src/zugbruecke/wenv/env.py: Class for managing a Wine-Python environment
+	src/zugbruecke/wenv.py: Managing a Wine-Python environment
 
 	Required to run on platform / side: [UNIX]
 
@@ -39,7 +39,7 @@ import sys
 import urllib.request
 import zipfile
 
-from ..core.config import config_class
+from .core.config import config_class
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -341,3 +341,12 @@ class env_class:
 			))
 		# Push command stack and leave
 		push_return('#'.join(cmd_list))
+
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# MAIN
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+if __name__ == '__main__':
+
+	env_class().cli()
