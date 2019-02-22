@@ -224,9 +224,7 @@ class env_class:
 		wine_pkg_path = os.path.abspath(os.path.join(self._path_dict_['sitepackages'], 'zugbruecke'))
 
 		# Package path in unix-python site-packages
-		unix_pkg_path = os.path.abspath(os.path.join(
-			os.path.dirname(__file__), os.path.pardir
-			))
+		unix_pkg_path = os.path.abspath(os.path.dirname(__file__))
 
 		# If package has not been linked into site-packages ...
 		if not os.path.exists(wine_pkg_path):
