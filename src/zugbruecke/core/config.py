@@ -112,7 +112,6 @@ class config_class(dict):
 
 		# Compile path
 		try_path = os.path.join(file_location, CONFIG_FN)
-		print(try_path)
 
 		# Is this a file?
 		if not os.path.isfile(try_path):
