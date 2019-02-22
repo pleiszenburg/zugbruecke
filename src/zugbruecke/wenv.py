@@ -104,11 +104,16 @@ class env_class:
 	def __get_command_dict__(interpreter_path, scripts_path):
 
 		out = {'python': interpreter_path}
+
+		if not os.path.exists(scripts_path):
+			return out
+
 		scripts = os.listdir(scripts_path)
 		for script in scripts:
 			if not script.lower().endswith('.exe'):
 				continue
 			out[script[:-4]] = os.path.join(scripts_path, script)
+
 		return out
 
 
