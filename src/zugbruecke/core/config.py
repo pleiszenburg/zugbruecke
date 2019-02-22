@@ -34,7 +34,7 @@ specific language governing rights and limitations under the License.
 import os
 import json
 
-from .const import CONFIG_FN
+from .const import CONFIG_FLD, CONFIG_FN
 from .errors import config_parser_error
 from .lib import generate_session_id
 
@@ -85,7 +85,7 @@ class config_class(dict):
 
 	def __get_default_config_directory__(self):
 
-		return os.path.join(os.path.expanduser('~'), CONFIG_FN)
+		return os.path.join(os.path.expanduser('~'), CONFIG_FLD)
 
 
 	def __get_config_from_files__(self):
@@ -112,6 +112,7 @@ class config_class(dict):
 
 		# Compile path
 		try_path = os.path.join(file_location, CONFIG_FN)
+		print(try_path)
 
 		# Is this a file?
 		if not os.path.isfile(try_path):
