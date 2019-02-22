@@ -46,9 +46,15 @@ from .core.config import config_class
 # CONST
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-HELP_STR = """Pla
-Blub
-Blubber
+HELP_STR = """wenv - the Wine Python environment
+
+- wenv init: sets up an environment (including Python interpreter, pip and pytest)
+- wenv help: prints this help text
+- wenv python: the Python interpreter
+
+Beyond that, the following scripts and modules are installed and available:
+
+{scripts:s}
 """
 
 
@@ -282,7 +288,11 @@ class env_class:
 
 
 	def __cmd_help__(self):
-		sys.stdout.write(HELP_STR)
+		sys.stdout.write(HELP_STR.format(scripts = '\n'.join([
+			'- wenv {script:s}'.format(script = key)
+			for key in sorted(self._cmd_dict_.keys())
+			if key != 'python'
+			])))
 		sys.stdout.flush()
 
 
