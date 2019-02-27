@@ -34,14 +34,14 @@ specific language governing rights and limitations under the License.
 
 import argparse
 
-from core.session_server import session_server_class
+from .core.session_server import session_server_class
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# INIT
+# ROUTINES
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-if __name__ == '__main__':
+def run():
 
 	# Parse arguments comming from unix side
 	parser = argparse.ArgumentParser()
@@ -76,3 +76,12 @@ if __name__ == '__main__':
 
 	# Fire up wine server session with parsed parameters
 	session = session_server_class(parameter['id'], parameter)
+
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# MAIN
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+if __name__ == '__main__':
+
+	run()

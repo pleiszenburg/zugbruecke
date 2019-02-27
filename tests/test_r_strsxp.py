@@ -33,7 +33,7 @@ specific language governing rights and limitations under the License.
 
 from sys import platform
 if any([platform.startswith(os_name) for os_name in ['linux', 'darwin', 'freebsd']]):
-	import zugbruecke as ctypes
+	import zugbruecke.ctypes as ctypes
 elif platform.startswith('win'):
 	import ctypes
 

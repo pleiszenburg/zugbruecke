@@ -44,3 +44,11 @@ GROUP_FUNCTION = 8
 
 # Required for WINFUNCTYPE
 _FUNCFLAG_STDCALL = 0 # EXPORT
+
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# FOLDER- AND FILENAMES
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+CONFIG_FLD = '.zugbruecke'
+CONFIG_FN = '.zugbruecke.json'

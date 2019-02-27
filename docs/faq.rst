@@ -50,9 +50,6 @@ sections must be kept in sync between the *Unix* and the *Wine* side of the code
 If run on *Windows*, the regular *ctypes* will just ignore any ``memsync``
 directive in the code.
 
-Pointers returned by a DLL pointing to memory allocated by the DLL are
-currently not handled.
-
 Is it thread-safe?
 ------------------
 
@@ -63,7 +60,7 @@ in your code manually. You can do this as follows:
 
 .. code:: python
 
-	from zugbruecke import session
+	from zugbruecke.ctypes import session
 	# start new thread or process (multiprocessing) - then, inside, do:
 	a = session()
 	# now you can do stuff like

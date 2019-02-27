@@ -21,6 +21,18 @@
 # </LICENSE_BLOCK>
 
 
+clean:
+	-rm -r build/*
+	-rm -r dist/*
+	-rm -r src/*.egg-info
+	find src/ tests/ -name '*.pyc' -exec rm -f {} +
+	find src/ tests/ -name '*.pyo' -exec rm -f {} +
+	find src/ tests/ -name '*~' -exec rm -f {} +
+	find src/ tests/ -name '__pycache__' -exec rm -fr {} +
+	# find src/ tests/ -name '*.htm' -exec rm -f {} +
+	# find src/ tests/ -name '*.html' -exec rm -f {} +
+	# find src/ tests/ -name '*.so' -exec rm -f {} +
+
 dll:
 	@(cd demo_dll; make clean; make; make install)
 
@@ -28,9 +40,7 @@ docu:
 	@(cd docs; make clean; make html)
 
 release:
-	-rm build/*
-	-rm dist/*
-	-rm -r src/*.egg-info
+	make clean
 	python setup.py sdist bdist_wheel
 	gpg --detach-sign -a dist/zugbruecke*.whl
 	gpg --detach-sign -a dist/zugbruecke*.tar.gz
@@ -47,21 +57,21 @@ upload_test:
 
 install:
 	pip install .[dev]
-	wine-pytest --version
+	wenv init
 
 install_link:
 	pip install -e .[dev]
-	wine-pytest --version
+	wenv init
 
 test:
 	make docu
-	-rm tests/__pycache__/*.pyc
-	wine-pytest
-	-rm tests/__pycache__/*.pyc
+	make clean
+	wenv pytest
+	make clean
 	pytest
 
 test_quick:
-	-rm tests/__pycache__/*.pyc
-	wine-pytest
-	-rm tests/__pycache__/*.pyc
+	make clean
+	wenv pytest
+	make clean
 	pytest

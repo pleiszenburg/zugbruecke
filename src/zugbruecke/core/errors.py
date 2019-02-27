@@ -6,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	src/zugbruecke/__init__.py: Package init file
+	src/zugbruecke/core/errors.py: Exceptions
 
 	Required to run on platform / side: [UNIX, WINE]
 
@@ -25,3 +25,11 @@ specific language governing rights and limitations under the License.
 </LICENSE_BLOCK>
 
 """
+
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# TYPES
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+class config_parser_error(Exception):
+	pass

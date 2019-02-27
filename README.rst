@@ -107,7 +107,7 @@ Start an interactive Python session on your favorite Unix(-like) operating syste
 
 .. code:: python
 
-	import zugbruecke as ctypes
+	import zugbruecke.ctypes as ctypes
 	dll_pow = ctypes.cdll.msvcrt.pow
 	dll_pow.argtypes = (ctypes.c_double, ctypes.c_double)
 	dll_pow.restype = ctypes.c_double

@@ -54,7 +54,7 @@ if any([platform.startswith(os_name) for os_name in ['linux', 'darwin', 'freebsd
 	else:
 		f.write('{"log_level": 10}')
 	f.close()
-	import zugbruecke as ctypes
+	import zugbruecke.ctypes as ctypes
 
 elif platform.startswith('win'):
 

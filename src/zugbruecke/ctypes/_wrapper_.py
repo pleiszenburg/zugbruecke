@@ -6,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	src/zugbruecke/_wrapper_.py: Patches platform-specific ctypes features
+	src/zugbruecke/ctypes/_wrapper_.py: Patches platform-specific ctypes features
 
 	Required to run on platform / side: [UNIX]
 
@@ -54,8 +54,8 @@ from ctypes import CDLL as ctypes_CDLL_class
 # IMPORT: zugbruecke core and missing ctypes flags
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-from .core.session_client import session_client_class # EXPORT
-from .core.const import _FUNCFLAG_STDCALL # EXPORT
+from ..core.session_client import session_client_class # EXPORT
+from ..core.const import _FUNCFLAG_STDCALL # EXPORT
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
