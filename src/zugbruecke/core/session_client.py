@@ -64,7 +64,10 @@ from .rpc import (
 class session_client_class():
 
 
-	def __init__(self, parameter = {}, force = False):
+	def __init__(self, parameter = None, force = False):
+
+		if parameter is None:
+			parameter = {}
 
 		self.__init_stage_1__(parameter, force)
 
