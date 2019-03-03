@@ -329,4 +329,7 @@ __ctypes_public__ = [
 	]
 
 for __ctypes_item__ in __ctypes_private__ + __ctypes_public__:
-	setattr(session_class, __ctypes_item__, getattr(__ctypes__, __ctypes_item__))
+	__ctypes_attr__ = getattr(__ctypes__, __ctypes_item__)
+	if hasattr(__ctypes_attr__, '__call__'):
+		__ctypes_attr__ = staticmethod(__ctypes_attr__)
+	setattr(session_class, __ctypes_item__, __ctypes_attr__)
