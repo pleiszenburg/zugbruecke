@@ -125,6 +125,16 @@ class session_class:
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# Set up and expose dll library loader objects
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+		# Set up and expose dll library loader objects
+		self.cdll = LibraryLoader(self.CDLL)
+		self.windll = LibraryLoader(self.WinDLL)
+		self.oledll = LibraryLoader(self.OleDLL)
+
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # Routines only availabe on Wine / Windows, currently stubbed in zugbruecke
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -146,79 +156,77 @@ class session_class:
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# Routines only availabe on Wine / Windows, provided via zugbruecke
+# Wrapper around DLL / shared object interface classes
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+	# Wrapper for CDLL class
+	def CDLL(
+		self,
+		name, mode = DEFAULT_MODE, handle = None,
+		use_errno = False,
+		use_last_error = False
+		):
 
-# EXPORT: Wrapper for CDLL class
-def CDLL(
-	name, mode = DEFAULT_MODE, handle = None,
-	use_errno = False,
-	use_last_error = False
-	):
+		# If there is a handle to a zugbruecke session, return session
+		if handle is not None:
 
-	# If there is a handle to a zugbruecke session, return session
-	if handle is not None:
+			# Handle zugbruecke handle
+			if type(handle).__name__ == 'dll_client_class':
 
-		# Handle zugbruecke handle
-		if type(handle).__name__ == 'dll_client_class':
+				# Return it as-is TODO what about a new name?
+				return handle
 
-			# Return it as-is TODO what about a new name?
-			return handle
+			# Handle ctypes handle
+			else:
 
-		# Handle ctypes handle
+				# Return ctypes DLL class instance, let it handle the handle as it would
+				return __ctypes_CDLL_class__(name, mode, handle, use_errno, use_last_error)
+
+		# If no handle was passed, it's a new library
 		else:
 
-			# Return ctypes DLL class instance, let it handle the handle as it would
-			return __ctypes_CDLL_class__(name, mode, handle, use_errno, use_last_error)
+			# Let's try the Wine side first
+			try:
 
-	# If no handle was passed, it's a new library
-	else:
+				# Return a handle on dll_client object
+				return self._zb_current_session.load_library(
+					dll_name = name, dll_type = 'cdll', dll_param = {
+						'mode': mode, 'use_errno': use_errno, 'use_last_error': use_last_error
+						}
+					)
 
-		# Let's try the Wine side first
-		try:
+			# Well, it might be a Unix library after all
+			except:
 
-			# Return a handle on dll_client object
-			return _zb_current_session.load_library(
-				dll_name = name, dll_type = 'cdll', dll_param = {
-					'mode': mode, 'use_errno': use_errno, 'use_last_error': use_last_error
-					}
-				)
-
-		# Well, it might be a Unix library after all
-		except:
-
-			# If Unix library, return CDLL class instance
-			return __ctypes_CDLL_class__(name, mode, handle, use_errno, use_last_error)
+				# If Unix library, return CDLL class instance
+				return __ctypes_CDLL_class__(name, mode, handle, use_errno, use_last_error)
 
 
-def WinDLL(
-	name, mode = DEFAULT_MODE, handle = None,
-	use_errno = False,
-	use_last_error = False
-	): # EXPORT
+	# Wrapper for WinDLL class
+	def WinDLL(
+		self,
+		name, mode = DEFAULT_MODE, handle = None,
+		use_errno = False,
+		use_last_error = False
+		):
 
-	return _zb_current_session.load_library(
-		dll_name = name, dll_type = 'windll', dll_param = {
-			'mode': mode, 'use_errno': use_errno, 'use_last_error': use_last_error
-			}
-		)
-
-
-def OleDLL(
-	name, mode = DEFAULT_MODE, handle = None,
-	use_errno = False,
-	use_last_error = False
-	): # EXPORT
-
-	return _zb_current_session.load_library(
-		dll_name = name, dll_type = 'oledll', dll_param = {
-			'mode': mode, 'use_errno': use_errno, 'use_last_error': use_last_error
-			}
-		)
+		return self._zb_current_session.load_library(
+			dll_name = name, dll_type = 'windll', dll_param = {
+				'mode': mode, 'use_errno': use_errno, 'use_last_error': use_last_error
+				}
+			)
 
 
-# Set up and expose dll library loader objects
-cdll = LibraryLoader(CDLL) # EXPORT
-windll = LibraryLoader(WinDLL) # EXPORT
-oledll = LibraryLoader(OleDLL) # EXPORT
+	# Wrapper for OleDLL class
+	def OleDLL(
+		self,
+		name, mode = DEFAULT_MODE, handle = None,
+		use_errno = False,
+		use_last_error = False
+		):
+
+		return self._zb_current_session.load_library(
+			dll_name = name, dll_type = 'oledll', dll_param = {
+				'mode': mode, 'use_errno': use_errno, 'use_last_error': use_last_error
+				}
+			)
