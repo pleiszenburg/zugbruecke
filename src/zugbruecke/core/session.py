@@ -54,8 +54,8 @@ from ctypes import CDLL as __ctypes_CDLL_class__
 # IMPORT: zugbruecke core and missing ctypes flags
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-from .core.session_client import __session_client_class__
-from .core.const import _FUNCFLAG_STDCALL # EXPORT
+from .session_client import __session_client_class__
+from .const import _FUNCFLAG_STDCALL # EXPORT
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -67,7 +67,7 @@ class session_class:
 	def __init__(self):
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# zugbruecke session
+# zugbruecke session client
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 		# Start new zugbruecke session
