@@ -34,7 +34,7 @@ specific language governing rights and limitations under the License.
 
 from ..core.session import (
 	session_class as __session_class__,
-	ctypes_veryprivate as __ctypes_veryprivate__
+	_ctypes_veryprivate_ as __ctypes_veryprivate__
 	)
 
 
