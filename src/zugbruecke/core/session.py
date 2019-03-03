@@ -80,7 +80,15 @@ class session_class:
 # constructor
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-	def __init__(self):
+	def __init__(self, parameter = None, force = False):
+
+		if parameter is None:
+			parameter = {}
+		elif not isinstance(parameter, dict):
+			raise TypeError('parameter "parameter" must be a dict')
+
+		if not isinstance(force, bool):
+			raise TypeError('parameter "force" must be a bool')
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -88,7 +96,7 @@ class session_class:
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 		# Start new zugbruecke session
-		self._zb_current_session = __session_client_class__()
+		self._zb_current_session = __session_client_class__(parameter = parameter, force = force)
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
