@@ -25,3 +25,10 @@ specific language governing rights and limitations under the License.
 </LICENSE_BLOCK>
 
 """
+
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# IMPORT: zugbruecke core
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+from .core.session import session_class as ctypes_session
