@@ -32,7 +32,10 @@ specific language governing rights and limitations under the License.
 # IMPORT: zugbruecke core
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-from ..core.session import session_class as __session_class__
+from ..core.session import (
+	session_class as __session_class__,
+	ctypes_veryprivate as __ctypes_veryprivate__
+	)
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -42,7 +45,7 @@ from ..core.session import session_class as __session_class__
 __session__ = __session_class__()
 __globals__ = globals()
 for __ctypes_item__ in dir(__session__):
-	if __ctypes_item__.startswith('__') and not __ctypes_item__ in ['__version__']:
+	if __ctypes_item__.startswith('__') and not __ctypes_item__ in __ctypes_veryprivate__:
 		continue
 	__globals__[__ctypes_item__] = getattr(__session__, __ctypes_item__)
 del __globals__, __session__, __session_class__, __ctypes_item__
