@@ -75,6 +75,21 @@ class session_class:
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# Routines only availabe on Wine / Windows - accessed via server
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+		self.FormatError = _zb_current_session.ctypes_FormatError # EXPORT
+
+		self.get_last_error = _zb_current_session.ctypes_get_last_error # EXPORT
+
+		self.GetLastError = _zb_current_session.ctypes_GetLastError # EXPORT
+
+		self.set_last_error = _zb_current_session.ctypes_set_last_error # EXPORT
+
+		self.WinError = _zb_current_session.ctypes_WinError # EXPORT
+
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # Routines only availabe on Wine / Windows, currently stubbed in zugbruecke
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -93,21 +108,6 @@ class session_class:
 	@staticmethod
 	def _check_HRESULT(result): # EXPORT
 		pass # TODO stub - method for HRESULT, checks error bit, raises error if true. Needs reimplementation.
-
-
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# Routines only availabe on Wine / Windows - accessed via server
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-FormatError = _zb_current_session.ctypes_FormatError # EXPORT
-
-get_last_error = _zb_current_session.ctypes_get_last_error # EXPORT
-
-GetLastError = _zb_current_session.ctypes_GetLastError # EXPORT
-
-set_last_error = _zb_current_session.ctypes_set_last_error # EXPORT
-
-WinError = _zb_current_session.ctypes_WinError # EXPORT
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
