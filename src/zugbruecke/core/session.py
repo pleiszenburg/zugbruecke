@@ -47,14 +47,14 @@ from ctypes import LibraryLoader # EXPORT
 # IMPORT: Unix ctypes members, which will be modified
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-from ctypes import CDLL as ctypes_CDLL_class
+from ctypes import CDLL as __ctypes_CDLL_class__
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # IMPORT: zugbruecke core and missing ctypes flags
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-from .core.session_client import session_client_class # EXPORT
+from .core.session_client import __session_client_class__
 from .core.const import _FUNCFLAG_STDCALL # EXPORT
 
 
@@ -80,22 +80,22 @@ def _check_HRESULT(result): # EXPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 # Start new zugbruecke session
-current_session = session_client_class() # EXPORT
+_zb_current_session = __session_client_class__() # EXPORT
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # Routines only availabe on Wine / Windows - accessed via server
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-FormatError = current_session.ctypes_FormatError # EXPORT
+FormatError = _zb_current_session.ctypes_FormatError # EXPORT
 
-get_last_error = current_session.ctypes_get_last_error # EXPORT
+get_last_error = _zb_current_session.ctypes_get_last_error # EXPORT
 
-GetLastError = current_session.ctypes_GetLastError # EXPORT
+GetLastError = _zb_current_session.ctypes_GetLastError # EXPORT
 
-set_last_error = current_session.ctypes_set_last_error # EXPORT
+set_last_error = _zb_current_session.ctypes_set_last_error # EXPORT
 
-WinError = current_session.ctypes_WinError # EXPORT
+WinError = _zb_current_session.ctypes_WinError # EXPORT
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -103,12 +103,12 @@ WinError = current_session.ctypes_WinError # EXPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 # CFUNCTYPE and WINFUNCTYPE function pointer factories
-CFUNCTYPE = current_session.ctypes_CFUNCTYPE # EXPORT
-WINFUNCTYPE = current_session.ctypes_WINFUNCTYPE # EXPORT
+CFUNCTYPE = _zb_current_session.ctypes_CFUNCTYPE # EXPORT
+WINFUNCTYPE = _zb_current_session.ctypes_WINFUNCTYPE # EXPORT
 
 # Used as cache by CFUNCTYPE and WINFUNCTYPE
-_c_functype_cache = current_session.data.cache_dict['func_type'][_FUNCFLAG_CDECL] # EXPORT
-_win_functype_cache = current_session.data.cache_dict['func_type'][_FUNCFLAG_STDCALL] # EXPORT
+_c_functype_cache = _zb_current_session.data.cache_dict['func_type'][_FUNCFLAG_CDECL] # EXPORT
+_win_functype_cache = _zb_current_session.data.cache_dict['func_type'][_FUNCFLAG_STDCALL] # EXPORT
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -117,8 +117,8 @@ _win_functype_cache = current_session.data.cache_dict['func_type'][_FUNCFLAG_STD
 
 class wine:
 
-	unix_to_wine = current_session.path_unix_to_wine
-	wine_to_unix = current_session.path_wine_to_unix
+	unix_to_wine = _zb_current_session.path_unix_to_wine
+	wine_to_unix = _zb_current_session.path_wine_to_unix
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -146,7 +146,7 @@ def CDLL(
 		else:
 
 			# Return ctypes DLL class instance, let it handle the handle as it would
-			return ctypes_CDLL_class(name, mode, handle, use_errno, use_last_error)
+			return __ctypes_CDLL_class__(name, mode, handle, use_errno, use_last_error)
 
 	# If no handle was passed, it's a new library
 	else:
@@ -155,7 +155,7 @@ def CDLL(
 		try:
 
 			# Return a handle on dll_client object
-			return current_session.load_library(
+			return _zb_current_session.load_library(
 				dll_name = name, dll_type = 'cdll', dll_param = {
 					'mode': mode, 'use_errno': use_errno, 'use_last_error': use_last_error
 					}
@@ -165,7 +165,7 @@ def CDLL(
 		except:
 
 			# If Unix library, return CDLL class instance
-			return ctypes_CDLL_class(name, mode, handle, use_errno, use_last_error)
+			return __ctypes_CDLL_class__(name, mode, handle, use_errno, use_last_error)
 
 
 def WinDLL(
@@ -174,7 +174,7 @@ def WinDLL(
 	use_last_error = False
 	): # EXPORT
 
-	return current_session.load_library(
+	return _zb_current_session.load_library(
 		dll_name = name, dll_type = 'windll', dll_param = {
 			'mode': mode, 'use_errno': use_errno, 'use_last_error': use_last_error
 			}
@@ -187,7 +187,7 @@ def OleDLL(
 	use_last_error = False
 	): # EXPORT
 
-	return current_session.load_library(
+	return _zb_current_session.load_library(
 		dll_name = name, dll_type = 'oledll', dll_param = {
 			'mode': mode, 'use_errno': use_errno, 'use_last_error': use_last_error
 			}
