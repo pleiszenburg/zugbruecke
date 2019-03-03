@@ -55,7 +55,7 @@ from ctypes import CDLL as __ctypes_CDLL_class__
 # IMPORT: zugbruecke core and missing ctypes flags
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-from .session_client import __session_client_class__
+from .session_client import session_client_class as __session_client_class__
 from .const import _FUNCFLAG_STDCALL # EXPORT
 
 
