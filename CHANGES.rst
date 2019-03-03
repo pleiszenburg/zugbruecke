@@ -1,10 +1,10 @@
 Changes
 =======
 
-0.0.14 (2019-XX-XX)
+0.1.00 (2019-XX-XX)
 -------------------
 
-Caution: **IMPORT LAYOUT CHANGE BREAKING BACKWARDS COMPATIBILITY!**
+Caution: **MODULE LAYOUT CHANGE BREAKING BACKWARDS COMPATIBILITY!**
 
 Previously, *zugbruecke* or parts of it could be imported as follows:
 
@@ -22,7 +22,9 @@ From now on, the ``ctypes`` drop-in replacement interface is located inside a ne
 
 The above significant change was mandatory for allowing to cleanup a lot of old code and remove long-standing bugs. The main issue was that importing ``zugbruecke`` was implying that new wine-python session was started automatically. This could not be prohibited. With the new package layout, it becomes possible to import sub-modules of ``zugbruecke`` without implicitly starting a session. One of the more significant added benefits therefore is that this change also allows much more fine-grained tests.
 
-Furthermore, the shell scripts ``wine-python``, ``wine-pip`` and ``wine-pytest`` have been removed. Their functionality was consolidated into a single new script, ``wenv``. One can now call ``wenv python``, ``wenv pip`` and ``wenv pytest``. This change was necessary for allowing a more generic interface to entry points of arbitrary third party packages.
+As a consequence, ``zugbruecke.ctypes.current_session`` is no longer available. ``zugbruecke.ctypes`` on its own is now the default session. Besides, the class ``zugbruecke.session`` was renamed into ``zugbruecke.ctypes_session`` and has now a fully compatible ``ctypes`` drop-in replacement interface as well. Both, ``zugbruecke.ctypes`` and custom sessions constructed from ``zugbruecke.ctypes_session``, now have methods and properties prefixed with ``_zb_`` for manipulating their configuration, termination and Wine-related tasks.
+
+Furthermore, the shell scripts ``wine-python``, ``wine-pip`` and ``wine-pytest`` have been removed. Their functionality was consolidated into a single new script, ``wenv``. One can now call ``wenv python``, ``wenv pip`` and ``wenv pytest``. This change was necessary for allowing a more generic interface to entry points of arbitrary third party packages. Run ``wenv help`` for more information.
 
 * FEATURE: ``wineprefix`` becomes a configuration parameter definable by users allowing custom wine prefixes, see issue #44.
 * FEATURE: Introduced new error types specific to this package.
