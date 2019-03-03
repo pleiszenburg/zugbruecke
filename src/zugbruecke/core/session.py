@@ -27,6 +27,13 @@ specific language governing rights and limitations under the License.
 """
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# IMPORT: Original ctypes
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+import ctypes as __ctypes__
+
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # IMPORT: Unix ctypes members required by wrapper, which will exported as they are
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -320,3 +327,6 @@ __ctypes_public__ = [
 	'string_at',
 	'wstring_at'
 	]
+
+for __ctypes_item__ in __ctypes_private__ + __ctypes_public__:
+	setattr(session_class, __ctypes_item__, getattr(__ctypes__, __ctypes_item__))
