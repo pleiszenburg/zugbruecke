@@ -92,15 +92,15 @@ class session_class:
 # Routines only availabe on Wine / Windows - accessed via server
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-		self.FormatError = _zb_current_session.ctypes_FormatError # EXPORT
+		self.FormatError = self._zb_current_session.ctypes_FormatError # EXPORT
 
-		self.get_last_error = _zb_current_session.ctypes_get_last_error # EXPORT
+		self.get_last_error = self._zb_current_session.ctypes_get_last_error # EXPORT
 
-		self.GetLastError = _zb_current_session.ctypes_GetLastError # EXPORT
+		self.GetLastError = self._zb_current_session.ctypes_GetLastError # EXPORT
 
-		self.set_last_error = _zb_current_session.ctypes_set_last_error # EXPORT
+		self.set_last_error = self._zb_current_session.ctypes_set_last_error # EXPORT
 
-		self.WinError = _zb_current_session.ctypes_WinError # EXPORT
+		self.WinError = self._zb_current_session.ctypes_WinError # EXPORT
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -108,20 +108,20 @@ class session_class:
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 		# CFUNCTYPE and WINFUNCTYPE function pointer factories
-		self.CFUNCTYPE = _zb_current_session.ctypes_CFUNCTYPE # EXPORT
-		self.WINFUNCTYPE = _zb_current_session.ctypes_WINFUNCTYPE # EXPORT
+		self.CFUNCTYPE = self._zb_current_session.ctypes_CFUNCTYPE # EXPORT
+		self.WINFUNCTYPE = self._zb_current_session.ctypes_WINFUNCTYPE # EXPORT
 
 		# Used as cache by CFUNCTYPE and WINFUNCTYPE
-		self._c_functype_cache = _zb_current_session.data.cache_dict['func_type'][_FUNCFLAG_CDECL] # EXPORT
-		self._win_functype_cache = _zb_current_session.data.cache_dict['func_type'][_FUNCFLAG_STDCALL] # EXPORT
+		self._c_functype_cache = self._zb_current_session.data.cache_dict['func_type'][_FUNCFLAG_CDECL] # EXPORT
+		self._win_functype_cache = self._zb_current_session.data.cache_dict['func_type'][_FUNCFLAG_STDCALL] # EXPORT
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # Wine-related stuff
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-		self._zb_path_unix_to_wine = _zb_current_session.path_unix_to_wine
-		self._zb_path_wine_to_unix = _zb_current_session.path_wine_to_unix
+		self._zb_path_unix_to_wine = self._zb_current_session.path_unix_to_wine
+		self._zb_path_wine_to_unix = self._zb_current_session.path_wine_to_unix
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
