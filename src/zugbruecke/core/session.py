@@ -85,22 +85,22 @@ class session_class:
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 		# Start new zugbruecke session
-		self._zb_current_session = __session_client_class__() # EXPORT
+		self._zb_current_session = __session_client_class__()
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # Routines only availabe on Wine / Windows - accessed via server
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-		self.FormatError = self._zb_current_session.ctypes_FormatError # EXPORT
+		self.FormatError = self._zb_current_session.ctypes_FormatError
 
-		self.get_last_error = self._zb_current_session.ctypes_get_last_error # EXPORT
+		self.get_last_error = self._zb_current_session.ctypes_get_last_error
 
-		self.GetLastError = self._zb_current_session.ctypes_GetLastError # EXPORT
+		self.GetLastError = self._zb_current_session.ctypes_GetLastError
 
-		self.set_last_error = self._zb_current_session.ctypes_set_last_error # EXPORT
+		self.set_last_error = self._zb_current_session.ctypes_set_last_error
 
-		self.WinError = self._zb_current_session.ctypes_WinError # EXPORT
+		self.WinError = self._zb_current_session.ctypes_WinError
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -108,12 +108,12 @@ class session_class:
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 		# CFUNCTYPE and WINFUNCTYPE function pointer factories
-		self.CFUNCTYPE = self._zb_current_session.ctypes_CFUNCTYPE # EXPORT
-		self.WINFUNCTYPE = self._zb_current_session.ctypes_WINFUNCTYPE # EXPORT
+		self.CFUNCTYPE = self._zb_current_session.ctypes_CFUNCTYPE
+		self.WINFUNCTYPE = self._zb_current_session.ctypes_WINFUNCTYPE
 
 		# Used as cache by CFUNCTYPE and WINFUNCTYPE
-		self._c_functype_cache = self._zb_current_session.data.cache_dict['func_type'][_FUNCFLAG_CDECL] # EXPORT
-		self._win_functype_cache = self._zb_current_session.data.cache_dict['func_type'][_FUNCFLAG_STDCALL] # EXPORT
+		self._c_functype_cache = self._zb_current_session.data.cache_dict['func_type'][_FUNCFLAG_CDECL]
+		self._win_functype_cache = self._zb_current_session.data.cache_dict['func_type'][_FUNCFLAG_STDCALL]
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
