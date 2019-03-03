@@ -90,6 +90,19 @@ class session_class:
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# CFUNCTYPE & WINFUNCTYPE
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+		# CFUNCTYPE and WINFUNCTYPE function pointer factories
+		self.CFUNCTYPE = _zb_current_session.ctypes_CFUNCTYPE # EXPORT
+		self.WINFUNCTYPE = _zb_current_session.ctypes_WINFUNCTYPE # EXPORT
+
+		# Used as cache by CFUNCTYPE and WINFUNCTYPE
+		self._c_functype_cache = _zb_current_session.data.cache_dict['func_type'][_FUNCFLAG_CDECL] # EXPORT
+		self._win_functype_cache = _zb_current_session.data.cache_dict['func_type'][_FUNCFLAG_STDCALL] # EXPORT
+
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # Routines only availabe on Wine / Windows, currently stubbed in zugbruecke
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -108,19 +121,6 @@ class session_class:
 	@staticmethod
 	def _check_HRESULT(result): # EXPORT
 		pass # TODO stub - method for HRESULT, checks error bit, raises error if true. Needs reimplementation.
-
-
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# CFUNCTYPE & WINFUNCTYPE
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-# CFUNCTYPE and WINFUNCTYPE function pointer factories
-CFUNCTYPE = _zb_current_session.ctypes_CFUNCTYPE # EXPORT
-WINFUNCTYPE = _zb_current_session.ctypes_WINFUNCTYPE # EXPORT
-
-# Used as cache by CFUNCTYPE and WINFUNCTYPE
-_c_functype_cache = _zb_current_session.data.cache_dict['func_type'][_FUNCFLAG_CDECL] # EXPORT
-_win_functype_cache = _zb_current_session.data.cache_dict['func_type'][_FUNCFLAG_STDCALL] # EXPORT
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
