@@ -146,7 +146,6 @@ class session_class:
 	def DllGetClassObject(rclsid, riid, ppv): # EXPORT
 		pass # TODO stub - required for COM
 
-	@staticmethod
 	class HRESULT: # EXPORT
 		pass # TODO stub - special form of c_long, will require changes to argument parser
 
