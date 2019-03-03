@@ -27,20 +27,14 @@ specific language governing rights and limitations under the License.
 """
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# IMPORT: Unix ctypes members required by wrapper
+# IMPORT: Unix ctypes members required by wrapper, which will exported as they are
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 from ctypes import (
 	_FUNCFLAG_CDECL,
-	DEFAULT_MODE
+	DEFAULT_MODE,
+	LibraryLoader
 	)
-
-
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# IMPORT: Unix ctypes members, which will exported as they are
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-from ctypes import LibraryLoader # EXPORT
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -69,7 +63,9 @@ class session_class:
 # static components
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+	DEFAULT_MODE = DEFAULT_MODE
 	LibraryLoader = LibraryLoader
+	_FUNCFLAG_CDECL = _FUNCFLAG_CDECL
 	_FUNCFLAG_STDCALL = _FUNCFLAG_STDCALL
 
 
@@ -238,7 +234,6 @@ class session_class:
 __ctypes_private__ = [
 	'__version__',
 	'_CFuncPtr',
-	'_FUNCFLAG_CDECL',
 	'_FUNCFLAG_PYTHONAPI',
 	'_FUNCFLAG_USE_ERRNO',
 	'_FUNCFLAG_USE_LASTERROR',
@@ -266,7 +261,6 @@ __ctypes_public__ = [
 	'ArgumentError',
 	'Array',
 	'BigEndianStructure',
-	'DEFAULT_MODE',
 	'LittleEndianStructure',
 	'POINTER',
 	'PYFUNCTYPE',
