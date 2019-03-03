@@ -1,8 +1,8 @@
 Changes
 =======
 
-0.1.00 (2019-XX-XX)
--------------------
+0.1.0 (2019-XX-XX)
+------------------
 
 Caution: **MODULE LAYOUT CHANGE BREAKING BACKWARDS COMPATIBILITY!**
 
