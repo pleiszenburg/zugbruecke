@@ -45,3 +45,4 @@ for __ctypes_item__ in dir(__session__):
 	if __ctypes_item__.startswith('__') and not __ctypes_item__ in ['__version__']:
 		continue
 	__globals__[__ctypes_item__] = getattr(__session__, __ctypes_item__)
+del __globals__, __session__, __session_class__, __ctypes_item__
