@@ -150,6 +150,19 @@ class session_class:
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# Allow readonly access to session states
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+	@property
+	def _zb_id(self):
+		return self._zb_current_session.id
+
+	@property
+	def _zb_up(self):
+		return self._zb_current_session.up
+
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # Routines only availabe on Wine / Windows, currently stubbed in zugbruecke
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
