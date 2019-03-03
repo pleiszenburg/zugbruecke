@@ -59,6 +59,17 @@ from .core.const import _FUNCFLAG_STDCALL # EXPORT
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# SESSION CTYPES-DROP-IN-REPLACEMENT CLASS
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+class session_class:
+
+	def __init__(self):
+
+		pass
+
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # Routines only availabe on Wine / Windows, currently stubbed in zugbruecke
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -198,14 +209,3 @@ def OleDLL(
 cdll = LibraryLoader(CDLL) # EXPORT
 windll = LibraryLoader(WinDLL) # EXPORT
 oledll = LibraryLoader(OleDLL) # EXPORT
-
-
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# SESSION CTYPES-DROP-IN-REPLACEMENT CLASS
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-class session_class:
-
-	def __init__(self):
-
-		pass
