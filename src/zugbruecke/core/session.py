@@ -92,11 +92,15 @@ class session_class:
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# zugbruecke session client
+# zugbruecke session client and session interface
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 		# Start new zugbruecke session
 		self._zb_current_session = __session_client_class__(parameter = parameter, force = force)
+
+		# Offer access to session internals
+		self._zb_set_parameter = self._zb_current_session.set_parameter
+		self._zb_terminate = self._zb_current_session.terminate
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

@@ -216,6 +216,9 @@ class session_client_class():
 
 	def path_unix_to_wine(self, in_path):
 
+		if not isintance(in_path, str):
+			raise TypeError('in_path must by of type str')
+
 		# If in stage 1, fire up stage 2
 		if self.stage == 1:
 			self.__init_stage_2__()
@@ -226,6 +229,9 @@ class session_client_class():
 
 	def path_wine_to_unix(self, in_path):
 
+		if not isintance(in_path, str):
+			raise TypeError('in_path must by of type str')
+
 		# If in stage 1, fire up stage 2
 		if self.stage == 1:
 			self.__init_stage_2__()
@@ -235,6 +241,9 @@ class session_client_class():
 
 
 	def set_parameter(self, parameter):
+
+		if not isintance(parameter, dict):
+			raise TypeError('parameter "parameter" must by of type dict')
 
 		self.p.update(parameter)
 		self.rpc_client.set_parameter(parameter)
