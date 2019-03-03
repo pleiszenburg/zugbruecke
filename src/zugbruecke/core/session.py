@@ -198,3 +198,14 @@ def OleDLL(
 cdll = LibraryLoader(CDLL) # EXPORT
 windll = LibraryLoader(WinDLL) # EXPORT
 oledll = LibraryLoader(OleDLL) # EXPORT
+
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# SESSION CTYPES-DROP-IN-REPLACEMENT CLASS
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+class session_class:
+
+	def __init__(self):
+
+		pass
