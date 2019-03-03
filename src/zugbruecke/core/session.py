@@ -66,32 +66,33 @@ class session_class:
 
 	def __init__(self):
 
-		pass
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# zugbruecke session
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+		# Start new zugbruecke session
+		self._zb_current_session = __session_client_class__() # EXPORT
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # Routines only availabe on Wine / Windows, currently stubbed in zugbruecke
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-def DllCanUnloadNow(): # EXPORT
-	pass # TODO stub - required for COM
+	@staticmethod
+	def DllCanUnloadNow(): # EXPORT
+		pass # TODO stub - required for COM
 
-def DllGetClassObject(rclsid, riid, ppv): # EXPORT
-	pass # TODO stub - required for COM
+	@staticmethod
+	def DllGetClassObject(rclsid, riid, ppv): # EXPORT
+		pass # TODO stub - required for COM
 
-class HRESULT: # EXPORT
-	pass # TODO stub - special form of c_long, will require changes to argument parser
+	@staticmethod
+	class HRESULT: # EXPORT
+		pass # TODO stub - special form of c_long, will require changes to argument parser
 
-def _check_HRESULT(result): # EXPORT
-	pass # TODO stub - method for HRESULT, checks error bit, raises error if true. Needs reimplementation.
-
-
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# zugbruecke session
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-# Start new zugbruecke session
-_zb_current_session = __session_client_class__() # EXPORT
+	@staticmethod
+	def _check_HRESULT(result): # EXPORT
+		pass # TODO stub - method for HRESULT, checks error bit, raises error if true. Needs reimplementation.
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
