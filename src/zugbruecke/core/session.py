@@ -117,6 +117,14 @@ class session_class:
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# Wine-related stuff
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+		self._zb_path_unix_to_wine = _zb_current_session.path_unix_to_wine
+		self._zb_path_wine_to_unix = _zb_current_session.path_wine_to_unix
+
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # Routines only availabe on Wine / Windows, currently stubbed in zugbruecke
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -135,16 +143,6 @@ class session_class:
 	@staticmethod
 	def _check_HRESULT(result): # EXPORT
 		pass # TODO stub - method for HRESULT, checks error bit, raises error if true. Needs reimplementation.
-
-
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# Wine-related stuff
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-class wine:
-
-	unix_to_wine = _zb_current_session.path_unix_to_wine
-	wine_to_unix = _zb_current_session.path_wine_to_unix
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
