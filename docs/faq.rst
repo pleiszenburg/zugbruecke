@@ -40,30 +40,23 @@ Can it handle pointers?
 
 Yes and no.
 
-Pointers to simple C data types (int, float, etc.) used as function
-parameters or within structures can be handled just fine.
+Pointers to simple C data types (int, float, etc.) used as function parameters or within structures can be handled just fine.
 
-Pointers to arbitrary data structures can be handled if another parameter of
-the call contains the length of the memory section the pointer is pointing to.
-*zugbruecke* uses a special ``memsync`` protocol for indicating which memory
-sections must be kept in sync between the *Unix* and the *Wine* side of the code.
-If run on *Windows*, the regular *ctypes* will just ignore any ``memsync``
-directive in the code.
+Pointers to arbitrary data structures can be handled if another parameter of the call contains the length of the memory section the pointer is pointing to. *zugbruecke* uses a special ``memsync`` protocol for indicating which memory sections must be kept in sync between the *Unix* and the *Wine* side of the code. If run on *Windows*, the regular *ctypes* will just ignore any ``memsync`` directive in the code.
 
 Is it thread-safe?
 ------------------
 
 Probably (yes). More extensive tests are required.
 
-If you want to be on the safe side, start one *zugbruecke* session per thread
-in your code manually. You can do this as follows:
+If you want to be on the safe side, start one *zugbruecke* session per thread in your code manually. You can do this as follows:
 
 .. code:: python
 
-	from zugbruecke.ctypes import session
+	from zugbruecke import ctypes_session
 	# start new thread or process (multiprocessing) - then, inside, do:
-	a = session()
+	a = ctypes_session()
 	# now you can do stuff like
-	kernel32 = a.load_library('kernel32', 'cdll')
+	kernel32 = a.cdll.kernel32
 	# do not forget to terminate the session (i.e. the Windows Python interpreter)
-	a.terminate()
+	a._zb_terminate()
