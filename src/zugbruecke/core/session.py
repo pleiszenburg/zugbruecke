@@ -66,7 +66,7 @@ class session_class:
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# static
+# static components
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 	LibraryLoader = LibraryLoader
@@ -229,3 +229,100 @@ class session_class:
 				'mode': mode, 'use_errno': use_errno, 'use_last_error': use_last_error
 				}
 			)
+
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# more static components from ctypes
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+__ctypes_private__ = [
+	'__version__',
+	'_CFuncPtr',
+	'_FUNCFLAG_CDECL',
+	'_FUNCFLAG_PYTHONAPI',
+	'_FUNCFLAG_USE_ERRNO',
+	'_FUNCFLAG_USE_LASTERROR',
+	'_Pointer',
+	'_SimpleCData',
+	'_calcsize',
+	'_cast',
+	'_cast_addr',
+	'_check_size',
+	'_ctypes_version',
+	'_dlopen', # behaviour depends on platform
+	'_endian',
+	'_memmove_addr',
+	'_memset_addr',
+	'_pointer_type_cache',
+	'_reset_cache',
+	'_string_at',
+	'_string_at_addr',
+	'_wstring_at',
+	'_wstring_at_addr'
+	]
+
+__ctypes_public__ = [
+	'ARRAY', # Python 3.6: Deprecated XXX
+	'ArgumentError',
+	'Array',
+	'BigEndianStructure',
+	'DEFAULT_MODE',
+	'LittleEndianStructure',
+	'POINTER',
+	'PYFUNCTYPE',
+	'PyDLL',
+	'RTLD_GLOBAL',
+	'RTLD_LOCAL',
+	'SetPointerType', # Python 3.6: Deprecated XXX
+	'Structure',
+	'Union',
+	'addressof',
+	'alignment',
+	'byref',
+	'c_bool',
+	'c_buffer',
+	'c_byte',
+	'c_char',
+	'c_char_p',
+	'c_double',
+	'c_float',
+	'c_int',
+	'c_int16',
+	'c_int32',
+	'c_int64',
+	'c_int8',
+	'c_long',
+	'c_longdouble',
+	'c_longlong',
+	'c_short',
+	'c_size_t',
+	'c_ssize_t',
+	'c_ubyte',
+	'c_uint',
+	'c_uint16',
+	'c_uint32',
+	'c_uint64',
+	'c_uint8',
+	'c_ulong',
+	'c_ulonglong',
+	'c_ushort',
+	'c_void_p',
+	'c_voidp',
+	'c_wchar',
+	'c_wchar_p',
+	'cast',
+	'create_string_buffer',
+	'create_unicode_buffer',
+	'get_errno',
+	'memmove',
+	'memset',
+	'pointer',
+	'py_object',
+	'pydll',
+	'pythonapi',
+	'resize',
+	'set_errno',
+	'sizeof',
+	'string_at',
+	'wstring_at'
+	]
