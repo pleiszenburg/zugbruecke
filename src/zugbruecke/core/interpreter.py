@@ -68,19 +68,20 @@ class interpreter_session_class():
 	# session destructor
 	def terminate(self):
 
-		if self.up:
+		if not self.up:
+			return
 
-			# Log status
-			self.log.out('[interpreter] TERMINATING ...')
+		# Log status
+		self.log.out('[interpreter] TERMINATING ...')
 
-			# Shut down wine python
-			self.__python_stop__()
+		# Shut down wine python
+		self.__python_stop__()
 
-			# Log status
-			self.log.out('[interpreter] TERMINATED.')
+		# Log status
+		self.log.out('[interpreter] TERMINATED.')
 
-			# Session is down
-			self.up = False
+		# Session is down
+		self.up = False
 
 
 	def __read_output_from_pipe__(self, pipe, func):
