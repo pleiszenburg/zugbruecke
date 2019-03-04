@@ -428,7 +428,7 @@ class session_client_class():
 		started_waiting_at = time.time()
 
 		# Run loop until socket appears
-		while not self.server_up:
+		while target_status != self.server_up:
 
 			# Wait before trying again
 			time.sleep(wait_for_seconds)
@@ -438,14 +438,17 @@ class session_client_class():
 				break
 
 		# Handle timeout
-		if not self.server_up:
+		if target_status != self.server_up:
 
 			# Log status
 			self.log.out('[session-client] ... wait timed out (after %0.2f seconds).' %
 				(time.time() - started_waiting_at)
 				)
 
-			raise TimeoutError('session server did not appear')
+			if target_status:
+				raise TimeoutError('session server did not appear')
+			else:
+				raise TimeoutError('session server could not be stopped')
 
 		# Log status
 		self.log.out('[session-client] ... session server is %s (after %0.2f seconds).' %
