@@ -200,19 +200,20 @@ class session_server_class:
 		"""
 
 		# Run only if session still up
-		if self.up:
+		if not self.up:
+			return
 
-			# Status log
-			self.log.out('[session-server] TERMINATING ...')
+		# Status log
+		self.log.out('[session-server] TERMINATING ...')
 
-			# Terminate log
-			self.log.terminate()
+		# Terminate log
+		self.log.terminate()
 
-			# Session down
-			self.up = False
+		# Session down
+		self.up = False
 
-			# Status log
-			self.log.out('[session-server] TERMINATED.')
+		# Status log
+		self.log.out('[session-server] TERMINATED.')
 
-			# Indicate to session client that server was terminated
-			self.rpc_client.set_server_status(False)
+		# Indicate to session client that server was terminated
+		self.rpc_client.set_server_status(False)
