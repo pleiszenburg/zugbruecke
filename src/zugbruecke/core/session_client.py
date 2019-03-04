@@ -252,34 +252,35 @@ class session_client_class():
 	def terminate(self):
 
 		# Run only if session is still up
-		if self.up:
+		if not self.up:
+			return
 
-			# Log status
-			self.log.out('[session-client] TERMINATING ...')
+		# Log status
+		self.log.out('[session-client] TERMINATING ...')
 
-			# Only if in stage 2:
-			if self.stage == 2:
+		# Only if in stage 2:
+		if self.stage == 2:
 
-				# Wait for server to appear
-				self.__wait_for_server_status_change__(target_status = False)
+			# Wait for server to appear
+			self.__wait_for_server_status_change__(target_status = False)
 
-				# Tell server via message to terminate
-				self.rpc_client.terminate()
+			# Tell server via message to terminate
+			self.rpc_client.terminate()
 
-				# Destruct interpreter session
-				self.interpreter_session.terminate()
+			# Destruct interpreter session
+			self.interpreter_session.terminate()
 
-			# Terminate callback server
-			self.rpc_server.terminate()
+		# Terminate callback server
+		self.rpc_server.terminate()
 
-			# Log status
-			self.log.out('[session-client] TERMINATED.')
+		# Log status
+		self.log.out('[session-client] TERMINATED.')
 
-			# Terminate log
-			self.log.terminate()
+		# Terminate log
+		self.log.terminate()
 
-			# Session down
-			self.up = False
+		# Session down
+		self.up = False
 
 
 	def __init_stage_1__(self, parameter, force_stage_2):
