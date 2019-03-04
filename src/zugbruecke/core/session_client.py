@@ -445,7 +445,7 @@ class session_client_class():
 				(time.time() - started_waiting_at)
 				)
 
-			raise # TODO
+			raise TimeoutError('session server did not appear')
 
 		# Log status
 		self.log.out('[session-client] ... session server is %s (after %0.2f seconds).' %
