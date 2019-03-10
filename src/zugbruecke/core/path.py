@@ -136,7 +136,7 @@ class path_class:
 		"""
 
 		if len(in_path) > MAX_PATH:
-			raise # TODO
+			raise ValueError('path too long')
 
 		in_path_astr_p = ctypes.pointer(self.__str_to_winastr__(in_path))
 		out_path_ustr_p = ctypes.pointer(UNICODE_STRING())
@@ -165,7 +165,7 @@ class path_class:
 		"""
 
 		if len(in_path) > MAX_PATH:
-			raise # TODO
+			raise ValueError('path too long')
 
 		in_path_buffer_p = ctypes.pointer(ctypes.create_unicode_buffer(in_path + '\0'))
 		in_path_ustr_p = ctypes.pointer(UNICODE_STRING())
