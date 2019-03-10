@@ -211,7 +211,7 @@ class interpreter_session_class():
 		# Time-step
 		wait_for_seconds = 0.01
 		# Timeout
-		timeout_after_seconds = 30.0
+		timeout_after_seconds = self.p['timeout_stop']
 
 		# Start waiting at ...
 		started_waiting_at = time.time()
@@ -250,7 +250,7 @@ class interpreter_session_class():
 
 	def __thread_stop__(self):
 
-		timeout_after_seconds = 30.0
+		timeout_after_seconds = self.p['timeout_stop']
 
 		self.log.out('[interpreter] Joining processing thread ...')
 

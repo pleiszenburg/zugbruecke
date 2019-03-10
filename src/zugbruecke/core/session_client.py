@@ -423,6 +423,8 @@ class session_client_class():
 
 		# Debug strings
 		STATUS_DICT = {True: 'up', False: 'down'}
+		# Config keys for timeouts
+		CONFIG_DICT = {True: 'timeout_start', False: 'timeout_stop'}
 
 		# Log status
 		self.log.out('[session-client] Waiting for session-server to be %s ...' % STATUS_DICT[target_status])
@@ -430,7 +432,7 @@ class session_client_class():
 		# Time-step
 		wait_for_seconds = 0.01
 		# Timeout
-		timeout_after_seconds = 30.0
+		timeout_after_seconds = self.p[CONFIG_DICT[target_status]]
 		# Already waited for ...
 		started_waiting_at = time.time()
 

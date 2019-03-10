@@ -91,3 +91,13 @@ Please note that 3.4 and earlier are not supported. In the opposite direction, a
 ^^^^^^^^^^^^^
 
 This parameter defines the root directory of *zugbruecke*. This is where *zugbruecke*'s own *Wine* profile folder is stored (``WINEPREFIX``) and where the :ref:`Wine Python environment <wineenv>` resides. By default, it is set to ``~/.zugbruecke``.
+
+``timeout_start`` (float)
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Defines how many seconds *zugbruecke* waits for the *Windows* *CPython* interpreter to show up. A ``TimeoutError`` is raised if more time elapses. By default, it is set to 30 seconds.
+
+``timeout_stop`` (float)
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+Defines how many seconds *zugbruecke* waits for every individual step of the termination routine of the *Windows* *CPython* interpreter. A ``TimeoutError`` is raised if the interpreter can not be terminated. By default, it is set to 30 seconds.

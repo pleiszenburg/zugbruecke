@@ -78,6 +78,8 @@ class config_class(dict):
 			arch = ARCH, # Define Wine & Wine-Python architecture
 			version = VERSION, # Define Wine-Python version
 			dir = DIR, # Default config directory
+			timeout_start = 30, # Timeout for waiting on Wine-Python start
+			timeout_stop = 30, # Timeout for waiting on Wine-Python stop
 			wineprefix = os.path.join(DIR, ARCH + '-wine'),
 			pythonprefix = os.path.join(DIR, '%s-python%s' % (ARCH, VERSION)),
 			)
