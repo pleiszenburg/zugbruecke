@@ -252,34 +252,42 @@ class session_client_class():
 	def terminate(self):
 
 		# Run only if session is still up
-		if self.up:
+		if not self.up:
+			return
 
-			# Log status
-			self.log.out('[session-client] TERMINATING ...')
+		# Log status
+		self.log.out('[session-client] TERMINATING ...')
 
-			# Only if in stage 2:
-			if self.stage == 2:
+		# Only if in stage 2:
+		if self.stage == 2:
 
-				# Wait for server to appear
-				self.__wait_for_server_status_change__(target_status = False)
+			try:
 
 				# Tell server via message to terminate
 				self.rpc_client.terminate()
 
-				# Destruct interpreter session
-				self.interpreter_session.terminate()
+			except EOFError:
 
-			# Terminate callback server
-			self.rpc_server.terminate()
+				# EOFError is raised if server socket is closed - ignore it
+				self.log.out('[session-client] Remote socket closed.')
 
-			# Log status
-			self.log.out('[session-client] TERMINATED.')
+			# Wait for server to appear
+			self.__wait_for_server_status_change__(target_status = False)
 
-			# Terminate log
-			self.log.terminate()
+			# Destruct interpreter session
+			self.interpreter_session.terminate()
 
-			# Session down
-			self.up = False
+		# Terminate callback server
+		self.rpc_server.terminate()
+
+		# Log status
+		self.log.out('[session-client] TERMINATED.')
+
+		# Terminate log
+		self.log.terminate()
+
+		# Session down
+		self.up = False
 
 
 	def __init_stage_1__(self, parameter, force_stage_2):
@@ -415,6 +423,8 @@ class session_client_class():
 
 		# Debug strings
 		STATUS_DICT = {True: 'up', False: 'down'}
+		# Config keys for timeouts
+		CONFIG_DICT = {True: 'timeout_start', False: 'timeout_stop'}
 
 		# Log status
 		self.log.out('[session-client] Waiting for session-server to be %s ...' % STATUS_DICT[target_status])
@@ -422,12 +432,12 @@ class session_client_class():
 		# Time-step
 		wait_for_seconds = 0.01
 		# Timeout
-		timeout_after_seconds = 30.0
+		timeout_after_seconds = self.p[CONFIG_DICT[target_status]]
 		# Already waited for ...
 		started_waiting_at = time.time()
 
 		# Run loop until socket appears
-		while not self.server_up:
+		while target_status != self.server_up:
 
 			# Wait before trying again
 			time.sleep(wait_for_seconds)
@@ -437,14 +447,17 @@ class session_client_class():
 				break
 
 		# Handle timeout
-		if not self.server_up:
+		if target_status != self.server_up:
 
 			# Log status
 			self.log.out('[session-client] ... wait timed out (after %0.2f seconds).' %
 				(time.time() - started_waiting_at)
 				)
 
-			raise # TODO
+			if target_status:
+				raise TimeoutError('session server did not appear')
+			else:
+				raise TimeoutError('session server could not be stopped')
 
 		# Log status
 		self.log.out('[session-client] ... session server is %s (after %0.2f seconds).' %
