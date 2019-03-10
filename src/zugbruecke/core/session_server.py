@@ -171,12 +171,12 @@ class session_server_class:
 			# Reraise error
 			raise e
 
-		except:
+		except Exception as e:
 
 			# Push traceback to log
 			self.log.err(traceback.format_exc())
 
-			raise # TODO
+			raise e
 
 		# Load library
 		self.dll_dict[dll_name] = dll_server_class(
