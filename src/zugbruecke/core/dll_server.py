@@ -117,12 +117,12 @@ class dll_server_class(): # Representing one idividual dll to be called into
 
 			raise e
 
-		except:
+		except Exception as e:
 
 			# Push traceback to log
 			self.log.err(traceback.format_exc())
 
-			raise # TODO
+			raise e
 
 		# Generate new instance of routine class
 		self.routines[routine_name] = routine_server_class(self, routine_name, routine_handler)
