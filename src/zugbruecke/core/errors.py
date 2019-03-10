@@ -33,3 +33,6 @@ specific language governing rights and limitations under the License.
 
 class config_parser_error(Exception):
 	pass
+
+class wine_error(Exception):
+	pass
