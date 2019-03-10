@@ -174,7 +174,7 @@ class session_client_class():
 		if dll_type not in ['cdll', 'windll', 'oledll']:
 
 			# Raise error if unknown
-			raise # TODO
+			raise ValueError('unknown dll type')
 
 		# Fix parameters dict with defauls values
 		if 'mode' not in dll_param.keys():
