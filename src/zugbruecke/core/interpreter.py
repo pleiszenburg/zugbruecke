@@ -132,7 +132,7 @@ class interpreter_session_class():
 		self.log.out('[interpreter] Starting log processing thread ...')
 
 		while self.__is_alive__():
-			time.sleep(0.2)
+			time.sleep(0.1)
 			while not self.stdout_queue.empty():
 				interpreter_session_class.__read_stream__(
 					self.stdout_queue,
@@ -143,10 +143,17 @@ class interpreter_session_class():
 					self.stderr_queue,
 					lambda line: self.log.err('[P] ' + line)
 					)
+
+		# Log status
+		self.log.out('[interpreter] Joining worker threads and queues ...')
+
 		self.stdout_queue.join()
 		self.stderr_queue.join()
 		self.stdout_thread.join()
 		self.stderr_thread.join()
+
+		# Log status
+		self.log.out('[interpreter] ... worker threads and queues joined.')
 
 
 	def __is_alive__(self):
@@ -167,7 +174,6 @@ class interpreter_session_class():
 			shell = False,
 			start_new_session = True,
 			close_fds = True,
-			bufsize = 1
 			)
 
 		# Status log
