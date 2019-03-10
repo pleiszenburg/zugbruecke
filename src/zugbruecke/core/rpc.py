@@ -198,9 +198,6 @@ class mp_server_class():
 		# Stop the server by killing the loop
 		self.up = False
 
-		# Shut down socket TODO
-		# self.server.close()
-
 		# Call terminate function if it exists
 		if self.terminate_function is not None:
 			self.terminate_function()
@@ -208,6 +205,9 @@ class mp_server_class():
 		# Status log
 		if self.log is not None:
 			self.log.out('[mp-server] TERMINATED.')
+
+		# Shut down socket. Must be last action, because this function is called through it!
+		self.server.close()
 
 
 	def serve_forever(self):
@@ -228,7 +228,13 @@ class mp_server_class():
 				t.daemon = True
 				t.start()
 
-			except Exception:
+			except OSError:
+
+				# Status log
+				if self.log is not None:
+					self.log.out('[mp-server] OSError: Socket likely closed.')
+
+			except:
 
 				# TODO just print traceback. Better solution?
 				traceback.print_exc()

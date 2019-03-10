@@ -261,8 +261,15 @@ class session_client_class():
 		# Only if in stage 2:
 		if self.stage == 2:
 
-			# Tell server via message to terminate
-			self.rpc_client.terminate()
+			try:
+
+				# Tell server via message to terminate
+				self.rpc_client.terminate()
+
+			except EOFError:
+
+				# EOFError is raised if server socket is closed - ignore it
+				self.log.out('[session-client] Remote socket closed.')
 
 			# Wait for server to appear
 			self.__wait_for_server_status_change__(target_status = False)

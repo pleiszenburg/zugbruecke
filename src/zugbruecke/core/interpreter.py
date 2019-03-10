@@ -79,6 +79,9 @@ class interpreter_session_class():
 		# Shut down wine python
 		self.__python_stop__()
 
+		# Shut down processing thread
+		self.__thread_stop__()
+
 		# Log status
 		self.log.out('[interpreter] TERMINATED.')
 
@@ -128,8 +131,7 @@ class interpreter_session_class():
 		# Log status
 		self.log.out('[interpreter] Starting log processing thread ...')
 
-		proc_alive = True
-		while proc_alive:
+		while self.__is_alive__():
 			time.sleep(0.2)
 			while not self.stdout_queue.empty():
 				interpreter_session_class.__read_stream__(
@@ -141,18 +143,15 @@ class interpreter_session_class():
 					self.stderr_queue,
 					lambda line: self.log.err('[P] ' + line)
 					)
-			proc_alive = self.proc_winepython.poll() is None
 		self.stdout_queue.join()
 		self.stderr_queue.join()
 		self.stdout_thread.join()
 		self.stderr_thread.join()
 
 
-	# def __read_output_from_pipe__(self, pipe, func):
-	#
-	# 	for line in iter(pipe.readline, b''):
-	# 		func('[P] ' + line.decode('utf-8'))
-	# 	pipe.close()
+	def __is_alive__(self):
+
+		return self.proc_winepython.poll() is None
 
 
 	def __python_start__(self):
@@ -201,17 +200,59 @@ class interpreter_session_class():
 
 	def __python_stop__(self):
 
-		self.log.out('[interpreter] Sending SIGINT to process ...')
+		self.log.out('[interpreter] Ensure process has terminated, waiting ...')
 
-		# Interupt Wine-Python TODO
-		# os.killpg(os.getpgid(self.proc_winepython.pid), signal.SIGINT)
+		# Time-step
+		wait_for_seconds = 0.01
+		# Timeout
+		timeout_after_seconds = 30.0
 
-		# if self.proc_winepython.poll() is None:
-		# 	self.log.out('[interpreter] Sending SIGTERM to process ...')
-		# 	os.killpg(os.getpgid(self.proc_winepython.pid), signal.SIGTERM)
+		# Start waiting at ...
+		started_waiting_at = time.time()
+		# Wait for process
+		while self.__is_alive__() and started_waiting_at + timeout_after_seconds > time.time():
+			time.sleep(wait_for_seconds)
+		# Is process still alive?
+		if self.__is_alive__():
+			self.log.out('[interpreter] ... did not terminate after %d seconds, sending SIGINT ...' % timeout_after_seconds)
+			os.killpg(os.getpgid(self.proc_winepython.pid), signal.SIGINT)
+		else:
+			self.log.out('[interpreter] ... terminated on its own after %.02f seconds.' % (time.time() - started_waiting_at))
+			return
+
+		# Start waiting at ...
+		started_waiting_at = time.time()
+		# Wait for process
+		while self.__is_alive__() and started_waiting_at + timeout_after_seconds > time.time():
+			time.sleep(wait_for_seconds)
+		# Is process still alive?
+		if self.__is_alive__():
+			self.log.out('[interpreter] ... did not terminate after %d seconds, sending SIGTERM ...' % timeout_after_seconds)
+			os.killpg(os.getpgid(self.proc_winepython.pid), signal.SIGTERM)
+		else:
+			self.log.out('[interpreter] ... terminated with SIGINT after %.02f seconds.' % (time.time() - started_waiting_at))
+			return
+
+		# Is process still alive?
+		if self.__is_alive__():
+			self.log.out('[interpreter] ... failed to terminate with SIGTERM!')
+			raise TimeoutError('interpreter process could not be terminated')
+		else:
+			self.log.out('[interpreter] ... terminated with SIGTERM.')
+			return
+
+
+	def __thread_stop__(self):
+
+		timeout_after_seconds = 30.0
 
 		self.log.out('[interpreter] Joining processing thread ...')
-		self.processing_thread.join(timeout = 30) # seconds
+
+		# Joining thread ...
+		self.processing_thread.join(timeout = timeout_after_seconds)
+		if self.processing_thread.is_alive():
+			self.log.out('[interpreter] ... failed to join thread!')
+			raise TimeoutError('processing thread could not be terminated')
 
 		# Log status
-		self.log.out('[interpreter] Logging threads joined or timed out.')
+		self.log.out('[interpreter] ... joined.')
