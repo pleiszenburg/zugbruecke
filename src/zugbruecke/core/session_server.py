@@ -60,8 +60,9 @@ class session_server_class:
 
 		# Connect to Unix side
 		self.rpc_client = mp_client_safe_connect(
-			('localhost', self.p['port_socket_unix']),
-			'zugbruecke_unix'
+			socket_path = ('localhost', self.p['port_socket_unix']),
+			authkey = 'zugbruecke_unix',
+			timeout_after_seconds = self.p['timeout_start']
 			)
 
 		# Start logging session and connect it with log on unix side
