@@ -188,22 +188,26 @@ class mp_server_class():
 	def terminate(self):
 
 		# Terminate only once
-		if self.up:
+		if not self.up:
+			return
 
-			# Status log
-			if self.log is not None:
-				self.log.out('[mp-server] TERMINATING ...')
+		# Status log
+		if self.log is not None:
+			self.log.out('[mp-server] TERMINATING ...')
 
-			# Stop the server by killing the loop
-			self.up = False
+		# Stop the server by killing the loop
+		self.up = False
 
-			# Call terminate function if it exists
-			if self.terminate_function is not None:
-				self.terminate_function()
+		# Shut down socket TODO
+		# self.server.close()
 
-			# Status log
-			if self.log is not None:
-				self.log.out('[mp-server] TERMINATED.')
+		# Call terminate function if it exists
+		if self.terminate_function is not None:
+			self.terminate_function()
+
+		# Status log
+		if self.log is not None:
+			self.log.out('[mp-server] TERMINATED.')
 
 
 	def serve_forever(self):

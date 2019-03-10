@@ -261,11 +261,11 @@ class session_client_class():
 		# Only if in stage 2:
 		if self.stage == 2:
 
-			# Wait for server to appear
-			self.__wait_for_server_status_change__(target_status = False)
-
 			# Tell server via message to terminate
 			self.rpc_client.terminate()
+
+			# Wait for server to appear
+			self.__wait_for_server_status_change__(target_status = False)
 
 			# Destruct interpreter session
 			self.interpreter_session.terminate()

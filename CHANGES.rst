@@ -28,8 +28,9 @@ Furthermore, the shell scripts ``wine-python``, ``wine-pip`` and ``wine-pytest``
 
 * FEATURE: ``wineprefix`` becomes a configuration parameter definable by users allowing custom wine prefixes, see issue #44.
 * FEATURE: Introduced new error types specific to this package.
+* FIX: *zugbruecke* did not capture and forward data coming from Windows DLLs and binaries through ``stdout`` and ``stderr``(running with Wine) most of the time.
 * FIX: ``wine-pip`` previously would, on every launch, download ``get-pip.py`` and try to install it first before running - even if ``pip`` was already installed. ``wenv pip`` does not show this behavior anymore.
-* FIX: A proper TimeoutError is raised (instead of a SyntaxError) if *zugbruecke*'s server component does not start.
+* FIX: A proper ``TimeoutError`` is raised (instead of a ``SyntaxError``) if *zugbruecke*'s server component does not start.
 * FIX: *zugbruecke* did not actually check properly if its server component had terminated if a session was terminated.
 * The configuration module was refactored and made clearer and faster, allowing to implement new options.
 
