@@ -360,12 +360,12 @@ class arguments_contents_class():
 			return None
 		# Handle everything else ...
 		else:
-			raise # TODO
+			raise data_group_error('unexpected datatype group')
 
 		# Step through flags in reverse order (if it's not a memsync field)
 		for flag in reversed(arg_def_dict['f']):
 			if flag != FLAG_POINTER:
-				raise # TODO
+				raise data_flag_error('unknown non-pointer flag for scalar')
 			arg_rebuilt = ctypes.pointer(arg_rebuilt)
 
 		return arg_rebuilt
