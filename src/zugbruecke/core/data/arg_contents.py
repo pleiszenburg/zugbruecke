@@ -66,7 +66,7 @@ class arguments_contents_class():
 
 		# Number of arguments is just wrong
 		else:
-			raise TypeError
+			raise TypeError # Must be TypeError for ctypes compatibility
 
 
 	def arg_list_unpack(self, args_package_list, argtypes_list):
@@ -81,7 +81,7 @@ class arguments_contents_class():
 
 		# Number of arguments is just wrong
 		else:
-			raise TypeError
+			raise TypeError # Highly unlikely case, arg_list_pack will fail instead
 
 
 	def return_msg_pack(self, return_value, returntype_dict):
