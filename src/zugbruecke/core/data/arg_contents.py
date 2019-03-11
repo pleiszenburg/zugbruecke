@@ -206,7 +206,7 @@ class arguments_contents_class():
 			# Handle unknown flags
 			else:
 
-				raise # TODO
+				raise data_flag_error('unknown non-pointer flag for array')
 
 		return arg_in
 
