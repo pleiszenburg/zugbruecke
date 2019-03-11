@@ -43,6 +43,7 @@ from ..const import (
 	GROUP_STRUCT,
 	GROUP_FUNCTION
 	)
+from ..errors import data_type_error
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -195,7 +196,7 @@ class arguments_definition_class():
 			# This is not supposed to happen ...
 			else:
 
-				raise
+				raise data_type_error('unknown ctypes wrapper type')
 
 			# Get next type in sequence
 			datatype = datatype._type_
