@@ -141,39 +141,36 @@ class arguments_contents_class():
 
 	def __pack_item__(self, arg_in, arg_def_dict):
 
-		# Grep the simple case first, scalars
-		if arg_def_dict['s']:
+		# The non-trivial case first, non-scalars: arrays
+		if not arg_def_dict['s']:
+			# Unpack every item in array
+			return self.__pack_item_array__(arg_in, arg_def_dict)
 
-			# Strip away the pointers ... (all flags are pointers in this case)
-			for flag in arg_def_dict['f']:
-				if flag != FLAG_POINTER:
-					raise # TODO
-				if is_null_pointer(arg_in):
-					# Just return None - will (hopefully) be overwritten by memsync
-					return None
-				arg_in = self.__item_pointer_strip__(arg_in)
-
-			# Handle fundamental types
-			if arg_def_dict['g'] == GROUP_FUNDAMENTAL:
-				# Append argument to list ...
-				return self.__item_value_strip__(arg_in)
-			# Handle structs
-			elif arg_def_dict['g'] == GROUP_STRUCT:
-				# Reclusively call this routine for packing structs
-				return self.__pack_item_struct__(arg_in, arg_def_dict)
-			# Handle functions
-			elif arg_def_dict['g'] == GROUP_FUNCTION:
-				# Packs functions and registers them at RPC server
-				return self.__pack_item_function__(arg_in, arg_def_dict)
-			# Handle everything else ... likely pointers handled by memsync
-			else:
+		# Strip away the pointers ... (all flags are pointers in this case)
+		for flag in arg_def_dict['f']:
+			if flag != FLAG_POINTER:
+				raise # TODO
+			if is_null_pointer(arg_in):
 				# Just return None - will (hopefully) be overwritten by memsync
 				return None
+			arg_in = self.__item_pointer_strip__(arg_in)
 
-		# The non-trivial case, involving arrays
+		# Handle fundamental types
+		if arg_def_dict['g'] == GROUP_FUNDAMENTAL:
+			# Append argument to list ...
+			return self.__item_value_strip__(arg_in)
+		# Handle structs
+		elif arg_def_dict['g'] == GROUP_STRUCT:
+			# Reclusively call this routine for packing structs
+			return self.__pack_item_struct__(arg_in, arg_def_dict)
+		# Handle functions
+		elif arg_def_dict['g'] == GROUP_FUNCTION:
+			# Packs functions and registers them at RPC server
+			return self.__pack_item_function__(arg_in, arg_def_dict)
+		# Handle everything else ... likely pointers handled by memsync
 		else:
-
-			return self.__pack_item_array__(arg_in, arg_def_dict)
+			# Just return None - will (hopefully) be overwritten by memsync
+			return None
 
 
 	def __pack_item_array__(self, arg_in, arg_def_dict, flag_index_start = 0):
