@@ -44,6 +44,7 @@ from ..const import (
 	)
 from ..callback_client import callback_translator_client_class
 from ..callback_server import callback_translator_server_class
+from ..errors import data_flag_error
 from .memory import is_null_pointer
 
 
@@ -149,7 +150,7 @@ class arguments_contents_class():
 		# Strip away the pointers ... (all flags are pointers in this case)
 		for flag in arg_def_dict['f']:
 			if flag != FLAG_POINTER:
-				raise # TODO
+				raise data_flag_error('unknown non-pointer flag for scalar')
 			if is_null_pointer(arg_in):
 				# Just return None - will (hopefully) be overwritten by memsync
 				return None

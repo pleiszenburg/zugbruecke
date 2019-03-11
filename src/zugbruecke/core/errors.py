@@ -36,3 +36,9 @@ class config_parser_error(Exception):
 
 class wine_error(Exception):
 	pass
+
+class data_error(Exception):
+	pass
+
+class data_flag_error(data_error):
+	pass
