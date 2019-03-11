@@ -337,7 +337,7 @@ class arguments_definition_class():
 
 		# TODO BUG only works on Wine Python, must not be called on Unix side
 		if not self.is_server:
-			raise SystemError('function must not be called on Unix/client side')
+			raise SystemError('method must not be called on Unix/client side')
 
 		# Generate function pointer type (used as parameter type and as decorator for Python function)
 		factory_type = self.generate_callback_decorator(
