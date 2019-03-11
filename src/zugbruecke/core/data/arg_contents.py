@@ -44,7 +44,7 @@ from ..const import (
 	)
 from ..callback_client import callback_translator_client_class
 from ..callback_server import callback_translator_server_class
-from ..errors import data_flag_error
+from ..errors import data_flag_error, data_group_error
 from .memory import is_null_pointer
 
 
@@ -262,7 +262,7 @@ class arguments_contents_class():
 			# Strip away the pointers ... (all flags are pointers in this case)
 			for flag in arg_def_dict['f']:
 				if flag != FLAG_POINTER:
-					raise # TODO
+					raise data_flag_error('unknown non-pointer flag for scalar')
 				old_arg = self.__item_pointer_strip__(old_arg)
 				new_arg = self.__item_pointer_strip__(new_arg)
 
@@ -273,8 +273,10 @@ class arguments_contents_class():
 					pass # only relevant within structs or for actual pointers to scalars
 			elif arg_def_dict['g'] == GROUP_STRUCT:
 				return self.__sync_item_struct__(old_arg, new_arg, arg_def_dict)
+			elif arg_def_dict['g'] == GROUP_FUNCTION:
+				pass # Nothing to do?
 			else:
-				pass # DO NOTHING?
+				raise data_group_error('unexpected datatype group')
 
 		# The non-trivial case, arrays
 		elif not arg_def_dict['s']:
@@ -314,13 +316,15 @@ class arguments_contents_class():
 					elif arg_def_dict['g'] == GROUP_STRUCT:
 						for old_struct, new_struct in zip(old_arg[:], new_arg[:]):
 							self.__sync_item_struct__(old_struct, new_struct, arg_def_dict)
+					elif arg_def_dict['g'] == GROUP_FUNCTION:
+						pass # Nothing to do?
 					else:
-						raise # TODO
+						raise data_group_error('unexpected datatype group')
 
 			# Handle unknown flags
 			else:
 
-				raise # TODO
+				raise data_flag_error('unknown non-pointer flag for array')
 
 
 	def __sync_item_struct__(self, old_struct, new_struct, struct_def_dict):

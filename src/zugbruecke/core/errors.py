@@ -42,3 +42,6 @@ class data_error(Exception):
 
 class data_flag_error(data_error):
 	pass
+
+class data_group_error(data_error):
+	pass
