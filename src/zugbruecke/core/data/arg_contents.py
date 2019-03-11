@@ -316,7 +316,7 @@ class arguments_contents_class():
 						for old_struct, new_struct in zip(old_arg[:], new_arg[:]):
 							self.__sync_item_struct__(old_struct, new_struct, arg_def_dict)
 					elif arg_def_dict['g'] == GROUP_FUNCTION:
-						pass # Nothing to do?
+						raise NotImplementedError('functions in arrays are not supported')
 					else:
 						raise data_group_error('unexpected datatype group')
 
@@ -408,13 +408,13 @@ class arguments_contents_class():
 				arg_in = arg_type(*arg_in)
 			# Handle unknown flags
 			else:
-				raise # TODO
+				raise data_flag_error('unknown non-pointer flag for array')
 
 		# No dive, we're at the bottom - just get the original ctypes type
 		else:
 
 			if flag == FLAG_POINTER:
-				raise # TODO
+				raise data_flag_error('unexpected pointer flag for array')
 
 			if arg_def_dict['g'] == GROUP_FUNDAMENTAL:
 				arg_type = getattr(ctypes, arg_def_dict['t']) * flag
@@ -422,8 +422,10 @@ class arguments_contents_class():
 			elif arg_def_dict['g'] == GROUP_STRUCT:
 				arg_type = self.cache_dict['struct_type'][arg_def_dict['t']] * flag
 				arg_in = arg_type(*(self.__unpack_item_struct__(e, arg_def_dict) for e in arg_in))
+			elif arg_def_dict['g'] == GROUP_FUNCTION:
+				raise NotImplementedError('functions in arrays are not supported')
 			else:
-				raise # TODO
+				raise data_group_error('unexpected datatype group')
 
 		return arg_type, arg_in
 
