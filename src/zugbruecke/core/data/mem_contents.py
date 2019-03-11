@@ -36,6 +36,7 @@ from pprint import pformat as pf
 #import traceback
 
 from ..const import GROUP_VOID
+from ..errors import data_memsyncpath_error
 from .memory import (
 	generate_pointer_from_bytes,
 	is_null_pointer,
@@ -167,7 +168,7 @@ class memory_contents_class():
 			elif isinstance(path_element, str) and element_index == 0:
 
 				if path_element != 'r':
-					raise ValueError()
+					raise data_memsyncpath_error('field with name (type string) is not return value ("r")')
 
 				element = return_value
 
@@ -196,7 +197,7 @@ class memory_contents_class():
 		elif memsync_path[0] == 'r':
 			arg_type = restype_d
 		else:
-			raise # TODO
+			raise data_memsyncpath_error('field is neither return value ("r") nor parameter (type int)')
 
 		# Step through path to argument type ...
 		for path_element in memsync_path[1:]:

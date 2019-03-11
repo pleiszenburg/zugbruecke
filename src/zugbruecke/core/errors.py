@@ -48,3 +48,6 @@ class data_type_error(data_error):
 
 class data_group_error(data_error):
 	pass
+
+class data_memsyncpath_error(data_error):
+	pass
