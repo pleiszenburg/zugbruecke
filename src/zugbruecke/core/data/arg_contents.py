@@ -340,38 +340,35 @@ class arguments_contents_class():
 
 	def __unpack_item__(self, arg_raw, arg_def_dict):
 
-		# Again the simple case first, scalars of any kind
-		if arg_def_dict['s']:
-
-			# Handle fundamental types
-			if arg_def_dict['g'] == GROUP_FUNDAMENTAL:
-				arg_rebuilt = getattr(ctypes, arg_def_dict['t'])(arg_raw)
-			# Handle structs
-			elif arg_def_dict['g'] == GROUP_STRUCT:
-				arg_rebuilt = self.__unpack_item_struct__(arg_raw, arg_def_dict)
-			# Handle functions
-			elif arg_def_dict['g'] == GROUP_FUNCTION:
-				arg_rebuilt = self.__unpack_item_function__(arg_raw, arg_def_dict)
-			# Handle voids (likely mensync stuff)
-			elif arg_def_dict['g'] == GROUP_VOID:
-				# Return a placeholder
-				return None
-			# Handle everything else ...
-			else:
-				raise # TODO
-
-			# Step through flags in reverse order (if it's not a memsync field)
-			for flag in reversed(arg_def_dict['f']):
-				if flag != FLAG_POINTER:
-					raise # TODO
-				arg_rebuilt = ctypes.pointer(arg_rebuilt)
-
-			return arg_rebuilt
-
-		# And now arrays ...
-		else:
-
+		# The non-trivial case first, arrays
+		if not arg_def_dict['s']:
+			# Unpack items in array
 			return self.__unpack_item_array__(arg_raw, arg_def_dict)[1]
+
+		# Handle fundamental types
+		if arg_def_dict['g'] == GROUP_FUNDAMENTAL:
+			arg_rebuilt = getattr(ctypes, arg_def_dict['t'])(arg_raw)
+		# Handle structs
+		elif arg_def_dict['g'] == GROUP_STRUCT:
+			arg_rebuilt = self.__unpack_item_struct__(arg_raw, arg_def_dict)
+		# Handle functions
+		elif arg_def_dict['g'] == GROUP_FUNCTION:
+			arg_rebuilt = self.__unpack_item_function__(arg_raw, arg_def_dict)
+		# Handle voids (likely mensync stuff)
+		elif arg_def_dict['g'] == GROUP_VOID:
+			# Return a placeholder
+			return None
+		# Handle everything else ...
+		else:
+			raise # TODO
+
+		# Step through flags in reverse order (if it's not a memsync field)
+		for flag in reversed(arg_def_dict['f']):
+			if flag != FLAG_POINTER:
+				raise # TODO
+			arg_rebuilt = ctypes.pointer(arg_rebuilt)
+
+		return arg_rebuilt
 
 
 	def __unpack_item_array__(self, arg_in, arg_def_dict, flag_index = 0):
