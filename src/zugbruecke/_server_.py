@@ -60,6 +60,9 @@ def run():
 	parser.add_argument(
 		'--log_write', type = int, nargs = 1
 		)
+	parser.add_argument(
+		'--timeout_start', type = float, nargs = 1
+		)
 	args = parser.parse_args()
 
 	# Generate parameter dict
@@ -71,7 +74,8 @@ def run():
 		'log_write': bool(args.log_write[0]),
 		'log_level': args.log_level[0],
 		'port_socket_wine': args.port_socket_wine[0],
-		'port_socket_unix': args.port_socket_unix[0]
+		'port_socket_unix': args.port_socket_unix[0],
+		'timeout_start': args.timeout_start[0]
 		}
 
 	# Fire up wine server session with parsed parameters

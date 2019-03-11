@@ -174,7 +174,7 @@ class session_client_class():
 		if dll_type not in ['cdll', 'windll', 'oledll']:
 
 			# Raise error if unknown
-			raise # TODO
+			raise ValueError('unknown dll type')
 
 		# Fix parameters dict with defauls values
 		if 'mode' not in dll_param.keys():
@@ -374,8 +374,9 @@ class session_client_class():
 
 		# Fire up xmlrpc client
 		self.rpc_client = mp_client_safe_connect(
-			('localhost', self.p['port_socket_wine']),
-			'zugbruecke_wine'
+			socket_path = ('localhost', self.p['port_socket_wine']),
+			authkey = 'zugbruecke_wine',
+			timeout_after_seconds = self.p['timeout_start']
 			)
 
 
@@ -409,7 +410,8 @@ class session_client_class():
 			'--port_socket_wine', str(self.p['port_socket_wine']),
 			'--port_socket_unix', str(self.p['port_socket_unix']),
 			'--log_level', str(self.p['log_level']),
-			'--log_write', str(int(self.p['log_write']))
+			'--log_write', str(int(self.p['log_write'])),
+			'--timeout_start', str(int(self.p['timeout_start']))
 			]
 
 

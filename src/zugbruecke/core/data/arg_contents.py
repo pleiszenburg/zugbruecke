@@ -44,6 +44,7 @@ from ..const import (
 	)
 from ..callback_client import callback_translator_client_class
 from ..callback_server import callback_translator_server_class
+from ..errors import data_flag_error, data_group_error
 from .memory import is_null_pointer
 
 
@@ -66,7 +67,7 @@ class arguments_contents_class():
 
 		# Number of arguments is just wrong
 		else:
-			raise TypeError
+			raise TypeError # Must be TypeError for ctypes compatibility
 
 
 	def arg_list_unpack(self, args_package_list, argtypes_list):
@@ -81,7 +82,7 @@ class arguments_contents_class():
 
 		# Number of arguments is just wrong
 		else:
-			raise TypeError
+			raise TypeError # Highly unlikely case, arg_list_pack will fail instead
 
 
 	def return_msg_pack(self, return_value, returntype_dict):
@@ -141,39 +142,36 @@ class arguments_contents_class():
 
 	def __pack_item__(self, arg_in, arg_def_dict):
 
-		# Grep the simple case first, scalars
-		if arg_def_dict['s']:
+		# The non-trivial case first, non-scalars: arrays
+		if not arg_def_dict['s']:
+			# Unpack every item in array
+			return self.__pack_item_array__(arg_in, arg_def_dict)
 
-			# Strip away the pointers ... (all flags are pointers in this case)
-			for flag in arg_def_dict['f']:
-				if flag != FLAG_POINTER:
-					raise # TODO
-				if is_null_pointer(arg_in):
-					# Just return None - will (hopefully) be overwritten by memsync
-					return None
-				arg_in = self.__item_pointer_strip__(arg_in)
-
-			# Handle fundamental types
-			if arg_def_dict['g'] == GROUP_FUNDAMENTAL:
-				# Append argument to list ...
-				return self.__item_value_strip__(arg_in)
-			# Handle structs
-			elif arg_def_dict['g'] == GROUP_STRUCT:
-				# Reclusively call this routine for packing structs
-				return self.__pack_item_struct__(arg_in, arg_def_dict)
-			# Handle functions
-			elif arg_def_dict['g'] == GROUP_FUNCTION:
-				# Packs functions and registers them at RPC server
-				return self.__pack_item_function__(arg_in, arg_def_dict)
-			# Handle everything else ... likely pointers handled by memsync
-			else:
+		# Strip away the pointers ... (all flags are pointers in this case)
+		for flag in arg_def_dict['f']:
+			if flag != FLAG_POINTER:
+				raise data_flag_error('unknown non-pointer flag for scalar')
+			if is_null_pointer(arg_in):
 				# Just return None - will (hopefully) be overwritten by memsync
 				return None
+			arg_in = self.__item_pointer_strip__(arg_in)
 
-		# The non-trivial case, involving arrays
+		# Handle fundamental types
+		if arg_def_dict['g'] == GROUP_FUNDAMENTAL:
+			# Append argument to list ...
+			return self.__item_value_strip__(arg_in)
+		# Handle structs
+		elif arg_def_dict['g'] == GROUP_STRUCT:
+			# Reclusively call this routine for packing structs
+			return self.__pack_item_struct__(arg_in, arg_def_dict)
+		# Handle functions
+		elif arg_def_dict['g'] == GROUP_FUNCTION:
+			# Packs functions and registers them at RPC server
+			return self.__pack_item_function__(arg_in, arg_def_dict)
+		# Handle everything else ... likely pointers handled by memsync
 		else:
-
-			return self.__pack_item_array__(arg_in, arg_def_dict)
+			# Just return None - will (hopefully) be overwritten by memsync
+			return None
 
 
 	def __pack_item_array__(self, arg_in, arg_def_dict, flag_index_start = 0):
@@ -208,7 +206,7 @@ class arguments_contents_class():
 			# Handle unknown flags
 			else:
 
-				raise # TODO
+				raise data_flag_error('unknown non-pointer flag for array')
 
 		return arg_in
 
@@ -254,34 +252,35 @@ class arguments_contents_class():
 
 	def __sync_item__(self, old_arg, new_arg, arg_def_dict):
 
-		# Grep the simple case first, scalars
-		if arg_def_dict['s']:
-
-			# Do not do this for void pointers, likely handled by memsync
-			if arg_def_dict['g'] == GROUP_VOID:
-				return
-
-			# Strip away the pointers ... (all flags are pointers in this case)
-			for flag in arg_def_dict['f']:
-				if flag != FLAG_POINTER:
-					raise # TODO
-				old_arg = self.__item_pointer_strip__(old_arg)
-				new_arg = self.__item_pointer_strip__(new_arg)
-
-			if arg_def_dict['g'] == GROUP_FUNDAMENTAL:
-				if hasattr(old_arg, 'value'):
-					old_arg.value = new_arg.value
-				else:
-					pass # only relevant within structs or for actual pointers to scalars
-			elif arg_def_dict['g'] == GROUP_STRUCT:
-				return self.__sync_item_struct__(old_arg, new_arg, arg_def_dict)
-			else:
-				pass # DO NOTHING?
-
-		# The non-trivial case, arrays
-		elif not arg_def_dict['s']:
-
+		# The non-trivial case first, arrays
+		if not arg_def_dict['s']:
+			# Sync items in array
 			self.__sync_item_array__(old_arg, new_arg, arg_def_dict)
+			# Leave
+			return
+
+		# Do not do this for void pointers, likely handled by memsync
+		if arg_def_dict['g'] == GROUP_VOID:
+			return
+
+		# Strip away the pointers ... (all flags are pointers in this case)
+		for flag in arg_def_dict['f']:
+			if flag != FLAG_POINTER:
+				raise data_flag_error('unknown non-pointer flag for scalar')
+			old_arg = self.__item_pointer_strip__(old_arg)
+			new_arg = self.__item_pointer_strip__(new_arg)
+
+		if arg_def_dict['g'] == GROUP_FUNDAMENTAL:
+			if hasattr(old_arg, 'value'):
+				old_arg.value = new_arg.value
+			else:
+				pass # only relevant within structs or for actual pointers to scalars
+		elif arg_def_dict['g'] == GROUP_STRUCT:
+			return self.__sync_item_struct__(old_arg, new_arg, arg_def_dict)
+		elif arg_def_dict['g'] == GROUP_FUNCTION:
+			pass # Nothing to do?
+		else:
+			raise data_group_error('unexpected datatype group')
 
 
 	def __sync_item_array__(self, old_arg, new_arg, arg_def_dict, flag_index_start = 0):
@@ -316,13 +315,15 @@ class arguments_contents_class():
 					elif arg_def_dict['g'] == GROUP_STRUCT:
 						for old_struct, new_struct in zip(old_arg[:], new_arg[:]):
 							self.__sync_item_struct__(old_struct, new_struct, arg_def_dict)
+					elif arg_def_dict['g'] == GROUP_FUNCTION:
+						raise NotImplementedError('functions in arrays are not supported')
 					else:
-						raise # TODO
+						raise data_group_error('unexpected datatype group')
 
 			# Handle unknown flags
 			else:
 
-				raise # TODO
+				raise data_flag_error('unknown non-pointer flag for array')
 
 
 	def __sync_item_struct__(self, old_struct, new_struct, struct_def_dict):
@@ -339,38 +340,35 @@ class arguments_contents_class():
 
 	def __unpack_item__(self, arg_raw, arg_def_dict):
 
-		# Again the simple case first, scalars of any kind
-		if arg_def_dict['s']:
-
-			# Handle fundamental types
-			if arg_def_dict['g'] == GROUP_FUNDAMENTAL:
-				arg_rebuilt = getattr(ctypes, arg_def_dict['t'])(arg_raw)
-			# Handle structs
-			elif arg_def_dict['g'] == GROUP_STRUCT:
-				arg_rebuilt = self.__unpack_item_struct__(arg_raw, arg_def_dict)
-			# Handle functions
-			elif arg_def_dict['g'] == GROUP_FUNCTION:
-				arg_rebuilt = self.__unpack_item_function__(arg_raw, arg_def_dict)
-			# Handle voids (likely mensync stuff)
-			elif arg_def_dict['g'] == GROUP_VOID:
-				# Return a placeholder
-				return None
-			# Handle everything else ...
-			else:
-				raise # TODO
-
-			# Step through flags in reverse order (if it's not a memsync field)
-			for flag in reversed(arg_def_dict['f']):
-				if flag != FLAG_POINTER:
-					raise # TODO
-				arg_rebuilt = ctypes.pointer(arg_rebuilt)
-
-			return arg_rebuilt
-
-		# And now arrays ...
-		else:
-
+		# The non-trivial case first, arrays
+		if not arg_def_dict['s']:
+			# Unpack items in array
 			return self.__unpack_item_array__(arg_raw, arg_def_dict)[1]
+
+		# Handle fundamental types
+		if arg_def_dict['g'] == GROUP_FUNDAMENTAL:
+			arg_rebuilt = getattr(ctypes, arg_def_dict['t'])(arg_raw)
+		# Handle structs
+		elif arg_def_dict['g'] == GROUP_STRUCT:
+			arg_rebuilt = self.__unpack_item_struct__(arg_raw, arg_def_dict)
+		# Handle functions
+		elif arg_def_dict['g'] == GROUP_FUNCTION:
+			arg_rebuilt = self.__unpack_item_function__(arg_raw, arg_def_dict)
+		# Handle voids (likely mensync stuff)
+		elif arg_def_dict['g'] == GROUP_VOID:
+			# Return a placeholder
+			return None
+		# Handle everything else ...
+		else:
+			raise data_group_error('unexpected datatype group')
+
+		# Step through flags in reverse order (if it's not a memsync field)
+		for flag in reversed(arg_def_dict['f']):
+			if flag != FLAG_POINTER:
+				raise data_flag_error('unknown non-pointer flag for scalar')
+			arg_rebuilt = ctypes.pointer(arg_rebuilt)
+
+		return arg_rebuilt
 
 
 	def __unpack_item_array__(self, arg_in, arg_def_dict, flag_index = 0):
@@ -410,13 +408,13 @@ class arguments_contents_class():
 				arg_in = arg_type(*arg_in)
 			# Handle unknown flags
 			else:
-				raise # TODO
+				raise data_flag_error('unknown non-pointer flag for array')
 
 		# No dive, we're at the bottom - just get the original ctypes type
 		else:
 
 			if flag == FLAG_POINTER:
-				raise # TODO
+				raise data_flag_error('unexpected pointer flag for array')
 
 			if arg_def_dict['g'] == GROUP_FUNDAMENTAL:
 				arg_type = getattr(ctypes, arg_def_dict['t']) * flag
@@ -424,8 +422,10 @@ class arguments_contents_class():
 			elif arg_def_dict['g'] == GROUP_STRUCT:
 				arg_type = self.cache_dict['struct_type'][arg_def_dict['t']] * flag
 				arg_in = arg_type(*(self.__unpack_item_struct__(e, arg_def_dict) for e in arg_in))
+			elif arg_def_dict['g'] == GROUP_FUNCTION:
+				raise NotImplementedError('functions in arrays are not supported')
 			else:
-				raise # TODO
+				raise data_group_error('unexpected datatype group')
 
 		return arg_type, arg_in
 

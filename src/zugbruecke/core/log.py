@@ -163,7 +163,7 @@ class log_class:
 		elif messages['pipe'] == 'err':
 			sys.stderr.write(message_string)
 		else:
-			raise # TODO
+			raise ValueError('unknown pipe name')
 
 
 	def __process_message__(self, message, pipe, level):

@@ -43,6 +43,7 @@ from ..const import (
 	GROUP_STRUCT,
 	GROUP_FUNCTION
 	)
+from ..errors import data_flag_error, data_type_error
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -195,7 +196,7 @@ class arguments_definition_class():
 			# This is not supposed to happen ...
 			else:
 
-				raise
+				raise data_type_error('unknown ctypes wrapper type')
 
 			# Get next type in sequence
 			datatype = datatype._type_
@@ -327,7 +328,7 @@ class arguments_definition_class():
 				if not is_void_pointer: # do this only for last flag TODO
 					datatype = ctypes.POINTER(datatype)
 			else:
-				raise # TODO
+				raise data_flag_error('unknown non-pointer flag for array')
 
 		return datatype
 
@@ -336,7 +337,7 @@ class arguments_definition_class():
 
 		# TODO BUG only works on Wine Python, must not be called on Unix side
 		if not self.is_server:
-			raise # TODO
+			raise SystemError('method must not be called on Unix/client side')
 
 		# Generate function pointer type (used as parameter type and as decorator for Python function)
 		factory_type = self.generate_callback_decorator(

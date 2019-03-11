@@ -60,8 +60,9 @@ class session_server_class:
 
 		# Connect to Unix side
 		self.rpc_client = mp_client_safe_connect(
-			('localhost', self.p['port_socket_unix']),
-			'zugbruecke_unix'
+			socket_path = ('localhost', self.p['port_socket_unix']),
+			authkey = 'zugbruecke_unix',
+			timeout_after_seconds = self.p['timeout_start']
 			)
 
 		# Start logging session and connect it with log on unix side
@@ -170,12 +171,12 @@ class session_server_class:
 			# Reraise error
 			raise e
 
-		except:
+		except Exception as e:
 
 			# Push traceback to log
 			self.log.err(traceback.format_exc())
 
-			raise # TODO
+			raise e
 
 		# Load library
 		self.dll_dict[dll_name] = dll_server_class(

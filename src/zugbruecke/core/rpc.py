@@ -70,7 +70,7 @@ def mp_client_safe_connect(socket_path, authkey, timeout_after_seconds = 30, wai
 		time.sleep(wait_for_seconds)
 
 	# If client could not connect, raise an error
-	raise # TODO
+	raise TimeoutError('mp_client failed to start')
 
 
 class mp_client_class:

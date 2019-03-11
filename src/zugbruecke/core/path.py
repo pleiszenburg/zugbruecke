@@ -34,6 +34,8 @@ specific language governing rights and limitations under the License.
 import ctypes
 from ctypes import wintypes
 
+from .errors import wine_error
+
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # WINDOWS DATATYPES
@@ -136,7 +138,7 @@ class path_class:
 		"""
 
 		if len(in_path) > MAX_PATH:
-			raise # TODO
+			raise ValueError('path too long')
 
 		in_path_astr_p = ctypes.pointer(self.__str_to_winastr__(in_path))
 		out_path_ustr_p = ctypes.pointer(UNICODE_STRING())
@@ -146,7 +148,7 @@ class path_class:
 			)
 
 		if ntstatus != 0:
-			raise # TODO
+			raise wine_error('path translation failed')
 
 		out_path = self.__winustr_to_str__(out_path_ustr_p.contents)
 
@@ -165,7 +167,7 @@ class path_class:
 		"""
 
 		if len(in_path) > MAX_PATH:
-			raise # TODO
+			raise ValueError('path too long')
 
 		in_path_buffer_p = ctypes.pointer(ctypes.create_unicode_buffer(in_path + '\0'))
 		in_path_ustr_p = ctypes.pointer(UNICODE_STRING())
@@ -180,7 +182,7 @@ class path_class:
 			)
 
 		if ntstatus != 0:
-			raise # TODO
+			raise wine_error('path translation failed')
 
 		return self.__winastr_to_str__(out_path_astr_p.contents)
 
