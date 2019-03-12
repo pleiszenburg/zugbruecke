@@ -32,6 +32,7 @@ specific language governing rights and limitations under the License.
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 import json
+from pprint import pformat
 import sys
 import time
 
@@ -116,6 +117,9 @@ class log_class:
 	def __compile_message_dict_list__(self, message, pipe_name, level):
 
 		message_lines = []
+
+		if not isinstance(message, str):
+			message = pformat(message)
 
 		for line in message.split('\n'):
 			if line.strip() != '':
