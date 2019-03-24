@@ -84,6 +84,9 @@ class routine_server_class():
 
 		except Exception as e:
 
+			# Log status
+			self.log.out('[routine-server] ... call preparation failed!')
+
 			# Push traceback to log
 			self.log.err(traceback.format_exc())
 
@@ -137,7 +140,7 @@ class routine_server_class():
 		except Exception as e:
 
 			# Log status
-			self.log.out('[routine-server] ... packing call failed!')
+			self.log.out('[routine-server] ... call post-processing failed!')
 
 			# Push traceback to log
 			self.log.err(traceback.format_exc())
