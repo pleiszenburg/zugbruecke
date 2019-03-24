@@ -89,20 +89,20 @@ class env_class:
 			)
 		# Get environment variables
 		self._envvar_dict_ = env_class.__get_environment_variables__(
-			self.p['wineprefix'], self.p['arch']
+			self.p['wineprefix'], self.p['winedebug'], self.p['arch']
 			)
 		# Get Wine cmd names
 		self._wine_dict_ = {'win32': 'wine', 'win64': 'wine64'}
 
 
 	@staticmethod
-	def __get_environment_variables__(wineprefix, arch):
+	def __get_environment_variables__(wineprefix, winedebug, arch):
 
 		return dict(
 			WINEARCH = arch, # Architecture
 			WINEPREFIX = wineprefix, # Wine prefix / directory
 			WINEDLLOVERRIDES = 'mscoree=d', # Disable MONO: https://unix.stackexchange.com/a/191609
-			WINEDEBUG = '-all', # Silence Wine!
+			WINEDEBUG = winedebug, # Wine debug level
 			)
 
 
