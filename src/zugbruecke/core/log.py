@@ -170,12 +170,13 @@ class log_class:
 			raise ValueError('unknown pipe name')
 
 
-	def __process_message__(self, message, pipe, level):
+	def __process_messages__(self, messages, pipe, level):
 
-		message_dict_list = self.__compile_message_dict_list__(message, pipe, level)
+		message_dict_list = []
+		for message in messages:
+			message_dict_list.extend(self.__compile_message_dict_list__(message, pipe, level))
 
 		for mesage_dict in message_dict_list:
-
 			self.__process_message_dict__(mesage_dict)
 
 
@@ -206,13 +207,13 @@ class log_class:
 			f.write(json.dumps(message) + '\n')
 
 
-	def out(self, message, level = 1):
+	def out(self, *messages, level = 1):
 
 		if level <= self.p['log_level']:
-			self.__process_message__(message, 'out', level)
+			self.__process_messages__(messages, 'out', level)
 
 
-	def err(self, message, level = 1):
+	def err(self, *messages, level = 1):
 
 		if level <= self.p['log_level']:
-			self.__process_message__(message, 'err', level)
+			self.__process_messages__(messages, 'err', level)
