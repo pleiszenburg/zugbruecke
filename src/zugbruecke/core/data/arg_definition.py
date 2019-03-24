@@ -165,15 +165,12 @@ class arguments_definition_class():
 
 	def __pack_definition_dict__(self, datatype, field_name = None):
 
-		# Not all datatypes have a name, let's handle that
-		type_name = None
-		# Get name of datatype, such as c_int, if there is one
-		if hasattr(datatype, '__name__'):
-			type_name = datatype.__name__
+		# Get name of datatype, such as c_int, if there is one, else None
+		type_name = getattr(datatype, '__name__', None)
 
 		# Get group of datatype
 		group_name = type(datatype).__name__
-		# Can be: 'PyCSimpleType', 'PyCStructType', PyCArrayType or 'PyCPointerType'
+		# Can be: 'PyCSimpleType', 'PyCStructType', 'PyCArrayType' or 'PyCPointerType'
 
 		# List of flags: Pointer flag or length of array (one entry per dimension)
 		flag_list = []
