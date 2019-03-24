@@ -202,9 +202,8 @@ class log_class:
 
 	def __store_message__(self, message):
 
-		f = open(self.f[message['pipe']], 'a+')
-		f.write(json.dumps(message) + '\n')
-		f.close()
+		with open(self.f[message['pipe']], 'a+') as f:
+			f.write(json.dumps(message) + '\n')
 
 
 	def out(self, message, level = 1):
