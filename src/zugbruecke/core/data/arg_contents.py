@@ -134,10 +134,7 @@ class arguments_contents_class():
 
 	def __item_value_strip__(self, arg_in):
 
-		if hasattr(arg_in, 'value'):
-			return arg_in.value
-		else:
-			return arg_in
+		return getattr(arg_in, 'value', arg_in)
 
 
 	def __pack_item__(self, arg_in, arg_def_dict):

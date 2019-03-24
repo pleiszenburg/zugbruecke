@@ -153,7 +153,7 @@ class log_class:
 			message_list.append(c['RED'])
 		message_list.append(messages['pipe'][0] + c['RESET'])
 		message_list.append(': ')
-		if any(ext in messages['cnt'] for ext in ['fixme:', 'err:', 'wine: ', 'wine client error']):
+		if any(ext in messages['cnt'] for ext in ['fixme:', 'err:', 'wine: ', 'wine client error', ':warn:', ':trace:']):
 			message_list.append(c['GREY'])
 		else:
 			message_list.append(c['WHITE'])
@@ -170,12 +170,13 @@ class log_class:
 			raise ValueError('unknown pipe name')
 
 
-	def __process_message__(self, message, pipe, level):
+	def __process_messages__(self, messages, pipe, level):
 
-		message_dict_list = self.__compile_message_dict_list__(message, pipe, level)
+		message_dict_list = []
+		for message in messages:
+			message_dict_list.extend(self.__compile_message_dict_list__(message, pipe, level))
 
 		for mesage_dict in message_dict_list:
-
 			self.__process_message_dict__(mesage_dict)
 
 
@@ -202,18 +203,17 @@ class log_class:
 
 	def __store_message__(self, message):
 
-		f = open(self.f[message['pipe']], 'a+')
-		f.write(json.dumps(message) + '\n')
-		f.close()
+		with open(self.f[message['pipe']], 'a+') as f:
+			f.write(json.dumps(message) + '\n')
 
 
-	def out(self, message, level = 1):
-
-		if level <= self.p['log_level']:
-			self.__process_message__(message, 'out', level)
-
-
-	def err(self, message, level = 1):
+	def out(self, *messages, level = 1):
 
 		if level <= self.p['log_level']:
-			self.__process_message__(message, 'err', level)
+			self.__process_messages__(messages, 'out', level)
+
+
+	def err(self, *messages, level = 1):
+
+		if level <= self.p['log_level']:
+			self.__process_messages__(messages, 'err', level)

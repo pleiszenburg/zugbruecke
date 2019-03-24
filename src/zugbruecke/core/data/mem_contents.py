@@ -32,7 +32,7 @@ specific language governing rights and limitations under the License.
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 import ctypes
-from pprint import pformat as pf
+#from pprint import pformat as pf
 #import traceback
 
 from ..const import GROUP_VOID
@@ -183,7 +183,7 @@ class memory_contents_class():
 			# TODO elements of arrays
 			else:
 
-				self.log.err(str(path_element))
+				self.log.err(path_element)
 				raise NotImplementedError('array elements can yet not be addressed')
 
 		return element

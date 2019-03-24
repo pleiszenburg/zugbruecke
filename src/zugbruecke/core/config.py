@@ -80,6 +80,7 @@ class config_class(dict):
 			dir = DIR, # Default config directory
 			timeout_start = 30, # Timeout for waiting on Wine-Python start
 			timeout_stop = 30, # Timeout for waiting on Wine-Python stop
+			winedebug = '-all', # Wine debug output off
 			wineprefix = os.path.join(DIR, ARCH + '-wine'),
 			pythonprefix = os.path.join(DIR, '%s-python%s' % (ARCH, VERSION)),
 			)
