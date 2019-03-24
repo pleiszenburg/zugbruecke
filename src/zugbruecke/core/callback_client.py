@@ -84,6 +84,9 @@ class callback_translator_client_class:
 
 		except Exception as e:
 
+			# Log status
+			self.log.out('[callback-client] ... call preparation failed!')
+
 			# Push traceback to log
 			self.log.err(traceback.format_exc())
 
@@ -138,7 +141,7 @@ class callback_translator_client_class:
 		except Exception as e:
 
 			# Log status
-			self.log.out('[callback-client] ... packing failed!')
+			self.log.out('[callback-client] ... call post-processing failed!')
 
 			# Push traceback to log
 			self.log.err(traceback.format_exc())
