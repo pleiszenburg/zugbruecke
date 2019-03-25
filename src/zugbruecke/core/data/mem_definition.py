@@ -45,6 +45,12 @@ class memory_definition_class():
 
 	def pack_definition_memsync(self, memsync_d_list):
 
+		# HACK this error should be raised by a class property of FunctionType class
+		# BUG class property of FunctionType class causes segfault in Python 3.5 on Wine 4
+		# TODO temporary replacement, remove in future release!
+		if not isinstance(memsync_d_list, list):
+			raise data_memsyncsyntax_error('memsync attribute must be a list')
+
 		return [self.__pack_memsync_definition_dict__(memsync_d) for memsync_d in memsync_d_list]
 
 

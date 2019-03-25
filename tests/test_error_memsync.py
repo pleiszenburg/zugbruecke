@@ -57,12 +57,21 @@ def test_memsync_on_routine_not_list():
 		sub_ints.memsync = {}
 
 
-# def test_memsync_on_callback_not_list():
-#
-# 	conveyor_belt = ctypes.WINFUNCTYPE(ctypes.c_int16, ctypes.c_int16)
-#
-# 	if any([platform.startswith(os_name) for os_name in ['linux', 'darwin', 'freebsd']]):
-# 		with pytest.raises(data_memsyncsyntax_error, match = 'memsync attribute must be a list'):
-# 			conveyor_belt.memsync = {}
-# 	elif platform.startswith('win'):
-# 		conveyor_belt.memsync = {}
+def test_memsync_on_callback_not_list():
+
+	conveyor_belt = ctypes.WINFUNCTYPE(ctypes.c_int16, ctypes.c_int16)
+
+	# BUG temporarily disabled - see below
+	# if any([platform.startswith(os_name) for os_name in ['linux', 'darwin', 'freebsd']]):
+	# 	with pytest.raises(data_memsyncsyntax_error, match = 'memsync attribute must be a list'):
+	# 		conveyor_belt.memsync = {}
+	# elif platform.startswith('win'):
+	# 	conveyor_belt.memsync = {}
+
+	# HACK this test is a workaround and temporary replacement for the above
+	# BUG class property of FunctionType class causes segfault in Python 3.5 on Wine 4
+	# TODO temporary replacement, remove in future release!
+	conveyor_belt.memsync = {}
+	if any([platform.startswith(os_name) for os_name in ['linux', 'darwin', 'freebsd']]):
+		with pytest.raises(data_memsyncsyntax_error, match = 'memsync attribute must be a list'):
+			ctypes._zb_current_session.data.pack_definition_memsync(conveyor_belt.memsync)
