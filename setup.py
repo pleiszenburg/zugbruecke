@@ -84,6 +84,8 @@ setup(
 	install_requires = [],
 	extras_require = {'dev': [
 		'pytest',
+		'coverage',
+		'pytest-cov',
 		'python-language-server',
 		'setuptools',
 		'Sphinx',

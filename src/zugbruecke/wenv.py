@@ -57,6 +57,10 @@ Beyond that, the following scripts and modules are installed and available:
 {scripts:s}
 """
 
+COVERAGE_STARTUP = """
+import coverage
+coverage.process_startup()
+"""
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # WINE-PYTHON ENVIRONMENT CLASS
@@ -138,6 +142,8 @@ class env_class:
 		pip_path = os.path.join(scripts_path, 'pip.exe')
 		# pytest
 		pytest_path = os.path.join(scripts_path, 'pytest.exe')
+		# coverage
+		coverage_path = os.path.join(scripts_path, 'coverage.exe')
 		# stdlib zip filename
 		stdlibzip_path = os.path.join(
 			pythonprefix,
@@ -152,6 +158,7 @@ class env_class:
 			interpreter = interpreter_path,
 			pip = pip_path,
 			pytest = pytest_path,
+			coverage = coverage_path,
 			stdlibzip = stdlibzip_path,
 			)
 
@@ -265,6 +272,26 @@ class env_class:
 		subprocess.Popen(['wenv', 'pip', 'install', 'pytest']).wait()
 
 
+	def setup_coverage(self):
+
+		# Exit if it exists
+		if os.path.isfile(self._path_dict_['coverage']):
+			return
+
+		# Run pip install
+		subprocess.Popen(['wenv', 'pip', 'install', 'coverage']).wait()
+
+		# Ensure that coverage is started with the Python interpreter
+		siteconfig_path = os.path.join(self._path_dict_['sitepackages'], 'sitecustomize.py')
+		if os.path.isfile(siteconfig_path):
+			with open(siteconfig_path, 'r') as f:
+				siteconfig_cnt = f.read(COVERAGE_STARTUP)
+			if COVERAGE_STARTUP in siteconfig_cnt:
+				return
+		with open(siteconfig_path, 'w') as f:
+			f.write(COVERAGE_STARTUP)
+
+
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # ROUTINES
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -285,6 +312,7 @@ class env_class:
 		self.setup_python()
 		self.setup_pip()
 		self.setup_pytest()
+		self.setup_coverage()
 
 
 	def __cmd_help__(self):

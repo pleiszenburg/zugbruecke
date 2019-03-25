@@ -25,6 +25,9 @@ clean:
 	-rm -r build/*
 	-rm -r dist/*
 	-rm -r src/*.egg-info
+	# -rm -r htmlconv/*
+	# -rm .coverage*
+	coverage erase
 	find src/ tests/ -name '*.pyc' -exec rm -f {} +
 	find src/ tests/ -name '*.pyo' -exec rm -f {} +
 	find src/ tests/ -name '*~' -exec rm -f {} +
@@ -65,13 +68,11 @@ install_link:
 
 test:
 	make docu
-	make clean
-	wenv pytest
-	make clean
-	pytest
+	make test_quick
 
 test_quick:
 	make clean
 	wenv pytest
 	make clean
-	pytest
+	pytest --cov=zugbruecke --cov-config=setup.cfg
+	mv .coverage .coverage.e9.0 ; coverage combine ; coverage html
