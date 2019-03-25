@@ -35,6 +35,8 @@ import ctypes
 from functools import partial
 from pprint import pformat as pf
 
+from .errors import data_memsyncsyntax_error
+
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # DLL CLIENT CLASS
@@ -224,5 +226,8 @@ class routine_client_class():
 
 	@memsync.setter
 	def memsync(self, value):
+
+		if not isinstance(value, list):
+			raise data_memsyncsyntax_error('memsync attribute must be a list')
 
 		self.__memsync__ = value

@@ -32,8 +32,8 @@ specific language governing rights and limitations under the License.
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 import ctypes
-from pprint import pformat as pf
-#import traceback
+
+from ..errors import data_memsyncsyntax_error
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -54,6 +54,11 @@ class memory_definition_class():
 
 
 	def __pack_memsync_definition_dict__(self, memsync_d):
+
+		if not isinstance(memsync_d, dict) and not isinstance(memsync_d, tuple):
+			raise data_memsyncsyntax_error('memsync definition must either be a dict or a tuple')
+
+		# TODO handle tuples (pointers to pointer arrays ...)
 
 		# Keep everything, which is not private (does not start with '_')
 		return {key: memsync_d[key] for key in memsync_d.keys() if not key.startswith('_')}

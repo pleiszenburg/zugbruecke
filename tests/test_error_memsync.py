@@ -6,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	tests/test_sqrt_int.py: Test function with single parameter
+	tests/test_error_memsync.py: Checks for proper error handling of memsync definitions
 
 	Required to run on platform / side: [UNIX, WINE]
 
@@ -31,60 +31,38 @@ specific language governing rights and limitations under the License.
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+import pytest
+
 from sys import platform
 if any([platform.startswith(os_name) for os_name in ['linux', 'darwin', 'freebsd']]):
 	import zugbruecke.ctypes as ctypes
+	from zugbruecke.core.errors import data_memsyncsyntax_error
 elif platform.startswith('win'):
 	import ctypes
-
-import pytest
-
-
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# CLASSES AND ROUTINES
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-class sample_class:
-
-
-	def __init__(self):
-
-		self.__dll__ = ctypes.windll.LoadLibrary('tests/demo_dll.dll')
-
-		self.__replace_r__ = self.__dll__.replace_letter_in_null_terminated_string_r
-		self.__replace_r__.argtypes = (
-			ctypes.POINTER(ctypes.POINTER(ctypes.c_char)), # Generate pointer to char manually
-			ctypes.c_char,
-			ctypes.c_char
-			)
-		self.__replace_r__.memsync = [
-			({'p': [0, -1], 'n': True}, {'p': [0, -1], 'n': True})
-			]
-
-
-	def replace_r(self, in_string, old_letter, new_letter):
-
-		string_buffer = (ctypes.c_char_p * 1)(in_string.encode('utf-8'))
-		string_buffer_p = ctypes.cast(
-			string_buffer,
-			ctypes.POINTER(ctypes.POINTER(ctypes.c_char))
-			)
-
-		self.__replace_r__(
-			string_buffer_p,
-			old_letter.encode('utf-8'),
-			new_letter.encode('utf-8')
-			)
-
-		return string_buffer[:][0].decode('utf-8')
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # TEST(s)
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-@pytest.mark.xfail(strict = False, reason = 'not yet implemented')
-def test_r_strsxp():
+def test_memsync_on_routine_not_list():
 
-	sample = sample_class()
-	assert 'zetegehube' == sample.replace_r('zategahuba', 'a', 'e')
+	dll = ctypes.windll.LoadLibrary('tests/demo_dll.dll')
+	sub_ints = dll.sub_ints
+
+	if any([platform.startswith(os_name) for os_name in ['linux', 'darwin', 'freebsd']]):
+		with pytest.raises(data_memsyncsyntax_error, match = 'memsync attribute must be a list'):
+			sub_ints.memsync = {}
+	elif platform.startswith('win'):
+		sub_ints.memsync = {}
+
+
+# def test_memsync_on_callback_not_list():
+#
+# 	conveyor_belt = ctypes.WINFUNCTYPE(ctypes.c_int16, ctypes.c_int16)
+#
+# 	if any([platform.startswith(os_name) for os_name in ['linux', 'darwin', 'freebsd']]):
+# 		with pytest.raises(data_memsyncsyntax_error, match = 'memsync attribute must be a list'):
+# 			conveyor_belt.memsync = {}
+# 	elif platform.startswith('win'):
+# 		conveyor_belt.memsync = {}

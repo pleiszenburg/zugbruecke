@@ -43,7 +43,7 @@ from ..const import (
 	GROUP_STRUCT,
 	GROUP_FUNCTION
 	)
-from ..errors import data_flag_error, data_type_error
+from ..errors import data_flag_error, data_type_error, data_memsyncsyntax_error
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -71,7 +71,6 @@ class arguments_definition_class():
 
 			# Create new function pointer type class
 			class FunctionType(ctypes._CFuncPtr):
-
 				_argtypes_ = argtypes
 				_restype_ = restype
 				memsync = self.unpack_definition_memsync(_memsync_)
