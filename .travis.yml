@@ -59,9 +59,11 @@ before_install:
   - export PATH=/opt/wine-staging/bin:$PATH
   - sudo apt-get install -y gcc-mingw-w64-i686
   - sudo apt-get install -y gcc-mingw-w64-x86-64
+  - pip install -U pytest
   - wine --version
   - i686-w64-mingw32-gcc --version
   - python --version
+  - pytest --version
   - uname -a
   - lsb_release -a
 
