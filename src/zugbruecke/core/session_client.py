@@ -249,7 +249,7 @@ class session_client_class():
 		self.rpc_client.set_parameter(parameter)
 
 
-	def terminate(self):
+	def terminate(self, signum = None, frame = None):
 
 		# Run only if session is still up
 		if not self.up:
