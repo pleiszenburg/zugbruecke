@@ -26,7 +26,7 @@ As a consequence, ``zugbruecke.current_session`` is no longer available. ``zugbr
 
 Furthermore, the shell scripts ``wine-python``, ``wine-pip`` and ``wine-pytest`` have been removed. Their functionality was consolidated into a single new script, ``wenv``. One can now call ``wenv python``, ``wenv pip`` and ``wenv pytest``. This change was necessary for allowing a more generic interface to entry points of arbitrary third party packages. Run ``wenv help`` for more information.
 
-* FEATURE: ``wineprefix`` becomes a configuration parameter definable by users allowing custom wine prefixes, see issue #44.
+* FEATURE: ``wineprefix``, ``winedebug`` and ``pythonprefix`` become a configuration parameters definable by users allowing custom wine prefixes, wine debug levels and Python installation paths, see issue #44.
 * FEATURE: Introduced new exception types specific to *zugbruecke*. Meaningful exception are now raised throughout the package.
 * FEATURE: Timeouts for start and stop of the server component can be configured.
 * FEATURE: Both code and branch coverage of *zugbruecke* can now be analyzed with ``coverage``.
