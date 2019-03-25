@@ -64,6 +64,14 @@ def test_path_unix_to_wine_rel():
 
 
 @pytest.mark.skipif(not IS_UNIX, reason = 'only relevant for unix side')
+def test_path_unix_to_wine_fail1():
+
+	PATH_A = 'a' * 270
+	with pytest.raises(ValueError):
+		path_out = ctypes._zb_path_unix_to_wine(PATH_A)
+
+
+@pytest.mark.skipif(not IS_UNIX, reason = 'only relevant for unix side')
 def test_path_wine_to_unix_abs():
 
 	PATH_A = 'C:\\'
@@ -86,4 +94,12 @@ def test_path_wine_to_unix_fail2():
 
 	PATH_A = 'c:\\doesnotexist'
 	with pytest.raises(wine_error):
+		path_out = ctypes._zb_path_wine_to_unix(PATH_A)
+
+
+@pytest.mark.skipif(not IS_UNIX, reason = 'only relevant for unix side')
+def test_path_wine_to_unix_fail3():
+
+	PATH_A = 'a' * 270
+	with pytest.raises(ValueError):
 		path_out = ctypes._zb_path_wine_to_unix(PATH_A)
