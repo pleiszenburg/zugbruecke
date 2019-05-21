@@ -1,7 +1,12 @@
 Changes
 =======
 
-0.0.12 (2019-02-03)
+0.0.14 (2019-05-21)
+-------------------
+
+* FIX: CI tests failed due to dependency link feature being dropped from ``pip``, see issue #45.
+
+0.0.13 (2019-02-03)
 -------------------
 
 * FIX: Documentation could (sometimes) not be built on readthedocs.
