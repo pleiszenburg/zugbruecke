@@ -68,6 +68,7 @@ before_install:
   - pytest --version
   - uname -a
   - lsb_release -a
+  - cp .travis.zugbruecke.json .zugbruecke.json
 
 # command to install dependencies and module
 install:
