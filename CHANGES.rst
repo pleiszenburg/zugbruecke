@@ -36,6 +36,11 @@ Furthermore, the shell scripts ``wine-python``, ``wine-pip`` and ``wine-pytest``
 * FIX: *zugbruecke* did not actually check properly if its server component had terminated when a session was terminated. The reliability of relevant termination code has been significantly improved.
 * The configuration module was refactored and made clearer and faster, allowing to implement new options.
 
+0.0.14 (2019-05-21)
+-------------------
+
+* FIX: CI tests failed due to dependency link feature being dropped from ``pip``, see issue #45.
+
 0.0.13 (2019-02-03)
 -------------------
 
