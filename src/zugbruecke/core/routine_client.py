@@ -179,11 +179,11 @@ class routine_client_class():
 			)
 
 		# Log status
-		self.log.out(' memsync: \n%s' % pf(self.memsync_d))
-		self.log.out(' argtypes: \n%s' % pf(self.__argtypes__))
-		self.log.out(' argtypes_d: \n%s' % pf(self.argtypes_d))
-		self.log.out(' restype: \n%s' % pf(self.__restype__))
-		self.log.out(' restype_d: \n%s' % pf(self.restype_d))
+		self.log.out('<memsync>', self.memsync_d, '</memsync>')
+		self.log.out('<argtypes>', self.__argtypes__, '</argtypes>')
+		self.log.out('<argtypes_d>', self.argtypes_d, '</argtypes_d>')
+		self.log.out('<restype>', self.__restype__, '</restype>')
+		self.log.out('<restype_d>', self.restype_d, '</restype_d>')
 
 		# Pass argument and return value types as strings ...
 		result = self.__configure_on_server__(
