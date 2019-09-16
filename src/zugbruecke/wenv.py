@@ -38,7 +38,7 @@ import sys
 import urllib.request
 import zipfile
 
-from ..core.config import config_class
+from .core.config import config_class
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
