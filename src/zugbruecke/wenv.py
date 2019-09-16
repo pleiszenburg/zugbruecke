@@ -192,7 +192,7 @@ class env_class:
 			shutil.rmtree(self._p['wineprefix'])
 
 		# Start wine server into prepared environment
-		subprocess.Popen(['wineboot', '-i']).wait()
+		subprocess.Popen(['wineboot', '-i'], env = self._envvar_dict).wait()
 
 
 	def setup_python(self, overwrite = False):
