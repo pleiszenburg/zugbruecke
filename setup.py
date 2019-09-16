@@ -36,7 +36,6 @@ from setuptools import (
 	setup
 	)
 import os
-from glob import glob
 from sys import platform
 
 
@@ -79,7 +78,7 @@ setup(
 	download_url = 'https://github.com/pleiszenburg/zugbruecke/archive/v%s.tar.gz' % _version_,
 	license = 'LGPLv2',
 	keywords = ['ctypes', 'wine'],
-	scripts = glob(os.path.join('scripts', '*')),
+	scripts = [],
 	include_package_data = True,
 	install_requires = [],
 	extras_require = {'dev': [
