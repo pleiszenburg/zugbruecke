@@ -52,13 +52,13 @@ coverage.process_startup()
 
 HELP_STR = """wenv - the Wine Python environment
 
-- wenv init: sets up an environment (including Python interpreter, pip and pytest)
-- wenv help: prints this help text
+{CLIS:s}
+
 - wenv python: the Python interpreter
 
 Beyond that, the following scripts and modules are installed and available:
 
-{scripts:s}
+{SCRIPTS:s}
 """
 
 
@@ -91,6 +91,8 @@ class env_class:
 		self._cmd_dict_ = env_class.__get_command_dict__(
 			self._path_dict_['interpreter'], self._path_dict_['scripts']
 			)
+		# Get internal CLI commands
+		self._cli_dict_ = self.__get_cli_dict__()
 		# Get environment variables
 		self._envvar_dict_ = env_class.__get_environment_variables__(
 			self.p['wineprefix'], self.p['winedebug'], self.p['arch'], self.p['pythonprefix']
@@ -109,6 +111,15 @@ class env_class:
 			WINEDEBUG = winedebug, # Wine debug level
 			PYTHONHOME = pythonprefix, # Python home for Wine Python (can be a Unix path)
 			)
+
+
+	def __get_cli_dict__(self):
+
+		return {
+			item[5:-1]: getattr(self, item)
+			for item in dir(self)
+			if item.startswith('_cli_') and hasattr(getattr(self, item), '__call__')
+			}
 
 
 	@staticmethod
@@ -304,6 +315,8 @@ class env_class:
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 	def _cli_init_(self):
+		"sets up an environment (including Python interpreter, pip and pytest)"
+
 		self.setup_prefix()
 		self.setup_python()
 		self.setup_pip()
@@ -312,22 +325,55 @@ class env_class:
 
 
 	def _cli_help_(self):
-		sys.stdout.write(HELP_STR.format(scripts = '\n'.join([
-			'- wenv {script:s}'.format(script = key)
-			for key in sorted(self._cmd_dict_.keys())
-			if key != 'python'
-			])))
+		"prints this help text"
+
+		sys.stdout.write(HELP_STR.format(
+			CLIS = '\n'.join([
+				'- wenv {CLI:s}: {HELP:s}'.format(
+					CLI = key,
+					HELP = self._cli_dict_[key].__doc__,
+					)
+				for key in sorted(self._cli_dict_.keys())
+				if key != 'python'
+				]),
+			SCRIPTS = '\n'.join([
+				'- wenv {SCRIPT:s}'.format(
+					SCRIPT = key,
+					)
+				for key in sorted(self._cmd_dict_.keys())
+				if key != 'python'
+				])
+			))
 		sys.stdout.flush()
 
 
 	def cli(self):
 
-		wine = self._wine_dict_[self.p['arch']]
-		cmd = self._cmd_dict_[ sys.argv[1] ]
+		# No command passed
+		if len(sys.argv) < 2:
+			return
 
+		# Separate command and arguments
+		cmd, param = sys.argv[1], sys.argv[2:]
+
+		# Special CLI command
+		if cmd in self._cli_dict_.keys():
+			self._cli_dict_[cmd]()
+			return
+
+		# Command is unknown
+		if cmd not in self._cmd_dict_.keys():
+			sys.stdout.write('Unknown command or script: "{CMD:s}"\n'.format(CMD = cmd))
+			sys.stdout.flush()
+			return
+
+		# Get Wine depending on arch
+		wine = self._wine_dict_[self.p['arch']]
+
+		# Replace this process with Wine
 		os.execvpe(
 			wine,
-			(wine, cmd, *sys.argv[2:]),
+			(wine, self._cmd_dict_[cmd], *param),
 			self._envvar_dict_,
 			)
 
