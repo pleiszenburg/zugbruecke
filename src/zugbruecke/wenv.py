@@ -351,7 +351,9 @@ class env_class:
 
 		# No command passed
 		if len(sys.argv) < 2:
-			return
+			sys.stderr.write('There was no command passed.\n')
+			sys.stderr.flush()
+			sys.exit(1)
 
 		# Separate command and arguments
 		cmd, param = sys.argv[1], sys.argv[2:]
@@ -359,13 +361,13 @@ class env_class:
 		# Special CLI command
 		if cmd in self._cli_dict_.keys():
 			self._cli_dict_[cmd]()
-			return
+			sys.exit(0)
 
 		# Command is unknown
 		if cmd not in self._cmd_dict_.keys():
-			sys.stdout.write('Unknown command or script: "{CMD:s}"\n'.format(CMD = cmd))
-			sys.stdout.flush()
-			return
+			sys.stderr.write('Unknown command or script: "{CMD:s}"\n'.format(CMD = cmd))
+			sys.stderr.flush()
+			sys.exit(1)
 
 		# Get Wine depending on arch
 		wine = self._wine_dict_[self.p['arch']]
