@@ -22,7 +22,7 @@
 # specific language governing rights and limitations under the License.
 # </LICENSE_BLOCK>
 
-conf=$(python3 -m zugbruecke.wenv $1 --configure) # get command configuration string
+conf=$(python3 -m zugbruecke.wenv.configure $1) # get command configuration string
 param="" # escape parameter string
 for arg in "${@:2}" ; do
 	param+=$(printf " %q" "$arg")
