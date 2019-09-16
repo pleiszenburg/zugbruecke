@@ -281,21 +281,19 @@ class env_class:
 			tempfile.gettempdir(),
 			'wenv-' + hashlib.sha256(self._p['pythonprefix'].encode('utf-8')).hexdigest()[:8],
 			)
-
 		if not is_clean(link_path):
 			raise OSError('unable to create clean link path: "{LINK:s}"'.format(LINK = link_path))
-
 		if not os.path.exists(link_path):
 			os.symlink(self._p['pythonprefix'], link_path)
-			self._p['pythonprefix'] = link_path
-			self._init_dicts()
-
 		if not os.path.exists(link_path):
 			raise OSError('"{LINK:s}" could not be created'.format(LINK = link_path))
 		if not os.path.islink(link_path):
 			raise OSError('"{LINK:s}" is not a symlink'.format(LINK = link_path))
 		if os.readlink(link_path) != pythonprefix:
 			raise OSError('"{LINK:s}" points to the wrong source'.format(LINK = link_path))
+
+		self._p['pythonprefix'] = link_path
+		self._init_dicts()
 
 
 	def setup_pip(self):
