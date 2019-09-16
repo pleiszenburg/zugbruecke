@@ -303,6 +303,23 @@ class env_class:
 # CLI
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+	def _cli_init_(self):
+		self.setup_prefix()
+		self.setup_python()
+		self.setup_pip()
+		self.setup_pytest()
+		self.setup_coverage()
+
+
+	def _cli_help_(self):
+		sys.stdout.write(HELP_STR.format(scripts = '\n'.join([
+			'- wenv {script:s}'.format(script = key)
+			for key in sorted(self._cmd_dict_.keys())
+			if key != 'python'
+			])))
+		sys.stdout.flush()
+
+
 	def cli(self):
 
 		wine = self._wine_dict_[self.p['arch']]
