@@ -57,7 +57,7 @@ upload_test:
 	done
 
 install:
-	pip install -Uv -e .[dev]
+	pip install -U -e .[dev]
 	wenv init
 
 test:
