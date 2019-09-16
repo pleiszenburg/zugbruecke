@@ -54,9 +54,7 @@ HELP_STR = """wenv - the Wine Python environment
 
 {CLIS:s}
 
-- wenv python: the Python interpreter
-
-Beyond that, the following scripts and modules are installed and available:
+The following interpreters, scripts and modules are installed and available:
 
 {SCRIPTS:s}
 """
@@ -334,14 +332,12 @@ class env_class:
 					HELP = self._cli_dict_[key].__doc__,
 					)
 				for key in sorted(self._cli_dict_.keys())
-				if key != 'python'
 				]),
 			SCRIPTS = '\n'.join([
 				'- wenv {SCRIPT:s}'.format(
 					SCRIPT = key,
 					)
 				for key in sorted(self._cmd_dict_.keys())
-				if key != 'python'
 				])
 			))
 		sys.stdout.flush()
