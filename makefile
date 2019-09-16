@@ -54,11 +54,7 @@ upload_test:
 	done
 
 install:
-	pip install -U .[dev]
-	wenv init
-
-install_link:
-	pip install -U -e .[dev]
+	pip install -Uv -e .[dev]
 	wenv init
 
 test:
