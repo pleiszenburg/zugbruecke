@@ -83,17 +83,17 @@ class env_class:
 			self.p = parameter
 
 		# Get Python environment paths
-		self._path_dict_ = env_class.__get_wine_python_paths__(
+		self._path_dict_ = env_class._get_wine_python_paths(
 			self.p['pythonprefix'], self.p['version']
 			)
 		# Get Python commands and scripts
-		self._cmd_dict_ = env_class.__get_command_dict__(
+		self._cmd_dict_ = env_class._get_command_dict(
 			self._path_dict_['interpreter'], self._path_dict_['scripts']
 			)
 		# Get internal CLI commands
-		self._cli_dict_ = self.__get_cli_dict__()
+		self._cli_dict_ = self._get_cli_dict()
 		# Get environment variables
-		self._envvar_dict_ = env_class.__get_environment_variables__(
+		self._envvar_dict_ = env_class._get_environment_variables(
 			self.p['wineprefix'], self.p['winedebug'], self.p['arch'], self.p['pythonprefix']
 			)
 		# Get Wine cmd names
@@ -101,7 +101,7 @@ class env_class:
 
 
 	@staticmethod
-	def __get_environment_variables__(wineprefix, winedebug, arch, pythonprefix):
+	def _get_environment_variables(wineprefix, winedebug, arch, pythonprefix):
 
 		return dict(
 			WINEARCH = arch, # Architecture
@@ -112,17 +112,17 @@ class env_class:
 			)
 
 
-	def __get_cli_dict__(self):
+	def _get_cli_dict(self):
 
 		return {
-			item[5:-1]: getattr(self, item)
+			item[5:]: getattr(self, item)
 			for item in dir(self)
 			if item.startswith('_cli_') and hasattr(getattr(self, item), '__call__')
 			}
 
 
 	@staticmethod
-	def __get_command_dict__(interpreter_path, scripts_path):
+	def _get_command_dict(interpreter_path, scripts_path):
 
 		out = {'python': interpreter_path}
 
@@ -139,7 +139,7 @@ class env_class:
 
 
 	@staticmethod
-	def __get_wine_python_paths__(pythonprefix, version):
+	def _get_wine_python_paths(pythonprefix, version):
 
 		version_string = ''.join(version.split('.')[0:2])
 
@@ -313,7 +313,7 @@ class env_class:
 # CLI
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-	def _cli_init_(self):
+	def _cli_init(self):
 		"sets up an environment (including Python interpreter, pip and pytest)"
 
 		self.setup_prefix()
@@ -323,7 +323,7 @@ class env_class:
 		self.setup_coverage()
 
 
-	def _cli_help_(self):
+	def _cli_help(self):
 		"prints this help text"
 
 		def colorize(text):
