@@ -54,7 +54,7 @@ upload_test:
 	done
 
 install:
-	pip install -Uv -e .[dev]
+	pip install -U -e .[dev]
 	wenv init
 
 test:
@@ -63,6 +63,7 @@ test:
 
 test_quick:
 	make clean
+	make install
 	wenv pytest
 	make clean
 	pytest --cov=zugbruecke --cov-config=setup.cfg
