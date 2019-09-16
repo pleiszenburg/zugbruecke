@@ -24,12 +24,15 @@
 clean:
 	-rm -r build/*
 	-rm -r dist/*
-	-rm -r src/*.egg-info
 	coverage erase
 	find src/ tests/ -name '*.pyc' -exec rm -f {} +
 	find src/ tests/ -name '*.pyo' -exec rm -f {} +
 	find src/ tests/ -name '*~' -exec rm -f {} +
 	find src/ tests/ -name '__pycache__' -exec rm -fr {} +
+
+release_clean:
+	make clean
+	-rm -r src/*.egg-info
 
 dll:
 	@(cd demo_dll; make clean; make; make install)
@@ -38,7 +41,7 @@ docu:
 	@(cd docs; make clean; make html)
 
 release:
-	make clean
+	make release_clean
 	python setup.py sdist bdist_wheel
 	gpg --detach-sign -a dist/zugbruecke*.whl
 	gpg --detach-sign -a dist/zugbruecke*.tar.gz
@@ -54,7 +57,7 @@ upload_test:
 	done
 
 install:
-	pip install -U -e .[dev]
+	pip install -Uv -e .[dev]
 	wenv init
 
 test:
@@ -63,7 +66,6 @@ test:
 
 test_quick:
 	make clean
-	make install
 	wenv pytest
 	make clean
 	pytest --cov=zugbruecke --cov-config=setup.cfg
