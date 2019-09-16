@@ -50,6 +50,18 @@ import coverage
 coverage.process_startup()
 """
 
+HELP_STR = """wenv - the Wine Python environment
+
+- wenv init: sets up an environment (including Python interpreter, pip and pytest)
+- wenv help: prints this help text
+- wenv python: the Python interpreter
+
+Beyond that, the following scripts and modules are installed and available:
+
+{scripts:s}
+"""
+
+
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # WINE-PYTHON ENVIRONMENT CLASS
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
