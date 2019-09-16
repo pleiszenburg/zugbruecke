@@ -59,11 +59,11 @@ upload_test:
 	done
 
 install:
-	pip install .[dev]
+	pip install -U .[dev]
 	wenv init
 
 install_link:
-	pip install -e .[dev]
+	pip install -U -e .[dev]
 	wenv init
 
 test:
