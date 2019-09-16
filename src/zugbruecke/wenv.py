@@ -421,8 +421,8 @@ class env_class:
 		# Replace this process with Wine
 		os.execvpe(
 			wine,
-			(wine, self._cmd_dict[cmd], *param),
-			self._envvar_dict,
+			(wine, self._cmd_dict[cmd]) + tuple(param), # Python 3.4: No in-place unpacking of param
+			self._envvar_dict
 			)
 
 
