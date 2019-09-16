@@ -26,12 +26,13 @@ As a consequence, ``zugbruecke.current_session`` is no longer available. ``zugbr
 
 Furthermore, the shell scripts ``wine-python``, ``wine-pip`` and ``wine-pytest`` have been removed. Their functionality was consolidated into a single new script, ``wenv``. One can now call ``wenv python``, ``wenv pip`` and ``wenv pytest``. This change was necessary for allowing a more generic interface to entry points of arbitrary third party packages. Run ``wenv help`` for more information.
 
-* FEATURE: ``wineprefix``, ``winedebug`` and ``pythonprefix`` become a configuration parameters definable by users allowing custom wine prefixes, wine debug levels and Python installation paths, see issue #44.
+* FEATURE: ``wineprefix``, ``winedebug`` and ``pythonprefix`` become configuration parameters definable by users allowing custom wine prefixes, wine debug levels and Python installation paths, see issue #44.
 * FEATURE: Introduced new exception types specific to *zugbruecke*. Meaningful exception are now raised throughout the package.
 * FEATURE: Timeouts for start and stop of the server component can be configured.
 * FEATURE: Both code and branch coverage of *zugbruecke* can now be analyzed with ``coverage``.
 * FIX: *zugbruecke* did not capture and forward data coming from Windows DLLs and binaries through ``stdout`` and ``stderr``(running with Wine) most of the time.
 * FIX: ``wine-pip`` previously would, on every launch, download ``get-pip.py`` and try to install it first before running - even if ``pip`` was already installed. ``wenv pip`` does not show this behavior anymore.
+* FIX: ``wine-python``, ``wine-pip`` and ``wenv pytest`` implicitly depended on ``bash``. This dependency has been removed in their successor ``wenv``, see #48.
 * FIX: A proper ``TimeoutError`` is raised (instead of a ``SyntaxError``) if *zugbruecke*'s server component does not start.
 * FIX: *zugbruecke* did not actually check properly if its server component had terminated when a session was terminated. The reliability of relevant termination code has been significantly improved.
 * The configuration module was refactored and made clearer and faster, allowing to implement new options.

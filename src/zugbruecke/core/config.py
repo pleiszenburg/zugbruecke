@@ -67,7 +67,7 @@ class config_class(dict):
 
 		ARCH = 'win32'
 		DIR = self.__get_default_config_directory__()
-		VERSION = '3.5.3'
+		VERSION = '3.7.4'
 
 		return dict(
 			id = generate_session_id(), # Generate unique session id
