@@ -39,6 +39,7 @@ import urllib.request
 import zipfile
 
 from .core.config import config_class
+from .core.log import c
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -325,6 +326,17 @@ class env_class:
 	def _cli_help_(self):
 		"prints this help text"
 
+		def colorize(text):
+			for color, key in (
+				('GREEN', 'python'),
+				('CYAN', 'pip'),
+				('YELLOW', 'wheel'),
+				('MAGENTA', 'pytest'),
+				('MAGENTA', 'py.test'),
+				):
+				text = text.replace(key, c[color] + key + c['RESET'])
+			return text
+
 		sys.stdout.write(HELP_STR.format(
 			CLIS = '\n'.join([
 				'- wenv {CLI:s}: {HELP:s}'.format(
@@ -333,12 +345,12 @@ class env_class:
 					)
 				for key in sorted(self._cli_dict_.keys())
 				]),
-			SCRIPTS = '\n'.join([
+			SCRIPTS = colorize('\n'.join([
 				'- wenv {SCRIPT:s}'.format(
 					SCRIPT = key,
 					)
 				for key in sorted(self._cmd_dict_.keys())
-				])
+				]))
 			))
 		sys.stdout.flush()
 
