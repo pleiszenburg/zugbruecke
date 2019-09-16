@@ -76,81 +76,37 @@ class env_class:
 
 		# Get config
 		if parameter is None:
-			self.p = config_class()
+			self._p = config_class()
 		else:
 			if not isinstance(parameter, dict):
 				raise TypeError('parameter is not a dictionary')
-			self.p = parameter
+			self._p = parameter
 
-		# Get Python environment paths
-		self._path_dict_ = env_class._get_wine_python_paths(
-			self.p['pythonprefix'], self.p['version']
-			)
-		# Get Python commands and scripts
-		self._cmd_dict_ = env_class._get_command_dict(
-			self._path_dict_['interpreter'], self._path_dict_['scripts']
-			)
-		# Get internal CLI commands
-		self._cli_dict_ = self._get_cli_dict()
-		# Get environment variables
-		self._envvar_dict_ = env_class._get_environment_variables(
-			self.p['wineprefix'], self.p['winedebug'], self.p['arch'], self.p['pythonprefix']
-			)
-		# Get Wine cmd names
-		self._wine_dict_ = {'win32': 'wine', 'win64': 'wine64'}
+		# Init Wine cmd names
+		self._wine_dict = {'win32': 'wine', 'win64': 'wine64'}
+
+		# Init Python environment paths
+		self._init_path_dict()
+		# Init Python commands and scripts
+		self._init_cmd_dict()
+		# Init internal CLI commands
+		self._init_cli_dict()
+		# Init environment variables
+		self._init_envvar_dict()
 
 
-	@staticmethod
-	def _get_environment_variables(wineprefix, winedebug, arch, pythonprefix):
+	def _init_path_dict(self):
 
-		return dict(
-			WINEARCH = arch, # Architecture
-			WINEPREFIX = wineprefix, # Wine prefix / directory
-			WINEDLLOVERRIDES = 'mscoree=d', # Disable MONO: https://unix.stackexchange.com/a/191609
-			WINEDEBUG = winedebug, # Wine debug level
-			PYTHONHOME = pythonprefix, # Python home for Wine Python (can be a Unix path)
-			)
-
-
-	def _get_cli_dict(self):
-
-		return {
-			item[5:]: getattr(self, item)
-			for item in dir(self)
-			if item.startswith('_cli_') and hasattr(getattr(self, item), '__call__')
-			}
-
-
-	@staticmethod
-	def _get_command_dict(interpreter_path, scripts_path):
-
-		out = {'python': interpreter_path}
-
-		if not os.path.exists(scripts_path):
-			return out
-
-		scripts = os.listdir(scripts_path)
-		for script in scripts:
-			if not script.lower().endswith('.exe'):
-				continue
-			out[script[:-4]] = os.path.join(scripts_path, script)
-
-		return out
-
-
-	@staticmethod
-	def _get_wine_python_paths(pythonprefix, version):
-
-		version_string = ''.join(version.split('.')[0:2])
+		version_string = ''.join(self._p['version'].split('.')[0:2])
 
 		# python standard library
-		lib_path = os.path.join(pythonprefix, 'Lib')
+		lib_path = os.path.join(self._p['pythonprefix'], 'Lib')
 		# site-packages
 		sitepackages_path = os.path.join(lib_path, 'site-packages')
 		# python interpreter
-		interpreter_path = os.path.join(pythonprefix, 'python.exe')
+		interpreter_path = os.path.join(self._p['pythonprefix'], 'python.exe')
 		# scripts
-		scripts_path = os.path.join(pythonprefix, 'Scripts')
+		scripts_path = os.path.join(self._p['pythonprefix'], 'Scripts')
 		# pip
 		pip_path = os.path.join(scripts_path, 'pip.exe')
 		# pytest
@@ -158,12 +114,11 @@ class env_class:
 		# coverage
 		coverage_path = os.path.join(scripts_path, 'coverage.exe')
 		# stdlib zip filename
-		stdlibzip_path = os.path.join(pythonprefix, 'python%s.zip' % version_string)
+		stdlibzip_path = os.path.join(self._p['pythonprefix'], 'python%s.zip' % version_string)
 		# pth filename (library path)
-		pth_path = os.path.join(pythonprefix, 'python%s._pth' % version_string)
+		pth_path = os.path.join(self._p['pythonprefix'], 'python%s._pth' % version_string)
 
-		# Return dict
-		return dict(
+		self._path_dict = dict(
 			lib = lib_path,
 			sitepackages = sitepackages_path,
 			scripts = scripts_path,
@@ -173,6 +128,42 @@ class env_class:
 			coverage = coverage_path,
 			stdlibzip = stdlibzip_path,
 			pth = pth_path,
+			)
+
+
+	def _init_cmd_dict(self):
+
+		out = {'python': self._path_dict['interpreter']} # TODO check!
+
+		if not os.path.exists(self._path_dict['scripts']):
+			return out
+
+		scripts = os.listdir(self._path_dict['scripts'])
+		for script in scripts:
+			if not script.lower().endswith('.exe'):
+				continue
+			out[script[:-4]] = os.path.join(self._path_dict['scripts'], script)
+
+		self._cmd_dict = out
+
+
+	def _init_cli_dict(self):
+
+		self._cli_dict = {
+			item[5:]: getattr(self, item)
+			for item in dir(self)
+			if item.startswith('_cli_') and hasattr(getattr(self, item), '__call__')
+			}
+
+
+	def _init_envvar_dict(self):
+
+		self._envvar_dict = dict(
+			WINEARCH = self._p['arch'], # Architecture
+			WINEPREFIX = self._p['wineprefix'], # Wine prefix / directory
+			WINEDLLOVERRIDES = 'mscoree=d', # Disable MONO: https://unix.stackexchange.com/a/191609
+			WINEDEBUG = self._p['winedebug'], # Wine debug level
+			PYTHONHOME = self._p['pythonprefix'], # Python home for Wine Python (can be a Unix path)
 			)
 
 
@@ -186,12 +177,12 @@ class env_class:
 			raise TypeError('overwrite is not a boolean')
 
 		# Does it exist?
-		if os.path.exists(self.p['wineprefix']):
+		if os.path.exists(self._p['wineprefix']):
 			# Exit if overwrite flag is not set
 			if not overwrite:
 				return
 			# Delete if overwrite is set
-			shutil.rmtree(self.p['wineprefix'])
+			shutil.rmtree(self._p['wineprefix'])
 
 		# Start wine server into prepared environment
 		subprocess.Popen(['wineboot', '-i']).wait()
@@ -204,24 +195,24 @@ class env_class:
 
 		# File name for python stand-alone zip file
 		pyarchive = 'python-%s-embed-%s.zip' % (
-			self.p['version'],
-			'amd64' if self.p['arch'] == 'win64' else self.p['arch']
+			self._p['version'],
+			'amd64' if self._p['arch'] == 'win64' else self._p['arch']
 			)
 		# Compute full URL of Python stand-alone zip file
-		pyurl = 'https://www.python.org/ftp/python/%s/%s' % (self.p['version'], pyarchive)
+		pyurl = 'https://www.python.org/ftp/python/%s/%s' % (self._p['version'], pyarchive)
 
 		# Is there a pre-existing Python installation with identical parameters?
-		preexisting = os.path.isfile(self._path_dict_['interpreter'])
+		preexisting = os.path.isfile(self._path_dict['interpreter'])
 
 		# Is there a preexisting installation and should it be overwritten?
 		if preexisting and overwrite:
 			# Delete folder
-			shutil.rmtree(self.p['pythonprefix'])
+			shutil.rmtree(self._p['pythonprefix'])
 
 		# Make sure the target directory exists
-		if not os.path.exists(self.p['pythonprefix']):
+		if not os.path.exists(self._p['pythonprefix']):
 			# Create folder
-			os.makedirs(self.p['pythonprefix'])
+			os.makedirs(self._p['pythonprefix'])
 
 		# Only do if Python is not there OR if should be overwritten
 		if overwrite or not preexisting:
@@ -233,24 +224,24 @@ class env_class:
 				archive_zip.write(u.read())
 			# Unpack from memory to disk
 			with zipfile.ZipFile(archive_zip) as f:
-				f.extractall(path = self.p['pythonprefix']) # Directory created if required
+				f.extractall(path = self._p['pythonprefix']) # Directory created if required
 
 			# Unpack Python library from embedded zip on disk
-			with zipfile.ZipFile(self._path_dict_['stdlibzip'], 'r') as f:
-				f.extractall(path = self._path_dict_['lib']) # Directory created if required
+			with zipfile.ZipFile(self._path_dict['stdlibzip'], 'r') as f:
+				f.extractall(path = self._path_dict['lib']) # Directory created if required
 			# Remove Python library zip from disk
-			os.remove(self._path_dict_['stdlibzip'])
+			os.remove(self._path_dict['stdlibzip'])
 
 			# HACK: Fix library path in pth-file (CPython >= 3.6)
-			os.unlink(self._path_dict_['pth'])
+			os.unlink(self._path_dict['pth'])
 
 		# Create site-packages folder if it does not exist
-		if not os.path.exists(self._path_dict_['sitepackages']):
+		if not os.path.exists(self._path_dict['sitepackages']):
 			# Create folder
-			os.makedirs(self._path_dict_['sitepackages'])
+			os.makedirs(self._path_dict['sitepackages'])
 
 		# Package path in wine-python site-packages
-		wine_pkg_path = os.path.abspath(os.path.join(self._path_dict_['sitepackages'], 'zugbruecke'))
+		wine_pkg_path = os.path.abspath(os.path.join(self._path_dict['sitepackages'], 'zugbruecke'))
 
 		# Package path in unix-python site-packages
 		unix_pkg_path = os.path.abspath(os.path.dirname(__file__))
@@ -261,10 +252,19 @@ class env_class:
 			os.symlink(unix_pkg_path, wine_pkg_path)
 
 
+	def wine_47766_workaround(self):
+		"""
+		PathAllocCanonicalize treats path segments start with dots wrong.
+		https://bugs.winehq.org/show_bug.cgi?id=47766
+		"""
+
+		pass
+
+
 	def setup_pip(self):
 
 		# Exit if it exists
-		if os.path.isfile(self._path_dict_['pip']):
+		if os.path.isfile(self._path_dict['pip']):
 			return
 
 		# Download get-pip.py into memory
@@ -281,7 +281,7 @@ class env_class:
 	def setup_pytest(self):
 
 		# Exit if it exists
-		if os.path.isfile(self._path_dict_['pytest']):
+		if os.path.isfile(self._path_dict['pytest']):
 			return
 
 		# Run pip install
@@ -291,14 +291,14 @@ class env_class:
 	def setup_coverage(self):
 
 		# Exit if it exists
-		if os.path.isfile(self._path_dict_['coverage']):
+		if os.path.isfile(self._path_dict['coverage']):
 			return
 
 		# Run pip install
 		subprocess.Popen(['wenv', 'pip', 'install', 'coverage']).wait()
 
 		# Ensure that coverage is started with the Python interpreter
-		siteconfig_path = os.path.join(self._path_dict_['sitepackages'], 'sitecustomize.py')
+		siteconfig_path = os.path.join(self._path_dict['sitepackages'], 'sitecustomize.py')
 		siteconfig_cnt = ''
 		if os.path.isfile(siteconfig_path):
 			with open(siteconfig_path, 'r') as f:
@@ -318,6 +318,7 @@ class env_class:
 
 		self.setup_prefix()
 		self.setup_python()
+		self.wine_47766_workaround() # must run after setup_python and before setup_pip
 		self.setup_pip()
 		self.setup_pytest()
 		self.setup_coverage()
@@ -341,15 +342,15 @@ class env_class:
 			CLIS = '\n'.join([
 				'- wenv {CLI:s}: {HELP:s}'.format(
 					CLI = key,
-					HELP = self._cli_dict_[key].__doc__,
+					HELP = self._cli_dict[key].__doc__,
 					)
-				for key in sorted(self._cli_dict_.keys())
+				for key in sorted(self._cli_dict.keys())
 				]),
 			SCRIPTS = colorize('\n'.join([
 				'- wenv {SCRIPT:s}'.format(
 					SCRIPT = key,
 					)
-				for key in sorted(self._cmd_dict_.keys())
+				for key in sorted(self._cmd_dict.keys())
 				]))
 			))
 		sys.stdout.flush()
@@ -367,24 +368,24 @@ class env_class:
 		cmd, param = sys.argv[1], sys.argv[2:]
 
 		# Special CLI command
-		if cmd in self._cli_dict_.keys():
-			self._cli_dict_[cmd]()
+		if cmd in self._cli_dict.keys():
+			self._cli_dict[cmd]()
 			sys.exit(0)
 
 		# Command is unknown
-		if cmd not in self._cmd_dict_.keys():
+		if cmd not in self._cmd_dict.keys():
 			sys.stderr.write('Unknown command or script: "{CMD:s}"\n'.format(CMD = cmd))
 			sys.stderr.flush()
 			sys.exit(1)
 
 		# Get Wine depending on arch
-		wine = self._wine_dict_[self.p['arch']]
+		wine = self._wine_dict[self._p['arch']]
 
 		# Replace this process with Wine
 		os.execvpe(
 			wine,
-			(wine, self._cmd_dict_[cmd], *param),
-			self._envvar_dict_,
+			(wine, self._cmd_dict[cmd], *param),
+			self._envvar_dict,
 			)
 
 
