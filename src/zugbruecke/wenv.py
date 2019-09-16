@@ -418,6 +418,8 @@ class env_class:
 		# Get Wine depending on arch
 		wine = self._wine_dict[self._p['arch']]
 
+		self.wine_47766_workaround()
+
 		# Replace this process with Wine
 		os.execvpe(
 			wine,
