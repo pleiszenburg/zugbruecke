@@ -82,6 +82,12 @@ class env_class:
 				raise TypeError('parameter is not a dictionary')
 			self._p = parameter
 
+		# Init internal dicts
+		self._init_dicts()
+
+
+	def _init_dicts(self):
+
 		# Init Wine cmd names
 		self._wine_dict = {'win32': 'wine', 'win64': 'wine64'}
 
