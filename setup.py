@@ -93,7 +93,7 @@ setup(
 		'wheel'
 		]},
 	zip_safe = False,
-	entry_points = {},
+	entry_points = {'console_scripts': ['wenv = zugbruecke.wenv:cli']},
 	classifiers = [
 		'Development Status :: 3 - Alpha',
 		'Intended Audience :: Developers',

@@ -25,3 +25,8 @@ specific language governing rights and limitations under the License.
 </LICENSE_BLOCK>
 
 """
+
+from .lib import (
+	cli,
+	env_class,
+	)
