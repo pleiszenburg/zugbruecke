@@ -194,6 +194,7 @@ class env_class:
 		# Start wine server into prepared environment
 		for k in os.environ.keys():
 			print('- %s == %s' % (k, os.environ[k]))
+		print(os.listdir('/opt/wine-staging/bin/'))
 		out, err = subprocess.Popen(
 			['which', 'wine'],
 			stdout = subprocess.PIPE, stderr = subprocess.PIPE,
