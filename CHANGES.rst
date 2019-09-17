@@ -18,6 +18,7 @@ Caution: **MODULE LAYOUT CHANGE BREAKING BACKWARDS COMPATIBILITY!**
 | session    | .. code:: python                                  + .. code:: python                                  +
 | class      |                                                   +                                                   +
 |            |     zugbruecke.session                            +     zugbruecke.ctypes_session                     +
+|            |                                                   +                                                   +
 +------------+---------------------------------------------------+---------------------------------------------------+
 | commands   | - ``wine-python``                                 + - ``wenv python``                                 +
 |            | - ``wine-pip``                                    + - ``wenv pip``                                    +
