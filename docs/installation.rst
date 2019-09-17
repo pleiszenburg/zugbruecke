@@ -25,6 +25,11 @@ there are different ways of doing that.
 .. _Installation instructions for Mac OS X: https://wiki.winehq.org/MacOS
 .. _Installation instructions for FreeBSD: https://wiki.winehq.org/FreeBSD
 
+Currently, Wine >= 4.x is supported. If you are limited to an older version of Wine such as 2.x or 3.x,
+you will have to try `an older version of this package`_.
+
+.. _an older version of this package: https://github.com/pleiszenburg/zugbruecke/releases/tag/v0.0.14
+
 Getting *zugbruecke*
 --------------------
 
