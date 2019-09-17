@@ -207,7 +207,7 @@ class env_class:
 		out, err = subprocess.Popen(
 			['which', 'wine'],
 			stdout = subprocess.PIPE, stderr = subprocess.PIPE,
-			env = self._test_env
+			env = _test_env
 			).communicate()
 		print(out.decode('utf-8'))
 		print(err.decode('utf-8'))
@@ -220,11 +220,11 @@ class env_class:
 		print(out.decode('utf-8'))
 		print(err.decode('utf-8'))
 
-		self._test_env.update(self._envvar_dict)
+		_test_env.update(self._envvar_dict)
 		out, err = subprocess.Popen(
 			['which', 'wine'],
 			stdout = subprocess.PIPE, stderr = subprocess.PIPE,
-			env = self._test_env
+			env = _test_env
 			).communicate()
 		print(out.decode('utf-8'))
 		print(err.decode('utf-8'))
