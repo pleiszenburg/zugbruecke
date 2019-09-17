@@ -14,20 +14,14 @@ Caution: **MODULE LAYOUT CHANGE BREAKING BACKWARDS COMPATIBILITY!**
 |            |     import zugbruecke as ctypes                   +     import zugbruecke.ctypes as ctypes            +
 |            |     from zugbruecke import c_double               +     from zugbruecke.ctypes import c_double        +
 +------------+---------------------------------------------------+---------------------------------------------------+
-
-Previously, *zugbruecke* or parts of it could be imported as follows:
-
-.. code:: python
-
-	import zugbruecke as ctypes
-	from zugbruecke import c_double
-
-From now on, the ``ctypes`` drop-in replacement interface is located inside a new sub-module, ``zugbruecke.ctypes``. Import as follows:
-
-.. code:: python
-
-	import zugbruecke.ctypes as ctypes
-	from zugbruecke.ctypes import c_double
+| session    | .. code:: python                                  + .. code:: python                                  +
+| class      |                                                   +                                                   +
+|            |     zugbruecke.session                            +     zugbruecke.ctypes_session                     +
++------------+---------------------------------------------------+---------------------------------------------------+
+| commands   | - ``wine-python``                                 + - ``wenv python``                                 +
+|            | - ``wine-pip``                                    + - ``wenv pip``                                    +
+|            | - ``wine-pytest``                                 + - ``wenv pytest``                                 +
++------------+---------------------------------------------------+---------------------------------------------------+
 
 The above significant change was mandatory for allowing to cleanup a lot of old code and to remove long-standing bugs. The main issue was that importing ``zugbruecke`` would implicitly start a new session. This could not be prohibited. With the new package layout, it becomes possible to import sub-modules of ``zugbruecke`` without implicitly starting a session. One of the more significant added benefits therefore is that this change also allows much more fine-grained tests.
 
