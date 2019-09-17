@@ -192,20 +192,34 @@ class env_class:
 			shutil.rmtree(self._p['wineprefix'])
 
 		# Start wine server into prepared environment
+		_test_env = {k: os.environ[k] for k in os.environ.keys()}
 		for k in os.environ.keys():
 			print('- %s == %s' % (k, os.environ[k]))
 		print(os.listdir('/opt/wine-staging/bin/'))
 		out, err = subprocess.Popen(
 			['which', 'wine'],
 			stdout = subprocess.PIPE, stderr = subprocess.PIPE,
-			env = self._envvar_dict
 			).communicate()
 		print(out.decode('utf-8'))
 		print(err.decode('utf-8'))
 		out, err = subprocess.Popen(
 			['which', 'wine'],
 			stdout = subprocess.PIPE, stderr = subprocess.PIPE,
+			env = self._test_env
+			).communicate()
+		print(out.decode('utf-8'))
+		print(err.decode('utf-8'))
+			['which', 'wine'],
+			stdout = subprocess.PIPE, stderr = subprocess.PIPE,
 			env = self._envvar_dict
+			).communicate()
+		print(out.decode('utf-8'))
+		print(err.decode('utf-8'))
+		self._test_env.update(self._envvar_dict)
+		out, err = subprocess.Popen(
+			['which', 'wine'],
+			stdout = subprocess.PIPE, stderr = subprocess.PIPE,
+			env = self._test_env
 			).communicate()
 		print(out.decode('utf-8'))
 		print(err.decode('utf-8'))
