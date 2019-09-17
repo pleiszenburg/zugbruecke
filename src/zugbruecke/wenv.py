@@ -176,6 +176,20 @@ class env_class:
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# ENSURE ENVIRONMENT
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+	def ensure(self):
+
+		self.setup_prefix()
+		self.setup_python()
+		self.wine_47766_workaround() # must run after setup_python and before setup_pip
+		self.setup_pip()
+		self.setup_pytest()
+		self.setup_coverage()
+
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # SETUP
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -368,12 +382,7 @@ class env_class:
 	def _cli_init(self):
 		"sets up an environment (including Python interpreter, pip and pytest)"
 
-		self.setup_prefix()
-		self.setup_python()
-		self.wine_47766_workaround() # must run after setup_python and before setup_pip
-		self.setup_pip()
-		self.setup_pytest()
-		self.setup_coverage()
+		self.ensure()
 
 
 	def _cli_init_coverage(self):

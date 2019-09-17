@@ -55,6 +55,7 @@ from .rpc import (
 	mp_client_safe_connect,
 	mp_server_class
 	)
+from ..wenv import env_class
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -344,6 +345,9 @@ class session_client_class():
 
 		# Log status
 		self.log.out('[session-client] STARTING (STAGE 2) ...')
+
+		# Ensure a working Wine-Python environment
+		env_class(self.p).ensure()
 
 		# Prepare python command for ctypes server or interpreter
 		self.__prepare_python_command__()
