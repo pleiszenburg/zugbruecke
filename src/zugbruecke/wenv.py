@@ -346,6 +346,9 @@ class env_class:
 		subprocess.Popen(['wenv', 'pip', 'install', 'coverage']).wait()
 		subprocess.Popen(['wenv', 'pip', 'install', 'pytest-cov']).wait()
 
+
+	def setup_coverage_activate(self):
+
 		# Ensure that coverage is started with the Python interpreter
 		siteconfig_path = os.path.join(self._path_dict['sitepackages'], 'sitecustomize.py')
 		siteconfig_cnt = ''
@@ -371,6 +374,12 @@ class env_class:
 		self.setup_pip()
 		self.setup_pytest()
 		self.setup_coverage()
+
+
+	def _cli_init_coverage(self):
+		"enables coverage analysis inside wenv"
+
+		self.setup_coverage_activate()
 
 
 	def _cli_help(self):

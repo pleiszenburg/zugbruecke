@@ -59,6 +59,7 @@ upload_test:
 install:
 	pip install -U -e .[dev]
 	wenv init
+	wenv init_coverage
 
 test:
 	make docu
