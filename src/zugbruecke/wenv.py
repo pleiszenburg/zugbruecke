@@ -191,12 +191,8 @@ class env_class:
 			# Delete if overwrite is set
 			shutil.rmtree(self._p['wineprefix'])
 
-		# travis test
-		env = self._envvar_dict.copy()
-		env['PATH'] = os.environ['PATH']
-
 		# Start wine server into prepared environment
-		subprocess.Popen(['wine', 'wineboot', '-i'], env = env).wait()
+		subprocess.Popen(['wine', 'wineboot', '-i'], env = self._envvar_dict).wait()
 
 
 	def setup_python(self, overwrite = False):
