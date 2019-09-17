@@ -343,6 +343,7 @@ class env_class:
 
 		# Run pip install
 		subprocess.Popen(['wenv', 'pip', 'install', 'coverage']).wait()
+		subprocess.Popen(['wenv', 'pip', 'install', 'pytest-cov']).wait()
 
 		# Ensure that coverage is started with the Python interpreter
 		siteconfig_path = os.path.join(self._path_dict['sitepackages'], 'sitecustomize.py')
