@@ -6,6 +6,15 @@ Changes
 
 Caution: **MODULE LAYOUT CHANGE BREAKING BACKWARDS COMPATIBILITY!**
 
++------------+---------------------------------------------------+---------------------------------------------------+
+|            | **OLD**                                           + **NEW**                                           +
++------------+---------------------------------------------------+---------------------------------------------------+
+| import     | .. code:: python                                  + .. code:: python                                  +
+|            |                                                   +                                                   +
+|            |     import zugbruecke as ctypes                   +     import zugbruecke.ctypes as ctypes            +
+|            |     from zugbruecke import c_double               +     from zugbruecke.ctypes import c_double        +
++------------+---------------------------------------------------+---------------------------------------------------+
+
 Previously, *zugbruecke* or parts of it could be imported as follows:
 
 .. code:: python
