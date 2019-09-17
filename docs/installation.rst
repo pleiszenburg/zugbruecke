@@ -40,6 +40,8 @@ If you are interested in testing the latest work from the **development branch**
 
 	pip install git+https://github.com/pleiszenburg/zugbruecke.git@develop
 
+After installing the package with ``pip``, you may choose to manually initialize the "Wine Python environment" by running ``wenv init``. If you choose not to do this, ``zugbruecke`` will take care of it during its first use.
+
 Installing *zugbruecke* in development mode
 -------------------------------------------
 

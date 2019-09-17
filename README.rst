@@ -95,6 +95,8 @@ Installation
 | develop            + |build_develop|    + ``pip install git+https://github.com/pleiszenburg/zugbruecke.git@develop``  + |docs_develop|     +
 +--------------------+--------------------+-----------------------------------------------------------------------------+--------------------+
 
+After installing the package with ``pip``, you may choose to manually initialize the "Wine Python environment" by running ``wenv init``. If you choose not to do this, ``zugbruecke`` will take care of it during its first use.
+
 Examples
 ========
 
