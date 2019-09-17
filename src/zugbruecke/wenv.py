@@ -202,6 +202,13 @@ class env_class:
 			).communicate()
 		print(out.decode('utf-8'))
 		print(err.decode('utf-8'))
+		out, err = subprocess.Popen(
+			['which', 'wine'],
+			stdout = subprocess.PIPE, stderr = subprocess.PIPE,
+			env = self._envvar_dict
+			).communicate()
+		print(out.decode('utf-8'))
+		print(err.decode('utf-8'))
 		proc = subprocess.Popen(
 			['wine', 'wineboot', '-i'],
 			stdout = subprocess.PIPE, stderr = subprocess.PIPE,
