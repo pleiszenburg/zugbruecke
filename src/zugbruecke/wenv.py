@@ -192,6 +192,8 @@ class env_class:
 			# Delete if overwrite is set
 			shutil.rmtree(self._p['wineprefix'])
 
+		os.makedirs(self._p['wineprefix']) # HACK Wine on Travis CI expects folder to exist
+
 		# Start wine server into prepared environment
 		proc = subprocess.Popen(
 			['wine', 'wineboot', '-i'],
