@@ -252,7 +252,8 @@ class env_class:
 			os.remove(self._path_dict['stdlibzip'])
 
 			# HACK: Fix library path in pth-file (CPython >= 3.6)
-			os.unlink(self._path_dict['pth'])
+			with open(self._path_dict['pth'], 'w') as f:
+				f.write('Lib\n.\n\n# Uncomment to run site.main() automatically\nimport site\n')
 
 		# Create site-packages folder if it does not exist
 		if not os.path.exists(self._path_dict['sitepackages']):
