@@ -457,6 +457,28 @@ class env_class:
 			self._envvar_dict
 			)
 
+	def shebang(self):
+		"""Working around a lack of Unix specification ...
+		https://stackoverflow.com/q/4303128/1672565
+		https://unix.stackexchange.com/q/63979/28301
+		https://lists.gnu.org/archive/html/bug-sh-utils/2002-04/msg00020.html
+		"""
+
+		if len(sys.argv) < 2:
+			raise OSError('entry point meant to be used as a shebang but no file name was provided')
+
+		# Get Wine depending on arch
+		wine = self._wine_dict[self._p['arch']]
+
+		self.wine_47766_workaround()
+
+		# Replace this process with Wine
+		os.execvpe(
+			wine,
+			(wine, self._cmd_dict['python'], sys.argv[1]),
+			self._envvar_dict
+			)
+
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # CLI EXPORT
@@ -465,6 +487,11 @@ class env_class:
 def cli():
 
 	env_class().cli()
+
+
+def shebang():
+
+	env_class().shebang()
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

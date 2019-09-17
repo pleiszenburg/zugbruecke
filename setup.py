@@ -93,7 +93,10 @@ setup(
 		'wheel'
 		]},
 	zip_safe = False,
-	entry_points = {'console_scripts': ['wenv = zugbruecke.wenv:cli']},
+	entry_points = {'console_scripts': [
+		'wenv = zugbruecke.wenv:cli',
+		'_wenv_python = zugbruecke.wenv:shebang'
+		]},
 	classifiers = [
 		'Development Status :: 3 - Alpha',
 		'Intended Audience :: Developers',

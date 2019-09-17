@@ -139,7 +139,7 @@ Useful helpers
 Have a look at the ``wenv python``, ``wenv pip`` and ``wenv pytest`` commands
 (as well as ``wenv help``, ``wenv init`` and ``wenv init_coverage``).
 They actually work as one would expect ;) If you want, you can also write
-executable scripts and add ``#!/usr/bin/env wenv python`` at their top.
+executable scripts and add ``#!/usr/bin/env _wenv_python`` at their top.
 Check ``import os; os.name``, it will return ``nt``. Check the section on the
 `Wine Python environment`_ in the documentation.
 

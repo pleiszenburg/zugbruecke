@@ -23,6 +23,8 @@ Caution: **MODULE LAYOUT CHANGE BREAKING BACKWARDS COMPATIBILITY!**
 |            | - ``wine-pip``                                    + - ``wenv pip``                                    +
 |            | - ``wine-pytest``                                 + - ``wenv pytest``                                 +
 +------------+---------------------------------------------------+---------------------------------------------------+
+| shebang    | ``#!/usr/bin/env wine-python``                    + ``#!/usr/bin/env _wenv_python``                   +
++------------+---------------------------------------------------+---------------------------------------------------+
 
 The above significant change was mandatory for allowing to cleanup a lot of old code and to remove long-standing bugs. The main issue was that importing ``zugbruecke`` would implicitly start a new session. This could not be prohibited. With the new package layout, it becomes possible to import sub-modules of ``zugbruecke`` without implicitly starting a session. One of the more significant added benefits therefore is that this change also allows much more fine-grained tests.
 
