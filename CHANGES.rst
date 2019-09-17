@@ -13,6 +13,7 @@ Caution: **MODULE LAYOUT CHANGE BREAKING BACKWARDS COMPATIBILITY!**
 |            |                                                   +                                                   +
 |            |     import zugbruecke as ctypes                   +     import zugbruecke.ctypes as ctypes            +
 |            |     from zugbruecke import c_double               +     from zugbruecke.ctypes import c_double        +
+|            |                                                   +                                                   +
 +------------+---------------------------------------------------+---------------------------------------------------+
 | session    | .. code:: python                                  + .. code:: python                                  +
 | class      |                                                   +                                                   +
