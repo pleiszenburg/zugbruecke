@@ -31,4 +31,9 @@ specific language governing rights and limitations under the License.
 # IMPORT: zugbruecke core
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-from .core.session import session_class as ctypes_session
+import sys as _sys
+if not _sys.platform.startswith('win'):
+
+	from .core.session import session_class as ctypes_session
+
+del _sys
