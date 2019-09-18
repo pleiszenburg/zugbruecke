@@ -62,8 +62,9 @@ install:
 	wenv init_coverage
 
 test:
-	make docu
-	make test_quick
+	wenv python -m zugbruecke._server_ --id 2f258c54 --port_socket_wine 39614 --port_socket_unix 35379 --log_level 100 --log_write 0 --timeout_start 30
+	# make docu
+	# make test_quick
 
 test_quick:
 	make clean
