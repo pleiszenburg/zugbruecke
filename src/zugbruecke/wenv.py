@@ -319,6 +319,8 @@ class env_class:
 		if os.readlink(link_path) != pythonprefix:
 			raise OSError('"{LINK:s}" points to the wrong source'.format(LINK = link_path))
 
+		print('XXX %s XXX' % link_path) # XXX
+
 		self._p['pythonprefix'] = link_path
 		self._init_dicts()
 
