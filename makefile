@@ -67,7 +67,10 @@ test:
 	ls -lah /tmp/wenv-75360f3b/Lib/site-packages/zugbruecke/
 	python hack_importlib.py
 	wenv python -c "import pytest; print(pytest.__version__)"
-	wenv python -c "import zugbruecke; print(dir(zugbruecke))"
+	-cat /tmp/wenv-75360f3b/log*.txt
+	-wenv python -c "import zugbruecke; print(dir(zugbruecke))"
+	-cat /tmp/wenv-75360f3b/log*.txt
+	ls -lah /tmp/wenv-75360f3b/
 	wenv python -m zugbruecke._server_ --id 2f258c54 --port_socket_wine 39614 --port_socket_unix 35379 --log_level 100 --log_write 0 --timeout_start 30
 	# make docu
 	# make test_quick
