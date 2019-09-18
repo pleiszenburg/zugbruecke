@@ -62,9 +62,9 @@ install:
 	wenv init_coverage
 
 test:
-	ls -lah /tmp/wenv-75360f3b/lib/
-	ls -lah /tmp/wenv-75360f3b/lib/site-packages/
-	ls -lah /tmp/wenv-75360f3b/lib/site-packages/zugbruecke/
+	ls -lah /tmp/wenv-75360f3b/Lib/
+	ls -lah /tmp/wenv-75360f3b/Lib/site-packages/
+	ls -lah /tmp/wenv-75360f3b/Lib/site-packages/zugbruecke/
 	wenv python -c "import zugbruecke; print(dir(zugbruecke))"
 	wenv python -m zugbruecke._server_ --id 2f258c54 --port_socket_wine 39614 --port_socket_unix 35379 --log_level 100 --log_write 0 --timeout_start 30
 	# make docu
