@@ -231,6 +231,15 @@ class env_class:
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# DESTROY / UNINSTALL ENVIRONMENT
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+	def uninstall(self):
+
+		print('uninstall')
+
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # SETUP
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -421,7 +430,7 @@ class env_class:
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 	def _cli_init(self):
-		"sets up an environment (including Python interpreter, pip and pytest)"
+		"sets up an environment (including Wine prefix, Python interpreter, pip and pytest)"
 
 		self.ensure()
 
@@ -430,6 +439,12 @@ class env_class:
 		"enables coverage analysis inside wenv"
 
 		self.setup_coverage_activate()
+
+
+	def _cli_clean(self):
+		"removes current environment (including Wine prefix, Python interpreter, pip and pytest)"
+
+		self.uninstall()
 
 
 	def _cli_help(self):
