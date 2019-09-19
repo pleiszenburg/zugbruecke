@@ -67,8 +67,7 @@ test:
 
 test_quick:
 	make clean
-	-wenv python -m zugbruecke._server_ --id 2f258c54 --port_socket_wine 39614 --port_socket_unix 35379 --log_level 100 --log_write 0 --timeout_start 10
-	wenv pytest --capture=no
+	wenv pytest # --capture=no
 	make clean
-	pytest --cov=zugbruecke --cov-config=setup.cfg --capture=no
+	pytest --cov=zugbruecke --cov-config=setup.cfg # --capture=no
 	mv .coverage .coverage.e9.0 ; coverage combine ; coverage html

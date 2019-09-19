@@ -78,10 +78,6 @@ def run():
 		'timeout_start': args.timeout_start[0]
 		}
 
-	import sys
-	sys.stderr.write('SERVER UP ... 1 ')
-	sys.stderr.flush()
-
 	# Fire up wine server session with parsed parameters
 	session = session_server_class(parameter['id'], parameter)
 
