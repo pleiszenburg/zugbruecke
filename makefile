@@ -67,7 +67,7 @@ test:
 
 test_quick:
 	make clean
-	wenv pytest
+	wenv pytest --capture=no
 	make clean
-	pytest --cov=zugbruecke --cov-config=setup.cfg
+	pytest --cov=zugbruecke --cov-config=setup.cfg --capture=no
 	mv .coverage .coverage.e9.0 ; coverage combine ; coverage html

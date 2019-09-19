@@ -32,6 +32,7 @@ specific language governing rights and limitations under the License.
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 import ctypes
+import sys
 import time
 import traceback
 
@@ -58,6 +59,9 @@ class session_server_class:
 		self.id = session_id
 		self.p = parameter
 
+		sys.stderr.write('SERVER UP ... 2 ')
+		sys.stderr.flush()
+
 		# Connect to Unix side
 		self.rpc_client = mp_client_safe_connect(
 			socket_path = ('localhost', self.p['port_socket_unix']),
@@ -65,14 +69,26 @@ class session_server_class:
 			timeout_after_seconds = self.p['timeout_start']
 			)
 
+		sys.stderr.write('SERVER UP ... 3 ')
+		sys.stderr.flush()
+
 		# Start logging session and connect it with log on unix side
 		self.log = log_class(self.id, self.p, rpc_client = self.rpc_client)
+
+		sys.stderr.write('SERVER UP ... 4 ')
+		sys.stderr.flush()
 
 		# Status log
 		self.log.out('[session-server] STARTING ...')
 
+		sys.stderr.write('SERVER UP ... 5 ')
+		sys.stderr.flush()
+
 		# Mark session as up
 		self.up = True
+
+		sys.stderr.write('SERVER UP ... 6 ')
+		sys.stderr.flush()
 
 		# Offer methods for converting paths
 		path = path_class()
@@ -99,6 +115,9 @@ class session_server_class:
 			log = self.log,
 			terminate_function = self.__terminate__
 			)
+
+		sys.stderr.write('SERVER UP ... 7 ')
+		sys.stderr.flush()
 
 		# Register call: Accessing a dll
 		self.rpc_server.register_function(self.__load_library__, 'load_library')
