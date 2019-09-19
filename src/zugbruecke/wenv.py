@@ -43,6 +43,29 @@ from .core.log import c
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# PYTHON SSL FALLBACK
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+def _download(_down_url):
+	try:
+		return urllib.request.urlopen(_down_url)
+	except urllib.error.URLError as e:
+		import ssl
+		if not isinstance(e.args[0], ssl.SSLError):
+			raise e # Not an SSL issue - this is unexpected ...
+		try:
+			_ = ModuleNotFoundError
+			del _
+		except NameError:
+			ModuleNotFoundError = ImportError # Python 3.4 & 3.5
+		try:
+			import certifi
+		except ModuleNotFoundError:
+			raise SystemExit('SSL/TSL has issues - please install "certifi" and try again', e.args[0])
+		return urllib.request.urlopen(_down_url, cafile = certifi.where())
+
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # CONST
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -253,7 +276,7 @@ class env_class:
 			# Generate in-memory file-like-object
 			archive_zip = BytesIO()
 			# Download zip file from Python website into file-like-object
-			with urllib.request.urlopen(pyurl) as u:
+			with _download(pyurl) as u:
 				archive_zip.write(u.read())
 			# Unpack from memory to disk
 			with zipfile.ZipFile(archive_zip) as f:
@@ -330,7 +353,7 @@ class env_class:
 			return
 
 		# Download get-pip.py into memory
-		with urllib.request.urlopen('https://bootstrap.pypa.io/get-pip.py') as u:
+		with _download('https://bootstrap.pypa.io/get-pip.py') as u:
 			getpip_bin = u.read()
 
 		# Start Python on top of Wine
