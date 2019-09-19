@@ -47,6 +47,15 @@ If you are interested in testing the latest work from the **development branch**
 
 After installing the package with ``pip``, you may choose to manually initialize the "Wine Python environment" by running ``wenv init``. If you choose not to do this, ``zugbruecke`` will take care of it during its first use.
 
+Possible problem: ``OSError: [WinError 6] Invalid handle``
+----------------------------------------------------------
+
+On older versions of Linux such as *Ubuntu 14.04* alias *Trusty Tahr* (released 2014), you may observe errors when running ``wenv python``. Most commonly, they will present themselves as ``OSError: [WinError 6] Invalid handle: 'z:\\...`` triggered by calling ``os.listdir`` in ``pip`` or ``importlib`` on folders related to ``zugbruecke``. You can easily test whether you are affected by this issue or not by running ``wenv python -c "import zugbruecke; print(dir(zugbruecke))"``. If you see the described ``OSError`` instead of meaningful output, you are affected.
+
+A **clean solution** is to upgrade to a younger version of Linux. E.g. *Ubuntu 16.04* alias *Xenial Xerus* (released 2016) is known to work.
+
+If upgrading Linux is not an option, there is a very **unclean workaround**. DO NOT FOLLOW THESE INSTRUCTIONS UNLESS YOU HAVE ABSOLUTELY NO OTHER OPTION. Typically, ``zugbruecke`` install its *Wine Python environment* into ``$HOME/.zugbruecke/win32-python3.X.Y/`` (where X and Y are the minor and micro versions of *Wine Python*). In ``$HOME/.zugbruecke/win32-python3.X.Y/Lib/site-packages`` you will find two symbolic links: ``zugbruecke`` and ``zugbruecke.egg-info``. They directly link to the corresponding folders in the ``site-packages`` directory of your *Unix Python* environment. Make a note of where the symbolic links are pointing to. Remove the symbolic links and substitute them with identically named folders. Copy the contents of ``site-packages/zugbruecke`` and ``zugbruecke/zugbruecke.egg-info`` in your *Unix Python environment* to their new counterparts in your *Wine Python environment*. Next, you have to open ``site-packages/zugbruecke/wenv.py`` from your *Unix Python environment*. Find the method ``ensure`` and remove/comment the ``self.setup_zugbruecke()`` instruction.
+
 Installing *zugbruecke* in development mode
 -------------------------------------------
 
