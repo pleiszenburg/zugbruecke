@@ -81,17 +81,22 @@ setup(
 	scripts = [],
 	include_package_data = True,
 	install_requires = [],
-	extras_require = {'dev': [
-		'pytest',
-		'coverage',
-		'pytest-cov',
-		'python-language-server',
-		'setuptools',
-		'Sphinx',
-		'sphinx_rtd_theme',
-		'twine',
-		'wheel'
-		]},
+	extras_require = {
+		'dev': [
+			'pytest',
+			'coverage',
+			'pytest-cov',
+			'python-language-server',
+			'setuptools',
+			'Sphinx',
+			'sphinx_rtd_theme',
+			'twine',
+			'wheel'
+			],
+		'certifi': [
+			'certifi'
+			]
+		},
 	zip_safe = False,
 	entry_points = {'console_scripts': [
 		'wenv = zugbruecke.wenv:cli',

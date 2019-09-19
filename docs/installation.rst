@@ -47,6 +47,15 @@ If you are interested in testing the latest work from the **development branch**
 
 After installing the package with ``pip``, you may choose to manually initialize the "Wine Python environment" by running ``wenv init``. If you choose not to do this, ``zugbruecke`` will take care of it during its first use.
 
+Possible problem: ``SSL/TSL has issues - please install "certifi" and try again``
+---------------------------------------------------------------------------------
+
+While running ``wenv init``, the command may terminate with a ``SystemExit`` exception entitled ``SSL/TSL has issues - please install "certifi" and try again``. This may happen on systems with older versions of ``libssl`` (``libopenssl``) or configuration issues regarding the SSL certificate store. You will most likely see additional information telling you that an SSL certificate could not be validated.
+
+In most cases, a **clean solution** is to install ``certifi`` with pip: ``pip install -U certifi``. The ``-U`` option forces ``pip`` to update ``certifi`` if it is already installed. Once you have installed or updated ``certifi``, you can run ``wenv init`` again.
+
+On known problematic systems, you may also choose to install ``zugbruecke`` directly with ``certifi`` included: ``pip install zugbruecke[certifi]``.
+
 Possible problem: ``OSError: [WinError 6] Invalid handle``
 ----------------------------------------------------------
 
