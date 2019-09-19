@@ -71,7 +71,7 @@ def _download(_down_url):
 
 def _symlink(src, dest):
 
-	if not os.path.exists(dest):
+	if not os.path.lexists(dest):
 		os.symlink(src, dest)
 
 	if not os.path.exists(dest):
@@ -216,6 +216,50 @@ class env_class:
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# WINE BUG #47766 / ZUGBRUECKE BUG #49
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+	def wine_47766_workaround(self):
+		"""
+		PathAllocCanonicalize treats path segments start with dots wrong.
+		https://bugs.winehq.org/show_bug.cgi?id=47766
+		"""
+
+		is_clean = lambda path: not any([seg.startswith('.') for seg in path.split(os.path.sep)])
+
+		pythonprefix = os.path.abspath(self._p['pythonprefix'])
+
+		if pythonprefix != self._p['pythonprefix']:
+			self._p['pythonprefix'] = pythonprefix
+			self._init_dicts()
+
+		if is_clean(self._p['pythonprefix']):
+			return
+
+		import tempfile, hashlib
+		link_path = os.path.join(
+			tempfile.gettempdir(),
+			'wenv-' + hashlib.sha256(self._p['pythonprefix'].encode('utf-8')).hexdigest()[:8],
+			)
+		if not is_clean(link_path):
+			raise OSError('unable to create clean link path: "{LINK:s}"'.format(LINK = link_path))
+
+		if os.path.exists(self._p['pythonprefix']):
+			_symlink(self._p['pythonprefix'], link_path)
+
+		self._p['pythonprefix'] = link_path
+		self._init_dicts()
+
+
+	def wine_47766_workaround_uninstall(self):
+
+		self.wine_47766_workaround()
+
+		if os.path.lexists(self._p['pythonprefix']):
+			os.unlink(self._p['pythonprefix'])
+
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # ENSURE ENVIRONMENT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -236,7 +280,17 @@ class env_class:
 
 	def uninstall(self):
 
-		print('uninstall')
+		# Does Wine prefix exist?
+		if os.path.exists(self._p['wineprefix']):
+			# Delete tree
+			shutil.rmtree(self._p['wineprefix'])
+
+		# Does Python prefix exist?
+		if os.path.exists(self._p['pythonprefix']):
+			# Delete tree
+			shutil.rmtree(self._p['pythonprefix'])
+
+		self.wine_47766_workaround_uninstall()
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -323,37 +377,6 @@ class env_class:
 		if not os.path.exists(self._path_dict['sitepackages']):
 			# Create folder
 			os.makedirs(self._path_dict['sitepackages'])
-
-
-	def wine_47766_workaround(self):
-		"""
-		PathAllocCanonicalize treats path segments start with dots wrong.
-		https://bugs.winehq.org/show_bug.cgi?id=47766
-		"""
-
-		is_clean = lambda path: not any([seg.startswith('.') for seg in path.split(os.path.sep)])
-
-		pythonprefix = os.path.abspath(self._p['pythonprefix'])
-
-		if pythonprefix != self._p['pythonprefix']:
-			self._p['pythonprefix'] = pythonprefix
-			self._init_dicts()
-
-		if is_clean(self._p['pythonprefix']):
-			return
-
-		import tempfile, hashlib
-		link_path = os.path.join(
-			tempfile.gettempdir(),
-			'wenv-' + hashlib.sha256(self._p['pythonprefix'].encode('utf-8')).hexdigest()[:8],
-			)
-		if not is_clean(link_path):
-			raise OSError('unable to create clean link path: "{LINK:s}"'.format(LINK = link_path))
-
-		_symlink(self._p['pythonprefix'], link_path)
-
-		self._p['pythonprefix'] = link_path
-		self._init_dicts()
 
 
 	def setup_pip(self):
