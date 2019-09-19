@@ -83,6 +83,7 @@ class config_class(dict):
 			winedebug = '-all', # Wine debug output off
 			wineprefix = os.path.join(DIR, ARCH + '-wine'),
 			pythonprefix = os.path.join(DIR, '%s-python%s' % (ARCH, VERSION)),
+			_issues_50_workaround = False, # Workaround for zugbruecke issue #50 (symlinks ...)
 			)
 
 

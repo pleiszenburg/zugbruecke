@@ -34,7 +34,7 @@ language: python
 # Python 3.4 appears to not being offered for xenial at the moment
 matrix:
     include:
-        - dist: xenial
+        - dist: trusty
           python: "3.4"
         - dist: xenial
           python: "3.5"
