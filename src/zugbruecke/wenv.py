@@ -66,6 +66,23 @@ def _download(_down_url):
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# HELPER ROUTINES
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+def _symlink(src, dest):
+
+	if not os.path.exists(dest):
+		os.symlink(src, dest)
+
+	if not os.path.exists(dest):
+		raise OSError('"{LINK:s}" could not be created'.format(LINK = dest))
+	if not os.path.islink(dest):
+		raise OSError('"{LINK:s}" is not a symlink'.format(LINK = dest))
+	if os.readlink(dest) != src:
+		raise OSError('"{LINK:s}" points to the wrong source'.format(LINK = dest))
+
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # CONST
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -209,6 +226,7 @@ class env_class:
 		self.wine_47766_workaround() # must run after setup_python and before setup_pip
 		self.setup_pip()
 		self.setup_pytest()
+		self.setup_zugbruecke()
 		self.setup_coverage()
 
 
@@ -297,17 +315,6 @@ class env_class:
 			# Create folder
 			os.makedirs(self._path_dict['sitepackages'])
 
-		# Package path in wine-python site-packages
-		wine_pkg_path = os.path.abspath(os.path.join(self._path_dict['sitepackages'], 'zugbruecke'))
-
-		# Package path in unix-python site-packages
-		unix_pkg_path = os.path.abspath(os.path.dirname(__file__))
-
-		# If package has not been linked into site-packages ...
-		if not os.path.exists(wine_pkg_path):
-			# Link zugbruecke package into wine-python site-packages
-			os.symlink(unix_pkg_path, wine_pkg_path)
-
 
 	def wine_47766_workaround(self):
 		"""
@@ -333,14 +340,8 @@ class env_class:
 			)
 		if not is_clean(link_path):
 			raise OSError('unable to create clean link path: "{LINK:s}"'.format(LINK = link_path))
-		if not os.path.exists(link_path):
-			os.symlink(self._p['pythonprefix'], link_path)
-		if not os.path.exists(link_path):
-			raise OSError('"{LINK:s}" could not be created'.format(LINK = link_path))
-		if not os.path.islink(link_path):
-			raise OSError('"{LINK:s}" is not a symlink'.format(LINK = link_path))
-		if os.readlink(link_path) != pythonprefix:
-			raise OSError('"{LINK:s}" points to the wrong source'.format(LINK = link_path))
+
+		_symlink(self._p['pythonprefix'], link_path)
 
 		self._p['pythonprefix'] = link_path
 		self._init_dicts()
@@ -371,6 +372,23 @@ class env_class:
 
 		# Run pip install
 		subprocess.Popen(['wenv', 'pip', 'install', 'pytest']).wait()
+
+
+	def setup_zugbruecke(self):
+
+		# Package path in unix-python site-packages
+		unix_pkg_path = os.path.abspath(os.path.dirname(__file__))
+		# Package path in wine-python site-packages
+		wine_pkg_path = os.path.abspath(os.path.join(self._path_dict['sitepackages'], 'zugbruecke'))
+		# Link zugbruecke package into wine-python site-packages
+		_symlink(unix_pkg_path, wine_pkg_path)
+
+		# Egg path in unix-python site-packages
+		unix_egg_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'zugbruecke.egg-info'))
+		# Egg path in wine-python site-packages
+		wine_egg_path = os.path.abspath(os.path.join(self._path_dict['sitepackages'], 'zugbruecke.egg-info'))
+		# Link zugbruecke egg into wine-python site-packages
+		_symlink(unix_egg_path, wine_egg_path)
 
 
 	def setup_coverage(self):
