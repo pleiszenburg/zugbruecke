@@ -100,7 +100,7 @@ class config_class(dict):
 			os.path.join('/etc/zugbruecke', CONFIG_FN),
 			os.path.join(self.__get_default_config_directory__(), CONFIG_FN),
 			os.environ.get('ZUGBRUECKE'),
-			os.path.join(os.environ.get('ZUGBRUECKE'), CONFIG_FN),
+			os.path.join(os.environ.get('ZUGBRUECKE'), CONFIG_FN) if os.environ.get('ZUGBRUECKE') is not None else None,
 			os.path.join(os.getcwd(), CONFIG_FN),
 			]:
 
