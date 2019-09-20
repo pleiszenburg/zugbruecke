@@ -25,12 +25,16 @@ Caution: **MODULE LAYOUT CHANGE BREAKING BACKWARDS COMPATIBILITY!**
 +------------+---------------------------------------------------+---------------------------------------------------+
 | shebang    | ``#!/usr/bin/env wine-python``                    + ``#!/usr/bin/env _wenv_python``                   +
 +------------+---------------------------------------------------+---------------------------------------------------+
+| config     | ``{"version": "3.5.3"}``                          + ``{"pythonversion": "3.7.4"}``                    +
++------------+---------------------------------------------------+---------------------------------------------------+
 
 The above significant change was mandatory for allowing to cleanup a lot of old code and to remove long-standing bugs. The main issue was that importing ``zugbruecke`` would implicitly start a new session. This could not be prohibited. With the new package layout, it becomes possible to import sub-modules of ``zugbruecke`` without implicitly starting a session. One of the more significant added benefits therefore is that this change also allows much more fine-grained tests.
 
 As a consequence, ``zugbruecke.current_session`` is no longer available. ``zugbruecke.ctypes`` on its own is now the default session. Besides, the class ``zugbruecke.session`` was renamed into ``zugbruecke.ctypes_session`` and has now a fully compatible ``ctypes`` drop-in replacement interface as well. Both, ``zugbruecke.ctypes`` and custom sessions constructed from ``zugbruecke.ctypes_session``, now have methods and properties prefixed with ``_zb_`` for manipulating their configuration, termination and Wine-related tasks.
 
 Furthermore, the shell scripts ``wine-python``, ``wine-pip`` and ``wine-pytest`` have been removed. Their functionality was consolidated into a single new script, ``wenv``. One can now call ``wenv python``, ``wenv pip`` and ``wenv pytest``. This change was necessary for allowing a more generic interface to entry points of arbitrary third party packages. Run ``wenv help`` for more information.
+
+The ``version`` configuration parameter for controlling the version of *Wine Python* has been renamed to ``pythonversion``.
 
 Wine 2.x and 3.x are no longer supported. Please use Wine 4.x or later.
 

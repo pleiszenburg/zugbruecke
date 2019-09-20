@@ -307,7 +307,7 @@ class session_client_class():
 
 		# Log status
 		self.log.out('[session-client] STARTING (STAGE 1) ...')
-		self.log.out('[session-client] Configured Wine-Python version is %s for %s.' % (self.p['version'], self.p['arch']))
+		self.log.out('[session-client] Configured Wine-Python version is %s for %s.' % (self.p['pythonversion'], self.p['arch']))
 		self.log.out('[session-client] Log socket port: %d.' % self.p['port_socket_unix'])
 
 		# Store current working directory

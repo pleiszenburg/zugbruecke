@@ -85,14 +85,12 @@ Changes the verbosity of *zugbuecke*. ``0`` for no logs, ``10`` for maximum logs
 
 Defines the architecture of *Wine* & *Wine* *Python*. It can be set to ``win32`` or ``win64``. Default is ``win32``, even on 64-bit systems. It appears to be a more stable configuration.
 
-``version`` (str)
-^^^^^^^^^^^^^^^^^
+``pythonversion`` (str)
+^^^^^^^^^^^^^^^^^^^^^^^
 
-The ``version`` parameter tells *zugbuecke* what version of the *Windows* *CPython* interpreter it should use. By default, it is set to ``3.5.3``.
+The ``pythonversion`` parameter tells *zugbuecke* what version of the *Windows* *CPython* interpreter it should use. By default, it is set to ``3.7.4``.
 
-Please note that 3.4 and earlier are not supported. In the opposite direction, at the time of writing, 3.6 (and later) does not work under *Wine* due to a `bug in Wine`_.
-
-.. _bug in Wine: https://github.com/pleiszenburg/zugbruecke/issues/13
+Please note that 3.4 and earlier are not supported. In the opposite direction, at the time of writing, 3.6 (and later) do require Wine 4.0 or later.
 
 ``dir`` (str)
 ^^^^^^^^^^^^^
