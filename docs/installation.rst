@@ -54,7 +54,7 @@ While running ``wenv init``, the command may terminate with a ``SystemExit`` exc
 
 In most cases, a **clean solution** is to install ``certifi`` with pip: ``pip install -U certifi``. The ``-U`` option forces ``pip`` to update ``certifi`` if it is already installed. Once you have installed or updated ``certifi``, you can run ``wenv init`` again.
 
-On known problematic systems, you may also choose to install ``zugbruecke`` directly with ``certifi`` included: ``pip install zugbruecke[certifi]``.
+On known problematic systems, you may also choose to install ``zugbruecke`` directly with ``certifi`` included: ``pip install zugbruecke[certifi]``. Notice that this may have undesired security implications.
 
 Possible problem: ``OSError: [WinError 6] Invalid handle``
 ----------------------------------------------------------
@@ -63,7 +63,7 @@ On older versions of Linux such as *Ubuntu 14.04* alias *Trusty Tahr* (released 
 
 A **clean solution** is to upgrade to a younger version of Linux. E.g. *Ubuntu 16.04* alias *Xenial Xerus* (released 2016) is known to work.
 
-If upgrading Linux is not an option, there is a very **unclean workaround**. DO NOT FOLLOW THESE INSTRUCTIONS UNLESS YOU HAVE ABSOLUTELY NO OTHER OPTION. Typically, ``zugbruecke`` install its *Wine Python environment* into ``$HOME/.zugbruecke/win32-python3.X.Y/`` (where X and Y are the minor and micro versions of *Wine Python*). In ``$HOME/.zugbruecke/win32-python3.X.Y/Lib/site-packages`` you will find two symbolic links: ``zugbruecke`` and ``zugbruecke.egg-info``. They directly link to the corresponding folders in the ``site-packages`` directory of your *Unix Python* environment. Make a note of where the symbolic links are pointing to. Remove the symbolic links and substitute them with identically named folders. Copy the contents of ``site-packages/zugbruecke`` and ``zugbruecke/zugbruecke.egg-info`` in your *Unix Python environment* to their new counterparts in your *Wine Python environment*. Next, you have to open ``site-packages/zugbruecke/wenv.py`` from your *Unix Python environment*. Find the method ``ensure`` and remove/comment the ``self.setup_zugbruecke()`` instruction.
+If upgrading Linux is not an option, there is a **less clean workaround**. Before running ``wenv init``, you can set the configuration option ``_issues_50_workaround`` to ``True``, see chapter on :ref:`configuration <configuration>`. If you have already initialized your *Wine Python environment* with ``wenv init``, you must remove it with ``wenv clean`` and then re-initialize it with ``wenv init``. Notice that - if you are using this workaround - removing your *Wine Python environment* with ``wenv clean`` and re-initializing it with ``wenv init`` is necessary after every update of ``zugbruecke``.
 
 Installing *zugbruecke* in development mode
 -------------------------------------------
