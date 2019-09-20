@@ -38,6 +38,11 @@ There are two optional additions to the above rules: ``/etc/zugbruecke`` and the
 
 Parameters passed directly into the *zugbuecke* session constructor will always be given priority. Beyond that, missing parameters are being looked for location after location in the above listed places. If, after checking for configuration files in all those locations, there are still parameters left undefined, *zugbuecke* will fill them with its defaults. A parameter found in a location higher in the list will always be given priority over a the same parameter with different content found in a location further down the list.
 
+Configuration environment variables
+-----------------------------------
+
+Independently of the ``ZUGBRUECKE`` environment variable, all configurable parameters of ``zugbruecke`` can directly be overridden with environment variables. All values coming from configuration files as well as re-configurations at run-time will then be ignored for this particular parameter. Take the name of any configurable parameter, convert it to upper case and prefix it with ``ZUGBRUECKE``. Example: The ``arch`` parameter can be overridden by declaring the ``ZUGBRUECKE_ARCH`` environment variable.
+
 .. _reconfiguration:
 
 Re-configuration during run-time
