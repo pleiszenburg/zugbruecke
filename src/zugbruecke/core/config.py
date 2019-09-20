@@ -65,6 +65,15 @@ class config_class(dict):
 
 	def __getitem__(self, key):
 
+		env_var = 'ZUGBRUECKE_{NAME:s}'.format(NAME = key.upper())
+		if env_var in os.environ.keys():
+			value = os.environ[env_var]
+			if len(value) > 0:
+				if value.isnumeric():
+					return int(value)
+				else:
+					return value
+
 		if key in self.keys():
 			return super().__getitem__(key)
 
