@@ -20,6 +20,11 @@ Command: ``wenv init``
 
 If you have not already used ``zugbruecke`` for calling into functions, you may have to initialize the *Wine Python environment* first by running ``wenv init``. This will configure *Wine*, install a *Windows* version of *Python* and fetch *pip*, *setuptools*, *pytest*, *coverage* and further dependencies.
 
+Command: ``wenv clean``
+-----------------------
+
+This command is useful if you want to remove your current *Wine Python environment* and all related data (including the relevant *Wine* prefix). ``zugbruecke``'s configuration is left untouched.
+
 Command: ``wenv help``
 ----------------------
 

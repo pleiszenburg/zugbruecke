@@ -34,14 +34,18 @@ language: python
 # Python 3.4 appears to not being offered for xenial at the moment
 matrix:
     include:
-        - dist: xenial
+        - dist: trusty
           python: "3.4"
+          env: ZUGBRUECKE=.travis-trusty.zugbruecke.json
         - dist: xenial
           python: "3.5"
+          env: ZUGBRUECKE=.travis-xenial.zugbruecke.json
         - dist: xenial
           python: "3.6"
+          env: ZUGBRUECKE=.travis-xenial.zugbruecke.json
         - dist: xenial
           python: "3.7"
+          env: ZUGBRUECKE=.travis-xenial.zugbruecke.json
 
 # Get wine and mingw cross compiler
 # http://ubuntuhandbook.org/index.php/2017/01/install-wine-2-0-ubuntu-16-04-14-04-16-10/
@@ -68,7 +72,6 @@ before_install:
   - pytest --version
   - uname -a
   - lsb_release -a
-  - cp .travis.zugbruecke.json .zugbruecke.json
 
 # command to install dependencies and module
 install:

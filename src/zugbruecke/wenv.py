@@ -71,7 +71,7 @@ def _download(_down_url):
 
 def _symlink(src, dest):
 
-	if not os.path.exists(dest):
+	if not os.path.lexists(dest):
 		os.symlink(src, dest)
 
 	if not os.path.exists(dest):
@@ -216,6 +216,50 @@ class env_class:
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# WINE BUG #47766 / ZUGBRUECKE BUG #49
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+	def wine_47766_workaround(self):
+		"""
+		PathAllocCanonicalize treats path segments start with dots wrong.
+		https://bugs.winehq.org/show_bug.cgi?id=47766
+		"""
+
+		is_clean = lambda path: not any([seg.startswith('.') for seg in path.split(os.path.sep)])
+
+		pythonprefix = os.path.abspath(self._p['pythonprefix'])
+
+		if pythonprefix != self._p['pythonprefix']:
+			self._p['pythonprefix'] = pythonprefix
+			self._init_dicts()
+
+		if is_clean(self._p['pythonprefix']):
+			return
+
+		import tempfile, hashlib
+		link_path = os.path.join(
+			tempfile.gettempdir(),
+			'wenv-' + hashlib.sha256(self._p['pythonprefix'].encode('utf-8')).hexdigest()[:8],
+			)
+		if not is_clean(link_path):
+			raise OSError('unable to create clean link path: "{LINK:s}"'.format(LINK = link_path))
+
+		if os.path.exists(self._p['pythonprefix']):
+			_symlink(self._p['pythonprefix'], link_path)
+
+		self._p['pythonprefix'] = link_path
+		self._init_dicts()
+
+
+	def wine_47766_workaround_uninstall(self):
+
+		self.wine_47766_workaround()
+
+		if os.path.lexists(self._p['pythonprefix']):
+			os.unlink(self._p['pythonprefix'])
+
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # ENSURE ENVIRONMENT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -228,6 +272,25 @@ class env_class:
 		self.setup_pytest()
 		self.setup_zugbruecke()
 		self.setup_coverage()
+
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# DESTROY / UNINSTALL ENVIRONMENT
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+	def uninstall(self):
+
+		# Does Wine prefix exist?
+		if os.path.exists(self._p['wineprefix']):
+			# Delete tree
+			shutil.rmtree(self._p['wineprefix'])
+
+		# Does Python prefix exist?
+		if os.path.exists(self._p['pythonprefix']):
+			# Delete tree
+			shutil.rmtree(self._p['pythonprefix'])
+
+		self.wine_47766_workaround_uninstall()
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -316,37 +379,6 @@ class env_class:
 			os.makedirs(self._path_dict['sitepackages'])
 
 
-	def wine_47766_workaround(self):
-		"""
-		PathAllocCanonicalize treats path segments start with dots wrong.
-		https://bugs.winehq.org/show_bug.cgi?id=47766
-		"""
-
-		is_clean = lambda path: not any([seg.startswith('.') for seg in path.split(os.path.sep)])
-
-		pythonprefix = os.path.abspath(self._p['pythonprefix'])
-
-		if pythonprefix != self._p['pythonprefix']:
-			self._p['pythonprefix'] = pythonprefix
-			self._init_dicts()
-
-		if is_clean(self._p['pythonprefix']):
-			return
-
-		import tempfile, hashlib
-		link_path = os.path.join(
-			tempfile.gettempdir(),
-			'wenv-' + hashlib.sha256(self._p['pythonprefix'].encode('utf-8')).hexdigest()[:8],
-			)
-		if not is_clean(link_path):
-			raise OSError('unable to create clean link path: "{LINK:s}"'.format(LINK = link_path))
-
-		_symlink(self._p['pythonprefix'], link_path)
-
-		self._p['pythonprefix'] = link_path
-		self._init_dicts()
-
-
 	def setup_pip(self):
 
 		# Exit if it exists
@@ -380,15 +412,27 @@ class env_class:
 		unix_pkg_path = os.path.abspath(os.path.dirname(__file__))
 		# Package path in wine-python site-packages
 		wine_pkg_path = os.path.abspath(os.path.join(self._path_dict['sitepackages'], 'zugbruecke'))
-		# Link zugbruecke package into wine-python site-packages
-		_symlink(unix_pkg_path, wine_pkg_path)
+
+		if not self._p['_issues_50_workaround']:
+			# Link zugbruecke package into wine-python site-packages
+			_symlink(unix_pkg_path, wine_pkg_path)
+		else:
+			if not os.path.exists(wine_pkg_path):
+				# Copy zugbruecke package into wine-python site-packages
+				shutil.copytree(unix_pkg_path, wine_pkg_path)
 
 		# Egg path in unix-python site-packages
 		unix_egg_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'zugbruecke.egg-info'))
 		# Egg path in wine-python site-packages
 		wine_egg_path = os.path.abspath(os.path.join(self._path_dict['sitepackages'], 'zugbruecke.egg-info'))
-		# Link zugbruecke egg into wine-python site-packages
-		_symlink(unix_egg_path, wine_egg_path)
+
+		if not self._p['_issues_50_workaround']:
+			# Link zugbruecke egg into wine-python site-packages
+			_symlink(unix_egg_path, wine_egg_path)
+		else:
+			if not os.path.exists(wine_egg_path):
+				# Copy zugbruecke egg into wine-python site-packages
+				shutil.copytree(unix_egg_path, wine_egg_path)
 
 
 	def setup_coverage(self):
@@ -421,7 +465,7 @@ class env_class:
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 	def _cli_init(self):
-		"sets up an environment (including Python interpreter, pip and pytest)"
+		"sets up an environment (including Wine prefix, Python interpreter, pip and pytest)"
 
 		self.ensure()
 
@@ -430,6 +474,12 @@ class env_class:
 		"enables coverage analysis inside wenv"
 
 		self.setup_coverage_activate()
+
+
+	def _cli_clean(self):
+		"removes current environment (including Wine prefix, Python interpreter, pip and pytest)"
+
+		self.uninstall()
 
 
 	def _cli_help(self):
