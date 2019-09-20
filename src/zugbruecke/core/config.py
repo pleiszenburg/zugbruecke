@@ -96,10 +96,10 @@ class config_class(dict):
 
 		# Look for config in the usual spots
 		for fn in [
-			'/etc/zugbruecke',
-			self.__get_default_config_directory__(),
+			os.path.join('/etc/zugbruecke', CONFIG_FN),
+			os.path.join(self.__get_default_config_directory__(), CONFIG_FN),
 			os.environ.get('ZUGBRUECKE'),
-			os.getcwd(),
+			os.path.join(os.getcwd(), CONFIG_FN),
 			]:
 
 			cnt_dict = self.__load_config_from_file__(fn)
@@ -108,14 +108,11 @@ class config_class(dict):
 				yield cnt_dict
 
 
-	def __load_config_from_file__(self, file_location):
+	def __load_config_from_file__(self, try_path):
 
 		# If there is a path ...
-		if file_location is None:
+		if try_path is None:
 			return
-
-		# Compile path
-		try_path = os.path.join(file_location, CONFIG_FN)
 
 		# Is this a file?
 		if not os.path.isfile(try_path):
