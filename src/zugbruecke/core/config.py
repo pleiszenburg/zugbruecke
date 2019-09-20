@@ -96,9 +96,11 @@ class config_class(dict):
 
 		# Look for config in the usual spots
 		for fn in [
+			'/etc/zugbruecke',
 			os.path.join('/etc/zugbruecke', CONFIG_FN),
 			os.path.join(self.__get_default_config_directory__(), CONFIG_FN),
 			os.environ.get('ZUGBRUECKE'),
+			os.path.join(os.environ.get('ZUGBRUECKE'), CONFIG_FN),
 			os.path.join(os.getcwd(), CONFIG_FN),
 			]:
 
