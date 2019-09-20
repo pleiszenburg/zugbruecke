@@ -84,9 +84,9 @@ Prerequisites
 .. _PATH: https://en.wikipedia.org/wiki/PATH_(variable)
 .. _mingw cross-compiler: http://mxe.cc
 
-If you are limited to an older version of Wine such as 2.x or 3.x, you will have to try `an older version of this package`_.
+If you are limited to an older version of Wine such as 2.x or 3.x, see ``zugbruecke``'s `installation instructions`_ for details and workarounds.
 
-.. _an older version of this package: https://github.com/pleiszenburg/zugbruecke/releases/tag/v0.0.14
+.. _installation instructions: https://zugbruecke.readthedocs.io/en/latest/installation.html
 
 Installation
 ============
