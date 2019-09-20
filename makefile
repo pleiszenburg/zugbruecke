@@ -24,14 +24,15 @@
 clean:
 	-rm -r build/*
 	-rm -r dist/*
-	-rm -r src/*.egg-info
+	coverage erase
 	find src/ tests/ -name '*.pyc' -exec rm -f {} +
 	find src/ tests/ -name '*.pyo' -exec rm -f {} +
 	find src/ tests/ -name '*~' -exec rm -f {} +
 	find src/ tests/ -name '__pycache__' -exec rm -fr {} +
-	# find src/ tests/ -name '*.htm' -exec rm -f {} +
-	# find src/ tests/ -name '*.html' -exec rm -f {} +
-	# find src/ tests/ -name '*.so' -exec rm -f {} +
+
+release_clean:
+	make clean
+	-rm -r src/*.egg-info
 
 dll:
 	@(cd demo_dll; make clean; make; make install)
@@ -40,7 +41,7 @@ docu:
 	@(cd docs; make clean; make html)
 
 release:
-	make clean
+	make release_clean
 	python setup.py sdist bdist_wheel
 	gpg --detach-sign -a dist/zugbruecke*.whl
 	gpg --detach-sign -a dist/zugbruecke*.tar.gz
@@ -56,22 +57,17 @@ upload_test:
 	done
 
 install:
-	pip install .[dev]
+	pip install -U -e .[dev]
 	wenv init
-
-install_link:
-	pip install -e .[dev]
-	wenv init
+	wenv init_coverage
 
 test:
 	make docu
-	make clean
-	wenv pytest
-	make clean
-	pytest
+	make test_quick
 
 test_quick:
 	make clean
-	wenv pytest
+	wenv pytest # --capture=no
 	make clean
-	pytest
+	pytest --cov=zugbruecke --cov-config=setup.cfg # --capture=no
+	mv .coverage .coverage.e9.0 ; coverage combine ; coverage html

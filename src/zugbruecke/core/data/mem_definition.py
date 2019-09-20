@@ -32,8 +32,8 @@ specific language governing rights and limitations under the License.
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 import ctypes
-from pprint import pformat as pf
-#import traceback
+
+from ..errors import data_memsyncsyntax_error
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -45,6 +45,12 @@ class memory_definition_class():
 
 	def pack_definition_memsync(self, memsync_d_list):
 
+		# HACK this error should be raised by a class property of FunctionType class
+		# BUG class property of FunctionType class causes segfault in Python 3.5 on Wine 4
+		# TODO temporary replacement, remove in future release!
+		if not isinstance(memsync_d_list, list):
+			raise data_memsyncsyntax_error('memsync attribute must be a list')
+
 		return [self.__pack_memsync_definition_dict__(memsync_d) for memsync_d in memsync_d_list]
 
 
@@ -54,6 +60,11 @@ class memory_definition_class():
 
 
 	def __pack_memsync_definition_dict__(self, memsync_d):
+
+		if not isinstance(memsync_d, dict) and not isinstance(memsync_d, tuple):
+			raise data_memsyncsyntax_error('memsync definition must either be a dict or a tuple')
+
+		# TODO handle tuples (pointers to pointer arrays ...)
 
 		# Keep everything, which is not private (does not start with '_')
 		return {key: memsync_d[key] for key in memsync_d.keys() if not key.startswith('_')}

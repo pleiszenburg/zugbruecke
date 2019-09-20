@@ -36,7 +36,7 @@ A few rules, describing how this project is being developed:
   *zugbruecke* under *Unix*.
 - Whatever works with *ctypes* under *Unix* is supposed to work with *zugbruecke*
   under *Unix* as well without limitations.
-- Keep interferences with users' code at a minimum. I.e. do not make
+- Keep interference with users' code at a minimum. I.e. do not make
   users write plenty of if-statements for handling platform-specific behavior.
   The ``memsync`` protocol, which is just ignored by *ctypes* on *Windows* / *Wine*,
   is a good example of how to implement no-interfering platform-specific
@@ -74,7 +74,7 @@ Looking for work? Check *zugbruecke*'s `open issues`_ :)
 First time setup for developers
 -------------------------------
 
-- Make sure you have *Wine* 2.x and *CPython* 3.x installed.
+- Make sure you have *Wine* >= 4.x and *CPython* 3.x installed.
 - Make sure you have the *mingw* cross compiler installed for compiling the *Windows* test DLL.
 - Download and install the `latest version of git`_.
 - Configure git with your `username`_ and `email`_:
@@ -112,7 +112,7 @@ First time setup for developers
 
 .. code:: bash
 
-	make install_link
+	make install
 
 - Compile the *Windows* test DLL:
 
@@ -136,9 +136,10 @@ First time setup for developers
 Useful helpers
 --------------
 
-Have a look at the ``wine-python``, ``wine-pip`` and ``wine-pytest`` commands.
+Have a look at the ``wenv python``, ``wenv pip`` and ``wenv pytest`` commands
+(as well as ``wenv help``, ``wenv init`` and ``wenv init_coverage``).
 They actually work as one would expect ;) If you want, you can also write
-executable scripts and add ``#!/usr/bin/env wine-python`` at their top.
+executable scripts and add ``#!/usr/bin/env _wenv_python`` at their top.
 Check ``import os; os.name``, it will return ``nt``. Check the section on the
 `Wine Python environment`_ in the documentation.
 

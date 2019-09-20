@@ -170,6 +170,11 @@ int16_t __stdcall DEMODLL pow_ints(
 	int16_t b
 	);
 
+int16_t __stdcall DEMODLL sub_ints(
+	int16_t a,
+	int16_t b
+	);
+
 int16_t __stdcall DEMODLL get_const_int(void);
 
 void __stdcall DEMODLL square_int_array(

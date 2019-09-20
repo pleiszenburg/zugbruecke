@@ -36,12 +36,16 @@ matrix:
     include:
         - dist: trusty
           python: "3.4"
+          env: ZUGBRUECKE=.travis-trusty.zugbruecke.json
         - dist: xenial
           python: "3.5"
+          env: ZUGBRUECKE=.travis-xenial.zugbruecke.json
         - dist: xenial
           python: "3.6"
+          env: ZUGBRUECKE=.travis-xenial.zugbruecke.json
         - dist: xenial
           python: "3.7"
+          env: ZUGBRUECKE=.travis-xenial.zugbruecke.json
 
 # Get wine and mingw cross compiler
 # http://ubuntuhandbook.org/index.php/2017/01/install-wine-2-0-ubuntu-16-04-14-04-16-10/
@@ -59,9 +63,13 @@ before_install:
   - export PATH=/opt/wine-staging/bin:$PATH
   - sudo apt-get install -y gcc-mingw-w64-i686
   - sudo apt-get install -y gcc-mingw-w64-x86-64
+  - pip install -U pip
+  - pip install -U setuptools
+  - pip install -U pytest
   - wine --version
   - i686-w64-mingw32-gcc --version
   - python --version
+  - pytest --version
   - uname -a
   - lsb_release -a
 

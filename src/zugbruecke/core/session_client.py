@@ -55,6 +55,7 @@ from .rpc import (
 	mp_client_safe_connect,
 	mp_server_class
 	)
+from ..wenv import env_class
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -216,7 +217,7 @@ class session_client_class():
 
 	def path_unix_to_wine(self, in_path):
 
-		if not isintance(in_path, str):
+		if not isinstance(in_path, str):
 			raise TypeError('in_path must by of type str')
 
 		# If in stage 1, fire up stage 2
@@ -229,7 +230,7 @@ class session_client_class():
 
 	def path_wine_to_unix(self, in_path):
 
-		if not isintance(in_path, str):
+		if not isinstance(in_path, str):
 			raise TypeError('in_path must by of type str')
 
 		# If in stage 1, fire up stage 2
@@ -242,14 +243,14 @@ class session_client_class():
 
 	def set_parameter(self, parameter):
 
-		if not isintance(parameter, dict):
+		if not isinstance(parameter, dict):
 			raise TypeError('parameter "parameter" must by of type dict')
 
 		self.p.update(parameter)
 		self.rpc_client.set_parameter(parameter)
 
 
-	def terminate(self):
+	def terminate(self, signum = None, frame = None):
 
 		# Run only if session is still up
 		if not self.up:
@@ -344,6 +345,9 @@ class session_client_class():
 
 		# Log status
 		self.log.out('[session-client] STARTING (STAGE 2) ...')
+
+		# Ensure a working Wine-Python environment
+		env_class(self.p).ensure()
 
 		# Prepare python command for ctypes server or interpreter
 		self.__prepare_python_command__()

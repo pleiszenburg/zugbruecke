@@ -36,7 +36,6 @@ from setuptools import (
 	setup
 	)
 import os
-from glob import glob
 from sys import platform
 
 
@@ -79,20 +78,30 @@ setup(
 	download_url = 'https://github.com/pleiszenburg/zugbruecke/archive/v%s.tar.gz' % _version_,
 	license = 'LGPLv2',
 	keywords = ['ctypes', 'wine'],
-	scripts = glob(os.path.join('scripts', '*')),
+	scripts = [],
 	include_package_data = True,
 	install_requires = [],
-	extras_require = {'dev': [
-		'pytest',
-		'python-language-server',
-		'setuptools',
-		'Sphinx',
-		'sphinx_rtd_theme',
-		'twine',
-		'wheel'
-		]},
+	extras_require = {
+		'dev': [
+			'pytest',
+			'coverage',
+			'pytest-cov',
+			'python-language-server',
+			'setuptools',
+			'Sphinx',
+			'sphinx_rtd_theme',
+			'twine',
+			'wheel'
+			],
+		'certifi': [
+			'certifi'
+			]
+		},
 	zip_safe = False,
-	entry_points = {},
+	entry_points = {'console_scripts': [
+		'wenv = zugbruecke.wenv:cli',
+		'_wenv_python = zugbruecke.wenv:shebang'
+		]},
 	classifiers = [
 		'Development Status :: 3 - Alpha',
 		'Intended Audience :: Developers',

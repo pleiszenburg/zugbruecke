@@ -26,7 +26,6 @@ specific language governing rights and limitations under the License.
 
 """
 
-
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -40,21 +39,65 @@ import urllib.request
 import zipfile
 
 from .core.config import config_class
+from .core.log import c
+
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# PYTHON SSL FALLBACK
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+def _download(_down_url):
+	try:
+		return urllib.request.urlopen(_down_url)
+	except urllib.error.URLError as e:
+		import ssl
+		if not isinstance(e.args[0], ssl.SSLError):
+			raise e # Not an SSL issue - this is unexpected ...
+		try:
+			_ = ModuleNotFoundError
+			del _
+		except NameError:
+			ModuleNotFoundError = ImportError # Python 3.4 & 3.5
+		try:
+			import certifi
+		except ModuleNotFoundError:
+			raise SystemExit('SSL/TSL has issues - please install "certifi" and try again', e.args[0])
+		return urllib.request.urlopen(_down_url, cafile = certifi.where())
+
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# HELPER ROUTINES
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+def _symlink(src, dest):
+
+	if not os.path.lexists(dest):
+		os.symlink(src, dest)
+
+	if not os.path.exists(dest):
+		raise OSError('"{LINK:s}" could not be created'.format(LINK = dest))
+	if not os.path.islink(dest):
+		raise OSError('"{LINK:s}" is not a symlink'.format(LINK = dest))
+	if os.readlink(dest) != src:
+		raise OSError('"{LINK:s}" points to the wrong source'.format(LINK = dest))
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # CONST
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+COVERAGE_STARTUP = """
+import coverage
+coverage.process_startup()
+"""
+
 HELP_STR = """wenv - the Wine Python environment
 
-- wenv init: sets up an environment (including Python interpreter, pip and pytest)
-- wenv help: prints this help text
-- wenv python: the Python interpreter
+{CLIS:s}
 
-Beyond that, the following scripts and modules are installed and available:
+The following interpreters, scripts and modules are installed and available:
 
-{scripts:s}
+{SCRIPTS:s}
 """
 
 
@@ -73,87 +116,181 @@ class env_class:
 
 		# Get config
 		if parameter is None:
-			self.p = config_class()
+			self._p = config_class()
 		else:
 			if not isinstance(parameter, dict):
 				raise TypeError('parameter is not a dictionary')
-			self.p = parameter
+			self._p = parameter
 
-		# Get Python environment paths
-		self._path_dict_ = env_class.__get_wine_python_paths__(
-			self.p['pythonprefix'], self.p['version']
-			)
-		# Get Python commands and scripts
-		self._cmd_dict_ = env_class.__get_command_dict__(
-			self._path_dict_['interpreter'], self._path_dict_['scripts']
-			)
-		# Get environment variables
-		self._envvar_dict_ = env_class.__get_environment_variables__(
-			self.p['wineprefix'], self.p['winedebug'], self.p['arch']
-			)
-		# Get Wine cmd names
-		self._wine_dict_ = {'win32': 'wine', 'win64': 'wine64'}
+		# Init internal dicts
+		self._init_dicts()
 
 
-	@staticmethod
-	def __get_environment_variables__(wineprefix, winedebug, arch):
+	def _init_dicts(self):
 
-		return dict(
-			WINEARCH = arch, # Architecture
-			WINEPREFIX = wineprefix, # Wine prefix / directory
-			WINEDLLOVERRIDES = 'mscoree=d', # Disable MONO: https://unix.stackexchange.com/a/191609
-			WINEDEBUG = winedebug, # Wine debug level
-			)
+		# Init Wine cmd names
+		self._wine_dict = {'win32': 'wine', 'win64': 'wine64'}
 
-
-	@staticmethod
-	def __get_command_dict__(interpreter_path, scripts_path):
-
-		out = {'python': interpreter_path}
-
-		if not os.path.exists(scripts_path):
-			return out
-
-		scripts = os.listdir(scripts_path)
-		for script in scripts:
-			if not script.lower().endswith('.exe'):
-				continue
-			out[script[:-4]] = os.path.join(scripts_path, script)
-
-		return out
+		# Init Python environment paths
+		self._init_path_dict()
+		# Init Python commands and scripts
+		self._init_cmd_dict()
+		# Init internal CLI commands
+		self._init_cli_dict()
+		# Init environment variables
+		self._init_envvar_dict()
 
 
-	@staticmethod
-	def __get_wine_python_paths__(pythonprefix, version):
+	def _init_path_dict(self):
+
+		version_string = ''.join(self._p['version'].split('.')[0:2])
 
 		# python standard library
-		lib_path = os.path.join(pythonprefix, 'Lib')
+		lib_path = os.path.join(self._p['pythonprefix'], 'Lib')
 		# site-packages
 		sitepackages_path = os.path.join(lib_path, 'site-packages')
 		# python interpreter
-		interpreter_path = os.path.join(pythonprefix, 'python.exe')
+		interpreter_path = os.path.join(self._p['pythonprefix'], 'python.exe')
 		# scripts
-		scripts_path = os.path.join(pythonprefix, 'Scripts')
+		scripts_path = os.path.join(self._p['pythonprefix'], 'Scripts')
 		# pip
 		pip_path = os.path.join(scripts_path, 'pip.exe')
 		# pytest
 		pytest_path = os.path.join(scripts_path, 'pytest.exe')
+		# coverage
+		coverage_path = os.path.join(scripts_path, 'coverage.exe')
 		# stdlib zip filename
-		stdlibzip_path = os.path.join(
-			pythonprefix,
-			'python%s%s.zip' % (version.split('.')[0], version.split('.')[1])
-			)
+		stdlibzip_path = os.path.join(self._p['pythonprefix'], 'python%s.zip' % version_string)
+		# pth filename (library path)
+		pth_path = os.path.join(self._p['pythonprefix'], 'python%s._pth' % version_string)
 
-		# Return dict
-		return dict(
+		self._path_dict = dict(
 			lib = lib_path,
 			sitepackages = sitepackages_path,
 			scripts = scripts_path,
 			interpreter = interpreter_path,
 			pip = pip_path,
 			pytest = pytest_path,
+			coverage = coverage_path,
 			stdlibzip = stdlibzip_path,
+			pth = pth_path,
 			)
+
+
+	def _init_cmd_dict(self):
+
+		out = {'python': self._path_dict['interpreter']} # TODO check!
+
+		if not os.path.exists(self._path_dict['scripts']):
+			self._cmd_dict = out
+			return
+
+		scripts = os.listdir(self._path_dict['scripts'])
+		for script in scripts:
+			if not script.lower().endswith('.exe'):
+				continue
+			out[script[:-4]] = os.path.join(self._path_dict['scripts'], script)
+
+		self._cmd_dict = out
+
+
+	def _init_cli_dict(self):
+
+		self._cli_dict = {
+			item[5:]: getattr(self, item)
+			for item in dir(self)
+			if item.startswith('_cli_') and hasattr(getattr(self, item), '__call__')
+			}
+
+
+	def _init_envvar_dict(self):
+
+		self._envvar_dict = {k: os.environ[k] for k in os.environ.keys()} # HACK Required for Travis CI
+		self._envvar_dict.update(dict(
+			WINEARCH = self._p['arch'], # Architecture
+			WINEPREFIX = self._p['wineprefix'], # Wine prefix / directory
+			WINEDLLOVERRIDES = 'mscoree=d', # Disable MONO: https://unix.stackexchange.com/a/191609
+			WINEDEBUG = self._p['winedebug'], # Wine debug level
+			PYTHONHOME = self._p['pythonprefix'], # Python home for Wine Python (can be a Unix path)
+			))
+
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# WINE BUG #47766 / ZUGBRUECKE BUG #49
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+	def wine_47766_workaround(self):
+		"""
+		PathAllocCanonicalize treats path segments start with dots wrong.
+		https://bugs.winehq.org/show_bug.cgi?id=47766
+		"""
+
+		is_clean = lambda path: not any([seg.startswith('.') for seg in path.split(os.path.sep)])
+
+		pythonprefix = os.path.abspath(self._p['pythonprefix'])
+
+		if pythonprefix != self._p['pythonprefix']:
+			self._p['pythonprefix'] = pythonprefix
+			self._init_dicts()
+
+		if is_clean(self._p['pythonprefix']):
+			return
+
+		import tempfile, hashlib
+		link_path = os.path.join(
+			tempfile.gettempdir(),
+			'wenv-' + hashlib.sha256(self._p['pythonprefix'].encode('utf-8')).hexdigest()[:8],
+			)
+		if not is_clean(link_path):
+			raise OSError('unable to create clean link path: "{LINK:s}"'.format(LINK = link_path))
+
+		if os.path.exists(self._p['pythonprefix']):
+			_symlink(self._p['pythonprefix'], link_path)
+
+		self._p['pythonprefix'] = link_path
+		self._init_dicts()
+
+
+	def wine_47766_workaround_uninstall(self):
+
+		self.wine_47766_workaround()
+
+		if os.path.lexists(self._p['pythonprefix']):
+			os.unlink(self._p['pythonprefix'])
+
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# ENSURE ENVIRONMENT
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+	def ensure(self):
+
+		self.setup_prefix()
+		self.setup_python()
+		self.wine_47766_workaround() # must run after setup_python and before setup_pip
+		self.setup_pip()
+		self.setup_pytest()
+		self.setup_zugbruecke()
+		self.setup_coverage()
+
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# DESTROY / UNINSTALL ENVIRONMENT
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+	def uninstall(self):
+
+		# Does Wine prefix exist?
+		if os.path.exists(self._p['wineprefix']):
+			# Delete tree
+			shutil.rmtree(self._p['wineprefix'])
+
+		# Does Python prefix exist?
+		if os.path.exists(self._p['pythonprefix']):
+			# Delete tree
+			shutil.rmtree(self._p['pythonprefix'])
+
+		self.wine_47766_workaround_uninstall()
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -166,15 +303,26 @@ class env_class:
 			raise TypeError('overwrite is not a boolean')
 
 		# Does it exist?
-		if os.path.exists(self.p['wineprefix']):
+		if os.path.exists(self._p['wineprefix']):
 			# Exit if overwrite flag is not set
 			if not overwrite:
 				return
 			# Delete if overwrite is set
-			shutil.rmtree(self.p['wineprefix'])
+			shutil.rmtree(self._p['wineprefix'])
+
+		os.makedirs(self._p['wineprefix']) # HACK Wine on Travis CI expects folder to exist
 
 		# Start wine server into prepared environment
-		subprocess.Popen(['wineboot', '-i']).wait()
+		proc = subprocess.Popen(
+			['wine', 'wineboot', '-i'],
+			stdout = subprocess.PIPE, stderr = subprocess.PIPE,
+			env = self._envvar_dict
+			)
+		out, err = proc.communicate()
+		print(out.decode('utf-8').strip())
+		print(err.decode('utf-8').strip())
+		if proc.returncode != 0:
+			sys.exit(1)
 
 
 	def setup_python(self, overwrite = False):
@@ -184,24 +332,24 @@ class env_class:
 
 		# File name for python stand-alone zip file
 		pyarchive = 'python-%s-embed-%s.zip' % (
-			self.p['version'],
-			'amd64' if self.p['arch'] == 'win64' else self.p['arch']
+			self._p['version'],
+			'amd64' if self._p['arch'] == 'win64' else self._p['arch']
 			)
 		# Compute full URL of Python stand-alone zip file
-		pyurl = 'https://www.python.org/ftp/python/%s/%s' % (self.p['version'], pyarchive)
+		pyurl = 'https://www.python.org/ftp/python/%s/%s' % (self._p['version'], pyarchive)
 
 		# Is there a pre-existing Python installation with identical parameters?
-		preexisting = os.path.isfile(self._path_dict_['interpreter'])
+		preexisting = os.path.isfile(self._path_dict['interpreter'])
 
 		# Is there a preexisting installation and should it be overwritten?
 		if preexisting and overwrite:
 			# Delete folder
-			shutil.rmtree(self.p['pythonprefix'])
+			shutil.rmtree(self._p['pythonprefix'])
 
 		# Make sure the target directory exists
-		if not os.path.exists(self.p['pythonprefix']):
+		if not os.path.exists(self._p['pythonprefix']):
 			# Create folder
-			os.makedirs(self.p['pythonprefix'])
+			os.makedirs(self._p['pythonprefix'])
 
 		# Only do if Python is not there OR if should be overwritten
 		if overwrite or not preexisting:
@@ -209,43 +357,36 @@ class env_class:
 			# Generate in-memory file-like-object
 			archive_zip = BytesIO()
 			# Download zip file from Python website into file-like-object
-			with urllib.request.urlopen(pyurl) as u:
+			with _download(pyurl) as u:
 				archive_zip.write(u.read())
 			# Unpack from memory to disk
 			with zipfile.ZipFile(archive_zip) as f:
-				f.extractall(path = self.p['pythonprefix']) # Directory created if required
+				f.extractall(path = self._p['pythonprefix']) # Directory created if required
 
 			# Unpack Python library from embedded zip on disk
-			with zipfile.ZipFile(self._path_dict_['stdlibzip'], 'r') as f:
-				f.extractall(path = self._path_dict_['lib']) # Directory created if required
+			with zipfile.ZipFile(self._path_dict['stdlibzip'], 'r') as f:
+				f.extractall(path = self._path_dict['lib']) # Directory created if required
 			# Remove Python library zip from disk
-			os.remove(self._path_dict_['stdlibzip'])
+			os.remove(self._path_dict['stdlibzip'])
+
+			# HACK: Fix library path in pth-file (CPython >= 3.6)
+			with open(self._path_dict['pth'], 'w') as f:
+				f.write('Lib\n.\n\n# Uncomment to run site.main() automatically\nimport site\n')
 
 		# Create site-packages folder if it does not exist
-		if not os.path.exists(self._path_dict_['sitepackages']):
+		if not os.path.exists(self._path_dict['sitepackages']):
 			# Create folder
-			os.makedirs(self._path_dict_['sitepackages'])
-
-		# Package path in wine-python site-packages
-		wine_pkg_path = os.path.abspath(os.path.join(self._path_dict_['sitepackages'], 'zugbruecke'))
-
-		# Package path in unix-python site-packages
-		unix_pkg_path = os.path.abspath(os.path.dirname(__file__))
-
-		# If package has not been linked into site-packages ...
-		if not os.path.exists(wine_pkg_path):
-			# Link zugbruecke package into wine-python site-packages
-			os.symlink(unix_pkg_path, wine_pkg_path)
+			os.makedirs(self._path_dict['sitepackages'])
 
 
 	def setup_pip(self):
 
 		# Exit if it exists
-		if os.path.isfile(self._path_dict_['pip']):
+		if os.path.isfile(self._path_dict['pip']):
 			return
 
 		# Download get-pip.py into memory
-		with urllib.request.urlopen('https://bootstrap.pypa.io/get-pip.py') as u:
+		with _download('https://bootstrap.pypa.io/get-pip.py') as u:
 			getpip_bin = u.read()
 
 		# Start Python on top of Wine
@@ -258,108 +399,196 @@ class env_class:
 	def setup_pytest(self):
 
 		# Exit if it exists
-		if os.path.isfile(self._path_dict_['pytest']):
+		if os.path.isfile(self._path_dict['pytest']):
 			return
 
 		# Run pip install
 		subprocess.Popen(['wenv', 'pip', 'install', 'pytest']).wait()
 
 
+	def setup_zugbruecke(self):
+
+		# Package path in unix-python site-packages
+		unix_pkg_path = os.path.abspath(os.path.dirname(__file__))
+		# Package path in wine-python site-packages
+		wine_pkg_path = os.path.abspath(os.path.join(self._path_dict['sitepackages'], 'zugbruecke'))
+
+		if not self._p['_issues_50_workaround']:
+			# Link zugbruecke package into wine-python site-packages
+			_symlink(unix_pkg_path, wine_pkg_path)
+		else:
+			if not os.path.exists(wine_pkg_path):
+				# Copy zugbruecke package into wine-python site-packages
+				shutil.copytree(unix_pkg_path, wine_pkg_path)
+
+		# Egg path in unix-python site-packages
+		unix_egg_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'zugbruecke.egg-info'))
+		# Egg path in wine-python site-packages
+		wine_egg_path = os.path.abspath(os.path.join(self._path_dict['sitepackages'], 'zugbruecke.egg-info'))
+
+		if not self._p['_issues_50_workaround']:
+			# Link zugbruecke egg into wine-python site-packages
+			_symlink(unix_egg_path, wine_egg_path)
+		else:
+			if not os.path.exists(wine_egg_path):
+				# Copy zugbruecke egg into wine-python site-packages
+				shutil.copytree(unix_egg_path, wine_egg_path)
+
+
+	def setup_coverage(self):
+
+		# Exit if it exists
+		if os.path.isfile(self._path_dict['coverage']):
+			return
+
+		# Run pip install
+		subprocess.Popen(['wenv', 'pip', 'install', 'coverage']).wait()
+		subprocess.Popen(['wenv', 'pip', 'install', 'pytest-cov']).wait()
+
+
+	def setup_coverage_activate(self):
+
+		# Ensure that coverage is started with the Python interpreter
+		siteconfig_path = os.path.join(self._path_dict['sitepackages'], 'sitecustomize.py')
+		siteconfig_cnt = ''
+		if os.path.isfile(siteconfig_path):
+			with open(siteconfig_path, 'r') as f:
+				siteconfig_cnt = f.read()
+			if COVERAGE_STARTUP in siteconfig_cnt:
+				return
+		with open(siteconfig_path, 'w') as f:
+			f.write(siteconfig_cnt + '\n' + COVERAGE_STARTUP)
+
+
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# ROUTINES
+# CLI
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-	def set_environment_variables(self):
+	def _cli_init(self):
+		"sets up an environment (including Wine prefix, Python interpreter, pip and pytest)"
 
-		for k, v in self._envvar_dict_.items():
-			os.environ[k] = v
-
-
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# CLI HELPER
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-	def __cmd_init__(self):
-		self.set_environment_variables()
-		self.setup_prefix()
-		self.setup_python()
-		self.setup_pip()
-		self.setup_pytest()
+		self.ensure()
 
 
-	def __cmd_help__(self):
-		sys.stdout.write(HELP_STR.format(scripts = '\n'.join([
-			'- wenv {script:s}'.format(script = key)
-			for key in sorted(self._cmd_dict_.keys())
-			if key != 'python'
-			])))
+	def _cli_init_coverage(self):
+		"enables coverage analysis inside wenv"
+
+		self.setup_coverage_activate()
+
+
+	def _cli_clean(self):
+		"removes current environment (including Wine prefix, Python interpreter, pip and pytest)"
+
+		self.uninstall()
+
+
+	def _cli_help(self):
+		"prints this help text"
+
+		def colorize(text):
+			for color, key in (
+				('GREEN', 'python'),
+				('CYAN', 'pip'),
+				('YELLOW', 'wheel'),
+				('MAGENTA', 'pytest'),
+				('MAGENTA', 'py.test'),
+				):
+				text = text.replace(key, c[color] + key + c['RESET'])
+			return text
+
+		sys.stdout.write(HELP_STR.format(
+			CLIS = '\n'.join([
+				'- wenv {CLI:s}: {HELP:s}'.format(
+					CLI = key,
+					HELP = self._cli_dict[key].__doc__,
+					)
+				for key in sorted(self._cli_dict.keys())
+				]),
+			SCRIPTS = colorize('\n'.join([
+				'- wenv {SCRIPT:s}'.format(
+					SCRIPT = key,
+					)
+				for key in sorted(self._cmd_dict.keys())
+				]))
+			))
 		sys.stdout.flush()
 
 
 	def cli(self):
 
-		def prefix(data, options = False):
-			return '___%d___%s' % ((1 if options else 0), data)
-		def push_return(data):
-			sys.stdout.write(data)
-			sys.stdout.flush()
-			sys.exit()
-
-		# No command was passed?
+		# No command passed
 		if len(sys.argv) < 2:
-			# Exit: Nothing to do
-			return
+			sys.stderr.write('There was no command passed.\n')
+			sys.stderr.flush()
+			sys.exit(1)
 
-		# Not (yet) a configuration call
-		configure = False
-		# Are there one or more arguments / options?
-		if len(sys.argv) >= 3:
-			# Is this a configuration call?
-			if sys.argv[2] == '--configure':
-				# Re-set flag
-				configure = True
+		# Separate command and arguments
+		cmd, param = sys.argv[1], sys.argv[2:]
 
-		# Get command
-		cmd = sys.argv[1]
+		# Special CLI command
+		if cmd in self._cli_dict.keys():
+			self._cli_dict[cmd]()
+			sys.exit(0)
 
-		# Special commands
-		special_list = ['init', 'help']
-		# Special command, first stage?
-		if configure and (cmd in special_list):
-			# Push new Python command for "interactive" second stage
-			push_return(prefix(
-				'python3 -m zugbruecke.wenv %s' % cmd, options = False
-				))
-		# Special command, second stage?
-		if not configure and (cmd in special_list):
-			# Run matching routine
-			getattr(self, '__cmd_%s__' % cmd)()
-			# Nothing more to do, leave
-			return
+		# Command is unknown
+		if cmd not in self._cmd_dict.keys():
+			sys.stderr.write('Unknown command or script: "{CMD:s}"\n'.format(CMD = cmd))
+			sys.stderr.flush()
+			sys.exit(1)
 
-		# If the command is unknown ...
-		if configure and (cmd not in self._cmd_dict_.keys()):
-			push_return(prefix('echo Unknown command or script: "%s"' % cmd, options = False))
+		# Get Wine depending on arch
+		wine = self._wine_dict[self._p['arch']]
 
-		# Nothing more to do
-		if not configure:
-			return
+		self.wine_47766_workaround()
 
-		# Prepare environment variables for shell export
-		cmd_list = ['%s=%s' % (k, v) for k, v in self._envvar_dict_.items()]
-		# Append actual "interactive" command
-		cmd_list.append(prefix(
-			'%s "%s"' % (self._wine_dict_[self.p['arch']], self._cmd_dict_[cmd]),
-			options = True,
-			))
-		# Push command stack and leave
-		push_return('#'.join(cmd_list))
+		# Replace this process with Wine
+		os.execvpe(
+			wine,
+			(wine, self._cmd_dict[cmd]) + tuple(param), # Python 3.4: No in-place unpacking of param
+			self._envvar_dict
+			)
+
+	def shebang(self):
+		"""Working around a lack of Unix specification ...
+		https://stackoverflow.com/q/4303128/1672565
+		https://unix.stackexchange.com/q/63979/28301
+		https://lists.gnu.org/archive/html/bug-sh-utils/2002-04/msg00020.html
+		"""
+
+		if len(sys.argv) < 2:
+			raise OSError('entry point meant to be used as a shebang but no file name was provided')
+
+		# Get Wine depending on arch
+		wine = self._wine_dict[self._p['arch']]
+
+		self.wine_47766_workaround()
+
+		# Replace this process with Wine
+		os.execvpe(
+			wine,
+			(wine, self._cmd_dict['python'], sys.argv[1]),
+			self._envvar_dict
+			)
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# MAIN
+# CLI EXPORT
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+def cli():
+
+	env_class().cli()
+
+
+def shebang():
+
+	env_class().shebang()
+
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# MODULE ENTRY POINT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 if __name__ == '__main__':
 
-	env_class().cli()
+	cli()

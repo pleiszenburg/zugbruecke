@@ -34,6 +34,8 @@ Configuration files
 * The *zugbuecke* root directory (``~/.zugbruecke`` by default)
 * ``/etc/zugbruecke``
 
+There are two optional additions to the above rules: ``/etc/zugbruecke`` and the path specified in the ``ZUGBRUECKE`` environment variable can directly point to a configuration file. I.e. ``zugbruecke`` can also be a file in ``/etc/`` and the ``ZUGBRUECKE`` environment variable can also contain a path similar ``/path/to/some/file.json``.
+
 Parameters passed directly into the *zugbuecke* session constructor will always be given priority. Beyond that, missing parameters are being looked for location after location in the above listed places. If, after checking for configuration files in all those locations, there are still parameters left undefined, *zugbuecke* will fill them with its defaults. A parameter found in a location higher in the list will always be given priority over a the same parameter with different content found in a location further down the list.
 
 .. _reconfiguration:
