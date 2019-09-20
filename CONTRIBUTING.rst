@@ -137,10 +137,15 @@ Useful helpers
 --------------
 
 Have a look at the ``wenv python``, ``wenv pip`` and ``wenv pytest`` commands
-(as well as ``wenv help``, ``wenv init`` and ``wenv init_coverage``).
+(as well as ``wenv help``, ``wenv init``, ``wenv clean`` and ``wenv init_coverage``).
 They actually work as one would expect ;) If you want, you can also write
 executable scripts and add ``#!/usr/bin/env _wenv_python`` at their top.
 Check ``import os; os.name``, it will return ``nt``. Check the section on the
 `Wine Python environment`_ in the documentation.
 
 .. _`Wine Python environment`: docs/wineenv.rst
+
+Known issues
+------------
+
+If testing with *CPython* for *Windows* in version 3.5 or 3.6, you must not use *pytest* later than version 5.0.1 due to a bug in Wine (#47787). If a younger version of *pytest* was installed into your *Wine Python environment*, you will have to downgrade it: ``wenv pip install -U pytest==5.0.1``. The version of *pytest* installed in your Unix Python environment does not matter.
