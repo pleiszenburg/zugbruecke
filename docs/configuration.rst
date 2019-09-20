@@ -85,6 +85,11 @@ Changes the verbosity of *zugbuecke*. ``0`` for no logs, ``10`` for maximum logs
 
 Defines the architecture of *Wine* & *Wine* *Python*. It can be set to ``win32`` or ``win64``. Default is ``win32``, even on 64-bit systems. It appears to be a more stable configuration.
 
+``dir`` (str)
+^^^^^^^^^^^^^
+
+This parameter defines the root directory of *zugbruecke*. This is where by default *zugbruecke*'s own *Wine* profile folder is stored (``WINEPREFIX``) and where the :ref:`Wine Python environment <wineenv>` resides. By default, it is set to ``~/.zugbruecke``.
+
 ``pythonversion`` (str)
 ^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -92,17 +97,28 @@ The ``pythonversion`` parameter tells *zugbuecke* what version of the *Windows* 
 
 Please note that 3.4 and earlier are not supported. In the opposite direction, at the time of writing, 3.6 (and later) do require Wine 4.0 or later.
 
-``dir`` (str)
-^^^^^^^^^^^^^
+``pythonprefix`` (str)
+^^^^^^^^^^^^^^^^^^^^^^^
 
-This parameter defines the root directory of *zugbruecke*. This is where *zugbruecke*'s own *Wine* profile folder is stored (``WINEPREFIX``) and where the :ref:`Wine Python environment <wineenv>` resides. By default, it is set to ``~/.zugbruecke``.
+This parameter can be used to specify a custom location for the *Wine Python environment* outside of ``dir`` if required.
 
-``timeout_start`` (float)
-^^^^^^^^^^^^^^^^^^^^^^^^^
+``timeout_start`` (integer)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Defines how many seconds *zugbruecke* waits for the *Windows* *CPython* interpreter to show up. A ``TimeoutError`` is raised if more time elapses. By default, it is set to 30 seconds.
 
-``timeout_stop`` (float)
-^^^^^^^^^^^^^^^^^^^^^^^^
+``timeout_stop`` (integer)
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Defines how many seconds *zugbruecke* waits for every individual step of the termination routine of the *Windows* *CPython* interpreter. A ``TimeoutError`` is raised if the interpreter can not be terminated. By default, it is set to 30 seconds.
+
+
+``wineprefix`` (str)
+^^^^^^^^^^^^^^^^^^^^
+
+This parameter can be used to point to a custom ``WINEPREFIX`` outside of ``dir`` if desired.
+
+``winedebug`` (str)
+^^^^^^^^^^^^^^^^^^^
+
+*Wine* allows to control the level of debugging output through the ``WINEDEBUG`` environment variable. *zugbruecke* will by default disable all output by setting it to ``-all``. A custom value can be specified in the ``winedebug`` configuration parameter.
