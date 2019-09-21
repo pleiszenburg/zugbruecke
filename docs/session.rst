@@ -11,7 +11,7 @@ The session model
 
 *zugbruecke* operates based on a session model. Every session represents a separate *Windows* *Python* interpreter process running on *Wine*. *zugbruecke* starts a default session during the import of ``zugbruecke.ctypes``, but the user can start more sessions if required. Sessions are identified by a unique (hash) ID string. Sessions have a life-cycle and require termination routines to run before they can be dropped or deleted. By default, sessions terminate themselves automatically when the *Python* interpreter quits.
 
-The following notable ``ctypes`` methods and classes and their functionality are linked to individual sessions and therefore depend on their internal state: ``cdll``, ``CDLL``, ``CFUNCTYPE``, ``windll``, ``WinDLL``, ``WINFUNCTYPE``, ``oledll``, ``OleDLL``, ``FormatError``, ``get_last_error``, ``GetLastError``, ``set_last_error`` and ``WinError``.
+The following notable ``ctypes`` methods and classes and their functionality are linked to individual sessions and therefore depend on their internal state: ``cdll``, ``CDLL``, ``CFUNCTYPE``, ``windll``, ``WinDLL``, ``WINFUNCTYPE``, ``oledll``, ``OleDLL``, ``FormatError``, ``get_last_error``, ``GetLastError``, ``set_last_error`` and ``WinError``. In addition, the methods from ``ctypes.util``, i.e. ``find_library`` and ``find_msvcrt``, are also linked to individual sessions.
 
 .. _sessionclass:
 
