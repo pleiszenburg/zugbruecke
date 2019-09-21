@@ -123,6 +123,26 @@ class session_client_class():
 		return self.rpc_client.ctypes_WinError(code, descr)
 
 
+	def ctypes_find_msvcrt(self):
+
+		# If in stage 1, fire up stage 2
+		if self.stage == 1:
+			self.__init_stage_2__()
+
+		# Ask the server
+		return self.rpc_client.ctypes_find_msvcrt()
+
+
+	def ctypes_find_library(self, name):
+
+		# If in stage 1, fire up stage 2
+		if self.stage == 1:
+			self.__init_stage_2__()
+
+		# Ask the server
+		return self.rpc_client.ctypes_find_library(name)
+
+
 	def ctypes_CFUNCTYPE(self, restype, *argtypes, **kw):
 
 		# If in stage 1, fire up stage 2

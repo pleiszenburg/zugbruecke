@@ -6,13 +6,9 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	src/zugbruecke/ctypes/util.py: ctypes.util for POSIX, hacked for DLL compatibility
+	tests/test_util.py: Testing methods crom ctypes.util
 
-	Required to run on platform / side: [UNIX]
-
-	Based on:
-	https://github.com/python/cpython/blob/master/Lib/ctypes/util.py
-	https://github.com/python/cpython/commit/a76f014278bd1643e93fdfa9e88f9414ce8354a6
+	Required to run on platform / side: [UNIX, WINE]
 
 	Copyright (C) 2017-2019 Sebastian M. Ernst <ernst@pleiszenburg.de>
 
@@ -32,19 +28,27 @@ specific language governing rights and limitations under the License.
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# IMPORT: zugbruecke core
+# IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-from . import _util
+import pytest
+
+from sys import platform
+if any([platform.startswith(os_name) for os_name in ['linux', 'darwin', 'freebsd']]):
+	import zugbruecke.ctypes.util as util
+elif platform.startswith('win'):
+	import ctypes.util as util
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# Setup module
+# TEST(s)
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-_globals = globals()
-for _util_item in dir(_util):
-	if _util_item.startswith('__'):
-		continue
-	_globals[_util_item] = getattr(_util, _util_item)
-del _util, _util_item, _globals
+def test_find_library():
+
+	assert util.find_library('kernel32') == 'C:\\windows\\system32\\kernel32.dll'
+
+
+def test_find_msvcrt():
+
+	assert util.find_msvcrt() == None
