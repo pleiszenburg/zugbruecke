@@ -51,6 +51,7 @@ On older versions of Linux such as *Ubuntu 14.04* alias *Trusty Tahr* (released 
 * FIX: ``wine-python`` would fail on systems with old versions of ``libssl`` or broken SSL certificate store configurations, see #51. For details on the implemented workaround, see installation instructions in the documentation.
 * FIX: A proper ``TimeoutError`` is raised (instead of a ``SyntaxError``) if *zugbruecke*'s server component does not start.
 * FIX: *zugbruecke* did not actually check properly if its server component had terminated when a session was terminated. The reliability of relevant termination code has been significantly improved.
+* FIX: Methods from ``zugbruecke.ctypes.util`` (previously ``zugbruecke.util``) are faster and a lot less error-prone, see #52.
 * The configuration module was refactored and made clearer and faster, allowing to implement new options.
 
 0.0.14 (2019-05-21)
