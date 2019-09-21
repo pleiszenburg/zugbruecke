@@ -30,8 +30,7 @@ sudo: enabled
 # Repository language
 language: python
 
-# A 'recent' version of Ubuntu for a recent version of Wine is required
-# Python 3.4 appears to not being offered for xenial at the moment
+# Python 3.4 is availabe for trusty and xenial, Python >= 3.5 xenial only
 matrix:
     include:
         - dist: trusty
