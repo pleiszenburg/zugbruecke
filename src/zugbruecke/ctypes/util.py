@@ -32,81 +32,19 @@ specific language governing rights and limitations under the License.
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# IMPORT
+# IMPORT: zugbruecke core
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-import subprocess
-from ctypes.util import find_library as __find_library_unix__
+from . import _util
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# CROSS-PLATFORM FIND LIBRARY ROUTINES
+# Setup module
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-def find_msvcrt():
-	"""
-	Likely useless and will return None, see https://bugs.python.org/issue23606
-	Offered for full compatibility, though.
-	"""
-
-	# Start wine-python
-	winepython_p = subprocess.Popen(
-		[
-			'wenv', 'python', '-c',
-			'from ctypes.util import find_msvcrt; print(find_msvcrt())'
-			],
-		stdout = subprocess.PIPE,
-		stderr = subprocess.PIPE,
-		shell = False
-		)
-
-	# Get stdout and stderr
-	winepython_out, winepython_err = winepython_p.communicate()
-
-	# Change encoding
-	winepython_out = winepython_out.decode(encoding = 'UTF-8').strip()
-
-	# Handle None values
-	if winepython_out in ['', 'None']:
-		winepython_out = None
-
-	return winepython_out
-
-
-def find_library(name):
-
-	# Result is none by definition
-	result = None
-
-	# Is this a DLL for sure?
-	is_dll = (name.strip().lower()[-4:] == '.dll')
-
-	# If this is (likely) not a DLL, look for it on Unix side
-	if not is_dll:
-		result = __find_library_unix__(name)
-
-	# If library was not found on Unix side or is DLL for sure
-	if result is None or is_dll:
-
-		# Start wine-python
-		winepython_p = subprocess.Popen(
-			[
-				'wenv', 'python', '-c',
-				'from ctypes.util import find_library; print(find_library(\'%s\'))' % name
-				],
-			stdout = subprocess.PIPE,
-			stderr = subprocess.PIPE,
-			shell = False
-			)
-
-		# Get stdout and stderr
-		winepython_out, winepython_err = winepython_p.communicate()
-
-		# Change encoding
-		winepython_out = winepython_out.decode(encoding = 'UTF-8').strip()
-
-		# Check result, handle None value
-		if winepython_out not in ['', 'None']:
-			result = winepython_out
-
-	return result
+_globals = globals()
+for _util_item in dir(_util):
+	if _util_item.startswith('__'):
+		continue
+	_globals[_util_item] = getattr(_util, _util_item)
+del _util, _util_item, _globals
