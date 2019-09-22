@@ -192,7 +192,8 @@ class session_class:
 	# Wrapper for CDLL class
 	def CDLL(
 		self,
-		name, mode = DEFAULT_MODE, handle = None,
+		name, mode = DEFAULT_MODE,
+		handle = None, # TODO ignored, see #54
 		use_errno = False,
 		use_last_error = False
 		):
@@ -207,7 +208,8 @@ class session_class:
 	# Wrapper for WinDLL class
 	def WinDLL(
 		self,
-		name, mode = DEFAULT_MODE, handle = None,
+		name, mode = DEFAULT_MODE,
+		handle = None, # TODO ignored, see #54
 		use_errno = False,
 		use_last_error = False
 		):
@@ -222,7 +224,8 @@ class session_class:
 	# Wrapper for OleDLL class
 	def OleDLL(
 		self,
-		name, mode = DEFAULT_MODE, handle = None,
+		name, mode = DEFAULT_MODE,
+		handle = None, # TODO ignored, see #54
 		use_errno = False,
 		use_last_error = False
 		):
