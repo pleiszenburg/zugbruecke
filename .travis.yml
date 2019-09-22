@@ -45,7 +45,7 @@ matrix:
         - dist: xenial
           python: "3.7"
           env: ZUGBRUECKE=.travis-xenial.zugbruecke.json
-        - dist: bionic
+        - dist: xenial
           python: "3.8-dev"
           env: ZUGBRUECKE=.travis-xenial.zugbruecke.json
 
