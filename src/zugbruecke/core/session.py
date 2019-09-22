@@ -197,21 +197,11 @@ class session_class:
 		use_last_error = False
 		):
 
-		# If there is a handle to a zugbruecke session, return session
-		if handle is not None:
-
-			# Return it as-is TODO what about a new name?
-			return handle
-
-		# If no handle was passed, it's a new library
-		else:
-
-			# Return a handle on dll_client object
-			return self._zb_current_session.load_library(
-				dll_name = name, dll_type = 'cdll', dll_param = {
-					'mode': mode, 'use_errno': use_errno, 'use_last_error': use_last_error
-					}
-				)
+		return self._zb_current_session.load_library(
+			dll_name = name, dll_type = 'cdll', dll_param = {
+				'mode': mode, 'use_errno': use_errno, 'use_last_error': use_last_error
+				}
+			)
 
 
 	# Wrapper for WinDLL class
