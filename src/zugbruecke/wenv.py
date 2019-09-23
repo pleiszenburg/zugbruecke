@@ -327,6 +327,14 @@ class env_class:
 
 	def setup_python(self, overwrite = False):
 
+		def fix_special_version(version_string):
+			if 'b' in version_string:
+				return version_string[:version_string.index('b')]
+			elif 'rc' in version_string:
+				return version_string[:version_string.index('rc')]
+			else:
+				return version_string
+
 		if not isinstance(overwrite, bool):
 			raise TypeError('overwrite is not a boolean')
 
@@ -336,7 +344,7 @@ class env_class:
 			'amd64' if self._p['arch'] == 'win64' else self._p['arch']
 			)
 		# Compute full URL of Python stand-alone zip file
-		pyurl = 'https://www.python.org/ftp/python/%s/%s' % (self._p['pythonversion'], pyarchive)
+		pyurl = 'https://www.python.org/ftp/python/%s/%s' % (fix_special_version(self._p['pythonversion']), pyarchive)
 
 		# Is there a pre-existing Python installation with identical parameters?
 		preexisting = os.path.isfile(self._path_dict['interpreter'])
