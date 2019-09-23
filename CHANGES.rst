@@ -45,6 +45,7 @@ On older versions of Linux such as *Ubuntu 14.04* alias *Trusty Tahr* (released 
 * FEATURE: Introduced new exception types specific to *zugbruecke*. Meaningful exception are now raised throughout the package.
 * FEATURE: Timeouts for start and stop of the server component can be configured.
 * FEATURE: Both code and branch coverage of *zugbruecke* can now be analyzed with ``coverage``.
+* FEATURE: Added official support for CPython 3.8, see #56.
 * FIX: *zugbruecke* did not capture and forward data coming from Windows DLLs and binaries through ``stdout`` and ``stderr``(running with Wine) most of the time.
 * FIX: ``wine-pip`` previously would, on every launch, download ``get-pip.py`` and try to install it first before running - even if ``pip`` was already installed. ``wenv pip`` does not show this behavior anymore.
 * FIX: ``wine-python``, ``wine-pip`` and ``wenv pytest`` implicitly depended on ``bash``. This dependency has been removed in their successor ``wenv``, see #48.
