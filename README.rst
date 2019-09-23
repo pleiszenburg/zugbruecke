@@ -72,7 +72,7 @@ Prerequisites
 =============
 
 +--------------------+-------------------------------------------------------------------------------------------------------------+
-| for usage          + - `CPython`_ 3.x (tested with 3.{4,5,6,7}) - no additional Python packages required                         +
+| for usage          + - `CPython`_ 3.x (tested with 3.{4,5,6,7,8})                                                                +
 |                    + - `Wine`_ 4.x (tested with regular & `staging`_) - expected to be in the user's `PATH`_                     +
 +--------------------+-------------------------------------------------------------------------------------------------------------+
 | for tests          + - `mingw cross-compiler`_ - for building DLLs against which examples and tests can be run                   +
