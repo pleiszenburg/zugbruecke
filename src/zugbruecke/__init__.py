@@ -37,3 +37,5 @@ if not _sys.platform.startswith('win'):
 	from .core.session import session_class as ctypes_session
 
 del _sys
+
+from .core.config import config_class as config

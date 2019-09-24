@@ -261,13 +261,17 @@ class session_client_class():
 		return self.rpc_client.path_wine_to_unix(in_path)
 
 
-	def set_parameter(self, parameter):
+	def get_parameter(self, key):
 
-		if not isinstance(parameter, dict):
-			raise TypeError('parameter "parameter" must by of type dict')
+		return self.p[key]
 
-		self.p.update(parameter)
-		self.rpc_client.set_parameter(parameter)
+
+	def set_parameter(self, key, value):
+
+		self.p[key] = value
+
+		if self.stage > 1:
+			self.rpc_client.set_parameter(parameter)
 
 
 	def terminate(self, signum = None, frame = None):

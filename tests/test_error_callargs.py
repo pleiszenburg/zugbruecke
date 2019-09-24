@@ -53,6 +53,15 @@ def test_error_callargs_unconfigured_too_many_args():
 		a = square_int(1, 2, 3)
 
 
+def test_error_callargs_unconfigured_too_few_args():
+
+	dll = ctypes.windll.LoadLibrary('tests/demo_dll.dll')
+	mul_ints = dll.mul_ints
+
+	with pytest.raises(ValueError):
+		a = mul_ints(7)
+
+
 def test_error_callargs_unconfigured_right_number_of_args():
 
 	dll = ctypes.windll.LoadLibrary('tests/demo_dll.dll')

@@ -155,6 +155,11 @@ int16_t __stdcall DEMODLL add_ints(
 	int16_t b
 	);
 
+int16_t __stdcall DEMODLL mul_ints(
+	int16_t a,
+	int16_t b
+	);
+
 float __stdcall DEMODLL add_floats(
 	float a,
 	float b
