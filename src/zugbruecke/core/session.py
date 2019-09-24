@@ -45,13 +45,6 @@ from ctypes import (
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# IMPORT: Unix ctypes members, which will be modified
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-from ctypes import CDLL as __ctypes_CDLL_class__
-
-
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # IMPORT: zugbruecke core and missing ctypes flags
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -116,6 +109,16 @@ class session_class:
 		self.set_last_error = self._zb_current_session.ctypes_set_last_error
 
 		self.WinError = self._zb_current_session.ctypes_WinError
+
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# Routines from ctypes.util
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+		class _util:
+			find_msvcrt = staticmethod(self._zb_current_session.ctypes_find_msvcrt)
+			find_library = staticmethod(self._zb_current_session.ctypes_find_library)
+		self._util = _util
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -189,50 +192,24 @@ class session_class:
 	# Wrapper for CDLL class
 	def CDLL(
 		self,
-		name, mode = DEFAULT_MODE, handle = None,
+		name, mode = DEFAULT_MODE,
+		handle = None, # TODO ignored, see #54
 		use_errno = False,
 		use_last_error = False
 		):
 
-		# If there is a handle to a zugbruecke session, return session
-		if handle is not None:
-
-			# Handle zugbruecke handle
-			if type(handle).__name__ == 'dll_client_class':
-
-				# Return it as-is TODO what about a new name?
-				return handle
-
-			# Handle ctypes handle
-			else:
-
-				# Return ctypes DLL class instance, let it handle the handle as it would
-				return __ctypes_CDLL_class__(name, mode, handle, use_errno, use_last_error)
-
-		# If no handle was passed, it's a new library
-		else:
-
-			# Let's try the Wine side first
-			try:
-
-				# Return a handle on dll_client object
-				return self._zb_current_session.load_library(
-					dll_name = name, dll_type = 'cdll', dll_param = {
-						'mode': mode, 'use_errno': use_errno, 'use_last_error': use_last_error
-						}
-					)
-
-			# Well, it might be a Unix library after all
-			except:
-
-				# If Unix library, return CDLL class instance
-				return __ctypes_CDLL_class__(name, mode, handle, use_errno, use_last_error)
+		return self._zb_current_session.load_library(
+			dll_name = name, dll_type = 'cdll', dll_param = {
+				'mode': mode, 'use_errno': use_errno, 'use_last_error': use_last_error
+				}
+			)
 
 
 	# Wrapper for WinDLL class
 	def WinDLL(
 		self,
-		name, mode = DEFAULT_MODE, handle = None,
+		name, mode = DEFAULT_MODE,
+		handle = None, # TODO ignored, see #54
 		use_errno = False,
 		use_last_error = False
 		):
@@ -247,7 +224,8 @@ class session_class:
 	# Wrapper for OleDLL class
 	def OleDLL(
 		self,
-		name, mode = DEFAULT_MODE, handle = None,
+		name, mode = DEFAULT_MODE,
+		handle = None, # TODO ignored, see #54
 		use_errno = False,
 		use_last_error = False
 		):

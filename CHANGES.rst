@@ -25,6 +25,8 @@ Caution: **MODULE LAYOUT CHANGE BREAKING BACKWARDS COMPATIBILITY!**
 +------------+---------------------------------------------------+---------------------------------------------------+
 | shebang    | ``#!/usr/bin/env wine-python``                    + ``#!/usr/bin/env _wenv_python``                   +
 +------------+---------------------------------------------------+---------------------------------------------------+
+| config     | ``{"version": "3.5.3"}``                          + ``{"pythonversion": "3.7.4"}``                    +
++------------+---------------------------------------------------+---------------------------------------------------+
 
 The above significant change was mandatory for allowing to cleanup a lot of old code and to remove long-standing bugs. The main issue was that importing ``zugbruecke`` would implicitly start a new session. This could not be prohibited. With the new package layout, it becomes possible to import sub-modules of ``zugbruecke`` without implicitly starting a session. One of the more significant added benefits therefore is that this change also allows much more fine-grained tests.
 
@@ -32,20 +34,27 @@ As a consequence, ``zugbruecke.current_session`` is no longer available. ``zugbr
 
 Furthermore, the shell scripts ``wine-python``, ``wine-pip`` and ``wine-pytest`` have been removed. Their functionality was consolidated into a single new script, ``wenv``. One can now call ``wenv python``, ``wenv pip`` and ``wenv pytest``. This change was necessary for allowing a more generic interface to entry points of arbitrary third party packages. Run ``wenv help`` for more information.
 
+The ``version`` configuration parameter for controlling the version of *Wine Python* has been renamed to ``pythonversion``.
+
 Wine 2.x and 3.x are no longer supported. Please use Wine 4.x or later.
 
 On older versions of Linux such as *Ubuntu 14.04* alias *Trusty Tahr* (released 2014), you may observe errors when running ``wenv python``. Most commonly, they will present themselves as ``OSError: [WinError 6] Invalid handle: 'z:\\...`` triggered by calling ``os.listdir`` in ``pip`` or ``importlib`` on folders related to ``zugbruecke``. For possible workarounds, see section on installation in the documentation.
 
 * FEATURE: ``wineprefix``, ``winedebug`` and ``pythonprefix`` become configuration parameters definable by users allowing custom wine prefixes, wine debug levels and Python installation paths, see issue #44.
+* FEATURE: All configuration parameters can be overridden with individual environment variables.
 * FEATURE: Introduced new exception types specific to *zugbruecke*. Meaningful exception are now raised throughout the package.
 * FEATURE: Timeouts for start and stop of the server component can be configured.
 * FEATURE: Both code and branch coverage of *zugbruecke* can now be analyzed with ``coverage``.
+* FEATURE: Added official support for CPython 3.8, see #56.
+* FEATURE: *Wine Python* can be based on beta versions and release candidates of *CPython*.
 * FIX: *zugbruecke* did not capture and forward data coming from Windows DLLs and binaries through ``stdout`` and ``stderr``(running with Wine) most of the time.
 * FIX: ``wine-pip`` previously would, on every launch, download ``get-pip.py`` and try to install it first before running - even if ``pip`` was already installed. ``wenv pip`` does not show this behavior anymore.
 * FIX: ``wine-python``, ``wine-pip`` and ``wenv pytest`` implicitly depended on ``bash``. This dependency has been removed in their successor ``wenv``, see #48.
 * FIX: ``wine-python`` would fail on systems with old versions of ``libssl`` or broken SSL certificate store configurations, see #51. For details on the implemented workaround, see installation instructions in the documentation.
 * FIX: A proper ``TimeoutError`` is raised (instead of a ``SyntaxError``) if *zugbruecke*'s server component does not start.
 * FIX: *zugbruecke* did not actually check properly if its server component had terminated when a session was terminated. The reliability of relevant termination code has been significantly improved.
+* FIX: Methods from ``zugbruecke.ctypes.util`` (previously ``zugbruecke.util``) are faster and a lot less error-prone, see #52.
+* FIX: ``zugbruecke.ctypes.CDLL`` does no longer fall back to Unix libraries if no corresponding DLL file could be found. For attaching to Unix libraries please use the original ``ctypes`` module instead, see #53.
 * The configuration module was refactored and made clearer and faster, allowing to implement new options.
 
 0.0.14 (2019-05-21)

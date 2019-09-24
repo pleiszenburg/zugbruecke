@@ -32,6 +32,7 @@ specific language governing rights and limitations under the License.
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 import ctypes
+import ctypes.util
 import time
 import traceback
 
@@ -129,15 +130,17 @@ class session_server_class:
 	def __expose_ctypes_routines__(self):
 
 		# As-is exported platform-specific routines from ctypes
-		for routine in [
-			'FormatError',
-			'get_last_error',
-			'GetLastError',
-			'WinError',
-			'set_last_error'
+		for mod, routine in [
+			(ctypes, 'FormatError'),
+			(ctypes, 'get_last_error'),
+			(ctypes, 'GetLastError'),
+			(ctypes, 'WinError'),
+			(ctypes, 'set_last_error'),
+			(ctypes.util, 'find_msvcrt'),
+			(ctypes.util, 'find_library'),
 			]:
 
-			self.rpc_server.register_function(getattr(ctypes, routine), 'ctypes_' + routine)
+			self.rpc_server.register_function(getattr(mod, routine), 'ctypes_' + routine)
 
 
 	def __load_library__(self, dll_name, dll_type, dll_param):

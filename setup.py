@@ -51,7 +51,7 @@ _version_ = '0.1.0'
 # List all versions of Python which are supported
 confirmed_python_versions = [
 	('Programming Language :: Python :: %s' % x)
-	for x in '3.4 3.5 3.6 3.7'.split()
+	for x in '3.4 3.5 3.6 3.7 3.8'.split()
 	]
 
 

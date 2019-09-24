@@ -143,7 +143,7 @@ class env_class:
 
 	def _init_path_dict(self):
 
-		version_string = ''.join(self._p['version'].split('.')[0:2])
+		version_string = ''.join(self._p['pythonversion'].split('.')[0:2])
 
 		# python standard library
 		lib_path = os.path.join(self._p['pythonprefix'], 'Lib')
@@ -327,16 +327,24 @@ class env_class:
 
 	def setup_python(self, overwrite = False):
 
+		def fix_special_version(version_string):
+			if 'b' in version_string:
+				return version_string[:version_string.index('b')]
+			elif 'rc' in version_string:
+				return version_string[:version_string.index('rc')]
+			else:
+				return version_string
+
 		if not isinstance(overwrite, bool):
 			raise TypeError('overwrite is not a boolean')
 
 		# File name for python stand-alone zip file
 		pyarchive = 'python-%s-embed-%s.zip' % (
-			self._p['version'],
+			self._p['pythonversion'],
 			'amd64' if self._p['arch'] == 'win64' else self._p['arch']
 			)
 		# Compute full URL of Python stand-alone zip file
-		pyurl = 'https://www.python.org/ftp/python/%s/%s' % (self._p['version'], pyarchive)
+		pyurl = 'https://www.python.org/ftp/python/%s/%s' % (fix_special_version(self._p['pythonversion']), pyarchive)
 
 		# Is there a pre-existing Python installation with identical parameters?
 		preexisting = os.path.isfile(self._path_dict['interpreter'])
