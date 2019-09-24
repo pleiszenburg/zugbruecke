@@ -92,6 +92,7 @@ class session_class:
 		self._zb_current_session = __session_client_class__(parameter = parameter, force = force)
 
 		# Offer access to session internals
+		self._zb_get_parameter = self._zb_current_session.get_parameter
 		self._zb_set_parameter = self._zb_current_session.set_parameter
 		self._zb_terminate = self._zb_current_session.terminate
 

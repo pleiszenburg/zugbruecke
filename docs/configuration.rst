@@ -45,10 +45,29 @@ Independently of the ``ZUGBRUECKE`` environment variable, all configurable param
 
 .. _reconfiguration:
 
-Re-configuration during run-time
---------------------------------
+Re-configuration of a session during run-time
+---------------------------------------------
 
-Every session exposes a ``_zb_set_parameter`` method, which accepts a dictionary containing parameters.
+Every session exposes a ``_zb_set_parameter`` method, which accepts a key (parameter name) and a value (parameter). Every session exposes also a ``_zb_get_parameter`` method, which accepts a key (parameter name) and returns a value (parameter).
+
+.. code:: python
+
+	import os
+	import zugbruecke.ctypes as ctypes
+	ctypes._zb_set_parameter('wineprefix', os.path.join(ctypes._zb_get_parameter('dir'), 'test-wineprefix'))
+	# [proceed with using zugbruecke ...]
+
+Investigating the environment's configuration
+---------------------------------------------
+
+*zugbruecke* exposes a dictionary-like class named ``config``. It can be used to investigate the available configuration as it is perceived by *zugbruecke* - without requiring to start a session. It can also be useful for deriving custom parameters at runtime.
+
+.. code:: python
+
+	import os
+	import zugbruecke
+	demo_session = zugbruecke.ctypes_session(parameter = {'wineprefix': os.path.join(zugbruecke.config()['dir'], 'test-wineprefix')})
+	# [proceed with using zugbruecke ...]
 
 .. _configparameter:
 
