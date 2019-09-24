@@ -45,7 +45,7 @@ If you are using methods or classes, which depend on the internal state of a ses
 	session_a = ctypes_session()
 	session_b = ctypes_session()
 	kernel32 = session_a.cdll.kernel32
-	msvcrt = session_a.cdll.msvcrt
+	msvcrt = session_b.cdll.msvcrt
 	# do stuff with "kernel32" through "session_a" and "msvcrt" through "session_b" ...
 	session_a._zb_terminate()
 	session_b._zb_terminate()
