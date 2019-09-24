@@ -166,6 +166,15 @@ class interpreter_session_class():
 		# Log status
 		self.log.out('[interpreter] Command: ' + ' '.join(self.p['server_command_list']))
 
+		# Prepare environment for interpreter - inherit from settings of current session!
+		envvar_dict = {k: os.environ[k] for k in os.environ.keys()} # HACK Required for Travis CI
+		envvar_dict.update(dict(
+			ZUGBRUECKE_ARCH = self.p['arch'], # Architecture
+			ZUGBRUECKE_WINEPREFIX = self.p['wineprefix'], # Wine prefix / directory
+			ZUGBRUECKE_WINEDEBUG = self.p['winedebug'], # Wine debug level
+			ZUGBRUECKE_PYTHONPREFIX = self.p['pythonprefix'], # Python prefix for Wine Python (can be a Unix path)
+			))
+
 		# Fire up Wine-Python process
 		self.proc_winepython = subprocess.Popen(
 			['wenv', 'python', '-u'] + self.p['server_command_list'],
@@ -174,6 +183,7 @@ class interpreter_session_class():
 			shell = False,
 			start_new_session = True,
 			close_fds = True,
+			env = envvar_dict,
 			)
 
 		# Status log
