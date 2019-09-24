@@ -355,7 +355,7 @@ class arguments_definition_class():
 		return self.__unpack_definition_flags__(
 			getattr(ctypes, datatype_d_dict['t']),
 			datatype_d_dict['f'],
-			datatype_d_dict['t'] is 'c_void_p'
+			datatype_d_dict['t'] == 'c_void_p'
 			)
 
 
