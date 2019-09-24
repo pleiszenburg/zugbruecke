@@ -168,12 +168,16 @@ class interpreter_session_class():
 
 		# Prepare environment for interpreter - inherit from settings of current session!
 		envvar_dict = {k: os.environ[k] for k in os.environ.keys()} # HACK Required for Travis CI
-		envvar_dict.update(dict(
+		envvar_update_dict = dict(
 			ZUGBRUECKE_ARCH = self.p['arch'], # Architecture
 			ZUGBRUECKE_WINEPREFIX = self.p['wineprefix'], # Wine prefix / directory
 			ZUGBRUECKE_WINEDEBUG = self.p['winedebug'], # Wine debug level
 			ZUGBRUECKE_PYTHONPREFIX = self.p['pythonprefix'], # Python prefix for Wine Python (can be a Unix path)
-			))
+			)
+		envvar_dict.update(envvar_update_dict)
+
+		# Log status
+		self.log.out('[interpreter] Environment: ' + str(envvar_update_dict))
 
 		# Fire up Wine-Python process
 		self.proc_winepython = subprocess.Popen(
