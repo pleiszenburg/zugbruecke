@@ -27,16 +27,16 @@ If you chose to start your own session with ``zugbruecke.ctypes_session()``, the
 Configuration files
 -------------------
 
-*zugbuecke* uses ``JSON`` configuration files named ``.zugbruecke.json``. They are expected in the following locations (in that order):
+*zugbruecke* uses ``JSON`` configuration files named ``.zugbruecke.json``. They are expected in the following locations (in that order):
 
 * The current working directory
 * A directory specified in the ``ZUGBRUECKE`` environment variable
-* The *zugbuecke* root directory (``~/.zugbruecke`` by default)
+* The *zugbruecke* root directory (``~/.zugbruecke`` by default)
 * ``/etc/zugbruecke``
 
 There are two optional additions to the above rules: ``/etc/zugbruecke`` and the path specified in the ``ZUGBRUECKE`` environment variable can directly point to a configuration file. I.e. ``zugbruecke`` can also be a file in ``/etc/`` and the ``ZUGBRUECKE`` environment variable can also contain a path similar ``/path/to/some/file.json``.
 
-Parameters passed directly into the *zugbuecke* session constructor will always be given priority. Beyond that, missing parameters are being looked for location after location in the above listed places. If, after checking for configuration files in all those locations, there are still parameters left undefined, *zugbuecke* will fill them with its defaults. A parameter found in a location higher in the list will always be given priority over a the same parameter with different content found in a location further down the list.
+Parameters passed directly into the *zugbruecke* session constructor will always be given priority. Beyond that, missing parameters are being looked for location after location in the above listed places. If, after checking for configuration files in all those locations, there are still parameters left undefined, *zugbruecke* will fill them with its defaults. A parameter found in a location higher in the list will always be given priority over a the same parameter with different content found in a location further down the list.
 
 Configuration environment variables
 -----------------------------------
@@ -77,27 +77,27 @@ Configurable parameters
 ``id`` (str)
 ^^^^^^^^^^^^
 
-Every *zugbuecke* ``session`` has a unique ``id``, which allows easier debugging and keeping track of multiple simultaneously running sessions. If no session id is provided by the user, *zugbuecke* will automatically generate a random hash ``string`` for every new session. Only manually configure this if absolutely necessary.
+Every *zugbruecke* ``session`` has a unique ``id``, which allows easier debugging and keeping track of multiple simultaneously running sessions. If no session id is provided by the user, *zugbruecke* will automatically generate a random hash ``string`` for every new session. Only manually configure this if absolutely necessary.
 
 ``stdout`` (bool)
 ^^^^^^^^^^^^^^^^^
 
-Tells *zugbuecke* to show messages its sub-processes are writing to ``stdout``. ``True`` by default.
+Tells *zugbruecke* to show messages its sub-processes are writing to ``stdout``. ``True`` by default.
 
 ``stderr`` (bool)
 ^^^^^^^^^^^^^^^^^
 
-Tells *zugbuecke* to show messages its sub-processes are writing to ``stderr``. ``True`` by default.
+Tells *zugbruecke* to show messages its sub-processes are writing to ``stderr``. ``True`` by default.
 
 ``log_write`` (bool)
 ^^^^^^^^^^^^^^^^^^^^
 
-Tells *zugbuecke* to write its logs to disk into the current working directory. ``False`` by default.
+Tells *zugbruecke* to write its logs to disk into the current working directory. ``False`` by default.
 
 ``log_level`` (int)
 ^^^^^^^^^^^^^^^^^^^
 
-Changes the verbosity of *zugbuecke*. ``0`` for no logs, ``10`` for maximum logs. ``0`` by default.
+Changes the verbosity of *zugbruecke*. ``0`` for no logs, ``10`` for maximum logs. ``0`` by default.
 
 ``arch`` (str)
 ^^^^^^^^^^^^^^
@@ -112,7 +112,7 @@ This parameter defines the root directory of *zugbruecke*. This is where by defa
 ``pythonversion`` (str)
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-The ``pythonversion`` parameter tells *zugbuecke* what version of the *Windows* *CPython* interpreter it should use. By default, it is set to ``3.7.4``.
+The ``pythonversion`` parameter tells *zugbruecke* what version of the *Windows* *CPython* interpreter it should use. By default, it is set to ``3.7.4``.
 
 Please note that 3.4 and earlier are not supported. In the opposite direction, at the time of writing, 3.6 (and later) do require Wine 4.0 or later. If you are forced to use *Wine* 2.0 or 3.0, you may try to set this parameter to ``3.5.4``. Note that you can only specify versions for which an "Windows embeddable zip file" is available, see `python.org`_.
 
