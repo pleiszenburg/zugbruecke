@@ -46,6 +46,8 @@ If you are interested in testing the latest work from the **development branch**
 
 After installing the package with ``pip``, you may choose to manually initialize the "Wine Python environment" by running ``wenv init``. If you choose not to do this, ``zugbruecke`` will take care of it during its first use.
 
+If you are relying on *zugbruecke*, please notice that it uses semantic versioning. Breaking changes are indicated by increasing the second version number, the minor version. Going for example from 0.0.x to 0.1.0 or going from 0.1.y to 0.2.0 therefore indicates a breaking change. For as long as *zugbruecke* has development status "alpha", please expect more breaking changes to come.
+
 Possible problem: ``SSL/TSL has issues - please install "certifi" and try again``
 ---------------------------------------------------------------------------------
 

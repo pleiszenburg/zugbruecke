@@ -205,9 +205,6 @@ Miscellaneous
 For production environments
 ===========================
 
-**DO NOT run this code (as-is) in production environments unless you feel that you
-really know what you are doing or unless you are absolutely desperate!
-Being experimental in nature and of alpha quality, it is prone to fail
-in a number of unpredictable ways, some of which might not be obvious or might
-not even show any (intermediately) recognizable symptoms at all!
-You might end up with plain wrong, nonsensical results without noticing it!**
+**DO NOT run this code (as-is) in production environments unless you feel that you really know what you are doing or unless you are absolutely desperate! Being experimental in nature and of alpha quality, it is prone to fail in a number of unpredictable ways, some of which might not be obvious or might not even show any (intermediately) recognizable symptoms at all! You might end up with plain wrong, nonsensical results without noticing it!**
+
+If you are relying on *zugbruecke*, please notice that it uses semantic versioning. Breaking changes are indicated by increasing the second version number, the minor version. Going for example from 0.0.x to 0.1.0 or going from 0.1.y to 0.2.0 therefore indicates a breaking change. For as long as *zugbruecke* has development status "alpha", please expect more breaking changes to come.
