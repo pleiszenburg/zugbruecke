@@ -4,7 +4,7 @@ Changes
 0.1.0 (2019-XX-XX)
 ------------------
 
-Caution: **MODULE LAYOUT CHANGE BREAKING BACKWARDS COMPATIBILITY!**
+**CAUTION: MODULE LAYOUT CHANGE BREAKING BACKWARDS COMPATIBILITY!**
 
 +------------+---------------------------------------------------+---------------------------------------------------+
 |            | **OLD**                                           + **NEW**                                           +
@@ -41,6 +41,8 @@ The ``version`` configuration parameter for controlling the version of *Wine Pyt
 Wine 2.x and 3.x are no longer supported. Please use Wine 4.x or later.
 
 On older versions of Linux such as *Ubuntu 14.04* alias *Trusty Tahr* (released 2014), you may observe errors when running ``wenv python``. Most commonly, they will present themselves as ``OSError: [WinError 6] Invalid handle: 'z:\\...`` triggered by calling ``os.listdir`` in ``pip`` or ``importlib`` on folders related to ``zugbruecke``. For possible workarounds, see section on installation in the documentation.
+
+*zugbruecke* will use semantic versioning from now on. Breaking changes will be indicated by increasing the second version number, the minor version. Going for example from 0.0.x to 0.1.0 or going from 0.1.y to 0.2.0 therefore indicates a breaking change. For as long as *zugbruecke* has development status "alpha", please expect more breaking changes to come.
 
 * FEATURE: ``wineprefix``, ``winedebug`` and ``pythonprefix`` become configuration parameters definable by users allowing custom wine prefixes, wine debug levels and Python installation paths, see issue #44.
 * FEATURE: All configuration parameters can be overridden with individual environment variables.
