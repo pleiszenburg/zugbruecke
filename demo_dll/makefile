@@ -36,9 +36,9 @@ $(DEMODLL): $(DEMODLL_C)
 
 install:
 	ln -s ../$(DEMODLL)/$(DEMODLL).dll ../examples/$(DEMODLL).dll
-	ln -s ../$(DEMODLL)/$(DEMODLL).dll ../tests/$(DEMODLL).dll
+	ln -s ../$(DEMODLL)/$(DEMODLL).dll ../tests_old/$(DEMODLL).dll
 
 clean:
 	-rm $(DEMODLL).dll
 	-rm ../examples/$(DEMODLL).dll
-	-rm ../tests/$(DEMODLL).dll
+	-rm ../tests_old/$(DEMODLL).dll
