@@ -86,6 +86,8 @@ setup(
 			'pytest',
 			'coverage',
 			'pytest-cov',
+			'hypothesis',
+			'Jinja2',
 			'python-language-server',
 			'setuptools',
 			'Sphinx',
