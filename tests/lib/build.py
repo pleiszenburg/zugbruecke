@@ -92,7 +92,6 @@ def get_test_fld():
 
 def make_all():
 
-	build_fld = tempfile.mkdtemp()
 	test_fld = get_test_fld()
 	test_fn_list = get_testfn_list(test_fld)
 
@@ -106,15 +105,15 @@ def make_all():
 			print('test "%s" does not contain C SOURCE - ignoring' % test_fn)
 			continue
 
-		make_dll(test_fld, build_fld, 'win32', 'windll', test_fn, header, source) # TODO permutations
+		make_dll(test_fld, 'win32', 'windll', test_fn, header, source) # TODO permutations
 
-	shutil.rmtree(build_fld)
-
-def make_dll(test_fld, build_fld, arch, convention, test_fn, header, source):
+def make_dll(test_fld, arch, convention, test_fn, header, source):
 	"compile test dll"
 
 	HEADER_FN = 'tmp_header.h'
 	SOURCE_FN = 'tmp_source.c'
+
+	build_fld = tempfile.mkdtemp()
 
 	dll_fn = get_dll_fn(arch, convention, test_fn)
 	dll_test_path = os.path.join(test_fld, dll_fn)
@@ -136,13 +135,22 @@ def make_dll(test_fld, build_fld, arch, convention, test_fn, header, source):
 		CC[arch], source_path, *CFLAGS, '-o', dll_build_path, *LDFLAGS
 		], stdout = subprocess.PIPE, stderr = subprocess.PIPE)
 	out, err = proc.communicate()
-	out, err = out.decode('utf-8'), err.decode('utf-8')
-	print(out)
-	print(err)
-	print(dll_fn, '!!!')
+	if proc.returncode != 0:
+		raise SystemError(
+			'compiler exited with error, returncode %d' % proc.returncode,
+			out.decode('utf-8'), err.decode('utf-8')
+			)
+	if not os.path.isfile(dll_build_path):
+		raise SystemError(
+			'no compiler error but also no dll file present',
+			out.decode('utf-8'), err.decode('utf-8')
+			)
 
-	# TODO check if dll file exists ...
-	# TODO install/move dlls
+	shutil.move(dll_build_path, dll_test_path)
+	if not os.path.isfile(dll_test_path):
+		raise SystemError('dll file was not moved from build directory')
+
+	shutil.rmtree(build_fld)
 
 if __name__ == '__main__':
 
