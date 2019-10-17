@@ -36,7 +36,7 @@ def get_dll_fn(arch, convention, test_fn, custom = None):
 	assert test_fn.lower().endswith('.py')
 	name = test_fn[:-3]
 
-	return '{NAME:s}-{CONVENTION:s}-{ARCH:s}{CUSTOM:s}.dll'.format(
+	return '{NAME:s}_{CONVENTION:s}-{ARCH:s}{CUSTOM:s}.dll'.format(
 		NAME = name,
 		CONVENTION = convention,
 		ARCH = arch,
