@@ -94,6 +94,7 @@ def make_all():
 
 	test_fld = get_test_fld()
 	test_fn_list = get_testfn_list(test_fld)
+	arch_list = sorted(CC.keys())
 
 	for test_fn in test_fn_list:
 
@@ -105,7 +106,8 @@ def make_all():
 			print('test "%s" does not contain C SOURCE - ignoring' % test_fn)
 			continue
 
-		make_dll(test_fld, 'win32', 'windll', test_fn, header, source) # TODO permutations
+		for arch in arch_list:
+			make_dll(test_fld, arch, 'windll', test_fn, header, source) # TODO permutations
 
 def make_dll(test_fld, arch, convention, test_fn, header, source):
 	"compile test dll"
