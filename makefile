@@ -29,6 +29,7 @@ clean:
 	find src/ tests/ -name '*.pyo' -exec rm -f {} +
 	find src/ tests/ -name '*~' -exec rm -f {} +
 	find src/ tests/ -name '__pycache__' -exec rm -fr {} +
+	find src/ tests/ -name '*.dll' -exec rm -f {} +
 
 release_clean:
 	make clean
@@ -66,6 +67,11 @@ test:
 	make test_quick
 
 test_quick:
+	# make clean
+	python -m tests.lib.build
+	# TODO ...
+
+test_quick_OLD:
 	make clean
 	wenv pytest # --capture=no
 	make clean
