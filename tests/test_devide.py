@@ -55,7 +55,7 @@ int __stdcall DEMODLL divide_int(
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-from .lib.ctypes import ctypes, get_dll_handles
+from .lib.ctypes import get_dll_handles
 
 import pytest
 
@@ -63,8 +63,8 @@ import pytest
 # TEST(s)
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-@pytest.mark.parametrize('dll_handle', get_dll_handles(__file__))
-def test_devide(dll_handle):
+@pytest.mark.parametrize('ctypes,dll_handle', get_dll_handles(__file__))
+def test_devide(ctypes, dll_handle):
 
 	x, y = 11, 3 # TODO generate x and y with hypothesis
 
