@@ -16,7 +16,7 @@ def get_dll_handle(arch, convention, test_fn):
 	"get handle to dll for given arch and convention"
 
 	return getattr(ctypes, convention).LoadLibrary(
-		get_dll_path(arch, convention, test_fn)
+		get_dll_path(arch, convention, test_fn) # TODO this will parse setup.cfg on EVERY call
 		)
 
 def get_dll_handles(test_path):
