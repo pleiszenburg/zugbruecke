@@ -47,6 +47,8 @@ DEMODLL bool __stdcall DllMain(HANDLE hModule, DWORD ul_reason_for_call, LPVOID 
 
 """
 
+ARCHS = ['win32', 'win64']
+
 CC = {
 	'win32': 'i686-w64-mingw32-gcc',
 	'win64': 'x86_64-w64-mingw32-gcc',

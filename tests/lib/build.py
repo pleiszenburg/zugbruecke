@@ -7,6 +7,7 @@ import tempfile
 from jinja2 import Template
 
 from .const import (
+	ARCHS,
 	CC,
 	CFLAGS,
 	LDFLAGS,
@@ -94,7 +95,6 @@ def make_all():
 
 	test_fld = get_test_fld()
 	test_fn_list = get_testfn_list(test_fld)
-	arch_list = sorted(CC.keys())
 
 	for test_fn in test_fn_list:
 
@@ -106,7 +106,7 @@ def make_all():
 			print('test "%s" does not contain C SOURCE - ignoring' % test_fn)
 			continue
 
-		for arch in arch_list:
+		for arch in ARCHS:
 			make_dll(test_fld, arch, 'windll', test_fn, header, source) # TODO permutations
 
 def make_dll(test_fld, arch, convention, test_fn, header, source):
