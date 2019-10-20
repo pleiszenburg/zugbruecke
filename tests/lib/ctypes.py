@@ -26,4 +26,8 @@ def get_dll_handles(test_path):
 
 	test_fn = os.path.basename(test_path)
 
-	return ((CTYPES[arch], get_dll_handle(arch, 'windll', test_fn)) for arch in ARCHS)
+	for arch in ARCHS:
+		try:
+			yield (CTYPES[arch], get_dll_handle(arch, 'windll', test_fn))
+		except OSError:
+			print('Loading DLL for testfile "%s" on arch "%s" failed.' % (test_fn, arch))

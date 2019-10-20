@@ -45,6 +45,11 @@ int __stdcall DEMODLL divide_int(
 	int *remainder
 	)
 {
+	if (b == 0)
+	{
+		*remainder = 0;
+		return 0;
+	}
 	int quot = a / b;
 	*remainder = a % b;
 	return quot;
@@ -57,6 +62,7 @@ int __stdcall DEMODLL divide_int(
 
 from .lib.ctypes import get_dll_handles
 
+from hypothesis import given, strategies as st
 import pytest
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -64,9 +70,11 @@ import pytest
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 @pytest.mark.parametrize('ctypes,dll_handle', get_dll_handles(__file__))
-def test_devide(ctypes, dll_handle):
-
-	x, y = 11, 3 # TODO generate x and y with hypothesis
+@given(
+	x = st.integers(min_value = -1 * 2 ** 31, max_value = 2 ** 31 - 1),
+	y = st.integers(min_value = -1 * 2 ** 31, max_value = 2 ** 31 - 1)
+	)
+def test_devide(x, y, ctypes, dll_handle):
 
 	divide_int = dll_handle.divide_int
 	divide_int.argtypes = (ctypes.c_int, ctypes.c_int, ctypes.POINTER(ctypes.c_int))
@@ -76,4 +84,15 @@ def test_devide(ctypes, dll_handle):
 	quot = divide_int(x, y, rem_)
 	rem = rem_.value
 
-	assert (x // y, x % y) == (quot, rem)
+	if y != 0:
+
+		v_quot = x // y
+		v_rem = abs(x) % abs(y) * (1, -1)[x < 0] # HACK C99
+		if v_rem != 0 and ((x < 0) ^ (y < 0)): # HACK C99
+			v_quot += 1
+
+		assert (v_quot, v_rem) == (quot, rem)
+
+	else:
+
+		assert (0, 0) == (quot, rem)
