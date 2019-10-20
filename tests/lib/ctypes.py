@@ -2,7 +2,7 @@
 import os
 from sys import platform
 
-from .const import ARCHS
+from .const import ARCHS, CONVENTIONS
 from .names import get_dll_path
 
 if any([platform.startswith(os_name) for os_name in ['linux', 'darwin', 'freebsd']]):
@@ -26,8 +26,9 @@ def get_dll_handles(test_path):
 
 	test_fn = os.path.basename(test_path)
 
-	for arch in ARCHS:
-		try:
-			yield (CTYPES[arch], get_dll_handle(arch, 'windll', test_fn))
-		except OSError:
-			print('Loading DLL for testfile "%s" on arch "%s" failed.' % (test_fn, arch))
+	for convention in CONVENTIONS:
+		for arch in ARCHS:
+			try:
+				yield (CTYPES[arch], get_dll_handle(arch, convention, test_fn))
+			except OSError:
+				print('Loading DLL for testfile "%s" on arch "%s" failed.' % (test_fn, arch))
