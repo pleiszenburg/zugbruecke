@@ -32,7 +32,7 @@ CONVENTIONS = ['cdll', 'windll']
 
 PREFIX = {
 	'cdll': '__declspec(dllexport)',
-	'windll': '__declspec(dllimport)',
+	'windll': '__declspec(dllexport)',
 	}
 SUFFIX = {
 	'cdll': '__cdecl',

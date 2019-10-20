@@ -29,6 +29,7 @@ clean:
 	find src/ tests/ -name '*.pyo' -exec rm -f {} +
 	find src/ tests/ -name '*~' -exec rm -f {} +
 	find src/ tests/ -name '__pycache__' -exec rm -fr {} +
+clean_dll:
 	find src/ tests/ -name '*.dll' -exec rm -f {} +
 
 release_clean:
@@ -67,9 +68,13 @@ test:
 	make test_quick
 
 test_quick:
-	# make clean
+	make clean_dll
 	python -m tests.lib.build
-	# TODO ...
+	make clean
+	wenv pytest
+	make clean
+	pytest --cov=zugbruecke --cov-config=setup.cfg # --capture=no
+	mv .coverage .coverage.e9.0 ; coverage combine ; coverage html
 
 test_quick_OLD:
 	make clean
