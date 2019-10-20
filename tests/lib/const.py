@@ -1,5 +1,5 @@
 
-WINDLL_HEADER = """
+DLL_HEADER = """
 
 #ifndef TESTDLL_H
 #define TESTDLL_H
@@ -9,7 +9,7 @@ WINDLL_HEADER = """
 #include <stdint.h>
 #include <math.h>
 
-#define DEMODLL __declspec(dllimport)
+// #define DEMODLL __declspec(dllimport)
 
 typedef int32_t bool;
 #define TRUE 1
@@ -17,19 +17,22 @@ typedef int32_t bool;
 
 {{ HEADER }}
 
-DEMODLL bool __stdcall DllMain(HANDLE hModule, DWORD ul_reason_for_call, LPVOID lpReserved);
+/*
+{{ PREFIX }} bool {{ SUFFIX }} DllMain(HANDLE hModule, DWORD ul_reason_for_call, LPVOID lpReserved);
+*/
 
 #endif
 
 """
 
-WINDLL_SOURCE = """
+DLL_SOURCE = """
 
 #include "{{ HEADER_FN }}"
 
 {{ SOURCE }}
 
-DEMODLL bool __stdcall DllMain(HANDLE hModule, DWORD ul_reason_for_call, LPVOID lpReserved)
+/*
+{{ PREFIX }} bool {{ SUFFIX }} DllMain(HANDLE hModule, DWORD ul_reason_for_call, LPVOID lpReserved)
 {
 	switch (ul_reason_for_call)
 	{
@@ -44,21 +47,35 @@ DEMODLL bool __stdcall DllMain(HANDLE hModule, DWORD ul_reason_for_call, LPVOID 
 	}
 	return TRUE;
 }
+*/
 
 """
 
 ARCHS = ['win32', 'win64']
+CONVENTIONS = ['cdll', 'windll']
+
+PREFIX = {
+	'cdll': '__declspec(dllexport)',
+	'windll': '__declspec(dllimport)',
+	}
+SUFFIX = {
+	'cdll': '__cdecl',
+	'windll': '__stdcall',
+	}
 
 CC = {
 	'win32': 'i686-w64-mingw32-gcc',
 	'win64': 'x86_64-w64-mingw32-gcc',
 	}
-CFLAGS = [
+_CFLAGS = [
 	'-Wall',
-	'-Wl,-add-stdcall-alias',
 	'-shared',
 	'-std=c99'
 	]
+CFLAGS = {
+	'cdll': _CFLAGS + ['-Wl,--subsystem,windows'],
+	'windll': _CFLAGS + ['-Wl,-add-stdcall-alias'],
+	}
 LDFLAGS = [
 	'-lm',
 	]
