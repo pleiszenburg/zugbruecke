@@ -8,11 +8,14 @@ from jinja2 import Template
 
 from .const import (
 	ARCHS,
+	CONVENTIONS,
 	CC,
 	CFLAGS,
 	LDFLAGS,
-	WINDLL_HEADER,
-	WINDLL_SOURCE,
+	DLL_HEADER,
+	DLL_SOURCE,
+	PREFIX,
+	SUFFIX,
 	)
 from .names import get_dll_fn, get_test_fld
 from .parser import get_vars_from_source
@@ -58,8 +61,9 @@ def make_all():
 			print('test "%s" does not contain C SOURCE - ignoring' % test_fn)
 			continue
 
-		for arch in ARCHS:
-			make_dll(test_fld, arch, 'windll', test_fn, header, source) # TODO permutations
+		for convention in CONVENTIONS:
+			for arch in ARCHS:
+				make_dll(test_fld, arch, convention, test_fn, header, source) # TODO permutations
 
 def make_dll(test_fld, arch, convention, test_fn, header, source):
 	"compile test dll"
@@ -76,17 +80,23 @@ def make_dll(test_fld, arch, convention, test_fn, header, source):
 	source_path = os.path.join(build_fld, SOURCE_FN)
 
 	with open(header_path, 'w', encoding = 'utf-8') as f:
-		f.write(Template(WINDLL_HEADER).render(
-			HEADER = header,
+		f.write(Template(DLL_HEADER).render(
+			HEADER = Template(header).render(
+				PREFIX = PREFIX[convention],
+				SUFFIX = SUFFIX[convention],
+				),
 			))
 	with open(source_path, 'w', encoding = 'utf-8') as f:
-		f.write(Template(WINDLL_SOURCE).render(
+		f.write(Template(DLL_SOURCE).render(
 			HEADER_FN = HEADER_FN,
-			SOURCE = source,
+			SOURCE = Template(source).render(
+				PREFIX = PREFIX[convention],
+				SUFFIX = SUFFIX[convention],
+				),
 			))
 
 	proc = subprocess.Popen([
-		CC[arch], source_path, *CFLAGS, '-o', dll_build_path, *LDFLAGS
+		CC[arch], source_path, *CFLAGS[convention], '-o', dll_build_path, *LDFLAGS
 		], stdout = subprocess.PIPE, stderr = subprocess.PIPE)
 	out, err = proc.communicate()
 	if proc.returncode != 0:
