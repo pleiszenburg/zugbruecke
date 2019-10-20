@@ -4,7 +4,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	demo_dll/demo_dll.h: DLL header
+	demo_dll/01/demo_dll.h: DLL header
 
 	Required to run on platform / side: [WINE]
 

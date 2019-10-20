@@ -2,7 +2,7 @@
 # Calling routines in Windows DLLs from Python scripts running on unixlike systems
 # https://github.com/pleiszenburg/zugbruecke
 #
-#	demo_dll/makefile: GNU makefile for building demo DLL with mingw
+#	demo_dll/01/makefile: GNU makefile for building demo DLL with mingw
 #
 #	Required to run on platform / side: [UNIX]
 #
