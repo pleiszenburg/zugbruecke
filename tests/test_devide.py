@@ -31,7 +31,7 @@ specific language governing rights and limitations under the License.
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 HEADER = """
-int __stdcall DEMODLL divide_int(
+{{ PREFIX }} int {{ SUFFIX }} divide_int(
 	int a,
 	int b,
 	int *remainder
@@ -39,7 +39,7 @@ int __stdcall DEMODLL divide_int(
 """
 
 SOURCE = """
-int __stdcall DEMODLL divide_int(
+{{ PREFIX }} int {{ SUFFIX }} divide_int(
 	int a,
 	int b,
 	int *remainder
