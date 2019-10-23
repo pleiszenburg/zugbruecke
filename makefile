@@ -25,6 +25,9 @@ clean:
 	-rm -r build/*
 	-rm -r dist/*
 	coverage erase
+	make clean_py
+	make clean_dll
+clean_py:
 	find src/ tests/ -name '*.pyc' -exec rm -f {} +
 	find src/ tests/ -name '*.pyo' -exec rm -f {} +
 	find src/ tests/ -name '*~' -exec rm -f {} +
@@ -60,20 +63,24 @@ upload_test:
 
 install:
 	pip install -U -e .[dev]
-	wenv init
-	wenv init_coverage
+	ZUGBRUECKE_ARCH=win32 wenv init
+	ZUGBRUECKE_ARCH=win32 wenv pip install -r requirements_test.txt
+	ZUGBRUECKE_ARCH=win32 wenv init_coverage
+	ZUGBRUECKE_ARCH=win64 wenv init
+	ZUGBRUECKE_ARCH=win64 wenv pip install -r requirements_test.txt
+	ZUGBRUECKE_ARCH=win64 wenv init_coverage
 
 test:
 	make docu
 	make test_quick
 
 test_quick:
-	make clean_dll
+	make clean
 	python -m tests.lib.build
-	make clean
+	make clean_py
 	ZUGBRUECKE_ARCH=win32 wenv pytest
-	make clean
+	make clean_py
 	ZUGBRUECKE_ARCH=win64 wenv pytest
-	make clean
+	make clean_py
 	pytest --cov=zugbruecke --cov-config=setup.cfg # --capture=no
 	mv .coverage .coverage.e9.0 ; coverage combine ; coverage html
