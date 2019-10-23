@@ -36,8 +36,8 @@ release_clean:
 	make clean
 	-rm -r src/*.egg-info
 
-dll:
-	@(cd demo_dll; make clean; make; make install)
+# dll: # TODO move to example folder
+# 	@(cd demo_dll; make clean; make; make install)
 
 docu:
 	@(cd docs; make clean; make html)
@@ -72,13 +72,6 @@ test_quick:
 	python -m tests.lib.build
 	make clean
 	wenv pytest
-	make clean
-	pytest --cov=zugbruecke --cov-config=setup.cfg # --capture=no
-	mv .coverage .coverage.e9.0 ; coverage combine ; coverage html
-
-test_quick_OLD:
-	make clean
-	wenv pytest # --capture=no
 	make clean
 	pytest --cov=zugbruecke --cov-config=setup.cfg # --capture=no
 	mv .coverage .coverage.e9.0 ; coverage combine ; coverage html
