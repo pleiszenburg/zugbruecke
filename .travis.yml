@@ -69,7 +69,9 @@ before_install:
   - pip install -U setuptools
   - pip install -U pytest
   - wine --version
+  - wine64 --version
   - i686-w64-mingw32-gcc --version
+  - x86_64-w64-mingw32-gcc --version
   - python --version
   - pytest --version
   - uname -a
@@ -77,7 +79,7 @@ before_install:
 
 # command to install dependencies and module
 install:
-  - make dll
+  # - make dll
   - make install
 
 # command to run tests
