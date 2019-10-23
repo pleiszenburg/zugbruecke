@@ -71,7 +71,9 @@ test_quick:
 	make clean_dll
 	python -m tests.lib.build
 	make clean
-	wenv pytest
+	ZUGBRUECKE_ARCH=win32 wenv pytest
+	make clean
+	ZUGBRUECKE_ARCH=win64 wenv pytest
 	make clean
 	pytest --cov=zugbruecke --cov-config=setup.cfg # --capture=no
 	mv .coverage .coverage.e9.0 ; coverage combine ; coverage html
