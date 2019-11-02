@@ -71,6 +71,8 @@ class config_class(dict):
 			if len(value) > 0:
 				if value.isnumeric():
 					return int(value)
+				elif value.strip().lower() in ('true', 'false'):
+					return {'true': True, 'false': False}[value.strip().lower()]
 				else:
 					return value
 
