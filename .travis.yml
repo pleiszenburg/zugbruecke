@@ -35,19 +35,29 @@ matrix:
     include:
         - dist: trusty
           python: "3.4"
-          env: ZUGBRUECKE=.travis-trusty.zugbruecke.json
+          env:
+              - ZUGBRUECKE__ISSUES_50_WORKAROUND=TRUE
+              - ZUGBRUECKE_LOG_LEVEL=100
         - dist: xenial
           python: "3.5"
-          env: ZUGBRUECKE=.travis-xenial.zugbruecke.json
+          env:
+              - ZUGBRUECKE__ISSUES_50_WORKAROUND=FALSE
+              - ZUGBRUECKE_LOG_LEVEL=100
         - dist: xenial
           python: "3.6"
-          env: ZUGBRUECKE=.travis-xenial.zugbruecke.json
+          env:
+              - ZUGBRUECKE__ISSUES_50_WORKAROUND=FALSE
+              - ZUGBRUECKE_LOG_LEVEL=100
         - dist: xenial
           python: "3.7"
-          env: ZUGBRUECKE=.travis-xenial.zugbruecke.json
+          env:
+              - ZUGBRUECKE__ISSUES_50_WORKAROUND=FALSE
+              - ZUGBRUECKE_LOG_LEVEL=100
         - dist: xenial
-          python: "3.8-dev"
-          env: ZUGBRUECKE=.travis-xenial.zugbruecke.json
+          python: "3.8"
+          env:
+              - ZUGBRUECKE__ISSUES_50_WORKAROUND=FALSE
+              - ZUGBRUECKE_LOG_LEVEL=100
 
 # Get wine and mingw cross compiler
 # http://ubuntuhandbook.org/index.php/2017/01/install-wine-2-0-ubuntu-16-04-14-04-16-10/
