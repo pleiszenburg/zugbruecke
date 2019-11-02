@@ -1,4 +1,4 @@
+hypothesis
 pytest
 coverage
 pytest-cov
-hypothesis
