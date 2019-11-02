@@ -26,6 +26,10 @@ specific language governing rights and limitations under the License.
 
 """
 
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# IMPORT
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
 import os
 import shutil
 import subprocess
@@ -46,6 +50,10 @@ from .const import (
 	)
 from .names import get_dll_fn, get_test_fld
 from .parser import get_vars_from_source
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# ROUTINES
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 def get_header_and_source_from_test(fn):
 	"extract header and source from Python test file without importing it"
@@ -142,6 +150,10 @@ def make_dll(test_fld, arch, convention, test_fn, header, source):
 		raise SystemError('dll file was not moved from build directory')
 
 	shutil.rmtree(build_fld)
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# MODULE ENTRY POINT
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 if __name__ == '__main__':
 

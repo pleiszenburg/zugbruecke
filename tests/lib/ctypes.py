@@ -26,12 +26,20 @@ specific language governing rights and limitations under the License.
 
 """
 
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# IMPORT
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
 import os
 from sys import platform
 from platform import architecture
 
 from .const import ARCHS, CONVENTIONS
 from .names import get_dll_path
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# IMPORT / PLATFORM
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 ARCHITECTURE = architecture()[0][:2]
 
@@ -45,6 +53,10 @@ elif platform.startswith('win'):
 	PLATFORM = 'wine'
 else:
 	raise SystemError('unsopported platform')
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# ROUTINES
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 def get_dll_handle(arch, convention, test_fn):
 	"get handle to dll for given arch and convention"
