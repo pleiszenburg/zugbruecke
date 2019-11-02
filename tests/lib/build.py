@@ -130,9 +130,9 @@ def make_dll(test_fld, arch, convention, test_fn, header, source):
 				),
 			))
 
-	proc = subprocess.Popen([
-		CC[arch], source_path, *CFLAGS[convention], '-o', dll_build_path, *LDFLAGS
-		], stdout = subprocess.PIPE, stderr = subprocess.PIPE)
+	proc = subprocess.Popen(
+		[CC[arch], source_path] + CFLAGS[convention] + ['-o', dll_build_path] + LDFLAGS,
+		stdout = subprocess.PIPE, stderr = subprocess.PIPE)
 	out, err = proc.communicate()
 	if proc.returncode != 0:
 		raise SystemError(
