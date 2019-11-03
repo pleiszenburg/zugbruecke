@@ -87,7 +87,7 @@ def make_all():
 	test_fld = get_test_fld()
 	test_fn_list = get_testfn_list(test_fld)
 
-	for test_fn in test_fn_list:
+	for test_fn in test_fn_list: # TODO parallel?
 
 		header, source, extra = get_header_and_source_from_test(os.path.join(test_fld, test_fn))
 		if header is None:
@@ -97,8 +97,8 @@ def make_all():
 			print('test "%s" does not contain C SOURCE - ignoring' % test_fn)
 			continue
 
-		for convention in CONVENTIONS:
-			for arch in ARCHS:
+		for convention in CONVENTIONS: # TODO parallel?
+			for arch in ARCHS: # TODO parallel?
 				make_dll(test_fld, arch, convention, test_fn, header, source, extra)
 
 def make_dll(test_fld, arch, convention, test_fn, header, source, extra):
