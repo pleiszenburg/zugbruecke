@@ -74,13 +74,26 @@ from hypothesis import given, strategies as st
 import pytest
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# HELPER(s)
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+def _int_limits(bits, sign = True):
+	assert isinstance(bits, int)
+	assert bits in (8, 16, 32, 64)
+	assert isinstance(sign, bool)
+	if sign:
+		return {'min_value': -1 * 2 ** (bits - 1), 'max_value': 2 ** (bits - 1) - 1}
+	else:
+		return {'min_value': 0, 'max_value': 2 ** bits - 1}
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # TEST(s)
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 @pytest.mark.parametrize('ctypes,dll_handle', get_dll_handles(__file__))
 @given(
-	x = st.integers(min_value = -1 * 2 ** 31, max_value = 2 ** 31 - 1),
-	y = st.integers(min_value = -1 * 2 ** 31, max_value = 2 ** 31 - 1)
+	x = st.integers(**_int_limits(32, sign = True)),
+	y = st.integers(**_int_limits(32, sign = True))
 	)
 def test_devide_dtype(x, y, ctypes, dll_handle):
 
