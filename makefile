@@ -78,9 +78,9 @@ test_quick:
 	make clean
 	python -m tests.lib.build
 	make clean_py
-	ZUGBRUECKE_ARCH=win32 wenv pytest
+	ZUGBRUECKE_ARCH=win32 wenv pytest --hypothesis-show-statistics
 	make clean_py
-	ZUGBRUECKE_ARCH=win64 wenv pytest
+	ZUGBRUECKE_ARCH=win64 wenv pytest --hypothesis-show-statistics
 	make clean_py
-	pytest --cov=zugbruecke --cov-config=setup.cfg # --capture=no
+	pytest --cov=zugbruecke --cov-config=setup.cfg --hypothesis-show-statistics # --capture=no
 	mv .coverage .coverage.e9.0 ; coverage combine ; coverage html
