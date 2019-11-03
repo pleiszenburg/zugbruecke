@@ -33,6 +33,7 @@ specific language governing rights and limitations under the License.
 import os
 import shutil
 import subprocess
+import sys
 import tempfile
 
 from jinja2 import Template
@@ -61,9 +62,9 @@ def get_header_and_source_from_test(fn):
 	with open(fn, 'r', encoding = 'utf-8') as f:
 		src = f.read()
 
-	var_dict = get_vars_from_source(src, 'HEADER', 'SOURCE')
+	var_dict = get_vars_from_source(src, 'HEADER', 'SOURCE', 'EXTRA')
 
-	return var_dict['HEADER'], var_dict['SOURCE']
+	return var_dict['HEADER'], var_dict['SOURCE'], var_dict['EXTRA']
 
 def get_testfn_list(test_fld):
 	"get list of Python test files in project test folder"
@@ -88,7 +89,7 @@ def make_all():
 
 	for test_fn in test_fn_list:
 
-		header, source = get_header_and_source_from_test(os.path.join(test_fld, test_fn))
+		header, source, extra = get_header_and_source_from_test(os.path.join(test_fld, test_fn))
 		if header is None:
 			print('test "%s" does not contain a C HEADER - ignoring' % test_fn)
 			continue
@@ -98,10 +99,13 @@ def make_all():
 
 		for convention in CONVENTIONS:
 			for arch in ARCHS:
-				make_dll(test_fld, arch, convention, test_fn, header, source) # TODO permutations
+				make_dll(test_fld, arch, convention, test_fn, header, source, extra)
 
-def make_dll(test_fld, arch, convention, test_fn, header, source):
+def make_dll(test_fld, arch, convention, test_fn, header, source, extra):
 	"compile test dll"
+
+	if extra is None:
+		extra = dict()
 
 	HEADER_FN = 'tmp_header.h'
 	SOURCE_FN = 'tmp_source.c'
@@ -114,11 +118,14 @@ def make_dll(test_fld, arch, convention, test_fn, header, source):
 	header_path = os.path.join(build_fld, HEADER_FN)
 	source_path = os.path.join(build_fld, SOURCE_FN)
 
+	print('Building "{DLL_FN:s}" ... '.format(DLL_FN = dll_fn), end = '')
+
 	with open(header_path, 'w', encoding = 'utf-8') as f:
 		f.write(Template(DLL_HEADER).render(
 			HEADER = Template(header).render(
 				PREFIX = PREFIX[convention],
 				SUFFIX = SUFFIX[convention],
+				**extra,
 				),
 			))
 	with open(source_path, 'w', encoding = 'utf-8') as f:
@@ -127,6 +134,7 @@ def make_dll(test_fld, arch, convention, test_fn, header, source):
 			SOURCE = Template(source).render(
 				PREFIX = PREFIX[convention],
 				SUFFIX = SUFFIX[convention],
+				**extra,
 				),
 			))
 
@@ -150,6 +158,8 @@ def make_dll(test_fld, arch, convention, test_fn, header, source):
 		raise SystemError('dll file was not moved from build directory')
 
 	shutil.rmtree(build_fld)
+
+	print('done.')
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # MODULE ENTRY POINT

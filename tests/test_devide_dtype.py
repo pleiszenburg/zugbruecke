@@ -31,30 +31,38 @@ specific language governing rights and limitations under the License.
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 HEADER = """
-{{ PREFIX }} int {{ SUFFIX }} divide_int(
-	int a,
-	int b,
-	int *remainder
-	);
+{% for DTYPE in DTYPES %}
+	{{ PREFIX }} {{ DTYPE }} {{ SUFFIX }} test_divide_{{ DTYPE }}(
+		{{ DTYPE }} a,
+		{{ DTYPE }} b,
+		{{ DTYPE }} *remainder
+		);
+{% endfor %}
 """
 
 SOURCE = """
-{{ PREFIX }} int {{ SUFFIX }} divide_int(
-	int a,
-	int b,
-	int *remainder
-	)
-{
-	if (b == 0)
+{% for DTYPE in DTYPES %}
+	{{ PREFIX }} {{ DTYPE }} {{ SUFFIX }} test_divide_{{ DTYPE }}(
+		{{ DTYPE }} a,
+		{{ DTYPE }} b,
+		{{ DTYPE }} *remainder
+		)
 	{
-		*remainder = 0;
-		return 0;
+		if (b == 0)
+		{
+			*remainder = 0;
+			return 0;
+		}
+		{{ DTYPE }} quot = a / b;
+		*remainder = a % b;
+		return quot;
 	}
-	int quot = a / b;
-	*remainder = a % b;
-	return quot;
-}
+{% endfor %}
 """
+
+EXTRA = {
+	'DTYPES': ['int32_t'] # 'int', 'int8_t', 'int16_t', 'int64_t'
+	}
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # IMPORT
@@ -74,13 +82,13 @@ import pytest
 	x = st.integers(min_value = -1 * 2 ** 31, max_value = 2 ** 31 - 1),
 	y = st.integers(min_value = -1 * 2 ** 31, max_value = 2 ** 31 - 1)
 	)
-def test_devide(x, y, ctypes, dll_handle):
+def test_devide_dtype(x, y, ctypes, dll_handle):
 
-	divide_int = dll_handle.divide_int
-	divide_int.argtypes = (ctypes.c_int, ctypes.c_int, ctypes.POINTER(ctypes.c_int))
-	divide_int.restype = ctypes.c_int
+	divide_int = dll_handle.test_divide_int32_t
+	divide_int.argtypes = (ctypes.c_int32, ctypes.c_int32, ctypes.POINTER(ctypes.c_int32))
+	divide_int.restype = ctypes.c_int32
 
-	rem_ = ctypes.c_int()
+	rem_ = ctypes.c_int32()
 	quot = divide_int(x, y, rem_)
 	rem = rem_.value
 

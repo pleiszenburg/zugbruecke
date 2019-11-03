@@ -61,9 +61,12 @@ else:
 def get_dll_handle(arch, convention, test_fn):
 	"get handle to dll for given arch and convention"
 
-	return getattr(CTYPES[arch], convention).LoadLibrary(
-		get_dll_path(arch, convention, test_fn) # TODO this will parse setup.cfg on EVERY call
-		)
+	try:
+		return getattr(CTYPES[arch], convention).LoadLibrary(
+			get_dll_path(arch, convention, test_fn) # TODO this will parse setup.cfg on EVERY call
+			)
+	except:
+		raise SystemError('Ups!', arch, convention, test_fn, get_dll_path(arch, convention, test_fn), os.getcwd())
 
 def get_dll_handles(test_path):
 	"get handles to one test's dlls for all archs and conventions"
