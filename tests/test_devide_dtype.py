@@ -91,17 +91,19 @@ def _int_limits(bits, sign = True):
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 @pytest.mark.parametrize('ctypes,dll_handle', get_dll_handles(__file__))
-@given(
-	x = st.integers(**_int_limits(32, sign = True)),
-	y = st.integers(**_int_limits(32, sign = True))
-	)
-def test_devide_dtype(x, y, ctypes, dll_handle):
+@pytest.mark.parametrize('bits', [8, 16, 32])
+@given(data = st.data())
+def test_devide_dtype(data, bits, ctypes, dll_handle):
 
-	divide_int = dll_handle.test_divide_int32_t
-	divide_int.argtypes = (ctypes.c_int32, ctypes.c_int32, ctypes.POINTER(ctypes.c_int32))
-	divide_int.restype = ctypes.c_int32
+	x = data.draw(st.integers(**_int_limits(bits, sign = True)))
+	y = data.draw(st.integers(**_int_limits(bits, sign = True)))
 
-	rem_ = ctypes.c_int32()
+	dtype = getattr(ctypes, 'c_int{BITS:d}'.format(BITS = bits))
+	divide_int = getattr(dll_handle, 'test_divide_int{BITS:d}_t'.format(BITS = bits))
+	divide_int.argtypes = (dtype, dtype, ctypes.POINTER(dtype))
+	divide_int.restype = dtype
+
+	rem_ = dtype()
 	quot = divide_int(x, y, rem_)
 	rem = rem_.value
 
