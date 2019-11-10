@@ -76,4 +76,4 @@ def get_dll_handles(test_path):
 	for convention in CONVENTIONS:
 		for arch in ARCHS:
 			if PLATFORM == 'unix' or arch[3:] == ARCHITECTURE:
-				yield (CTYPES[arch], get_dll_handle(arch, convention, test_fn))
+				yield (arch, CTYPES[arch], get_dll_handle(arch, convention, test_fn))

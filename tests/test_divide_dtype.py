@@ -96,11 +96,11 @@ def _int_limits(bits, sign = True):
 # TEST(s)
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-@pytest.mark.parametrize('ctypes,dll_handle', get_dll_handles(__file__))
+@pytest.mark.parametrize('arch,ctypes,dll_handle', get_dll_handles(__file__))
 @pytest.mark.parametrize('bits', [8, 16, 32])
 @given(data = st.data())
 @settings(max_examples = 500)
-def test_divide_dtype(data, bits, ctypes, dll_handle):
+def test_divide_dtype(data, bits, arch, ctypes, dll_handle):
 
 	x = data.draw(st.integers(**_int_limits(bits, sign = True)))
 	y = data.draw(st.integers(**_int_limits(bits, sign = True)))

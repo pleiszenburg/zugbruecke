@@ -69,12 +69,12 @@ import pytest
 # TEST(s)
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-@pytest.mark.parametrize('ctypes,dll_handle', get_dll_handles(__file__))
+@pytest.mark.parametrize('arch,ctypes,dll_handle', get_dll_handles(__file__))
 @given(
 	x = st.integers(min_value = -1 * 2 ** 31, max_value = 2 ** 31 - 1),
 	y = st.integers(min_value = -1 * 2 ** 31, max_value = 2 ** 31 - 1)
 	)
-def test_divide(x, y, ctypes, dll_handle):
+def test_divide(x, y, arch, ctypes, dll_handle):
 
 	divide_int = dll_handle.divide_int
 	divide_int.argtypes = (ctypes.c_int, ctypes.c_int, ctypes.POINTER(ctypes.c_int))
