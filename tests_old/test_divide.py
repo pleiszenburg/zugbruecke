@@ -6,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	tests/test_devide.py: Tests by reference argument passing (int pointer)
+	tests/test_divide.py: Tests by reference argument passing (int pointer)
 
 	Required to run on platform / side: [UNIX, WINE]
 
@@ -68,7 +68,7 @@ class sample_class:
 # TEST(s)
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-def test_devide():
+def test_divide():
 
 	sample = sample_class()
 
