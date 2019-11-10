@@ -6,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	tests/test_devide_dtype.py: Tests by reference argument passing (int pointer)
+	tests/test_divide_dtype.py: Tests by reference argument passing (int pointer)
 
 	Required to run on platform / side: [UNIX, WINE]
 
@@ -93,7 +93,7 @@ def _int_limits(bits, sign = True):
 @pytest.mark.parametrize('ctypes,dll_handle', get_dll_handles(__file__))
 @pytest.mark.parametrize('bits', [8, 16, 32])
 @given(data = st.data())
-def test_devide_dtype(data, bits, ctypes, dll_handle):
+def test_divide_dtype(data, bits, ctypes, dll_handle):
 
 	x = data.draw(st.integers(**_int_limits(bits, sign = True)))
 	y = data.draw(st.integers(**_int_limits(bits, sign = True)))
