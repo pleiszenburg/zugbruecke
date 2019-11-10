@@ -70,7 +70,7 @@ EXTRA = {
 
 from .lib.ctypes import get_dll_handles
 
-from hypothesis import given, strategies as st
+from hypothesis import given, settings, strategies as st
 import pytest
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -86,6 +86,12 @@ def _int_limits(bits, sign = True):
 	else:
 		return {'min_value': 0, 'max_value': 2 ** bits - 1}
 
+# def _assert_int_limits(value, bits, sign):
+# 	interval_dict = _int_limits(bits, sign)
+# 	assert isinstance(value, int)
+# 	assert value >= interval_dict['min_value']
+# 	assert value <= interval_dict['max_value']
+
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # TEST(s)
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -93,10 +99,14 @@ def _int_limits(bits, sign = True):
 @pytest.mark.parametrize('ctypes,dll_handle', get_dll_handles(__file__))
 @pytest.mark.parametrize('bits', [8, 16, 32])
 @given(data = st.data())
+@settings(max_examples = 500)
 def test_divide_dtype(data, bits, ctypes, dll_handle):
 
 	x = data.draw(st.integers(**_int_limits(bits, sign = True)))
 	y = data.draw(st.integers(**_int_limits(bits, sign = True)))
+
+	# _assert_int_limits(x, bits, True)
+	# _assert_int_limits(y, bits, True)
 
 	dtype = getattr(ctypes, 'c_int{BITS:d}'.format(BITS = bits))
 	divide_int = getattr(dll_handle, 'test_divide_int{BITS:d}_t'.format(BITS = bits))
