@@ -44,3 +44,15 @@ def get_int_limits(bits, sign = True):
 		return {'min_value': -1 * 2 ** (bits - 1), 'max_value': 2 ** (bits - 1) - 1}
 	else:
 		return {'min_value': 0, 'max_value': 2 ** bits - 1}
+
+def force_int_overflow(value, bits, sign):
+	assert isinstance(value, int)
+	assert isinstance(bits, int)
+	assert bits in (8, 16, 32, 64)
+	assert isinstance(sign, bool)
+	int_limits = get_int_limits(bits, sign)
+	while value > int_limits['max_value']:
+		value -= 2 ** bits
+	while value < int_limits['min_value']:
+		value += 2 ** bits
+	return value

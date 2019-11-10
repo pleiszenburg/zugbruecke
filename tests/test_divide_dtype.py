@@ -71,6 +71,7 @@ EXTRA = {
 from .lib.ctypes import get_dll_handles
 from .lib.param import (
 	get_int_limits,
+	force_int_overflow,
 	MAX_EXAMPLES,
 	)
 
@@ -106,10 +107,10 @@ def test_divide_dtype(data, bits, arch, ctypes, dll_handle):
 
 	if y != 0:
 
-		v_quot = x // y
-		v_rem = abs(x) % abs(y) * (1, -1)[x < 0] # HACK C99
+		v_quot = force_int_overflow(x // y, bits, True)
+		v_rem = force_int_overflow(abs(x) % abs(y) * (1, -1)[x < 0], bits, True) # HACK C99
 		if v_rem != 0 and ((x < 0) ^ (y < 0)): # HACK C99
-			v_quot += 1
+			v_quot = force_int_overflow(v_quot + 1, bits, True)
 
 		assert (v_quot, v_rem) == (quot, rem)
 
