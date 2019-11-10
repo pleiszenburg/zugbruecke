@@ -68,9 +68,14 @@ EXTRA = {
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+from .lib.const import MAX_EXAMPLES
 from .lib.ctypes import get_dll_handles
 
-from hypothesis import given, settings, strategies as st
+from hypothesis import (
+	given,
+	settings,
+	strategies as st,
+	)
 import pytest
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -99,7 +104,7 @@ def _int_limits(bits, sign = True):
 @pytest.mark.parametrize('arch,ctypes,dll_handle', get_dll_handles(__file__))
 @pytest.mark.parametrize('bits', [8, 16, 32])
 @given(data = st.data())
-@settings(max_examples = 500)
+@settings(max_examples = MAX_EXAMPLES)
 def test_divide_dtype(data, bits, arch, ctypes, dll_handle):
 
 	x = data.draw(st.integers(**_int_limits(bits, sign = True)))

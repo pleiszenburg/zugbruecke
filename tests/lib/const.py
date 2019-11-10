@@ -86,3 +86,5 @@ CFLAGS = {
 LDFLAGS = [
 	'-lm',
 	]
+
+MAX_EXAMPLES = 300

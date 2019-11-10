@@ -60,9 +60,14 @@ SOURCE = """
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+from .lib.const import MAX_EXAMPLES
 from .lib.ctypes import get_dll_handles
 
-from hypothesis import given, strategies as st
+from hypothesis import (
+	given,
+	settings,
+	strategies as st,
+	)
 import pytest
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -74,6 +79,7 @@ import pytest
 	x = st.integers(min_value = -1 * 2 ** 31, max_value = 2 ** 31 - 1),
 	y = st.integers(min_value = -1 * 2 ** 31, max_value = 2 ** 31 - 1)
 	)
+@settings(max_examples = MAX_EXAMPLES)
 def test_divide(x, y, arch, ctypes, dll_handle):
 
 	divide_int = dll_handle.divide_int
