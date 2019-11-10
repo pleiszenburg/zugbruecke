@@ -82,17 +82,6 @@ from hypothesis import (
 import pytest
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# HELPER(s)
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-
-# def _assert_int_limits(value, bits, sign):
-# 	interval_dict = _int_limits(bits, sign)
-# 	assert isinstance(value, int)
-# 	assert value >= interval_dict['min_value']
-# 	assert value <= interval_dict['max_value']
-
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # TEST(s)
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -105,9 +94,6 @@ def test_divide_dtype(data, bits, arch, ctypes, dll_handle):
 	int_limits = get_int_limits(bits, sign = True)
 	x = data.draw(st.integers(**int_limits))
 	y = data.draw(st.integers(**int_limits))
-
-	# _assert_int_limits(x, bits, True)
-	# _assert_int_limits(y, bits, True)
 
 	dtype = getattr(ctypes, 'c_int{BITS:d}'.format(BITS = bits))
 	divide_int = getattr(dll_handle, 'test_divide_int{BITS:d}_t'.format(BITS = bits))
