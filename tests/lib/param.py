@@ -6,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	tests/lib/const.py: Holds constant values, flags, types
+	tests/lib/param.py: Providing test parameters and helpers
 
 	Required to run on platform / side: [UNIX, WINE]
 
@@ -27,62 +27,20 @@ specific language governing rights and limitations under the License.
 """
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# CONST
+# CONST / CONFIG
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-DLL_HEADER = """
+MAX_EXAMPLES = 300
 
-#ifndef TESTDLL_H
-#define TESTDLL_H
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# ROUTINES
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-#include <stdio.h>
-#include <windows.h>
-#include <stdint.h>
-#include <math.h>
-
-typedef int32_t bool;
-#define TRUE 1
-#define FALSE 0
-
-{{ HEADER }}
-
-#endif
-
-"""
-
-DLL_SOURCE = """
-
-#include "{{ HEADER_FN }}"
-
-{{ SOURCE }}
-
-"""
-
-ARCHS = ['win32', 'win64']
-CONVENTIONS = ['cdll', 'windll']
-
-PREFIX = {
-	'cdll': '__declspec(dllexport)',
-	'windll': '__declspec(dllexport)',
-	}
-SUFFIX = {
-	'cdll': '__cdecl',
-	'windll': '__stdcall',
-	}
-
-CC = {
-	'win32': 'i686-w64-mingw32-gcc',
-	'win64': 'x86_64-w64-mingw32-gcc',
-	}
-_CFLAGS = [
-	'-Wall',
-	'-shared',
-	'-std=c99'
-	]
-CFLAGS = {
-	'cdll': _CFLAGS + ['-Wl,--subsystem,windows'],
-	'windll': _CFLAGS + ['-Wl,-add-stdcall-alias'],
-	}
-LDFLAGS = [
-	'-lm',
-	]
+def get_int_limits(bits, sign = True):
+	assert isinstance(bits, int)
+	assert bits in (8, 16, 32, 64)
+	assert isinstance(sign, bool)
+	if sign:
+		return {'min_value': -1 * 2 ** (bits - 1), 'max_value': 2 ** (bits - 1) - 1}
+	else:
+		return {'min_value': 0, 'max_value': 2 ** bits - 1}

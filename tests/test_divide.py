@@ -60,8 +60,8 @@ SOURCE = """
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-from .lib.const import MAX_EXAMPLES
 from .lib.ctypes import get_dll_handles
+from .lib.param import MAX_EXAMPLES
 
 from hypothesis import (
 	given,

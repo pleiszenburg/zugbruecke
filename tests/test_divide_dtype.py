@@ -68,8 +68,11 @@ EXTRA = {
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-from .lib.const import MAX_EXAMPLES
 from .lib.ctypes import get_dll_handles
+from .lib.param import (
+	get_int_limits,
+	MAX_EXAMPLES,
+	)
 
 from hypothesis import (
 	given,
@@ -82,14 +85,6 @@ import pytest
 # HELPER(s)
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-def _int_limits(bits, sign = True):
-	assert isinstance(bits, int)
-	assert bits in (8, 16, 32, 64)
-	assert isinstance(sign, bool)
-	if sign:
-		return {'min_value': -1 * 2 ** (bits - 1), 'max_value': 2 ** (bits - 1) - 1}
-	else:
-		return {'min_value': 0, 'max_value': 2 ** bits - 1}
 
 # def _assert_int_limits(value, bits, sign):
 # 	interval_dict = _int_limits(bits, sign)
@@ -107,8 +102,9 @@ def _int_limits(bits, sign = True):
 @settings(max_examples = MAX_EXAMPLES)
 def test_divide_dtype(data, bits, arch, ctypes, dll_handle):
 
-	x = data.draw(st.integers(**_int_limits(bits, sign = True)))
-	y = data.draw(st.integers(**_int_limits(bits, sign = True)))
+	int_limits = get_int_limits(bits, sign = True)
+	x = data.draw(st.integers(**int_limits))
+	y = data.draw(st.integers(**int_limits))
 
 	# _assert_int_limits(x, bits, True)
 	# _assert_int_limits(y, bits, True)
