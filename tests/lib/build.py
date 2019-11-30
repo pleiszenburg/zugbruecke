@@ -135,7 +135,7 @@ def make_dll(param):
 			HEADER = Template(header).render(
 				PREFIX = PREFIX[convention],
 				SUFFIX = SUFFIX[convention],
-				**extra,
+				**extra
 				),
 			))
 	with open(source_path, 'w', encoding = 'utf-8') as f:
@@ -144,7 +144,7 @@ def make_dll(param):
 			SOURCE = Template(source).render(
 				PREFIX = PREFIX[convention],
 				SUFFIX = SUFFIX[convention],
-				**extra,
+				**extra
 				),
 			))
 
