@@ -30,6 +30,8 @@ specific language governing rights and limitations under the License.
 # CONST
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+DLL_FLD = 'dlls'
+
 DLL_HEADER = """
 
 #ifndef TESTDLL_H

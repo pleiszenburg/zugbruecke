@@ -45,6 +45,7 @@ from .const import (
 	CC,
 	CFLAGS,
 	LDFLAGS,
+	DLL_FLD,
 	DLL_HEADER,
 	DLL_SOURCE,
 	PREFIX,
@@ -123,7 +124,7 @@ def make_dll(param):
 	build_fld = tempfile.mkdtemp()
 
 	dll_fn = get_dll_fn(arch, convention, test_fn)
-	dll_test_path = os.path.join(test_fld, dll_fn)
+	dll_test_path = os.path.join(test_fld, DLL_FLD, dll_fn)
 	dll_build_path = os.path.join(build_fld, dll_fn)
 	header_path = os.path.join(build_fld, HEADER_FN)
 	source_path = os.path.join(build_fld, SOURCE_FN)

@@ -32,6 +32,8 @@ specific language governing rights and limitations under the License.
 
 import os
 
+from .const import DLL_FLD
+
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # ROUTINES
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -54,6 +56,7 @@ def get_dll_path(arch, convention, test_fn, custom = None):
 
 	return os.path.join(
 		get_test_fld(abspath = False),
+		DLL_FLD,
 		get_dll_fn(arch, convention, test_fn, custom = custom),
 		)
 
