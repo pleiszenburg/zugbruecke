@@ -68,7 +68,7 @@ EXTRA = {
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-from .lib.ctypes import get_dll_handles
+from .lib.ctypes import get_context
 from .lib.param import (
 	get_int_limits,
 	force_int_overflow,
@@ -86,7 +86,7 @@ import pytest
 # TEST(s)
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-@pytest.mark.parametrize('arch,ctypes,dll_handle', get_dll_handles(__file__))
+@pytest.mark.parametrize('arch,ctypes,dll_handle', get_context(__file__))
 @pytest.mark.parametrize('bits', [8, 16, 32])
 @given(data = st.data())
 @settings(max_examples = MAX_EXAMPLES)

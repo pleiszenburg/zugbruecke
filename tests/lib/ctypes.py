@@ -68,12 +68,17 @@ def get_dll_handle(arch, convention, test_fn):
 	except:
 		raise SystemError('Ups!', arch, convention, test_fn, get_dll_path(arch, convention, test_fn), os.getcwd())
 
-def get_dll_handles(test_path):
-	"get handles to one test's dlls for all archs and conventions"
+def get_context(test_path, handle = True):
+	"""all archs and conventions,
+	either test dll handle or path is provided
+	"""
 
 	test_fn = os.path.basename(test_path)
 
 	for convention in CONVENTIONS:
 		for arch in ARCHS:
 			if PLATFORM == 'unix' or arch[3:] == ARCHITECTURE:
-				yield (arch, CTYPES[arch], get_dll_handle(arch, convention, test_fn))
+				if handle:
+					yield (arch, CTYPES[arch], get_dll_handle(arch, convention, test_fn))
+				else:
+					yield (arch, CTYPES[arch], get_dll_path(arch, convention, test_fn))

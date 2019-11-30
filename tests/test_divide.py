@@ -60,7 +60,7 @@ SOURCE = """
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-from .lib.ctypes import get_dll_handles
+from .lib.ctypes import get_context
 from .lib.param import MAX_EXAMPLES
 
 from hypothesis import (
@@ -74,7 +74,7 @@ import pytest
 # TEST(s)
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-@pytest.mark.parametrize('arch,ctypes,dll_handle', get_dll_handles(__file__))
+@pytest.mark.parametrize('arch,ctypes,dll_handle', get_context(__file__))
 @given(
 	x = st.integers(min_value = -1 * 2 ** 31, max_value = 2 ** 31 - 1),
 	y = st.integers(min_value = -1 * 2 ** 31, max_value = 2 ** 31 - 1)
