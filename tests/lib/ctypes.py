@@ -79,6 +79,6 @@ def get_context(test_path, handle = True):
 		for arch in ARCHS:
 			if PLATFORM == 'unix' or arch[3:] == ARCHITECTURE:
 				if handle:
-					yield (arch, CTYPES[arch], get_dll_handle(arch, convention, test_fn))
+					yield (arch, convention, CTYPES[arch], get_dll_handle(arch, convention, test_fn))
 				else:
-					yield (arch, CTYPES[arch], get_dll_path(arch, convention, test_fn))
+					yield (arch, convention, CTYPES[arch], get_dll_path(arch, convention, test_fn))
