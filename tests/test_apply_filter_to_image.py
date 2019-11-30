@@ -44,15 +44,19 @@ typedef int16_t {{ SUFFIX }} (*filter_func_type)(image_data *section);
 	image_data *out_image,
 	filter_func_type filter_func
 	);
+
 int16_t _coordinates_in_image_(
 	image_data *in_image, int16_t x, int16_t y
 	);
+
 int16_t _image_pixel_get_(
 	image_data *in_image, int16_t x, int16_t y
 	);
+
 void _image_pixel_set_(
 	image_data *in_image, int16_t x, int16_t y, int16_t value
 	);
+
 void _image_copy_segment_to_buffer_(
 	image_data *in_image, image_data *in_buffer, int16_t x, int16_t y
 	);
