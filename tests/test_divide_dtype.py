@@ -86,11 +86,11 @@ import pytest
 # TEST(s)
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-@pytest.mark.parametrize('arch,ctypes,dll_handle', get_context(__file__))
+@pytest.mark.parametrize('arch,conv,ctypes,dll_handle', get_context(__file__))
 @pytest.mark.parametrize('bits', [8, 16, 32])
 @given(data = st.data())
 @settings(max_examples = MAX_EXAMPLES)
-def test_divide_dtype(data, bits, arch, ctypes, dll_handle):
+def test_divide_dtype(data, bits, arch, conv, ctypes, dll_handle):
 
 	int_limits = get_int_limits(bits, sign = True)
 	x = data.draw(st.integers(**int_limits))
