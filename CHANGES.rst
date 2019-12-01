@@ -60,6 +60,7 @@ On older versions of Linux such as *Ubuntu 14.04* alias *Trusty Tahr* (released 
 * FIX: Methods from ``zugbruecke.ctypes.util`` (previously ``zugbruecke.util``) are faster and a lot less error-prone, see #52.
 * FIX: ``zugbruecke.ctypes.CDLL`` does no longer fall back to Unix libraries if no corresponding DLL file could be found. For attaching to Unix libraries please use the original ``ctypes`` module instead, see #53.
 * FIX: Different structure types from different name spaces BUT identical names caused crashes, see #61.
+* FIX: ``zugbruecke`` raised TypeError if too many arguments were given too a configured cdll function (``ctypes`` does not), see #64.
 * The configuration module was refactored and made clearer and faster, allowing to implement new options.
 
 0.0.14 (2019-05-21)
