@@ -119,7 +119,7 @@ class routine_client_class():
 
 		# Actually call routine in DLL! TODO Handle kw ...
 		return_dict = self.__handle_call_on_server__(
-			self.data.arg_list_pack(args, self.argtypes_d), mem_package_list
+			self.data.arg_list_pack(args, self.argtypes_d, self.dll.calling_convention), mem_package_list
 			)
 
 		# Log status
@@ -128,7 +128,7 @@ class routine_client_class():
 		# Unpack return dict (call may have failed partially only)
 		self.data.arg_list_sync(
 			args,
-			self.data.arg_list_unpack(return_dict['args'], self.argtypes_d),
+			self.data.arg_list_unpack(return_dict['args'], self.argtypes_d, self.dll.calling_convention),
 			self.argtypes_d
 			)
 

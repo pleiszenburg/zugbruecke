@@ -74,7 +74,7 @@ class routine_server_class():
 		try:
 
 			# Unpack passed arguments, handle pointers and structs ...
-			args_list = self.data.arg_list_unpack(arg_message_list, self.argtypes_d)
+			args_list = self.data.arg_list_unpack(arg_message_list, self.argtypes_d, self.dll.calling_convention)
 
 			# Unpack pointer data
 			self.data.server_unpack_memory_list(args_list, arg_memory_list, self.memsync_d)
@@ -120,7 +120,7 @@ class routine_server_class():
 			self.data.server_pack_memory_list(args_list, return_value, arg_memory_list, self.memsync_d)
 
 			# Get new arg message list
-			arg_message_list = self.data.arg_list_pack(args_list, self.argtypes_d)
+			arg_message_list = self.data.arg_list_pack(args_list, self.argtypes_d, self.dll.calling_convention)
 
 			# Get new return message list
 			return_message = self.data.return_msg_pack(return_value, self.restype_d)
