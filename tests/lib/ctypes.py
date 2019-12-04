@@ -49,6 +49,8 @@ if any([platform.startswith(os_name) for os_name in ['linux', 'darwin', 'freebsd
 	PLATFORM = 'unix'
 elif platform.startswith('win'):
 	import ctypes
+	from ctypes import util
+	ctypes._util = util
 	CTYPES = {arch: ctypes for arch in ARCHS}
 	PLATFORM = 'wine'
 else:
