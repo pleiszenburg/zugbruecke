@@ -156,9 +156,6 @@ class routine_server_class():
 		# Store return value definition dict
 		self.restype_d = restype_d
 
-		# Store memory sync instructions
-		self.memsync_d = self.data.unpack_definition_memsync(memsync_d)
-
 		try:
 
 			# Parse and apply argtype definition dict to actual ctypes routine
@@ -169,6 +166,9 @@ class routine_server_class():
 
 			# Parse and apply restype definition dict to actual ctypes routine
 			self.handler.restype = self.data.unpack_definition_returntype(restype_d)
+
+			# Store memory sync instructions
+			self.memsync_d = self.data.unpack_definition_memsync(memsync_d)
 
 		except Exception as e:
 
