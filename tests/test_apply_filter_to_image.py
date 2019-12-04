@@ -26,42 +26,155 @@ specific language governing rights and limitations under the License.
 
 """
 
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# C
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+HEADER = """
+typedef struct image_data {
+	int16_t *data;
+	int16_t width;
+	int16_t height;
+} image_data;
+
+typedef int16_t {{ SUFFIX }} (*filter_func_type)(image_data *section);
+
+{{ PREFIX }} void {{ SUFFIX }} apply_filter_to_image(
+	image_data *in_image,
+	image_data *out_image,
+	filter_func_type filter_func
+	);
+
+int16_t _coordinates_in_image_(
+	image_data *in_image, int16_t x, int16_t y
+	);
+
+int16_t _image_pixel_get_(
+	image_data *in_image, int16_t x, int16_t y
+	);
+
+void _image_pixel_set_(
+	image_data *in_image, int16_t x, int16_t y, int16_t value
+	);
+
+void _image_copy_segment_to_buffer_(
+	image_data *in_image, image_data *in_buffer, int16_t x, int16_t y
+	);
+"""
+
+SOURCE = """
+{{ PREFIX }} void {{ SUFFIX }} apply_filter_to_image(
+	image_data *in_image,
+	image_data *out_image,
+	filter_func_type filter_func
+	)
+{
+
+	int16_t i, j;
+	const int16_t F_W = 3;
+	const int16_t F_H = 3;
+	const int16_t F_W_off = F_W / 2;
+	const int16_t F_H_off = F_H / 2;
+
+	out_image->data = malloc(sizeof(int16_t) * in_image->width * in_image->height);
+	out_image->width = in_image->width;
+	out_image->height = in_image->height;
+
+	image_data *buffer = malloc(sizeof(image_data));
+	buffer->data = malloc(sizeof(int16_t) * F_W * F_H);
+	buffer->width = F_W;
+	buffer->height = F_H;
+
+	for(i = 0; i < in_image->width; i++)
+	{
+		for(j = 0; j < in_image->height; j++)
+		{
+			_image_copy_segment_to_buffer_(in_image, buffer, i - F_W_off, j - F_H_off);
+			_image_pixel_set_(out_image, i, j, filter_func(buffer));
+		}
+	}
+
+	free(buffer->data);
+	free(buffer);
+
+}
+
+int16_t _coordinates_in_image_(
+	image_data *in_image, int16_t x, int16_t y
+	)
+{
+	if(x < 0 || x >= in_image->width || y < 0 || y >= in_image->height){ return 0; }
+	return 1;
+}
+
+
+int16_t _image_pixel_get_(
+	image_data *in_image, int16_t x, int16_t y
+	)
+{
+	if(!_coordinates_in_image_(in_image, x, y)) { return 0; }
+	return in_image->data[(in_image->width * y) + x];
+}
+
+
+void _image_pixel_set_(
+	image_data *in_image, int16_t x, int16_t y, int16_t value
+	)
+{
+	if(!_coordinates_in_image_(in_image, x, y)) { return; }
+	in_image->data[(in_image->width * y) + x] = value;
+}
+
+
+void _image_copy_segment_to_buffer_(
+	image_data *in_image, image_data *in_buffer, int16_t x, int16_t y
+	)
+{
+	int16_t m, n;
+	for(m = 0; m < in_buffer->width; m++)
+	{
+		for(n = 0; n < in_buffer->height; n++)
+		{
+			_image_pixel_set_(in_buffer, m, n, _image_pixel_get_(in_image, x + m, y + n));
+		}
+	}
+}
+"""
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-# import pytest
+from .lib.ctypes import get_context
 
-from sys import platform
-if any([platform.startswith(os_name) for os_name in ['linux', 'darwin', 'freebsd']]):
-	import zugbruecke.ctypes as ctypes
-elif platform.startswith('win'):
-	import ctypes
-
+import pytest
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # CLASSES AND ROUTINES
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-class image_data(ctypes.Structure):
-
-
-	_fields_ = [
-		('data', ctypes.POINTER(ctypes.c_int16)),
-		('width', ctypes.c_int16),
-		('height', ctypes.c_int16)
-		]
-
-
 class sample_class:
 
+	def __init__(self, arch, conv, ctypes, dll_handle):
 
-	def __init__(self):
+		self._c = ctypes
+		self._dll = dll_handle
 
-		self.__dll__ = ctypes.windll.LoadLibrary('tests/demo_dll.dll')
+		class image_data(self._c.Structure):
+			_fields_ = [
+				('data', self._c.POINTER(self._c.c_int16)),
+				('width', self._c.c_int16),
+				('height', self._c.c_int16)
+				]
+		self.image_data = image_data
 
-		filter_func_type = ctypes.WINFUNCTYPE(ctypes.c_int16, ctypes.POINTER(image_data))
+		if conv == 'cdll':
+			func_type = self._c.CFUNCTYPE
+		elif conv == 'windll':
+			func_type = self._c.WINFUNCTYPE
+		else:
+			raise ValueError('unknown calling convention', conv)
+		filter_func_type = func_type(self._c.c_int16, self._c.POINTER(image_data))
 		filter_func_type.memsync = [
 			{
 				'p': [0, 'data'],
@@ -71,10 +184,10 @@ class sample_class:
 				}
 			]
 
-		self.__apply_filter_to_image__ = self.__dll__.apply_filter_to_image
+		self.__apply_filter_to_image__ = self._dll.apply_filter_to_image
 		self.__apply_filter_to_image__.argtypes = (
-			ctypes.POINTER(image_data),
-			ctypes.POINTER(image_data),
+			self._c.POINTER(image_data),
+			self._c.POINTER(image_data),
 			filter_func_type
 			)
 		self.__apply_filter_to_image__.memsync = [
@@ -107,9 +220,9 @@ class sample_class:
 			assert width == 3 and height == 3
 
 			in_matrix = self.array_to_matrix(
-				ctypes.cast(
+				self._c.cast(
 					in_buffer.contents.data,
-					ctypes.POINTER(ctypes.c_int16 * (width * height))
+					self._c.POINTER(self._c.c_int16 * (width * height))
 					).contents[:],
 				width,
 				height
@@ -129,24 +242,24 @@ class sample_class:
 		width = len(in_image[0])
 		height = len(in_image)
 
-		in_image_ctypes = image_data()
-		out_image_ctypes = image_data()
+		in_image_ctypes = self.image_data()
+		out_image_ctypes = self.image_data()
 
-		in_image_ctypes.width = ctypes.c_int16(width)
-		in_image_ctypes.height = ctypes.c_int16(height)
-		in_image_ctypes.data = ctypes.cast(
-			ctypes.pointer((ctypes.c_int16 * (width * height))(*self.matrix_to_array(in_image))),
-			ctypes.POINTER(ctypes.c_int16)
+		in_image_ctypes.width = self._c.c_int16(width)
+		in_image_ctypes.height = self._c.c_int16(height)
+		in_image_ctypes.data = self._c.cast(
+			self._c.pointer((self._c.c_int16 * (width * height))(*self.matrix_to_array(in_image))),
+			self._c.POINTER(self._c.c_int16)
 			)
 
 		self.__apply_filter_to_image__(
-			ctypes.pointer(in_image_ctypes),
-			ctypes.pointer(out_image_ctypes),
+			self._c.pointer(in_image_ctypes),
+			self._c.pointer(out_image_ctypes),
 			self.__filter_edge_detection__
 			)
 
 		return self.array_to_matrix(
-			ctypes.cast(out_image_ctypes.data, ctypes.POINTER(ctypes.c_int16 * (width * height))).contents[:],
+			self._c.cast(out_image_ctypes.data, self._c.POINTER(self._c.c_int16 * (width * height))).contents[:],
 			width,
 			height
 			)
@@ -164,9 +277,10 @@ class sample_class:
 # TEST(s)
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-def test_apply_filter_to_image():
+@pytest.mark.parametrize('arch,conv,ctypes,dll_handle', get_context(__file__))
+def test_apply_filter_to_image(arch, conv, ctypes, dll_handle):
 
-	sample = sample_class()
+	sample = sample_class(arch, conv, ctypes, dll_handle)
 
 	result = sample.apply_filter_to_image([
 		[253, 252, 254, 243, 243, 230, 251, 247, 255, 254],

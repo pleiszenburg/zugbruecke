@@ -55,7 +55,7 @@ from .memory import is_null_pointer
 class arguments_contents_class():
 
 
-	def arg_list_pack(self, args_tuple, argtypes_list):
+	def arg_list_pack(self, args_tuple, argtypes_list, conv = None):
 
 		# Everything is normal
 		if len(args_tuple) == len(argtypes_list):
@@ -65,12 +65,19 @@ class arguments_contents_class():
 		elif len(args_tuple) > 0 and len(argtypes_list) == 0:
 			return list(args_tuple) # let's try ... TODO catch pickling errors
 
+		elif len(args_tuple) > len(argtypes_list) and len(argtypes_list) > 0 and conv == 'cdll':
+			return [
+				(d['n'], self.__pack_item__(a, d)) for a, d in zip(
+					args_tuple[:len(argtypes_list)], argtypes_list
+					)
+				] + list(args_tuple[len(argtypes_list):])
+
 		# Number of arguments is just wrong
 		else:
 			raise TypeError # Must be TypeError for ctypes compatibility
 
 
-	def arg_list_unpack(self, args_package_list, argtypes_list):
+	def arg_list_unpack(self, args_package_list, argtypes_list, conv = None):
 
 		# Everything is normal
 		if len(args_package_list) == len(argtypes_list):
@@ -79,6 +86,13 @@ class arguments_contents_class():
 		# Function has likely not been configured but there are arguments
 		elif len(args_package_list) > 0 and len(argtypes_list) == 0:
 			return args_package_list
+
+		elif len(args_package_list) > len(argtypes_list) and len(argtypes_list) > 0 and conv == 'cdll':
+			return [
+				self.__unpack_item__(a[1], d) for a, d in zip(
+					args_package_list[:len(argtypes_list)], argtypes_list
+					)
+				] + args_package_list[len(argtypes_list):]
 
 		# Number of arguments is just wrong
 		else:

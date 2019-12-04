@@ -26,46 +26,69 @@ specific language governing rights and limitations under the License.
 
 """
 
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# C
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+HEADER = """
+typedef struct int_array_data {
+	int16_t *data;
+	int16_t len;
+} int_array_data;
+
+{{ PREFIX }} void {{ SUFFIX }} square_int_array_with_struct(
+	int_array_data *in_array,
+	int_array_data *out_array
+	);
+"""
+
+SOURCE = """
+{{ PREFIX }} void {{ SUFFIX }} square_int_array_with_struct(
+	int_array_data *in_array,
+	int_array_data *out_array
+	)
+{
+	int i;
+	out_array->len = in_array->len;
+	out_array->data = malloc(sizeof(int16_t) * out_array->len);
+	for(i = 0; i < in_array->len; i++)
+	{
+		out_array->data[i] = in_array->data[i] * in_array->data[i];
+	}
+}
+"""
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+from .lib.ctypes import get_context
+
 import pytest
-
-from sys import platform
-if any([platform.startswith(os_name) for os_name in ['linux', 'darwin', 'freebsd']]):
-	import zugbruecke.ctypes as ctypes
-elif platform.startswith('win'):
-	import ctypes
-
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # CLASSES AND ROUTINES
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-class int_array_data(ctypes.Structure):
-
-
-	_fields_ = [
-		('data', ctypes.POINTER(ctypes.c_int16)),
-		('len', ctypes.c_int16)
-		]
-
-
 class sample_class:
 
+	def __init__(self, ctypes, dll_handle):
 
-	def __init__(self):
+		self._c = ctypes
 
-		self.__dll__ = ctypes.windll.LoadLibrary('tests/demo_dll.dll')
+		class int_array_data(self._c.Structure):
+			_fields_ = [
+				('data', self._c.POINTER(self._c.c_int16)),
+				('len', self._c.c_int16)
+				]
+		self._int_array_data = int_array_data
 
-		self.__square_int_array_with_struct__ = self.__dll__.square_int_array_with_struct
-		self.__square_int_array_with_struct__.argtypes = (
-			ctypes.POINTER(int_array_data),
-			ctypes.POINTER(int_array_data)
+		self._square_int_array_with_struct = dll_handle.square_int_array_with_struct
+		self._square_int_array_with_struct.argtypes = (
+			self._c.POINTER(self._int_array_data),
+			self._c.POINTER(self._int_array_data)
 			)
-		self.__square_int_array_with_struct__.memsync = [
+		self._square_int_array_with_struct.memsync = [
 			{
 				'p': [0, 'data'],
 				'l': [0, 'len'],
@@ -78,35 +101,34 @@ class sample_class:
 				}
 			]
 
-
 	def square_int_array_with_struct(self, in_array):
 
-		in_array_obj = int_array_data()
-		out_array_obj = int_array_data()
+		in_array_obj = self._int_array_data()
+		out_array_obj = self._int_array_data()
 
-		in_array_obj.data = ctypes.cast(
-			ctypes.pointer((ctypes.c_int16 * len(in_array))(*in_array)),
-			ctypes.POINTER(ctypes.c_int16)
+		in_array_obj.data = self._c.cast(
+			self._c.pointer((self._c.c_int16 * len(in_array))(*in_array)),
+			self._c.POINTER(self._c.c_int16)
 			)
 		in_array_obj.len = len(in_array)
 
-		self.__square_int_array_with_struct__(
+		self._square_int_array_with_struct(
 			in_array_obj,
 			out_array_obj
 			)
 
-		return ctypes.cast(
+		return self._c.cast(
 			out_array_obj.data,
-			ctypes.POINTER(ctypes.c_int16 * len(in_array))
+			self._c.POINTER(self._c.c_int16 * len(in_array))
 			).contents[:]
-
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # TEST(s)
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-def test_square_int_array_with_struct():
+@pytest.mark.parametrize('arch,conv,ctypes,dll_handle', get_context(__file__))
+def test_square_int_array_with_struct(arch, conv, ctypes, dll_handle):
 
-	sample = sample_class()
+	sample = sample_class(ctypes, dll_handle)
 
 	assert [4, 16, 9, 25] == sample.square_int_array_with_struct([2, 4, 3, 5])

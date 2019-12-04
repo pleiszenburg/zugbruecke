@@ -25,17 +25,22 @@ clean:
 	-rm -r build/*
 	-rm -r dist/*
 	coverage erase
+	make clean_py
+	make clean_dll
+clean_py:
 	find src/ tests/ -name '*.pyc' -exec rm -f {} +
 	find src/ tests/ -name '*.pyo' -exec rm -f {} +
 	find src/ tests/ -name '*~' -exec rm -f {} +
 	find src/ tests/ -name '__pycache__' -exec rm -fr {} +
+clean_dll:
+	find src/ tests/ -name '*.dll' -exec rm -f {} +
 
 release_clean:
 	make clean
 	-rm -r src/*.egg-info
 
-dll:
-	@(cd demo_dll; make clean; make; make install)
+# dll: # TODO move to example folder
+# 	@(cd demo_dll; make clean; make; make install)
 
 docu:
 	@(cd docs; make clean; make html)
@@ -58,8 +63,12 @@ upload_test:
 
 install:
 	pip install -U -e .[dev]
-	wenv init
-	wenv init_coverage
+	ZUGBRUECKE_ARCH=win32 wenv init
+	ZUGBRUECKE_ARCH=win32 wenv pip install -r requirements_test.txt
+	ZUGBRUECKE_ARCH=win32 wenv init_coverage
+	ZUGBRUECKE_ARCH=win64 wenv init
+	ZUGBRUECKE_ARCH=win64 wenv pip install -r requirements_test.txt
+	ZUGBRUECKE_ARCH=win64 wenv init_coverage
 
 test:
 	make docu
@@ -67,7 +76,11 @@ test:
 
 test_quick:
 	make clean
-	wenv pytest # --capture=no
-	make clean
-	pytest --cov=zugbruecke --cov-config=setup.cfg # --capture=no
+	python -m tests.lib.build
+	make clean_py
+	ZUGBRUECKE_ARCH=win32 wenv pytest --hypothesis-show-statistics
+	make clean_py
+	ZUGBRUECKE_ARCH=win64 wenv pytest --hypothesis-show-statistics
+	make clean_py
+	pytest --cov=zugbruecke --cov-config=setup.cfg --hypothesis-show-statistics # --capture=no
 	mv .coverage .coverage.e9.0 ; coverage combine ; coverage html

@@ -60,6 +60,11 @@ with open(os.path.join(os.path.dirname(__file__), 'README.rst')) as f:
 	long_description = f.read()
 
 
+# Fetch test requirements
+with open(os.path.join(os.path.dirname(__file__), 'requirements_test.txt')) as f:
+	requirements_test = [rq.strip() for rq in f.read().split('\n') if len(rq.strip()) > 0]
+
+
 # Just in case someone is actually running this on Windows ...
 if platform.startswith('win'):
 	raise SystemExit('You are already running Windows. No need for this package!')
@@ -82,10 +87,8 @@ setup(
 	include_package_data = True,
 	install_requires = [],
 	extras_require = {
-		'dev': [
-			'pytest',
-			'coverage',
-			'pytest-cov',
+		'dev': requirements_test + [
+			'Jinja2',
 			'python-language-server',
 			'setuptools',
 			'Sphinx',
@@ -122,4 +125,4 @@ setup(
 		'Topic :: System :: Operating System Kernels',
 		'Topic :: Utilities'
 		]
-)
+	)

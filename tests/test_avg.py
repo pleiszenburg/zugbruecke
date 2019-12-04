@@ -28,73 +28,72 @@ specific language governing rights and limitations under the License.
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# C
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+HEADER = """
+{{ PREFIX }} double {{ SUFFIX }} avg(
+	double *a,
+	int n
+	);
+"""
+
+SOURCE = """
+{{ PREFIX }} double {{ SUFFIX }} avg(
+	double *a,
+	int n
+	)
+{
+	int i;
+	double total = 0.0;
+	for (i = 0; i < n; i++)
+	{
+		total += a[i];
+	}
+	return total / n;
+}
+"""
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+from .lib.ctypes import get_context
+
 import pytest
-
-from sys import platform
-if any([platform.startswith(os_name) for os_name in ['linux', 'darwin', 'freebsd']]):
-	import zugbruecke.ctypes as ctypes
-elif platform.startswith('win'):
-	import ctypes
-
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # CLASSES AND ROUTINES
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-# Define a special type for the 'double *' argument
-class DoubleArrayType:
-
-
-	def from_param(self, param):
-
-		typename = type(param).__name__
-		if hasattr(self, 'from_' + typename):
-			return getattr(self, 'from_' + typename)(param)
-		elif isinstance(param, ctypes.Array):
-			return param
-		else:
-			raise TypeError('Can\'t convert %s' % typename)
-
-
-	# Cast from array.array objects
-	def from_array(self, param):
-
-		if param.typecode != 'd':
-			raise TypeError('must be an array of doubles')
-		ptr, _ = param.buffer_info()
-		return ctypes.cast(ptr, ctypes.POINTER(ctypes.c_double))
-
-
-	# Cast from lists/tuples
-	def from_list(self, param):
-
-		val = ((ctypes.c_double)*len(param))(*param)
-		return val
-
-
-	from_tuple = from_list
-
-
-	# Cast from a numpy array
-	def from_ndarray(self, param):
-
-		return param.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
-
-
 class sample_class:
 
+	def __init__(self, ctypes, dll_handle):
 
-	def __init__(self):
+		class DoubleArrayType:
+			def from_param(self, param):
+				typename = type(param).__name__
+				if hasattr(self, 'from_' + typename):
+					return getattr(self, 'from_' + typename)(param)
+				elif isinstance(param, ctypes.Array):
+					return param
+				else:
+					raise TypeError('Can\'t convert %s' % typename)
+			def from_array(self, param):
+				if param.typecode != 'd':
+					raise TypeError('must be an array of doubles')
+				ptr, _ = param.buffer_info()
+				return ctypes.cast(ptr, ctypes.POINTER(ctypes.c_double))
+			def from_list(self, param):
+				val = ((ctypes.c_double)*len(param))(*param)
+				return val
+			from_tuple = from_list
+			def from_ndarray(self, param):
+				return param.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
 
-		self.__dll__ = ctypes.windll.LoadLibrary('tests/demo_dll.dll')
-
-		# void avg(double *, int n)
 		DoubleArray = DoubleArrayType()
-		self.__avg__ = self.__dll__.cookbook_avg
-		self.__avg__.memsync = [ # Regular ctypes on Windows should ignore this statement
+		self._avg = dll_handle.avg
+		self._avg.memsync = [ # Regular ctypes on Windows should ignore this statement
 			{
 				'p': [0], # "path" to argument containing the pointer
 				'l': [1], # "path" to argument containing the length
@@ -102,21 +101,20 @@ class sample_class:
 				'_c': DoubleArray # custom datatype
 				}
 			]
-		self.__avg__.argtypes = (DoubleArray, ctypes.c_int)
-		self.__avg__.restype = ctypes.c_double
-
+		self._avg.argtypes = (DoubleArray, ctypes.c_int)
+		self._avg.restype = ctypes.c_double
 
 	def avg(self, values):
 
-		return self.__avg__(values, len(values))
-
+		return self._avg(values, len(values))
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # TEST(s)
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-def test_avg():
+@pytest.mark.parametrize('arch,conv,ctypes,dll_handle', get_context(__file__))
+def test_avg(arch, conv, ctypes, dll_handle):
 
-	sample = sample_class()
+	sample = sample_class(ctypes, dll_handle)
 
 	assert pytest.approx(2.5, 0.0000001) == sample.avg([1, 2, 3, 4])

@@ -269,9 +269,7 @@ class env_class:
 		self.setup_python()
 		self.wine_47766_workaround() # must run after setup_python and before setup_pip
 		self.setup_pip()
-		self.setup_pytest()
 		self.setup_zugbruecke()
-		self.setup_coverage()
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -404,16 +402,6 @@ class env_class:
 		proc_getpip.communicate(input = getpip_bin)
 
 
-	def setup_pytest(self):
-
-		# Exit if it exists
-		if os.path.isfile(self._path_dict['pytest']):
-			return
-
-		# Run pip install
-		subprocess.Popen(['wenv', 'pip', 'install', 'pytest']).wait()
-
-
 	def setup_zugbruecke(self):
 
 		# Package path in unix-python site-packages
@@ -441,17 +429,6 @@ class env_class:
 			if not os.path.exists(wine_egg_path):
 				# Copy zugbruecke egg into wine-python site-packages
 				shutil.copytree(unix_egg_path, wine_egg_path)
-
-
-	def setup_coverage(self):
-
-		# Exit if it exists
-		if os.path.isfile(self._path_dict['coverage']):
-			return
-
-		# Run pip install
-		subprocess.Popen(['wenv', 'pip', 'install', 'coverage']).wait()
-		subprocess.Popen(['wenv', 'pip', 'install', 'pytest-cov']).wait()
 
 
 	def setup_coverage_activate(self):

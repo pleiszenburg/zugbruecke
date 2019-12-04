@@ -26,19 +26,40 @@ specific language governing rights and limitations under the License.
 
 """
 
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# C
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+HEADER = """
+{{ PREFIX }} void {{ SUFFIX }} mix_rgb_colors(
+	int8_t color_a[3],
+	int8_t color_b[3],
+	int8_t *color_mixed
+	);
+"""
+
+SOURCE = """
+{{ PREFIX }} void {{ SUFFIX }} mix_rgb_colors(
+	int8_t color_a[3],
+	int8_t color_b[3],
+	int8_t *color_mixed
+	)
+{
+	int i;
+	for (i = 0; i < 3; i++)
+	{
+		color_mixed[i] = (color_a[i] + color_b[i]) / 2;
+	}
+}
+"""
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-# import pytest
+from .lib.ctypes import get_context
 
-from sys import platform
-if any([platform.startswith(os_name) for os_name in ['linux', 'darwin', 'freebsd']]):
-	import zugbruecke.ctypes as ctypes
-elif platform.startswith('win'):
-	import ctypes
-
+import pytest
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # CLASSES AND ROUTINES
@@ -46,36 +67,32 @@ elif platform.startswith('win'):
 
 class sample_class:
 
+	def __init__(self, ctypes, dll_handle):
 
-	def __init__(self):
-
-		self.__dll__ = ctypes.windll.LoadLibrary('tests/demo_dll.dll')
-
-		# void mix_rgb_colors(int8_t [3], int8_t [3], int8_t *)
-		self.__mix_rgb_colors__ = self.__dll__.mix_rgb_colors
-		self.__mix_rgb_colors__.argtypes = (
-			ctypes.c_ubyte * 3, ctypes.c_ubyte * 3, ctypes.POINTER(ctypes.c_ubyte * 3)
+		self._c = ctypes
+		self._mix_rgb_colors = dll_handle.mix_rgb_colors
+		self._mix_rgb_colors.argtypes = (
+			self._c.c_ubyte * 3, self._c.c_ubyte * 3, self._c.POINTER(self._c.c_ubyte * 3)
 			)
-
 
 	def mix_rgb_colors(self, color_a, color_b):
 
-		color_type = ctypes.c_ubyte * 3
+		color_type = self._c.c_ubyte * 3
 		ctypes_color_a = color_type(*tuple(color_a))
 		ctypes_color_b = color_type(*tuple(color_b))
 		mixed_color = color_type()
-		self.__mix_rgb_colors__(
-			ctypes_color_a, ctypes_color_b, ctypes.pointer(mixed_color)
+		self._mix_rgb_colors(
+			ctypes_color_a, ctypes_color_b, self._c.pointer(mixed_color)
 			)
 		return mixed_color[:]
-
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # TEST(s)
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-def test_mix_rgb_colors():
+@pytest.mark.parametrize('arch,conv,ctypes,dll_handle', get_context(__file__))
+def test_mix_rgb_colors(arch, conv, ctypes, dll_handle):
 
-	sample = sample_class()
+	sample = sample_class(ctypes, dll_handle)
 
 	assert [45, 35, 30] == sample.mix_rgb_colors([10, 20, 40], [80, 50, 20])

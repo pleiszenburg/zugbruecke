@@ -6,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	tests/test_sqrt_int.py: Test function call without parameters
+	tests/test_divide_dtype.py: Tests by reference argument passing (int pointer)
 
 	Required to run on platform / side: [UNIX, WINE]
 
@@ -31,36 +31,55 @@ specific language governing rights and limitations under the License.
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 HEADER = """
-{{ PREFIX }} int16_t {{ SUFFIX }} get_const_int_a(void);
-
-{{ PREFIX }} int16_t {{ SUFFIX }} get_const_int_b(void);
-
-{{ PREFIX }} int16_t {{ SUFFIX }} get_const_int_c(void);
+{% for DTYPE in DTYPES %}
+	{{ PREFIX }} {{ DTYPE }} {{ SUFFIX }} test_divide_{{ DTYPE }}(
+		{{ DTYPE }} a,
+		{{ DTYPE }} b,
+		{{ DTYPE }} *remainder
+		);
+{% endfor %}
 """
 
 SOURCE = """
-{{ PREFIX }} int16_t {{ SUFFIX }} get_const_int_a(void)
-{
-	return (int16_t)sqrt(49);
-}
-
-{{ PREFIX }} int16_t {{ SUFFIX }} get_const_int_b(void)
-{
-	return (int16_t)sqrt(36);
-}
-
-{{ PREFIX }} int16_t {{ SUFFIX }} get_const_int_c(void)
-{
-	return (int16_t)sqrt(25);
-}
+{% for DTYPE in DTYPES %}
+	{{ PREFIX }} {{ DTYPE }} {{ SUFFIX }} test_divide_{{ DTYPE }}(
+		{{ DTYPE }} a,
+		{{ DTYPE }} b,
+		{{ DTYPE }} *remainder
+		)
+	{
+		if (b == 0)
+		{
+			*remainder = 0;
+			return 0;
+		}
+		{{ DTYPE }} quot = a / b;
+		*remainder = a % b;
+		return quot;
+	}
+{% endfor %}
 """
+
+EXTRA = {
+	'DTYPES': ['int', 'int8_t', 'int16_t', 'int32_t'] # TODO: 'int64_t' only on win64
+	}
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 from .lib.ctypes import get_context
+from .lib.param import (
+	get_int_limits,
+	force_int_overflow,
+	MAX_EXAMPLES,
+	)
 
+from hypothesis import (
+	given,
+	settings,
+	strategies as st,
+	)
 import pytest
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -68,27 +87,33 @@ import pytest
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 @pytest.mark.parametrize('arch,conv,ctypes,dll_handle', get_context(__file__))
-def test_sqrt_int(arch, conv, ctypes, dll_handle):
+@pytest.mark.parametrize('bits', [8, 16, 32])
+@given(data = st.data())
+@settings(max_examples = MAX_EXAMPLES)
+def test_divide_dtype(data, bits, arch, conv, ctypes, dll_handle):
 
-		get_const_int = dll_handle.get_const_int_a
-		get_const_int.restype = ctypes.c_int16
+	int_limits = get_int_limits(bits, sign = True)
+	x = data.draw(st.integers(**int_limits))
+	y = data.draw(st.integers(**int_limits))
 
-		assert 7 == get_const_int()
+	dtype = getattr(ctypes, 'c_int{BITS:d}'.format(BITS = bits))
+	divide_int = getattr(dll_handle, 'test_divide_int{BITS:d}_t'.format(BITS = bits))
+	divide_int.argtypes = (dtype, dtype, ctypes.POINTER(dtype))
+	divide_int.restype = dtype
 
-@pytest.mark.parametrize('arch,conv,ctypes,dll_handle', get_context(__file__))
-def test_sqrt_int_with_tuple(arch, conv, ctypes, dll_handle):
+	rem_ = dtype()
+	quot = divide_int(x, y, rem_)
+	rem = rem_.value
 
-		get_const_int = dll_handle.get_const_int_b
-		get_const_int.argtypes = tuple()
-		get_const_int.restype = ctypes.c_int16
+	if y != 0:
 
-		assert 6 == get_const_int()
+		v_quot = force_int_overflow(x // y, bits, True)
+		v_rem = force_int_overflow(abs(x) % abs(y) * (1, -1)[x < 0], bits, True) # HACK C99
+		if v_rem != 0 and ((x < 0) ^ (y < 0)): # HACK C99
+			v_quot = force_int_overflow(v_quot + 1, bits, True)
 
-@pytest.mark.parametrize('arch,conv,ctypes,dll_handle', get_context(__file__))
-def test_sqrt_int_with_list(arch, conv, ctypes, dll_handle):
+		assert (v_quot, v_rem) == (quot, rem)
 
-		get_const_int = dll_handle.get_const_int_c
-		get_const_int.argtypes = []
-		get_const_int.restype = ctypes.c_int16
+	else:
 
-		assert 5 == get_const_int()
+		assert (0, 0) == (quot, rem)

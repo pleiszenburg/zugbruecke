@@ -6,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	tests/test_error_missingdll.py: Checks for proper error handling if DLL does not exist
+	tests/lib/param.py: Providing test parameters and helpers
 
 	Required to run on platform / side: [UNIX, WINE]
 
@@ -26,41 +26,33 @@ specific language governing rights and limitations under the License.
 
 """
 
-
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# IMPORT
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-from .lib.ctypes import get_context
-
-import pytest
-
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# TEST(s)
+# CONST / CONFIG
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-@pytest.mark.parametrize('arch,conv,ctypes,dll_path', get_context(__file__, handle = False))
-def test_missingdll(arch, conv, ctypes, dll_path):
+MAX_EXAMPLES = 300
 
-	missing_path = 'tests/nonexistent_%s_%s.dll' % (conv, arch)
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# ROUTINES
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-	with pytest.raises(OSError):
-		dll = getattr(ctypes, conv).LoadLibrary(missing_path)
+def get_int_limits(bits, sign = True):
+	assert isinstance(bits, int)
+	assert bits in (8, 16, 32, 64)
+	assert isinstance(sign, bool)
+	if sign:
+		return {'min_value': -1 * 2 ** (bits - 1), 'max_value': 2 ** (bits - 1) - 1}
+	else:
+		return {'min_value': 0, 'max_value': 2 ** bits - 1}
 
-@pytest.mark.parametrize('arch,conv,ctypes,dll_path', get_context(__file__, handle = False))
-def test_missingdll_attr(arch, conv, ctypes, dll_path):
-
-	missing_attr = 'nonexistent_%s_%s_attr' % (conv, arch)
-
-	with pytest.raises(OSError):
-		dll = getattr(ctypes.cdll, missing_attr)
-
-# def test_missingdll_oledll(): # TODO
-#
-# 	with pytest.raises(OSError):
-# 		dll = ctypes.oledll.LoadLibrary('tests/nonexistent3_dll.dll')
-
-# def test_missingdll_oledll_attr(): # TODO
-#
-# 	with pytest.raises(OSError):
-# 		dll = ctypes.oledll.nonexistent33_dll
+def force_int_overflow(value, bits, sign):
+	assert isinstance(value, int)
+	assert isinstance(bits, int)
+	assert bits in (8, 16, 32, 64)
+	assert isinstance(sign, bool)
+	int_limits = get_int_limits(bits, sign)
+	while value > int_limits['max_value']:
+		value -= 2 ** bits
+	while value < int_limits['min_value']:
+		value += 2 ** bits
+	return value

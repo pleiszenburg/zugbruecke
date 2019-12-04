@@ -26,42 +26,42 @@ specific language governing rights and limitations under the License.
 
 """
 
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# C
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+HEADER = """
+{{ PREFIX }} int16_t {{ SUFFIX }} sqrt_int(
+	int16_t a
+	);
+"""
+
+SOURCE = """
+{{ PREFIX }} int16_t {{ SUFFIX }} sqrt_int(
+	int16_t a
+	)
+{
+	return (int16_t)sqrt(a);
+}
+"""
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+from .lib.ctypes import get_context
+
 import pytest
-
-from sys import platform
-if any([platform.startswith(os_name) for os_name in ['linux', 'darwin', 'freebsd']]):
-	import zugbruecke.ctypes as ctypes
-elif platform.startswith('win'):
-	import ctypes
-
-
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# CLASSES AND ROUTINES
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-class sample_class:
-
-
-	def __init__(self):
-
-		self.__dll__ = ctypes.windll.LoadLibrary('tests/demo_dll.dll')
-
-		self.sqrt_int = self.__dll__.sqrt_int
-		self.sqrt_int.argtypes = (ctypes.c_int16,)
-		self.sqrt_int.restype = ctypes.c_int16
-
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # TEST(s)
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-def test_sqrt_int():
+@pytest.mark.parametrize('arch,conv,ctypes,dll_handle', get_context(__file__))
+def test_sqrt_int(arch, conv, ctypes, dll_handle):
 
-	sample = sample_class()
+	sqrt_int = dll_handle.sqrt_int
+	sqrt_int.argtypes = (ctypes.c_int16,)
+	sqrt_int.restype = ctypes.c_int16
 
-	assert 3 == sample.sqrt_int(9)
+	assert 3 == sqrt_int(9)

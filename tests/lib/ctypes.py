@@ -6,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	tests/test_devide.py: Tests by reference argument passing (int pointer)
+	tests/lib/ctypes.py: Offers handles on ctypes/zugbruecke sessions and DLLs
 
 	Required to run on platform / side: [UNIX, WINE]
 
@@ -26,50 +26,61 @@ specific language governing rights and limitations under the License.
 
 """
 
-
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-# import pytest
-
+import os
 from sys import platform
+from platform import architecture
+
+from .const import ARCHS, CONVENTIONS
+from .names import get_dll_path
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# IMPORT / PLATFORM
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+ARCHITECTURE = architecture()[0][:2]
+
 if any([platform.startswith(os_name) for os_name in ['linux', 'darwin', 'freebsd']]):
-	import zugbruecke.ctypes as ctypes
+	import zugbruecke
+	CTYPES = {arch: zugbruecke.ctypes_session({'arch': arch}) for arch in ARCHS}
+	PLATFORM = 'unix'
 elif platform.startswith('win'):
 	import ctypes
-
-
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# CLASSES AND ROUTINES
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-class sample_class:
-
-
-	def __init__(self):
-
-		self.__dll__ = ctypes.windll.LoadLibrary('tests/demo_dll.dll')
-
-		# int divide(int, int, int *)
-		self.__divide__ = self.__dll__.cookbook_divide
-		self.__divide__.argtypes = (ctypes.c_int, ctypes.c_int, ctypes.POINTER(ctypes.c_int))
-		self.__divide__.restype = ctypes.c_int
-
-
-	def divide(self, x, y):
-
-		rem = ctypes.c_int()
-		quot = self.__divide__(x, y, rem)
-		return quot, rem.value
-
+	from ctypes import util
+	ctypes._util = util
+	CTYPES = {arch: ctypes for arch in ARCHS}
+	PLATFORM = 'wine'
+else:
+	raise SystemError('unsopported platform')
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# TEST(s)
+# ROUTINES
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-def test_devide():
+def get_dll_handle(arch, convention, test_fn):
+	"get handle to dll for given arch and convention"
 
-	sample = sample_class()
+	try:
+		return getattr(CTYPES[arch], convention).LoadLibrary(
+			get_dll_path(arch, convention, test_fn) # TODO this will parse setup.cfg on EVERY call
+			)
+	except:
+		raise SystemError('Ups!', arch, convention, test_fn, get_dll_path(arch, convention, test_fn), os.getcwd())
 
-	assert (5, 2) == sample.divide(42, 8)
+def get_context(test_path, handle = True):
+	"""all archs and conventions,
+	either test dll handle or path is provided
+	"""
+
+	test_fn = os.path.basename(test_path)
+
+	for convention in CONVENTIONS:
+		for arch in ARCHS:
+			if PLATFORM == 'unix' or arch[3:] == ARCHITECTURE:
+				if handle:
+					yield (arch, convention, CTYPES[arch], get_dll_handle(arch, convention, test_fn))
+				else:
+					yield (arch, convention, CTYPES[arch], get_dll_path(arch, convention, test_fn))

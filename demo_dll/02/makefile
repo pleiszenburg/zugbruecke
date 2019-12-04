@@ -2,7 +2,7 @@
 # Calling routines in Windows DLLs from Python scripts running on unixlike systems
 # https://github.com/pleiszenburg/zugbruecke
 #
-#	demo_dll/makefile: GNU makefile for building demo DLL with mingw
+#	demo_dll/02/makefile: GNU makefile for building demo DLL with mingw
 #
 #	Required to run on platform / side: [UNIX]
 #
@@ -22,7 +22,8 @@
 
 
 CC      = i686-w64-mingw32-gcc
-CFLAGS  = -Wall -Wl,-add-stdcall-alias -shared -std=c99
+# CFLAGS  = -Wall -Wl,-add-stdcall-alias -shared -std=c99
+CFLAGS  = -Wall -Wl,--subsystem,windows -shared -std=c99
 LDFLAGS = -lm
 
 DEMODLL = demo_dll
@@ -34,11 +35,11 @@ all: $(DEMODLL)
 $(DEMODLL): $(DEMODLL_C)
 	$(CC) $(DEMODLL_C) $(CFLAGS) -o $(DEMODLL).dll $(LDFLAGS) $(DEMODLL_LDFLAGS)
 
-install:
-	ln -s ../$(DEMODLL)/$(DEMODLL).dll ../examples/$(DEMODLL).dll
-	ln -s ../$(DEMODLL)/$(DEMODLL).dll ../tests/$(DEMODLL).dll
+# install:
+# 	ln -s ../$(DEMODLL)/$(DEMODLL).dll ../examples/$(DEMODLL).dll
+# 	ln -s ../$(DEMODLL)/$(DEMODLL).dll ../tests_old/$(DEMODLL).dll
 
 clean:
 	-rm $(DEMODLL).dll
-	-rm ../examples/$(DEMODLL).dll
-	-rm ../tests/$(DEMODLL).dll
+	# -rm ../examples/$(DEMODLL).dll
+	# -rm ../tests_old/$(DEMODLL).dll

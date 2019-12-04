@@ -26,46 +26,76 @@ specific language governing rights and limitations under the License.
 
 """
 
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# C
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+HEADER = """
+typedef int16_t {{ SUFFIX }} (*conveyor_belt)(int16_t index);
+
+typedef struct conveyor_belt_data {
+	int16_t len;
+	conveyor_belt get_data;
+} conveyor_belt_data;
+
+{{ PREFIX }} int16_t {{ SUFFIX }} sum_elements_from_callback_in_struct(
+	struct conveyor_belt_data *data
+	);
+"""
+
+SOURCE = """
+{{ PREFIX }} int16_t {{ SUFFIX }} sum_elements_from_callback_in_struct(
+	struct conveyor_belt_data *data
+	)
+{
+
+	int16_t sum = 0;
+	int16_t i;
+
+	for(i = 0; i < data->len; i++)
+	{
+		sum += data->get_data(i);
+	}
+
+	return sum;
+
+}
+"""
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-# import pytest
+from .lib.ctypes import get_context
 
-from sys import platform
-if any([platform.startswith(os_name) for os_name in ['linux', 'darwin', 'freebsd']]):
-	import zugbruecke.ctypes as ctypes
-elif platform.startswith('win'):
-	import ctypes
-
+import pytest
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # CLASSES AND ROUTINES
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-conveyor_belt = ctypes.WINFUNCTYPE(ctypes.c_int16, ctypes.c_int16)
-
-
-class conveyor_belt_data(ctypes.Structure):
-
-
-	_fields_ = [
-		('len', ctypes.c_int16),
-		('get_data', conveyor_belt)
-		]
-
-
 class sample_class:
 
+	def __init__(self, conv, ctypes, dll_handle):
 
-	def __init__(self):
+		if conv == 'cdll':
+			func_type = ctypes.CFUNCTYPE
+		elif conv == 'windll':
+			func_type = ctypes.WINFUNCTYPE
+		else:
+			raise ValueError('unknown calling convention', conv)
+		conveyor_belt = func_type(ctypes.c_int16, ctypes.c_int16)
 
-		self.__dll__ = ctypes.windll.LoadLibrary('tests/demo_dll.dll')
+		class conveyor_belt_data(ctypes.Structure):
+			_fields_ = [
+				('len', ctypes.c_int16),
+				('get_data', conveyor_belt)
+				]
+		self._conveyor_belt_data = conveyor_belt_data
 
-		self.__sum_elements_from_callback_in_struct__ = self.__dll__.sum_elements_from_callback_in_struct
-		self.__sum_elements_from_callback_in_struct__.argtypes = (ctypes.POINTER(conveyor_belt_data),)
-		self.__sum_elements_from_callback_in_struct__.restype = ctypes.c_int16
+		self._sum_elements_from_callback_in_struct = dll_handle.sum_elements_from_callback_in_struct
+		self._sum_elements_from_callback_in_struct.argtypes = (ctypes.POINTER(conveyor_belt_data),)
+		self._sum_elements_from_callback_in_struct.restype = ctypes.c_int16
 
 		self.DATA = [1, 6, 8, 4, 9, 7, 4, 2, 5, 2]
 
@@ -74,22 +104,22 @@ class sample_class:
 			print((index, self.DATA[index]))
 			return self.DATA[index]
 
-		self.__get_data__ = get_data
+		self._get_data = get_data
 
 
 	def sum_elements_from_callback_in_struct(self):
 
-		in_struct = conveyor_belt_data(len(self.DATA), self.__get_data__)
+		in_struct = self._conveyor_belt_data(len(self.DATA), self._get_data)
 
-		return self.__sum_elements_from_callback_in_struct__(in_struct)
-
+		return self._sum_elements_from_callback_in_struct(in_struct)
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # TEST(s)
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-def test_callback_simple():
+@pytest.mark.parametrize('arch,conv,ctypes,dll_handle', get_context(__file__))
+def test_callback_simple(arch, conv, ctypes, dll_handle):
 
-	sample = sample_class()
+	sample = sample_class(conv, ctypes, dll_handle)
 
 	assert 48 == sample.sum_elements_from_callback_in_struct()

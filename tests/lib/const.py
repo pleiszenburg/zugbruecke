@@ -6,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	tests/test_util.py: Testing methods crom ctypes.util
+	tests/lib/const.py: Holds constant values, flags, types
 
 	Required to run on platform / side: [UNIX, WINE]
 
@@ -26,25 +26,65 @@ specific language governing rights and limitations under the License.
 
 """
 
-
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# IMPORT
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-from .lib.ctypes import get_context
-
-import pytest
-
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# TEST(s)
+# CONST
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-@pytest.mark.parametrize('arch,conv,ctypes,dll_path', get_context(__file__, handle = False))
-def test_find_library(arch, conv, ctypes, dll_path):
+DLL_FLD = 'dlls'
 
-	assert ctypes._util.find_library('kernel32') == 'C:\\windows\\system32\\kernel32.dll'
+DLL_HEADER = """
 
-@pytest.mark.parametrize('arch,conv,ctypes,dll_path', get_context(__file__, handle = False))
-def test_find_msvcrt(arch, conv, ctypes, dll_path):
+#ifndef TESTDLL_H
+#define TESTDLL_H
 
-	assert ctypes._util.find_msvcrt() == None
+#include <stdio.h>
+#include <windows.h>
+#include <stdint.h>
+#include <math.h>
+
+typedef int32_t bool;
+#define TRUE 1
+#define FALSE 0
+
+{{ HEADER }}
+
+#endif
+
+"""
+
+DLL_SOURCE = """
+
+#include "{{ HEADER_FN }}"
+
+{{ SOURCE }}
+
+"""
+
+ARCHS = ['win32', 'win64']
+CONVENTIONS = ['cdll', 'windll']
+
+PREFIX = {
+	'cdll': '__declspec(dllexport)',
+	'windll': '__declspec(dllexport)',
+	}
+SUFFIX = {
+	'cdll': '__cdecl',
+	'windll': '__stdcall',
+	}
+
+CC = {
+	'win32': 'i686-w64-mingw32-gcc',
+	'win64': 'x86_64-w64-mingw32-gcc',
+	}
+_CFLAGS = [
+	'-Wall',
+	'-shared',
+	'-std=c99'
+	]
+CFLAGS = {
+	'cdll': _CFLAGS + ['-Wl,--subsystem,windows'],
+	'windll': _CFLAGS + ['-Wl,-add-stdcall-alias'],
+	}
+LDFLAGS = [
+	'-lm',
+	]
