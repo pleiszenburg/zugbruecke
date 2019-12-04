@@ -32,27 +32,23 @@ specific language governing rights and limitations under the License.
 
 import pytest
 
-from .lib.ctypes import get_context
+from .lib.ctypes import get_context, PLATFORM
 
-from sys import platform
-if any([platform.startswith(os_name) for os_name in ['linux', 'darwin', 'freebsd']]):
-	IS_UNIX = True
+if PLATFORM == 'unix':
 	from zugbruecke.core.errors import wine_error
-elif platform.startswith('win'):
-	IS_UNIX = False
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # TEST(s)
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-@pytest.mark.skipif(not IS_UNIX, reason = 'only relevant for unix side')
+@pytest.mark.skipif(PLATFORM != 'unix', reason = 'only relevant for unix side')
 @pytest.mark.parametrize('arch,conv,ctypes,dll_path', get_context(__file__, handle = False))
 def test_path_unix_to_wine_abs(arch, conv, ctypes, dll_path):
 
 	PATH_A = ('/foo/bar', 'Z:\\foo\\bar')
 	assert ctypes._zb_path_unix_to_wine(PATH_A[0]) == PATH_A[1]
 
-@pytest.mark.skipif(not IS_UNIX, reason = 'only relevant for unix side')
+@pytest.mark.skipif(PLATFORM != 'unix', reason = 'only relevant for unix side')
 @pytest.mark.parametrize('arch,conv,ctypes,dll_path', get_context(__file__, handle = False))
 def test_path_unix_to_wine_rel(arch, conv, ctypes, dll_path):
 
@@ -62,7 +58,7 @@ def test_path_unix_to_wine_rel(arch, conv, ctypes, dll_path):
 	assert path_out.endswith(PATH_A[1])
 	assert len(path_out) > len(PATH_A[1]) + len('Z:\\')
 
-@pytest.mark.skipif(not IS_UNIX, reason = 'only relevant for unix side')
+@pytest.mark.skipif(PLATFORM != 'unix', reason = 'only relevant for unix side')
 @pytest.mark.parametrize('arch,conv,ctypes,dll_path', get_context(__file__, handle = False))
 def test_path_unix_to_wine_fail1(arch, conv, ctypes, dll_path):
 
@@ -70,7 +66,7 @@ def test_path_unix_to_wine_fail1(arch, conv, ctypes, dll_path):
 	with pytest.raises(ValueError):
 		path_out = ctypes._zb_path_unix_to_wine(PATH_A)
 
-@pytest.mark.skipif(not IS_UNIX, reason = 'only relevant for unix side')
+@pytest.mark.skipif(PLATFORM != 'unix', reason = 'only relevant for unix side')
 @pytest.mark.parametrize('arch,conv,ctypes,dll_path', get_context(__file__, handle = False))
 def test_path_wine_to_unix_abs(arch, conv, ctypes, dll_path):
 
@@ -80,7 +76,7 @@ def test_path_wine_to_unix_abs(arch, conv, ctypes, dll_path):
 	assert path_out.endswith('/c:/')
 	assert len(path_out) > len('/') + len('/c:/')
 
-@pytest.mark.skipif(not IS_UNIX, reason = 'only relevant for unix side')
+@pytest.mark.skipif(PLATFORM != 'unix', reason = 'only relevant for unix side')
 @pytest.mark.parametrize('arch,conv,ctypes,dll_path', get_context(__file__, handle = False))
 def test_path_wine_to_unix_fail1(arch, conv, ctypes, dll_path):
 
@@ -88,7 +84,7 @@ def test_path_wine_to_unix_fail1(arch, conv, ctypes, dll_path):
 	with pytest.raises(wine_error):
 		path_out = ctypes._zb_path_wine_to_unix(PATH_A)
 
-@pytest.mark.skipif(not IS_UNIX, reason = 'only relevant for unix side')
+@pytest.mark.skipif(PLATFORM != 'unix', reason = 'only relevant for unix side')
 @pytest.mark.parametrize('arch,conv,ctypes,dll_path', get_context(__file__, handle = False))
 def test_path_wine_to_unix_fail2(arch, conv, ctypes, dll_path):
 
@@ -96,7 +92,7 @@ def test_path_wine_to_unix_fail2(arch, conv, ctypes, dll_path):
 	with pytest.raises(wine_error):
 		path_out = ctypes._zb_path_wine_to_unix(PATH_A)
 
-@pytest.mark.skipif(not IS_UNIX, reason = 'only relevant for unix side')
+@pytest.mark.skipif(PLATFORM != 'unix', reason = 'only relevant for unix side')
 @pytest.mark.parametrize('arch,conv,ctypes,dll_path', get_context(__file__, handle = False))
 def test_path_wine_to_unix_fail3(arch, conv, ctypes, dll_path):
 
