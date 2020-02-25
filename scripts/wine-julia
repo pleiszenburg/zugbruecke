@@ -24,9 +24,11 @@
 
 # Get parameters from zugbruecke configuration
 arch=$(python3 -c 'from zugbruecke.core.config import echo_parameter; echo_parameter("arch")')
+version=$(python3 -c 'from zugbruecke.core.config import echo_parameter; echo_parameter("version")')
 zugbruecke_dir=$(python3 -c 'from zugbruecke.core.config import echo_parameter; echo_parameter("dir")')
 
 # Process parameters
+dir_py=$zugbruecke_dir/$arch-python$version
 dir_jl=$zugbruecke_dir/$arch-julia-1.3
 dir_wine=$zugbruecke_dir/$arch-wine
 
@@ -47,4 +49,6 @@ export WINEPREFIX="$dir_wine"
 export WINEDEBUG=-all
 
 # Fire up Julia under Wine, pass cmd line arguments
-cd $dir_jl/bin && LC_ALL=zh_CN.UTF-8 wineconsole julia.exe "$@"
+export PYTHON=$dir_py/python.exe
+unset JULIA_PKG_DEVDIR JULIA_DEPOT_PATH
+cd $dir_jl/bin && wineconsole julia.exe "$@"
