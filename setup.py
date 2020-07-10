@@ -52,7 +52,7 @@ python_minor_min = 4
 python_minor_max = 8
 confirmed_python_versions = [
 	'Programming Language :: Python :: 3.{MINOR:d}'.format(MINOR = minor)
-	for x in range(python_minor_min, python_minor_max + 1)
+	for minor in range(python_minor_min, python_minor_max + 1)
 	]
 
 
