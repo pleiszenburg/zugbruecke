@@ -36,7 +36,7 @@ from setuptools import (
 	setup
 	)
 import os
-from sys import platform
+from sys import platform, version_info
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -72,8 +72,8 @@ if platform.startswith('win'):
 
 # Python 3.4 dependency / CI fix
 pls = 'python-language-server'
-assert sys.version_info.major == 3
-if sys.version_info.minor <= 4:
+assert version_info.major == 3
+if version_info.minor <= 4:
 	pls += '<0.32.0'
 
 
