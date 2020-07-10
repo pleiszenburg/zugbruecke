@@ -1,6 +1,11 @@
 Changes
 =======
 
+0.0.15 (2020-07-10)
+-------------------
+
+* FIX: CI tests failed due to dependency issue in Python 3.4, see issue #72.
+
 0.0.14 (2019-05-21)
 -------------------
 
