@@ -44,12 +44,7 @@ from sys import platform, version_info
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
-# Bump version HERE!
-<<<<<<< HEAD
 _version_ = '0.1.0'
-=======
-_version_ = '0.0.15'
->>>>>>> e0fb2e6... new version
 
 
 # List all versions of Python which are supported
