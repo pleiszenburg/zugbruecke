@@ -37,7 +37,7 @@ from setuptools import (
 	)
 import os
 from glob import glob
-from sys import platform
+from sys import platform, version_info
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -46,7 +46,7 @@ from sys import platform
 
 
 # Bump version HERE!
-_version_ = '0.0.14'
+_version_ = '0.0.15'
 
 
 # List all versions of Python which are supported
@@ -64,6 +64,13 @@ with open(os.path.join(os.path.dirname(__file__), 'README.rst')) as f:
 # Just in case someone is actually running this on Windows ...
 if platform.startswith('win'):
 	raise SystemExit('You are already running Windows. No need for this package!')
+
+
+# Python 3.4 dependency / CI fix
+pls = 'python-language-server'
+assert version_info.major == 3
+if version_info.minor <= 4:
+	pls += '<0.32.0'
 
 
 setup(
@@ -84,7 +91,7 @@ setup(
 	install_requires = [],
 	extras_require = {'dev': [
 		'pytest',
-		'python-language-server',
+		pls,
 		'setuptools',
 		'Sphinx',
 		'sphinx_rtd_theme',
