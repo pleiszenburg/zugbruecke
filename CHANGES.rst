@@ -1,7 +1,7 @@
 Changes
 =======
 
-0.1.0 (2019-XX-XX)
+0.1.0 (2020-XX-XX)
 ------------------
 
 **CAUTION: MODULE LAYOUT CHANGE BREAKING BACKWARDS COMPATIBILITY!**
@@ -65,6 +65,11 @@ On older versions of Linux such as *Ubuntu 14.04* alias *Trusty Tahr* (released 
 * FIX: ``zugbruecke`` raised TypeError if too many arguments were given too a configured cdll function (``ctypes`` does not), see #62.
 * FIX: If a struct type was used in a function call with memsync first (before use in a function call without memsync), configuring (and calling) the function failed, see #63.
 * The configuration module was refactored and made clearer and faster, allowing to implement new options.
+
+0.0.15 (2020-07-10)
+-------------------
+
+* FIX: CI tests failed due to dependency issue in Python 3.4, see issue #72.
 
 0.0.14 (2019-05-21)
 -------------------
