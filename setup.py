@@ -66,6 +66,13 @@ if platform.startswith('win'):
 	raise SystemExit('You are already running Windows. No need for this package!')
 
 
+# Python 3.4 dependency / CI fix
+pls = 'python-language-server'
+assert sys.version_info.major == 3
+if sys.version_info.minor <= 4:
+	pls += '<0.32.0'
+
+
 setup(
 	name = 'zugbruecke',
 	packages = find_packages('src'),
@@ -84,7 +91,7 @@ setup(
 	install_requires = [],
 	extras_require = {'dev': [
 		'pytest',
-		'python-language-server',
+		pls,
 		'setuptools',
 		'Sphinx',
 		'sphinx_rtd_theme',
