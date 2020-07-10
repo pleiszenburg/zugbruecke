@@ -36,7 +36,7 @@ from setuptools import (
 	setup
 	)
 import os
-from sys import platform
+from sys import platform, version_info
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -45,7 +45,11 @@ from sys import platform
 
 
 # Bump version HERE!
+<<<<<<< HEAD
 _version_ = '0.1.0'
+=======
+_version_ = '0.0.15'
+>>>>>>> e0fb2e6... new version
 
 
 # List all versions of Python which are supported
@@ -70,6 +74,13 @@ if platform.startswith('win'):
 	raise SystemExit('You are already running Windows. No need for this package!')
 
 
+# Python 3.4 dependency / CI fix
+pls = 'python-language-server'
+assert version_info.major == 3
+if version_info.minor <= 4:
+	pls += '<0.32.0'
+
+
 setup(
 	name = 'zugbruecke',
 	packages = find_packages('src'),
@@ -89,7 +100,7 @@ setup(
 	extras_require = {
 		'dev': requirements_test + [
 			'Jinja2',
-			'python-language-server',
+			pls,
 			'setuptools',
 			'Sphinx',
 			'sphinx_rtd_theme',
