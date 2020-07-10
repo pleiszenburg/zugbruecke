@@ -10,7 +10,7 @@ https://github.com/pleiszenburg/zugbruecke
 
 	Required to run on platform / side: [UNIX, WINE]
 
-	Copyright (C) 2017-2019 Sebastian M. Ernst <ernst@pleiszenburg.de>
+	Copyright (C) 2017-2020 Sebastian M. Ernst <ernst@pleiszenburg.de>
 
 <LICENSE_BLOCK>
 The contents of this file are subject to the GNU Lesser General Public License
@@ -26,19 +26,101 @@ specific language governing rights and limitations under the License.
 
 """
 
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# C
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+HEADER = """
+{{ PREFIX }} void {{ SUFFIX }} replace_letter_in_null_terminated_string_a(
+	char *in_string,
+	char old_letter,
+	char new_letter
+	);
+
+{{ PREFIX }} void {{ SUFFIX }} replace_letter_in_null_terminated_string_b(
+	char *in_string,
+	char old_letter,
+	char new_letter
+	);
+
+{{ PREFIX }} void {{ SUFFIX }} replace_letter_in_null_terminated_string_unicode_a(
+	wchar_t *in_string,
+	wchar_t old_letter,
+	wchar_t new_letter
+	);
+
+{{ PREFIX }} void {{ SUFFIX }} replace_letter_in_null_terminated_string_unicode_b(
+	wchar_t *in_string,
+	wchar_t old_letter,
+	wchar_t new_letter
+	);
+"""
+
+SOURCE = """
+{{ PREFIX }} void {{ SUFFIX }} replace_letter_in_null_terminated_string_a(
+	char *in_string,
+	char old_letter,
+	char new_letter
+	)
+{
+	int i;
+	for (i = 0; i < strlen(in_string); i++) {
+		if(in_string[i] == old_letter) {
+			in_string[i] = new_letter;
+		}
+	}
+}
+
+{{ PREFIX }} void {{ SUFFIX }} replace_letter_in_null_terminated_string_b(
+	char *in_string,
+	char old_letter,
+	char new_letter
+	)
+{
+	int i;
+	for (i = 0; i < strlen(in_string); i++) {
+		if(in_string[i] == old_letter) {
+			in_string[i] = new_letter;
+		}
+	}
+}
+
+{{ PREFIX }} void {{ SUFFIX }} replace_letter_in_null_terminated_string_unicode_a(
+	wchar_t *in_string,
+	wchar_t old_letter,
+	wchar_t new_letter
+	)
+{
+	int i;
+	for (i = 0; i < wcslen(in_string); i++) {
+		if(in_string[i] == old_letter) {
+			in_string[i] = new_letter;
+		}
+	}
+}
+
+{{ PREFIX }} void {{ SUFFIX }} replace_letter_in_null_terminated_string_unicode_b(
+	wchar_t *in_string,
+	wchar_t old_letter,
+	wchar_t new_letter
+	)
+{
+	int i;
+	for (i = 0; i < wcslen(in_string); i++) {
+		if(in_string[i] == old_letter) {
+			in_string[i] = new_letter;
+		}
+	}
+}
+"""
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-# import pytest
+from .lib.ctypes import get_context
 
-from sys import platform
-if any([platform.startswith(os_name) for os_name in ['linux', 'darwin', 'freebsd']]):
-	import zugbruecke.ctypes as ctypes
-elif platform.startswith('win'):
-	import ctypes
-
+import pytest
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # CLASSES AND ROUTINES
@@ -46,96 +128,87 @@ elif platform.startswith('win'):
 
 class sample_class_a:
 
+	def __init__(self, ctypes, dll_handle):
 
-	def __init__(self):
-
-		self.__dll__ = ctypes.windll.LoadLibrary('tests/demo_dll.dll')
-
-		self.__replace_letter_in_null_terminated_string__ = self.__dll__.replace_letter_in_null_terminated_string_a
-		self.__replace_letter_in_null_terminated_string__.argtypes = (
-			ctypes.POINTER(ctypes.c_char), # Generate pointer to char manually
-			ctypes.c_char,
-			ctypes.c_char
+		self._c = ctypes
+		self._replace_letter_in_null_terminated_string = dll_handle.replace_letter_in_null_terminated_string_a
+		self._replace_letter_in_null_terminated_string.argtypes = (
+			self._c.POINTER(self._c.c_char), # Generate pointer to char manually
+			self._c.c_char,
+			self._c.c_char
 			)
-		self.__replace_letter_in_null_terminated_string__.memsync = [
+		self._replace_letter_in_null_terminated_string.memsync = [
 			{
 				'p': [0],
 				'n': True
 				}
 			]
 
-
 	def replace_letter_in_null_terminated_string(self, in_string, old_letter, new_letter):
 
 		BUFFER_LENGTH = 128
 
-		string_buffer = ctypes.create_string_buffer(BUFFER_LENGTH)
+		string_buffer = self._c.create_string_buffer(BUFFER_LENGTH)
 		string_buffer.value = in_string.encode('utf-8')
 
-		self.__replace_letter_in_null_terminated_string__(
+		self._replace_letter_in_null_terminated_string(
 			string_buffer,
 			old_letter.encode('utf-8'),
 			new_letter.encode('utf-8')
 			)
 
 		return string_buffer.value.decode('utf-8')
-
 
 	def replace_letter_in_null_terminated_string_buff(self, in_string, old_letter, new_letter):
 
-		string_buffer = ctypes.create_string_buffer(in_string.encode('utf-8'))
+		string_buffer = self._c.create_string_buffer(in_string.encode('utf-8'))
 
-		self.__replace_letter_in_null_terminated_string__(
+		self._replace_letter_in_null_terminated_string(
 			string_buffer,
 			old_letter.encode('utf-8'),
 			new_letter.encode('utf-8')
 			)
 
 		return string_buffer.value.decode('utf-8')
-
 
 class sample_class_b:
 
+	def __init__(self, ctypes, dll_handle):
 
-	def __init__(self):
-
-		self.__dll__ = ctypes.windll.LoadLibrary('tests/demo_dll.dll')
-
-		self.__replace_letter_in_null_terminated_string__ = self.__dll__.replace_letter_in_null_terminated_string_b
-		self.__replace_letter_in_null_terminated_string__.argtypes = (
-			ctypes.c_char_p, # Use built-in char pointer type
-			ctypes.c_char,
-			ctypes.c_char
+		self._c = ctypes
+		self._replace_letter_in_null_terminated_string = dll_handle.replace_letter_in_null_terminated_string_b
+		self._replace_letter_in_null_terminated_string.argtypes = (
+			self._c.c_char_p, # Use built-in char pointer type
+			self._c.c_char,
+			self._c.c_char
 			)
-		self.__replace_letter_in_null_terminated_string__.memsync = [
+		self._replace_letter_in_null_terminated_string.memsync = [
 			{
 				'p': [0],
 				'n': True
 				}
 			]
 
-
 	def replace_letter_in_null_terminated_string(self, in_string, old_letter, new_letter):
 
 		BUFFER_LENGTH = 128
 
-		string_buffer = ctypes.create_string_buffer(BUFFER_LENGTH)
+		string_buffer = self._c.create_string_buffer(BUFFER_LENGTH)
 		string_buffer.value = in_string.encode('utf-8')
 
-		self.__replace_letter_in_null_terminated_string__(
+		self._replace_letter_in_null_terminated_string(
 			string_buffer,
 			old_letter.encode('utf-8'),
 			new_letter.encode('utf-8')
 			)
 
 		return string_buffer.value.decode('utf-8')
-
 
 	def replace_letter_in_null_terminated_string_buff(self, in_string, old_letter, new_letter):
 
-		string_buffer = ctypes.create_string_buffer(in_string.encode('utf-8'))
+		string_buffer = self._c.create_string_buffer(in_string.encode('utf-8'))
 
-		self.__replace_letter_in_null_terminated_string__(
+		self._replace_letter_in_null_terminated_string(
 			string_buffer,
 			old_letter.encode('utf-8'),
 			new_letter.encode('utf-8')
@@ -143,21 +216,18 @@ class sample_class_b:
 
 		return string_buffer.value.decode('utf-8')
 
-
 class sample_class_unicode_a:
 
+	def __init__(self, ctypes, dll_handle):
 
-	def __init__(self):
-
-		self.__dll__ = ctypes.windll.LoadLibrary('tests/demo_dll.dll')
-
-		self.__replace_letter_in_null_terminated_string_unicode__ = self.__dll__.replace_letter_in_null_terminated_string_unicode_a
-		self.__replace_letter_in_null_terminated_string_unicode__.argtypes = (
-			ctypes.POINTER(ctypes.c_wchar), # Generate pointer to wchar manually
-			ctypes.c_wchar,
-			ctypes.c_wchar
+		self._c = ctypes
+		self._replace_letter_in_null_terminated_string_unicode = dll_handle.replace_letter_in_null_terminated_string_unicode_a
+		self._replace_letter_in_null_terminated_string_unicode.argtypes = (
+			self._c.POINTER(self._c.c_wchar), # Generate pointer to wchar manually
+			self._c.c_wchar,
+			self._c.c_wchar
 			)
-		self.__replace_letter_in_null_terminated_string_unicode__.memsync = [
+		self._replace_letter_in_null_terminated_string_unicode.memsync = [
 			{
 				'p': [0],
 				'n': True,
@@ -165,50 +235,45 @@ class sample_class_unicode_a:
 				}
 			]
 
-
 	def replace_letter_in_null_terminated_string_unicode(self, in_string, old_letter, new_letter):
 
 		BUFFER_LENGTH = 128
 
-		string_buffer = ctypes.create_unicode_buffer(BUFFER_LENGTH)
+		string_buffer = self._c.create_unicode_buffer(BUFFER_LENGTH)
 		string_buffer.value = in_string
 
-		self.__replace_letter_in_null_terminated_string_unicode__(
+		self._replace_letter_in_null_terminated_string_unicode(
 			string_buffer,
 			old_letter,
 			new_letter
 			)
 
 		return string_buffer.value
-
 
 	def replace_letter_in_null_terminated_string_buff_unicode(self, in_string, old_letter, new_letter):
 
-		string_buffer = ctypes.create_unicode_buffer(in_string)
+		string_buffer = self._c.create_unicode_buffer(in_string)
 
-		self.__replace_letter_in_null_terminated_string_unicode__(
+		self._replace_letter_in_null_terminated_string_unicode(
 			string_buffer,
 			old_letter,
 			new_letter
 			)
 
 		return string_buffer.value
-
 
 class sample_class_unicode_b:
 
+	def __init__(self, ctypes, dll_handle):
 
-	def __init__(self):
-
-		self.__dll__ = ctypes.windll.LoadLibrary('tests/demo_dll.dll')
-
-		self.__replace_letter_in_null_terminated_string_unicode__ = self.__dll__.replace_letter_in_null_terminated_string_unicode_b
-		self.__replace_letter_in_null_terminated_string_unicode__.argtypes = (
-			ctypes.c_wchar_p, # Use built-in wchar pointer type
-			ctypes.c_wchar,
-			ctypes.c_wchar
+		self._c = ctypes
+		self._replace_letter_in_null_terminated_string_unicode = dll_handle.replace_letter_in_null_terminated_string_unicode_b
+		self._replace_letter_in_null_terminated_string_unicode.argtypes = (
+			self._c.c_wchar_p, # Use built-in wchar pointer type
+			self._c.c_wchar,
+			self._c.c_wchar
 			)
-		self.__replace_letter_in_null_terminated_string_unicode__.memsync = [
+		self._replace_letter_in_null_terminated_string_unicode.memsync = [
 			{
 				'p': [0],
 				'n': True,
@@ -216,91 +281,89 @@ class sample_class_unicode_b:
 				}
 			]
 
-
 	def replace_letter_in_null_terminated_string_unicode(self, in_string, old_letter, new_letter):
 
 		BUFFER_LENGTH = 128
 
-		string_buffer = ctypes.create_unicode_buffer(BUFFER_LENGTH)
+		string_buffer = self._c.create_unicode_buffer(BUFFER_LENGTH)
 		string_buffer.value = in_string
 
-		self.__replace_letter_in_null_terminated_string_unicode__(
+		self._replace_letter_in_null_terminated_string_unicode(
 			string_buffer,
 			old_letter,
 			new_letter
 			)
 
 		return string_buffer.value
-
 
 	def replace_letter_in_null_terminated_string_buff_unicode(self, in_string, old_letter, new_letter):
 
-		string_buffer = ctypes.create_unicode_buffer(in_string)
+		string_buffer = self._c.create_unicode_buffer(in_string)
 
-		self.__replace_letter_in_null_terminated_string_unicode__(
+		self._replace_letter_in_null_terminated_string_unicode(
 			string_buffer,
 			old_letter,
 			new_letter
 			)
 
 		return string_buffer.value
-
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # TEST(s)
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-def test_replace_letter_in_null_terminated_string_a():
+@pytest.mark.parametrize('arch,conv,ctypes,dll_handle', get_context(__file__))
+def test_replace_letter_in_null_terminated_string_a(arch, conv, ctypes, dll_handle):
 
-	sample = sample_class_a()
-
-	assert 'zetegehube' == sample.replace_letter_in_null_terminated_string('zategahuba', 'a', 'e')
-
-
-def test_replace_letter_in_null_terminated_string_buff_a():
-
-	sample = sample_class_a()
-
-	assert 'zetegehube' == sample.replace_letter_in_null_terminated_string_buff('zategahuba', 'a', 'e')
-
-
-def test_replace_letter_in_null_terminated_string_b():
-
-	sample = sample_class_b()
+	sample = sample_class_a(ctypes, dll_handle)
 
 	assert 'zetegehube' == sample.replace_letter_in_null_terminated_string('zategahuba', 'a', 'e')
 
+@pytest.mark.parametrize('arch,conv,ctypes,dll_handle', get_context(__file__))
+def test_replace_letter_in_null_terminated_string_buff_a(arch, conv, ctypes, dll_handle):
 
-def test_replace_letter_in_null_terminated_string_buff_b():
-
-	sample = sample_class_b()
+	sample = sample_class_a(ctypes, dll_handle)
 
 	assert 'zetegehube' == sample.replace_letter_in_null_terminated_string_buff('zategahuba', 'a', 'e')
 
+@pytest.mark.parametrize('arch,conv,ctypes,dll_handle', get_context(__file__))
+def test_replace_letter_in_null_terminated_string_b(arch, conv, ctypes, dll_handle):
 
-def test_replace_letter_in_null_terminated_string_unicode_a():
+	sample = sample_class_b(ctypes, dll_handle)
 
-	sample = sample_class_unicode_a()
+	assert 'zetegehube' == sample.replace_letter_in_null_terminated_string('zategahuba', 'a', 'e')
+
+@pytest.mark.parametrize('arch,conv,ctypes,dll_handle', get_context(__file__))
+def test_replace_letter_in_null_terminated_string_buff_b(arch, conv, ctypes, dll_handle):
+
+	sample = sample_class_b(ctypes, dll_handle)
+
+	assert 'zetegehube' == sample.replace_letter_in_null_terminated_string_buff('zategahuba', 'a', 'e')
+
+@pytest.mark.parametrize('arch,conv,ctypes,dll_handle', get_context(__file__))
+def test_replace_letter_in_null_terminated_string_unicode_a(arch, conv, ctypes, dll_handle):
+
+	sample = sample_class_unicode_a(ctypes, dll_handle)
 
 	assert 'zetegehube' == sample.replace_letter_in_null_terminated_string_unicode('zategahuba', 'a', 'e')
 
+@pytest.mark.parametrize('arch,conv,ctypes,dll_handle', get_context(__file__))
+def test_replace_letter_in_null_terminated_string_buff_unicode_a(arch, conv, ctypes, dll_handle):
 
-def test_replace_letter_in_null_terminated_string_buff_unicode_a():
-
-	sample = sample_class_unicode_a()
+	sample = sample_class_unicode_a(ctypes, dll_handle)
 
 	assert 'zetegehube' == sample.replace_letter_in_null_terminated_string_buff_unicode('zategahuba', 'a', 'e')
 
+@pytest.mark.parametrize('arch,conv,ctypes,dll_handle', get_context(__file__))
+def test_replace_letter_in_null_terminated_string_unicode_b(arch, conv, ctypes, dll_handle):
 
-def test_replace_letter_in_null_terminated_string_unicode_b():
-
-	sample = sample_class_unicode_b()
+	sample = sample_class_unicode_b(ctypes, dll_handle)
 
 	assert 'zetegehube' == sample.replace_letter_in_null_terminated_string_unicode('zategahuba', 'a', 'e')
 
+@pytest.mark.parametrize('arch,conv,ctypes,dll_handle', get_context(__file__))
+def test_replace_letter_in_null_terminated_string_buff_unicode_b(arch, conv, ctypes, dll_handle):
 
-def test_replace_letter_in_null_terminated_string_buff_unicode_b():
-
-	sample = sample_class_unicode_b()
+	sample = sample_class_unicode_b(ctypes, dll_handle)
 
 	assert 'zetegehube' == sample.replace_letter_in_null_terminated_string_buff_unicode('zategahuba', 'a', 'e')

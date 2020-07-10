@@ -6,11 +6,11 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	tests/test_devide.py: Tests by reference argument passing (int pointer)
+	tests/lib/param.py: Providing test parameters and helpers
 
 	Required to run on platform / side: [UNIX, WINE]
 
-	Copyright (C) 2017-2019 Sebastian M. Ernst <ernst@pleiszenburg.de>
+	Copyright (C) 2017-2020 Sebastian M. Ernst <ernst@pleiszenburg.de>
 
 <LICENSE_BLOCK>
 The contents of this file are subject to the GNU Lesser General Public License
@@ -26,50 +26,33 @@ specific language governing rights and limitations under the License.
 
 """
 
-
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# IMPORT
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-# import pytest
-
-from sys import platform
-if any([platform.startswith(os_name) for os_name in ['linux', 'darwin', 'freebsd']]):
-	import zugbruecke.ctypes as ctypes
-elif platform.startswith('win'):
-	import ctypes
-
-
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# CLASSES AND ROUTINES
+# CONST / CONFIG
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-class sample_class:
-
-
-	def __init__(self):
-
-		self.__dll__ = ctypes.windll.LoadLibrary('tests/demo_dll.dll')
-
-		# int divide(int, int, int *)
-		self.__divide__ = self.__dll__.cookbook_divide
-		self.__divide__.argtypes = (ctypes.c_int, ctypes.c_int, ctypes.POINTER(ctypes.c_int))
-		self.__divide__.restype = ctypes.c_int
-
-
-	def divide(self, x, y):
-
-		rem = ctypes.c_int()
-		quot = self.__divide__(x, y, rem)
-		return quot, rem.value
-
+MAX_EXAMPLES = 300
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# TEST(s)
+# ROUTINES
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-def test_devide():
+def get_int_limits(bits, sign = True):
+	assert isinstance(bits, int)
+	assert bits in (8, 16, 32, 64)
+	assert isinstance(sign, bool)
+	if sign:
+		return {'min_value': -1 * 2 ** (bits - 1), 'max_value': 2 ** (bits - 1) - 1}
+	else:
+		return {'min_value': 0, 'max_value': 2 ** bits - 1}
 
-	sample = sample_class()
-
-	assert (5, 2) == sample.divide(42, 8)
+def force_int_overflow(value, bits, sign):
+	assert isinstance(value, int)
+	assert isinstance(bits, int)
+	assert bits in (8, 16, 32, 64)
+	assert isinstance(sign, bool)
+	int_limits = get_int_limits(bits, sign)
+	while value > int_limits['max_value']:
+		value -= 2 ** bits
+	while value < int_limits['min_value']:
+		value += 2 ** bits
+	return value

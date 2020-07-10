@@ -42,7 +42,7 @@
 Synopsis
 ========
 
-**zugbruecke** is an EXPERIMENTAL **Python module** (currently in development **status 3/alpha**).
+**zugbruecke** is an EXPERIMENTAL **Python package** (currently in development **status 3/alpha**).
 It allows to **call routines in Windows DLLs from Python code running on
 Unices / Unix-like systems** such as Linux, MacOS or BSD.
 zugbruecke is designed as a **drop-in replacement for Python's standard library's ctypes module**.

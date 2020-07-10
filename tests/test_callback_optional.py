@@ -10,7 +10,7 @@ https://github.com/pleiszenburg/zugbruecke
 
 	Required to run on platform / side: [UNIX, WINE]
 
-	Copyright (C) 2017-2019 Sebastian M. Ernst <ernst@pleiszenburg.de>
+	Copyright (C) 2017-2020 Sebastian M. Ernst <ernst@pleiszenburg.de>
 
 <LICENSE_BLOCK>
 The contents of this file are subject to the GNU Lesser General Public License
@@ -26,19 +26,61 @@ specific language governing rights and limitations under the License.
 
 """
 
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# C
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+HEADER = """
+typedef int16_t {{ SUFFIX }} (*conveyor_belt)(int16_t index);
+
+{{ PREFIX }} int16_t {{ SUFFIX }} use_optional_callback_a(
+	int16_t in_data,
+	conveyor_belt process_data
+	);
+
+{{ PREFIX }} int16_t {{ SUFFIX }} use_optional_callback_b(
+	int16_t in_data,
+	conveyor_belt process_data
+	);
+"""
+
+SOURCE = """
+{{ PREFIX }} int16_t {{ SUFFIX }} use_optional_callback_a(
+	int16_t in_data,
+	conveyor_belt process_data
+	)
+{
+	int16_t tmp;
+	if(process_data) {
+		tmp = process_data(in_data);
+	} else {
+		tmp = in_data;
+	}
+	return tmp * 2;
+}
+
+{{ PREFIX }} int16_t {{ SUFFIX }} use_optional_callback_b(
+	int16_t in_data,
+	conveyor_belt process_data
+	)
+{
+	int16_t tmp;
+	if(process_data) {
+		tmp = process_data(in_data);
+	} else {
+		tmp = in_data;
+	}
+	return tmp * 2;
+}
+"""
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-# import pytest
+from .lib.ctypes import get_context
 
-from sys import platform
-if any([platform.startswith(os_name) for os_name in ['linux', 'darwin', 'freebsd']]):
-	import zugbruecke.ctypes as ctypes
-elif platform.startswith('win'):
-	import ctypes
-
+import pytest
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # CLASSES AND ROUTINES
@@ -46,16 +88,19 @@ elif platform.startswith('win'):
 
 class sample_class_a:
 
+	def __init__(self, conv, ctypes, dll_handle):
 
-	def __init__(self):
+		if conv == 'cdll':
+			func_type = ctypes.CFUNCTYPE
+		elif conv == 'windll':
+			func_type = ctypes.WINFUNCTYPE
+		else:
+			raise ValueError('unknown calling convention', conv)
+		conveyor_belt = func_type(ctypes.c_int16, ctypes.c_int16)
 
-		self.__dll__ = ctypes.windll.LoadLibrary('tests/demo_dll.dll')
-
-		conveyor_belt = ctypes.WINFUNCTYPE(ctypes.c_int16, ctypes.c_int16)
-
-		self.__use_optional_callback__ = self.__dll__.use_optional_callback_a
-		self.__use_optional_callback__.argtypes = (ctypes.c_int16, conveyor_belt)
-		self.__use_optional_callback__.restype = ctypes.c_int16
+		self._use_optional_callback = dll_handle.use_optional_callback_a
+		self._use_optional_callback.argtypes = (ctypes.c_int16, conveyor_belt)
+		self._use_optional_callback.restype = ctypes.c_int16
 
 		@conveyor_belt
 		def process_data(in_data):
@@ -63,42 +108,29 @@ class sample_class_a:
 
 		self.__process_data__ = process_data
 
-
 	def use_optional_callback(self, some_data):
-
-		return self.__use_optional_callback__(some_data, self.__process_data__)
-
+		return self._use_optional_callback(some_data, self.__process_data__)
 
 class sample_class_b:
 
-
-	def __init__(self):
-
-		self.__dll__ = ctypes.windll.LoadLibrary('tests/demo_dll.dll')
-
-		self.__use_optional_callback__ = self.__dll__.use_optional_callback_b
-		self.__use_optional_callback__.argtypes = (ctypes.c_int16, ctypes.c_void_p)
-		self.__use_optional_callback__.restype = ctypes.c_int16
-
+	def __init__(self, ctypes, dll_handle):
+		self._use_optional_callback = dll_handle.use_optional_callback_b
+		self._use_optional_callback.argtypes = (ctypes.c_int16, ctypes.c_void_p)
+		self._use_optional_callback.restype = ctypes.c_int16
 
 	def do_not_use_optional_callback(self, some_data):
-
-		return self.__use_optional_callback__(some_data, None)
-
+		return self._use_optional_callback(some_data, None)
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # TEST(s)
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-def test_use_optional_callback():
-
-	sample = sample_class_a()
-
+@pytest.mark.parametrize('arch,conv,ctypes,dll_handle', get_context(__file__))
+def test_use_optional_callback(arch, conv, ctypes, dll_handle):
+	sample = sample_class_a(conv, ctypes, dll_handle)
 	assert 18 == sample.use_optional_callback(3)
 
-
-def test_do_not_use_optional_callback():
-
-	sample = sample_class_b()
-
+@pytest.mark.parametrize('arch,conv,ctypes,dll_handle', get_context(__file__))
+def test_do_not_use_optional_callback(arch, conv, ctypes, dll_handle):
+	sample = sample_class_b(ctypes, dll_handle)
 	assert 14 == sample.do_not_use_optional_callback(7)

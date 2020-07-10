@@ -10,7 +10,7 @@ https://github.com/pleiszenburg/zugbruecke
 
 	Required to run on platform / side: [UNIX, WINE]
 
-	Copyright (C) 2017-2019 Sebastian M. Ernst <ernst@pleiszenburg.de>
+	Copyright (C) 2017-2020 Sebastian M. Ernst <ernst@pleiszenburg.de>
 
 <LICENSE_BLOCK>
 The contents of this file are subject to the GNU Lesser General Public License
@@ -26,19 +26,42 @@ specific language governing rights and limitations under the License.
 
 """
 
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# C
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+HEADER = """
+{{ PREFIX }} void {{ SUFFIX }} square_int_array(
+	int16_t *in_array,
+	void *out_array,
+	int16_t len
+	);
+"""
+
+SOURCE = """
+{{ PREFIX }} void {{ SUFFIX }} square_int_array(
+	int16_t *in_array,
+	void *out_array,
+	int16_t len
+	)
+{
+	int i;
+	int16_t **out_array_p = out_array;
+	*out_array_p = malloc(sizeof(int16_t) * len);
+	for(i = 0; i < len; i++)
+	{
+		(*out_array_p)[i] = in_array[i] * in_array[i];
+	}
+}
+"""
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+from .lib.ctypes import get_context
+
 import pytest
-
-from sys import platform
-if any([platform.startswith(os_name) for os_name in ['linux', 'darwin', 'freebsd']]):
-	import zugbruecke.ctypes as ctypes
-elif platform.startswith('win'):
-	import ctypes
-
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # CLASSES AND ROUTINES
@@ -46,18 +69,16 @@ elif platform.startswith('win'):
 
 class sample_class:
 
+	def __init__(self, ctypes, dll_handle):
 
-	def __init__(self):
-
-		self.__dll__ = ctypes.windll.LoadLibrary('tests/demo_dll.dll')
-
-		self.__square_int_array__ = self.__dll__.square_int_array
-		self.__square_int_array__.argtypes = (
-			ctypes.POINTER(ctypes.c_int16),
-			ctypes.c_void_p,
-			ctypes.c_int16
+		self._c = ctypes
+		self._square_int_array = dll_handle.square_int_array
+		self._square_int_array.argtypes = (
+			self._c.POINTER(self._c.c_int16),
+			self._c.c_void_p,
+			self._c.c_int16
 			)
-		self.__square_int_array__.memsync = [
+		self._square_int_array.memsync = [
 			{
 				'p': [0],
 				'l': [2],
@@ -70,33 +91,32 @@ class sample_class:
 				}
 			]
 
-
 	def square_int_array(self, in_array):
 
-		in_array_p = ctypes.cast(
-			ctypes.pointer((ctypes.c_int16 * len(in_array))(*in_array)),
-			ctypes.POINTER(ctypes.c_int16)
+		in_array_p = self._c.cast(
+			self._c.pointer((self._c.c_int16 * len(in_array))(*in_array)),
+			self._c.POINTER(self._c.c_int16)
 			)
-		out_array_p = ctypes.pointer(ctypes.c_void_p())
+		out_array_p = self._c.pointer(self._c.c_void_p())
 
-		self.__square_int_array__(
+		self._square_int_array(
 			in_array_p,
 			out_array_p,
-			ctypes.c_int16(len(in_array))
+			self._c.c_int16(len(in_array))
 			)
 
-		return ctypes.cast(
+		return self._c.cast(
 			out_array_p.contents,
-			ctypes.POINTER(ctypes.c_int16 * len(in_array))
+			self._c.POINTER(self._c.c_int16 * len(in_array))
 			).contents[:]
-
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # TEST(s)
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-def test_square_int_array():
+@pytest.mark.parametrize('arch,conv,ctypes,dll_handle', get_context(__file__))
+def test_square_int_array(arch, conv, ctypes, dll_handle):
 
-	sample = sample_class()
+	sample = sample_class(ctypes, dll_handle)
 
 	assert [4, 16, 9, 25] == sample.square_int_array([2, 4, 3, 5])

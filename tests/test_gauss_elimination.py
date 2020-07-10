@@ -10,7 +10,7 @@ https://github.com/pleiszenburg/zugbruecke
 
 	Required to run on platform / side: [UNIX, WINE]
 
-	Copyright (C) 2017-2019 Sebastian M. Ernst <ernst@pleiszenburg.de>
+	Copyright (C) 2017-2020 Sebastian M. Ernst <ernst@pleiszenburg.de>
 
 <LICENSE_BLOCK>
 The contents of this file are subject to the GNU Lesser General Public License
@@ -26,19 +26,61 @@ specific language governing rights and limitations under the License.
 
 """
 
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# C
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+HEADER = """
+{{ PREFIX }} void {{ SUFFIX }} gauss_elimination(
+	float (*A)[3][4],
+	float (*x)[3]
+	);
+"""
+
+SOURCE = """
+{{ PREFIX }} void {{ SUFFIX }} gauss_elimination(
+	float (*A)[3][4],
+	float (*x)[3]
+	)
+{
+
+	int i, j, k, n = 3;
+	float c, sum = 0.0;
+
+	for(j = 0; j < n; j++)
+	{
+		for(i = j + 1; i < n; i++)
+		{
+			c = (*A)[i][j] / (*A)[j][j];
+			for(k = 0; k <= n; k++)
+			{
+				(*A)[i][k] = (*A)[i][k] - c * (*A)[j][k];
+			}
+		}
+	}
+
+	(*x)[n - 1] = (*A)[n - 1][n] / (*A)[n - 1][n - 1];
+
+	for(i = n - 2; i >= 0; i--)
+	{
+		sum = 0;
+		for(j = i + 1; j < n; j++)
+		{
+			sum = sum + (*A)[i][j] * (*x)[j];
+		}
+		(*x)[i] = ((*A)[i][n] - sum) / (*A)[i][i];
+	}
+
+}
+"""
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-# import pytest
+from .lib.ctypes import get_context
 
-from sys import platform
-if any([platform.startswith(os_name) for os_name in ['linux', 'darwin', 'freebsd']]):
-	import zugbruecke.ctypes as ctypes
-elif platform.startswith('win'):
-	import ctypes
-
+import pytest
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # CLASSES AND ROUTINES
@@ -46,18 +88,14 @@ elif platform.startswith('win'):
 
 class sample_class:
 
+	def __init__(self, ctypes, dll_handle):
 
-	def __init__(self):
-
-		self.__dll__ = ctypes.windll.LoadLibrary('tests/demo_dll.dll')
-
-		# void gauss_elimination(float [3][4] *)
-		self.__gauss_elimination__ = self.__dll__.gauss_elimination
-		self.__gauss_elimination__.argtypes = (
-			ctypes.POINTER(ctypes.c_float * 4 * 3),
-			ctypes.POINTER(ctypes.c_float * 3)
+		self._c = ctypes
+		self._gauss_elimination = dll_handle.gauss_elimination
+		self._gauss_elimination.argtypes = (
+			self._c.POINTER(self._c.c_float * 4 * 3),
+			self._c.POINTER(self._c.c_float * 3)
 			)
-
 
 	def gauss_elimination(self, A):
 
@@ -66,23 +104,23 @@ class sample_class:
 			raise # TODO
 
 		x = [0 for eq in range(N)]
-		_A = (ctypes.c_float * (N + 1) * N)(*(tuple(eq) for eq in A))
-		_x = (ctypes.c_float * N)(*tuple(x))
-		self.__gauss_elimination__(ctypes.pointer(_A), ctypes.pointer(_x))
+		_A = (self._c.c_float * (N + 1) * N)(*(tuple(eq) for eq in A))
+		_x = (self._c.c_float * N)(*tuple(x))
+		self._gauss_elimination(self._c.pointer(_A), self._c.pointer(_x))
 		for index, eq in enumerate(A):
 			eq[:] = _A[index][:]
 		x[:] = _x[:]
 
 		return x
 
-
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # TEST(s)
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-def test_gauss_elimination():
+@pytest.mark.parametrize('arch,conv,ctypes,dll_handle', get_context(__file__))
+def test_gauss_elimination(arch, conv, ctypes, dll_handle):
 
-	sample = sample_class()
+	sample = sample_class(ctypes, dll_handle)
 
 	eq_sys = [
 		[1, 2, 3, 2],
@@ -92,5 +130,10 @@ def test_gauss_elimination():
 	eq_sys_solution = sample.gauss_elimination(eq_sys)
 
 	assert (
-		[5.0, -6.0, 3.0], [[1.0, 2.0, 3.0, 2.0], [0.0, -1.0, -2.0, 0.0], [0.0, 0.0, -2.0, -6.0]]
+		[5.0, -6.0, 3.0],
+		[
+			[1.0,  2.0,  3.0,  2.0],
+			[0.0, -1.0, -2.0,  0.0],
+			[0.0,  0.0, -2.0, -6.0]
+			]
 		) == (eq_sys_solution, eq_sys)

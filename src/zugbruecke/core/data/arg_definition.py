@@ -10,7 +10,7 @@ https://github.com/pleiszenburg/zugbruecke
 
 	Required to run on platform / side: [UNIX, WINE]
 
-	Copyright (C) 2017-2019 Sebastian M. Ernst <ernst@pleiszenburg.de>
+	Copyright (C) 2017-2020 Sebastian M. Ernst <ernst@pleiszenburg.de>
 
 <LICENSE_BLOCK>
 The contents of this file are subject to the GNU Lesser General Public License
@@ -226,9 +226,12 @@ class arguments_definition_class():
 		# Structs
 		elif group_name == 'PyCStructType':
 
+			# HACK Different struct types from different name spaces can have identical names
+			_type_name = type_name + '@' + str(id(datatype))
+
 			# Keep track of datatype on client side
-			if type_name not in self.cache_dict['struct_type'].keys():
-				self.cache_dict['struct_type'][type_name] = datatype
+			if _type_name not in self.cache_dict['struct_type'].keys():
+				self.cache_dict['struct_type'][_type_name] = datatype
 
 			# TODO: For speed, cache packed struct definitions for known structs
 
@@ -238,7 +241,7 @@ class arguments_definition_class():
 				'd': flag_array_depth,
 				'p': flag_pointer,
 				'n': field_name, # kw
-				't': type_name, # Type name, such as 'c_int'
+				't': _type_name, # Type name, such as 'c_int'
 				'g': GROUP_STRUCT,
 				'_fields_': [
 					self.__pack_definition_dict__(field[1], field[0]) for field in datatype._fields_

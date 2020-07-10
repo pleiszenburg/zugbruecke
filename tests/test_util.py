@@ -10,7 +10,7 @@ https://github.com/pleiszenburg/zugbruecke
 
 	Required to run on platform / side: [UNIX, WINE]
 
-	Copyright (C) 2017-2019 Sebastian M. Ernst <ernst@pleiszenburg.de>
+	Copyright (C) 2017-2020 Sebastian M. Ernst <ernst@pleiszenburg.de>
 
 <LICENSE_BLOCK>
 The contents of this file are subject to the GNU Lesser General Public License
@@ -31,24 +31,20 @@ specific language governing rights and limitations under the License.
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+from .lib.ctypes import get_context
+
 import pytest
-
-from sys import platform
-if any([platform.startswith(os_name) for os_name in ['linux', 'darwin', 'freebsd']]):
-	import zugbruecke.ctypes.util as util
-elif platform.startswith('win'):
-	import ctypes.util as util
-
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # TEST(s)
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-def test_find_library():
+@pytest.mark.parametrize('arch,conv,ctypes,dll_path', get_context(__file__, handle = False))
+def test_find_library(arch, conv, ctypes, dll_path):
 
-	assert util.find_library('kernel32') == 'C:\\windows\\system32\\kernel32.dll'
+	assert ctypes._util.find_library('kernel32') == 'C:\\windows\\system32\\kernel32.dll'
 
+@pytest.mark.parametrize('arch,conv,ctypes,dll_path', get_context(__file__, handle = False))
+def test_find_msvcrt(arch, conv, ctypes, dll_path):
 
-def test_find_msvcrt():
-
-	assert util.find_msvcrt() == None
+	assert ctypes._util.find_msvcrt() == None

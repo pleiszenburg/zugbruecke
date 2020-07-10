@@ -10,7 +10,7 @@ https://github.com/pleiszenburg/zugbruecke
 
 	Required to run on platform / side: [UNIX, WINE]
 
-	Copyright (C) 2017-2019 Sebastian M. Ernst <ernst@pleiszenburg.de>
+	Copyright (C) 2017-2020 Sebastian M. Ernst <ernst@pleiszenburg.de>
 
 <LICENSE_BLOCK>
 The contents of this file are subject to the GNU Lesser General Public License
@@ -26,51 +26,69 @@ specific language governing rights and limitations under the License.
 
 """
 
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# C
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+HEADER = """
+{{ PREFIX }} int16_t {{ SUFFIX }} get_const_int_a(void);
+
+{{ PREFIX }} int16_t {{ SUFFIX }} get_const_int_b(void);
+
+{{ PREFIX }} int16_t {{ SUFFIX }} get_const_int_c(void);
+"""
+
+SOURCE = """
+{{ PREFIX }} int16_t {{ SUFFIX }} get_const_int_a(void)
+{
+	return (int16_t)sqrt(49);
+}
+
+{{ PREFIX }} int16_t {{ SUFFIX }} get_const_int_b(void)
+{
+	return (int16_t)sqrt(36);
+}
+
+{{ PREFIX }} int16_t {{ SUFFIX }} get_const_int_c(void)
+{
+	return (int16_t)sqrt(25);
+}
+"""
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+from .lib.ctypes import get_context
+
 import pytest
-
-from sys import platform
-if any([platform.startswith(os_name) for os_name in ['linux', 'darwin', 'freebsd']]):
-	import zugbruecke.ctypes as ctypes
-elif platform.startswith('win'):
-	import ctypes
-
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # TEST(s)
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-def test_sqrt_int():
+@pytest.mark.parametrize('arch,conv,ctypes,dll_handle', get_context(__file__))
+def test_sqrt_int(arch, conv, ctypes, dll_handle):
 
-		dll = ctypes.windll.LoadLibrary('tests/demo_dll.dll')
-
-		get_const_int = dll.get_const_int
+		get_const_int = dll_handle.get_const_int_a
 		get_const_int.restype = ctypes.c_int16
 
 		assert 7 == get_const_int()
 
+@pytest.mark.parametrize('arch,conv,ctypes,dll_handle', get_context(__file__))
+def test_sqrt_int_with_tuple(arch, conv, ctypes, dll_handle):
 
-def test_sqrt_int_with_tuple():
-
-		dll = ctypes.windll.LoadLibrary('tests/demo_dll.dll')
-
-		get_const_int = dll.get_const_int
+		get_const_int = dll_handle.get_const_int_b
 		get_const_int.argtypes = tuple()
 		get_const_int.restype = ctypes.c_int16
 
-		assert 7 == get_const_int()
+		assert 6 == get_const_int()
 
+@pytest.mark.parametrize('arch,conv,ctypes,dll_handle', get_context(__file__))
+def test_sqrt_int_with_list(arch, conv, ctypes, dll_handle):
 
-def test_sqrt_int_with_list():
-
-		dll = ctypes.windll.LoadLibrary('tests/demo_dll.dll')
-
-		get_const_int = dll.get_const_int
+		get_const_int = dll_handle.get_const_int_c
 		get_const_int.argtypes = []
 		get_const_int.restype = ctypes.c_int16
 
-		assert 7 == get_const_int()
+		assert 5 == get_const_int()

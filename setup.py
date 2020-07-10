@@ -10,7 +10,7 @@ https://github.com/pleiszenburg/zugbruecke
 
 	Required to run on platform / side: [UNIX]
 
-	Copyright (C) 2017-2019 Sebastian M. Ernst <ernst@pleiszenburg.de>
+	Copyright (C) 2017-2020 Sebastian M. Ernst <ernst@pleiszenburg.de>
 
 <LICENSE_BLOCK>
 The contents of this file are subject to the GNU Lesser General Public License
@@ -36,7 +36,7 @@ from setuptools import (
 	setup
 	)
 import os
-from sys import platform
+from sys import platform, version_info
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -44,14 +44,15 @@ from sys import platform
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
-# Bump version HERE!
 _version_ = '0.1.0'
 
 
 # List all versions of Python which are supported
+python_minor_min = 4
+python_minor_max = 8
 confirmed_python_versions = [
-	('Programming Language :: Python :: %s' % x)
-	for x in '3.4 3.5 3.6 3.7 3.8'.split()
+	'Programming Language :: Python :: 3.{MINOR:d}'.format(MINOR = minor)
+	for x in range(python_minor_min, python_minor_max + 1)
 	]
 
 
@@ -60,9 +61,21 @@ with open(os.path.join(os.path.dirname(__file__), 'README.rst')) as f:
 	long_description = f.read()
 
 
+# Fetch test requirements
+with open(os.path.join(os.path.dirname(__file__), 'requirements_test.txt')) as f:
+	requirements_test = [rq.strip() for rq in f.read().split('\n') if len(rq.strip()) > 0]
+
+
 # Just in case someone is actually running this on Windows ...
 if platform.startswith('win'):
 	raise SystemExit('You are already running Windows. No need for this package!')
+
+
+# Python 3.4 dependency / CI fix
+pls = 'python-language-server'
+assert version_info.major == 3
+if version_info.minor <= 4:
+	pls += '<0.32.0'
 
 
 setup(
@@ -80,13 +93,12 @@ setup(
 	keywords = ['ctypes', 'wine'],
 	scripts = [],
 	include_package_data = True,
+	python_requires = '>=3.{MINOR:d}'.format(MINOR = python_minor_min),
 	install_requires = [],
 	extras_require = {
-		'dev': [
-			'pytest',
-			'coverage',
-			'pytest-cov',
-			'python-language-server',
+		'dev': requirements_test + [
+			'Jinja2',
+			pls,
 			'setuptools',
 			'Sphinx',
 			'sphinx_rtd_theme',
@@ -122,4 +134,4 @@ setup(
 		'Topic :: System :: Operating System Kernels',
 		'Topic :: Utilities'
 		]
-)
+	)

@@ -10,7 +10,7 @@ https://github.com/pleiszenburg/zugbruecke
 
 	Required to run on platform / side: [UNIX, WINE]
 
-	Copyright (C) 2017-2019 Sebastian M. Ernst <ernst@pleiszenburg.de>
+	Copyright (C) 2017-2020 Sebastian M. Ernst <ernst@pleiszenburg.de>
 
 <LICENSE_BLOCK>
 The contents of this file are subject to the GNU Lesser General Public License
@@ -26,19 +26,46 @@ specific language governing rights and limitations under the License.
 
 """
 
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# C
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+HEADER = """
+{{ PREFIX }} int {{ SUFFIX }} in_mandel(
+	double x0,
+	double y0,
+	int n
+	);
+"""
+
+SOURCE = """
+/* Test if (x0,y0) is in the Mandelbrot set or not */
+{{ PREFIX }} int {{ SUFFIX }} in_mandel(
+	double x0,
+	double y0,
+	int n
+	)
+{
+	double x = 0, y = 0, xtemp;
+	while (n > 0)
+	{
+		xtemp = x * x - y * y + x0;
+		y = 2 * x * y + y0;
+		x = xtemp;
+		n -= 1;
+		if (x * x + y * y > 4) return 0;
+	}
+	return 1;
+}
+"""
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-# import pytest
+from .lib.ctypes import get_context
 
-from sys import platform
-if any([platform.startswith(os_name) for os_name in ['linux', 'darwin', 'freebsd']]):
-	import zugbruecke.ctypes as ctypes
-elif platform.startswith('win'):
-	import ctypes
-
+import pytest
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # CLASSES AND ROUTINES
@@ -46,30 +73,26 @@ elif platform.startswith('win'):
 
 class sample_class:
 
+	def __init__(self, ctypes, dll_handle):
 
-	def __init__(self):
-
-		self.__dll__ = ctypes.windll.LoadLibrary('tests/demo_dll.dll')
-
-		# int in_mandel(double, double, int)
-		self.in_mandel = self.__dll__.cookbook_in_mandel
+		self.in_mandel = dll_handle.in_mandel
 		self.in_mandel.argtypes = (ctypes.c_double, ctypes.c_double, ctypes.c_int)
-		self.in_mandel.restype = ctypes.c_int
-
+		self.in_mandel.restype = ctypes.c_int # TODO: sizeof(int) win32 vs win64 vs unix
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # TEST(s)
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-def test_in_mantel_inside():
+@pytest.mark.parametrize('arch,conv,ctypes,dll_handle', get_context(__file__))
+def test_in_mantel_inside(arch, conv, ctypes, dll_handle):
 
-	sample = sample_class()
+	sample = sample_class(ctypes, dll_handle)
 
 	assert 1 == sample.in_mandel(0.0, 0.0, 500)
 
+@pytest.mark.parametrize('arch,conv,ctypes,dll_handle', get_context(__file__))
+def test_in_mantel_outside(arch, conv, ctypes, dll_handle):
 
-def test_in_mantel_outside():
-
-	sample = sample_class()
+	sample = sample_class(ctypes, dll_handle)
 
 	assert 0 == sample.in_mandel(2.0, 1.0, 500)

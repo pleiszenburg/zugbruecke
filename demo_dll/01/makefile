@@ -2,11 +2,11 @@
 # Calling routines in Windows DLLs from Python scripts running on unixlike systems
 # https://github.com/pleiszenburg/zugbruecke
 #
-#	demo_dll/makefile: GNU makefile for building demo DLL with mingw
+#	demo_dll/01/makefile: GNU makefile for building demo DLL with mingw
 #
 #	Required to run on platform / side: [UNIX]
 #
-# 	Copyright (C) 2017-2019 Sebastian M. Ernst <ernst@pleiszenburg.de>
+# 	Copyright (C) 2017-2020 Sebastian M. Ernst <ernst@pleiszenburg.de>
 #
 # <LICENSE_BLOCK>
 # The contents of this file are subject to the GNU Lesser General Public License
@@ -34,11 +34,11 @@ all: $(DEMODLL)
 $(DEMODLL): $(DEMODLL_C)
 	$(CC) $(DEMODLL_C) $(CFLAGS) -o $(DEMODLL).dll $(LDFLAGS) $(DEMODLL_LDFLAGS)
 
-install:
-	ln -s ../$(DEMODLL)/$(DEMODLL).dll ../examples/$(DEMODLL).dll
-	ln -s ../$(DEMODLL)/$(DEMODLL).dll ../tests/$(DEMODLL).dll
+# install:
+# 	ln -s ../$(DEMODLL)/$(DEMODLL).dll ../examples/$(DEMODLL).dll
+# 	ln -s ../$(DEMODLL)/$(DEMODLL).dll ../tests_old/$(DEMODLL).dll
 
 clean:
 	-rm $(DEMODLL).dll
-	-rm ../examples/$(DEMODLL).dll
-	-rm ../tests/$(DEMODLL).dll
+	# -rm ../examples/$(DEMODLL).dll
+	# -rm ../tests_old/$(DEMODLL).dll

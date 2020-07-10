@@ -10,7 +10,7 @@ https://github.com/pleiszenburg/zugbruecke
 
 	Required to run on platform / side: [UNIX, WINE]
 
-	Copyright (C) 2017-2019 Sebastian M. Ernst <ernst@pleiszenburg.de>
+	Copyright (C) 2017-2020 Sebastian M. Ernst <ernst@pleiszenburg.de>
 
 <LICENSE_BLOCK>
 The contents of this file are subject to the GNU Lesser General Public License
@@ -26,76 +26,158 @@ specific language governing rights and limitations under the License.
 
 """
 
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# C
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+HEADER = """
+{{ PREFIX }} int16_t {{ SUFFIX }} square_int(
+	int16_t a
+	);
+
+{{ PREFIX }} int16_t {{ SUFFIX }} add_ints(
+	int16_t a,
+	int16_t b
+	);
+
+{{ PREFIX }} int16_t {{ SUFFIX }} mul_ints(
+	int16_t a,
+	int16_t b
+	);
+
+{{ PREFIX }} float {{ SUFFIX }} add_floats(
+	float a,
+	float b
+	);
+
+{{ PREFIX }} int16_t {{ SUFFIX }} subtract_ints(
+	int16_t a,
+	int16_t b
+	);
+
+{{ PREFIX }} int16_t {{ SUFFIX }} pow_ints(
+	int16_t a,
+	int16_t b
+	);
+"""
+
+SOURCE = """
+{{ PREFIX }} int16_t {{ SUFFIX }} square_int(
+	int16_t a
+	)
+{
+	return a * a;
+}
+
+{{ PREFIX }} int16_t {{ SUFFIX }} add_ints(
+	int16_t a,
+	int16_t b
+	)
+{
+	return a + b;
+}
+
+{{ PREFIX }} int16_t {{ SUFFIX }} mul_ints(
+	int16_t a,
+	int16_t b
+	)
+{
+	return a * b;
+}
+
+{{ PREFIX }} float {{ SUFFIX }} add_floats(
+	float a,
+	float b
+	)
+{
+	return a + b;
+}
+
+{{ PREFIX }} int16_t {{ SUFFIX }} subtract_ints(
+	int16_t a,
+	int16_t b
+	)
+{
+	return a - b;
+}
+
+{{ PREFIX }} int16_t {{ SUFFIX }} pow_ints(
+	int16_t a,
+	int16_t b
+	)
+{
+	return pow(a, b);
+}
+"""
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+from .lib.ctypes import get_context
+
 import pytest
-
-from sys import platform
-if any([platform.startswith(os_name) for os_name in ['linux', 'darwin', 'freebsd']]):
-	import zugbruecke.ctypes as ctypes
-elif platform.startswith('win'):
-	import ctypes
-
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # TEST(s)
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-def test_error_callargs_unconfigured_too_many_args():
+@pytest.mark.parametrize('arch,conv,ctypes,dll_handle', get_context(__file__))
+def test_error_callargs_unconfigured_too_many_args(arch, conv, ctypes, dll_handle):
 
-	dll = ctypes.windll.LoadLibrary('tests/demo_dll.dll')
-	square_int = dll.square_int
+	square_int = dll_handle.square_int
 
-	with pytest.raises(ValueError):
-		a = square_int(1, 2, 3)
+	if arch == 'win64' or conv == 'cdll':
+		a = square_int(1, 2, 3) # ctypes will ignore this case
+	else:
+		with pytest.raises(ValueError):
+			a = square_int(1, 2, 3)
 
+@pytest.mark.parametrize('arch,conv,ctypes,dll_handle', get_context(__file__))
+def test_error_callargs_unconfigured_too_few_args(arch, conv, ctypes, dll_handle):
 
-def test_error_callargs_unconfigured_too_few_args():
+	mul_ints = dll_handle.mul_ints
 
-	dll = ctypes.windll.LoadLibrary('tests/demo_dll.dll')
-	mul_ints = dll.mul_ints
+	if arch == 'win64' or conv == 'cdll':
+		a = mul_ints(7) # ctypes will ignore this case
+	else:
+		with pytest.raises(ValueError):
+			a = mul_ints(7)
 
-	with pytest.raises(ValueError):
-		a = mul_ints(7)
+@pytest.mark.parametrize('arch,conv,ctypes,dll_handle', get_context(__file__))
+def test_error_callargs_unconfigured_right_number_of_args(arch, conv, ctypes, dll_handle):
 
-
-def test_error_callargs_unconfigured_right_number_of_args():
-
-	dll = ctypes.windll.LoadLibrary('tests/demo_dll.dll')
-	add_ints = dll.add_ints
+	add_ints = dll_handle.add_ints
 
 	assert 7 == add_ints(3, 4)
 
+@pytest.mark.parametrize('arch,conv,ctypes,dll_handle', get_context(__file__))
+def test_error_callargs_unconfigured_right_number_of_args_nondefault_float(arch, conv, ctypes, dll_handle):
 
-def test_error_callargs_unconfigured_right_number_of_args_nondefault_float():
-
-	dll = ctypes.windll.LoadLibrary('tests/demo_dll.dll')
-	add_floats = dll.add_floats
+	add_floats = dll_handle.add_floats
 
 	with pytest.raises(ctypes.ArgumentError):
 		a = add_floats(1.2, 3.6)
 
+@pytest.mark.parametrize('arch,conv,ctypes,dll_handle', get_context(__file__))
+def test_error_callargs_configured_too_few_args(arch, conv, ctypes, dll_handle):
 
-def test_error_callargs_configured_too_few_args():
-
-	dll = ctypes.windll.LoadLibrary('tests/demo_dll.dll')
-	subtract_ints = dll.subtract_ints
+	subtract_ints = dll_handle.subtract_ints
 	subtract_ints.argtypes = (ctypes.c_int16, ctypes.c_int16)
 	subtract_ints.restype = ctypes.c_int16
 
 	with pytest.raises(TypeError):
 		a = subtract_ints(7)
 
+@pytest.mark.parametrize('arch,conv,ctypes,dll_handle', get_context(__file__))
+def test_error_callargs_configured_too_many_args(arch, conv, ctypes, dll_handle):
 
-def test_error_callargs_configured_too_many_args():
-
-	dll = ctypes.windll.LoadLibrary('tests/demo_dll.dll')
-	pow_ints = dll.pow_ints
+	pow_ints = dll_handle.pow_ints
 	pow_ints.argtypes = (ctypes.c_int16, ctypes.c_int16)
 	pow_ints.restype = ctypes.c_int16
 
-	with pytest.raises(TypeError):
-		a = pow_ints(7, 2, 99)
+	if conv == 'cdll':
+		a = pow_ints(7, 2, 99) # ctypes will ignore this case
+	else:
+		with pytest.raises(TypeError):
+			a = pow_ints(7, 2, 99)

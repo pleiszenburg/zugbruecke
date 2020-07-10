@@ -10,7 +10,7 @@ https://github.com/pleiszenburg/zugbruecke
 
 	Required to run on platform / side: [UNIX, WINE]
 
-	Copyright (C) 2017-2019 Sebastian M. Ernst <ernst@pleiszenburg.de>
+	Copyright (C) 2017-2020 Sebastian M. Ernst <ernst@pleiszenburg.de>
 
 <LICENSE_BLOCK>
 The contents of this file are subject to the GNU Lesser General Public License
@@ -26,29 +26,47 @@ specific language governing rights and limitations under the License.
 
 """
 
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# C
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+HEADER = """
+{{ PREFIX }} int16_t {{ SUFFIX }} sub_ints(
+	int16_t a,
+	int16_t b
+	);
+"""
+
+SOURCE = """
+{{ PREFIX }} int16_t {{ SUFFIX }} sub_ints(
+	int16_t a,
+	int16_t b
+	)
+{
+	return a - b;
+}
+"""
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+from .lib.ctypes import get_context
+
 import pytest
 
 from sys import platform
 if any([platform.startswith(os_name) for os_name in ['linux', 'darwin', 'freebsd']]):
-	import zugbruecke.ctypes as ctypes
 	from zugbruecke.core.errors import data_memsyncsyntax_error
-elif platform.startswith('win'):
-	import ctypes
-
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # TEST(s)
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-def test_memsync_on_routine_not_list():
+@pytest.mark.parametrize('arch,conv,ctypes,dll_handle', get_context(__file__))
+def test_memsync_on_routine_not_list(arch, conv, ctypes, dll_handle):
 
-	dll = ctypes.windll.LoadLibrary('tests/demo_dll.dll')
-	sub_ints = dll.sub_ints
+	sub_ints = dll_handle.sub_ints
 
 	if any([platform.startswith(os_name) for os_name in ['linux', 'darwin', 'freebsd']]):
 		with pytest.raises(data_memsyncsyntax_error, match = 'memsync attribute must be a list'):
@@ -56,10 +74,17 @@ def test_memsync_on_routine_not_list():
 	elif platform.startswith('win'):
 		sub_ints.memsync = {}
 
+@pytest.mark.parametrize('arch,conv,ctypes,dll_handle', get_context(__file__))
+def test_memsync_on_callback_not_list(arch, conv, ctypes, dll_handle):
 
-def test_memsync_on_callback_not_list():
+	if conv == 'cdll':
+		func_type = ctypes.CFUNCTYPE
+	elif conv == 'windll':
+		func_type = ctypes.WINFUNCTYPE
+	else:
+		raise ValueError('unknown calling convention', conv)
 
-	conveyor_belt = ctypes.WINFUNCTYPE(ctypes.c_int16, ctypes.c_int16)
+	conveyor_belt = func_type(ctypes.c_int16, ctypes.c_int16)
 
 	# BUG temporarily disabled - see below
 	# if any([platform.startswith(os_name) for os_name in ['linux', 'darwin', 'freebsd']]):

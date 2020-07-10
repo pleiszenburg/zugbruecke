@@ -10,7 +10,7 @@ https://github.com/pleiszenburg/zugbruecke
 
 	Required to run on platform / side: [UNIX, WINE]
 
-	Copyright (C) 2017-2019 Sebastian M. Ernst <ernst@pleiszenburg.de>
+	Copyright (C) 2017-2020 Sebastian M. Ernst <ernst@pleiszenburg.de>
 
 <LICENSE_BLOCK>
 The contents of this file are subject to the GNU Lesser General Public License
@@ -26,43 +26,52 @@ specific language governing rights and limitations under the License.
 
 """
 
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# C
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+HEADER = """
+{{ PREFIX }} int {{ SUFFIX }} gcd(
+	int x,
+	int y
+	);
+"""
+
+SOURCE = """
+/* Compute the greatest common divisor */
+{{ PREFIX }} int {{ SUFFIX }} gcd(
+	int x,
+	int y
+	)
+{
+	int g = y;
+	while (x > 0)
+	{
+		g = x;
+		x = y % x;
+		y = g;
+	}
+	return g;
+}
+"""
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-# import pytest
+from .lib.ctypes import get_context
 
-from sys import platform
-if any([platform.startswith(os_name) for os_name in ['linux', 'darwin', 'freebsd']]):
-	import zugbruecke.ctypes as ctypes
-elif platform.startswith('win'):
-	import ctypes
-
-
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# CLASSES AND ROUTINES
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-class sample_class:
-
-
-	def __init__(self):
-
-		self.__dll__ = ctypes.windll.LoadLibrary('tests/demo_dll.dll')
-
-		# int gcd(int, int)
-		self.gcd = self.__dll__.cookbook_gcd
-		self.gcd.argtypes = (ctypes.c_int, ctypes.c_int)
-		self.gcd.restype = ctypes.c_int
-
+import pytest
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # TEST(s)
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-def test_gdc():
+@pytest.mark.parametrize('arch,conv,ctypes,dll_handle', get_context(__file__))
+def test_gdc(arch, conv, ctypes, dll_handle):
 
-	sample = sample_class()
+	gcd = dll_handle.gcd
+	gcd.argtypes = (ctypes.c_int, ctypes.c_int) # TODO: sizeof(int) win32 vs win64 vs unix
+	gcd.restype = ctypes.c_int
 
-	assert 7 == sample.gcd(35, 42)
+	assert 7 == gcd(35, 42)

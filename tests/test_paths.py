@@ -10,7 +10,7 @@ https://github.com/pleiszenburg/zugbruecke
 
 	Required to run on platform / side: [UNIX, WINE]
 
-	Copyright (C) 2017-2019 Sebastian M. Ernst <ernst@pleiszenburg.de>
+	Copyright (C) 2017-2020 Sebastian M. Ernst <ernst@pleiszenburg.de>
 
 <LICENSE_BLOCK>
 The contents of this file are subject to the GNU Lesser General Public License
@@ -26,35 +26,31 @@ specific language governing rights and limitations under the License.
 
 """
 
-
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 import pytest
 
-from sys import platform
-if any([platform.startswith(os_name) for os_name in ['linux', 'darwin', 'freebsd']]):
-	import zugbruecke.ctypes as ctypes
-	from zugbruecke.core.errors import wine_error
-	IS_UNIX = True
-elif platform.startswith('win'):
-	IS_UNIX = False
+from .lib.ctypes import get_context, PLATFORM
 
+if PLATFORM == 'unix':
+	from zugbruecke.core.errors import wine_error
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # TEST(s)
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-@pytest.mark.skipif(not IS_UNIX, reason = 'only relevant for unix side')
-def test_path_unix_to_wine_abs():
+@pytest.mark.skipif(PLATFORM != 'unix', reason = 'only relevant for unix side')
+@pytest.mark.parametrize('arch,conv,ctypes,dll_path', get_context(__file__, handle = False))
+def test_path_unix_to_wine_abs(arch, conv, ctypes, dll_path):
 
 	PATH_A = ('/foo/bar', 'Z:\\foo\\bar')
 	assert ctypes._zb_path_unix_to_wine(PATH_A[0]) == PATH_A[1]
 
-
-@pytest.mark.skipif(not IS_UNIX, reason = 'only relevant for unix side')
-def test_path_unix_to_wine_rel():
+@pytest.mark.skipif(PLATFORM != 'unix', reason = 'only relevant for unix side')
+@pytest.mark.parametrize('arch,conv,ctypes,dll_path', get_context(__file__, handle = False))
+def test_path_unix_to_wine_rel(arch, conv, ctypes, dll_path):
 
 	PATH_A = ('foo/bar', 'foo\\bar')
 	path_out = ctypes._zb_path_unix_to_wine(PATH_A[0])
@@ -62,17 +58,17 @@ def test_path_unix_to_wine_rel():
 	assert path_out.endswith(PATH_A[1])
 	assert len(path_out) > len(PATH_A[1]) + len('Z:\\')
 
-
-@pytest.mark.skipif(not IS_UNIX, reason = 'only relevant for unix side')
-def test_path_unix_to_wine_fail1():
+@pytest.mark.skipif(PLATFORM != 'unix', reason = 'only relevant for unix side')
+@pytest.mark.parametrize('arch,conv,ctypes,dll_path', get_context(__file__, handle = False))
+def test_path_unix_to_wine_fail1(arch, conv, ctypes, dll_path):
 
 	PATH_A = 'a' * 270
 	with pytest.raises(ValueError):
 		path_out = ctypes._zb_path_unix_to_wine(PATH_A)
 
-
-@pytest.mark.skipif(not IS_UNIX, reason = 'only relevant for unix side')
-def test_path_wine_to_unix_abs():
+@pytest.mark.skipif(PLATFORM != 'unix', reason = 'only relevant for unix side')
+@pytest.mark.parametrize('arch,conv,ctypes,dll_path', get_context(__file__, handle = False))
+def test_path_wine_to_unix_abs(arch, conv, ctypes, dll_path):
 
 	PATH_A = 'C:\\'
 	path_out = ctypes._zb_path_wine_to_unix(PATH_A)
@@ -80,25 +76,25 @@ def test_path_wine_to_unix_abs():
 	assert path_out.endswith('/c:/')
 	assert len(path_out) > len('/') + len('/c:/')
 
-
-@pytest.mark.skipif(not IS_UNIX, reason = 'only relevant for unix side')
-def test_path_wine_to_unix_fail1():
+@pytest.mark.skipif(PLATFORM != 'unix', reason = 'only relevant for unix side')
+@pytest.mark.parametrize('arch,conv,ctypes,dll_path', get_context(__file__, handle = False))
+def test_path_wine_to_unix_fail1(arch, conv, ctypes, dll_path):
 
 	PATH_A = '\\doesnotexist'
 	with pytest.raises(wine_error):
 		path_out = ctypes._zb_path_wine_to_unix(PATH_A)
 
-
-@pytest.mark.skipif(not IS_UNIX, reason = 'only relevant for unix side')
-def test_path_wine_to_unix_fail2():
+@pytest.mark.skipif(PLATFORM != 'unix', reason = 'only relevant for unix side')
+@pytest.mark.parametrize('arch,conv,ctypes,dll_path', get_context(__file__, handle = False))
+def test_path_wine_to_unix_fail2(arch, conv, ctypes, dll_path):
 
 	PATH_A = 'c:\\doesnotexist'
 	with pytest.raises(wine_error):
 		path_out = ctypes._zb_path_wine_to_unix(PATH_A)
 
-
-@pytest.mark.skipif(not IS_UNIX, reason = 'only relevant for unix side')
-def test_path_wine_to_unix_fail3():
+@pytest.mark.skipif(PLATFORM != 'unix', reason = 'only relevant for unix side')
+@pytest.mark.parametrize('arch,conv,ctypes,dll_path', get_context(__file__, handle = False))
+def test_path_wine_to_unix_fail3(arch, conv, ctypes, dll_path):
 
 	PATH_A = 'a' * 270
 	with pytest.raises(ValueError):

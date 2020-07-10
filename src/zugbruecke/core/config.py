@@ -10,7 +10,7 @@ https://github.com/pleiszenburg/zugbruecke
 
 	Required to run on platform / side: [UNIX]
 
-	Copyright (C) 2017-2019 Sebastian M. Ernst <ernst@pleiszenburg.de>
+	Copyright (C) 2017-2020 Sebastian M. Ernst <ernst@pleiszenburg.de>
 
 <LICENSE_BLOCK>
 The contents of this file are subject to the GNU Lesser General Public License
@@ -71,6 +71,8 @@ class config_class(dict):
 			if len(value) > 0:
 				if value.isnumeric():
 					return int(value)
+				elif value.strip().lower() in ('true', 'false'):
+					return {'true': True, 'false': False}[value.strip().lower()]
 				else:
 					return value
 
