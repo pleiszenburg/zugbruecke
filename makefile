@@ -20,6 +20,8 @@
 # specific language governing rights and limitations under the License.
 # </LICENSE_BLOCK>
 
+black:
+	black .
 
 clean:
 	-rm -r build/*
