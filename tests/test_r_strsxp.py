@@ -66,44 +66,45 @@ import pytest
 # CLASSES AND ROUTINES
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+
 class sample_class:
+    def __init__(self, ctypes, dll_handle):
 
-	def __init__(self, ctypes, dll_handle):
+        self._c = ctypes
+        self._replace_r = dll_handle.replace_letter_in_null_terminated_string_r
+        self._replace_r.argtypes = (
+            self._c.POINTER(
+                self._c.POINTER(self._c.c_char)
+            ),  # Generate pointer to char manually
+            self._c.c_char,
+            self._c.c_char,
+        )
+        self._replace_r.memsync = [
+            ({"p": [0, -1], "n": True}, {"p": [0, -1], "n": True})
+        ]
 
-		self._c = ctypes
-		self._replace_r = dll_handle.replace_letter_in_null_terminated_string_r
-		self._replace_r.argtypes = (
-			self._c.POINTER(self._c.POINTER(self._c.c_char)), # Generate pointer to char manually
-			self._c.c_char,
-			self._c.c_char
-			)
-		self._replace_r.memsync = [
-			({'p': [0, -1], 'n': True}, {'p': [0, -1], 'n': True})
-			]
+    def replace_r(self, in_string, old_letter, new_letter):
 
-	def replace_r(self, in_string, old_letter, new_letter):
+        string_buffer = (self._c.c_char_p * 1)(in_string.encode("utf-8"))
+        string_buffer_p = self._c.cast(
+            string_buffer, self._c.POINTER(self._c.POINTER(self._c.c_char))
+        )
 
-		string_buffer = (self._c.c_char_p * 1)(in_string.encode('utf-8'))
-		string_buffer_p = self._c.cast(
-			string_buffer,
-			self._c.POINTER(self._c.POINTER(self._c.c_char))
-			)
+        self._replace_r(
+            string_buffer_p, old_letter.encode("utf-8"), new_letter.encode("utf-8")
+        )
 
-		self._replace_r(
-			string_buffer_p,
-			old_letter.encode('utf-8'),
-			new_letter.encode('utf-8')
-			)
+        return string_buffer[:][0].decode("utf-8")
 
-		return string_buffer[:][0].decode('utf-8')
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # TEST(s)
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-@pytest.mark.xfail(PLATFORM == 'unix', strict = True, reason = 'not yet implemented')
-@pytest.mark.parametrize('arch,conv,ctypes,dll_handle', get_context(__file__))
+
+@pytest.mark.xfail(PLATFORM == "unix", strict=True, reason="not yet implemented")
+@pytest.mark.parametrize("arch,conv,ctypes,dll_handle", get_context(__file__))
 def test_r_strsxp(arch, conv, ctypes, dll_handle):
 
-	sample = sample_class(ctypes, dll_handle)
-	assert 'zetegehube' == sample.replace_r('zategahuba', 'a', 'e')
+    sample = sample_class(ctypes, dll_handle)
+    assert "zetegehube" == sample.replace_r("zategahuba", "a", "e")

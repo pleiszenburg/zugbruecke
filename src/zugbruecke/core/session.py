@@ -37,11 +37,7 @@ import ctypes as __ctypes__
 # IMPORT: Unix ctypes members required by wrapper, which will exported as they are
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-from ctypes import (
-	_FUNCFLAG_CDECL,
-	DEFAULT_MODE,
-	LibraryLoader
-	)
+from ctypes import _FUNCFLAG_CDECL, DEFAULT_MODE, LibraryLoader
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -49,294 +45,302 @@ from ctypes import (
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 from .session_client import session_client_class as __session_client_class__
-from .const import _FUNCFLAG_STDCALL # EXPORT
+from .const import _FUNCFLAG_STDCALL  # EXPORT
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # SESSION CTYPES-DROP-IN-REPLACEMENT CLASS
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+
 class session_class:
 
+    # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    # static components
+    # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# static components
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    DEFAULT_MODE = DEFAULT_MODE
+    LibraryLoader = LibraryLoader
+    _FUNCFLAG_CDECL = _FUNCFLAG_CDECL
+    _FUNCFLAG_STDCALL = _FUNCFLAG_STDCALL
 
-	DEFAULT_MODE = DEFAULT_MODE
-	LibraryLoader = LibraryLoader
-	_FUNCFLAG_CDECL = _FUNCFLAG_CDECL
-	_FUNCFLAG_STDCALL = _FUNCFLAG_STDCALL
+    # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    # constructor
+    # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+    def __init__(self, parameter=None, force=False):
 
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# constructor
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        if parameter is None:
+            parameter = {}
+        elif not isinstance(parameter, dict):
+            raise TypeError('parameter "parameter" must be a dict')
 
-	def __init__(self, parameter = None, force = False):
+        if not isinstance(force, bool):
+            raise TypeError('parameter "force" must be a bool')
 
-		if parameter is None:
-			parameter = {}
-		elif not isinstance(parameter, dict):
-			raise TypeError('parameter "parameter" must be a dict')
+        # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        # zugbruecke session client and session interface
+        # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-		if not isinstance(force, bool):
-			raise TypeError('parameter "force" must be a bool')
+        # Start new zugbruecke session
+        self._zb_current_session = __session_client_class__(
+            parameter=parameter, force=force
+        )
 
+        # Offer access to session internals
+        self._zb_get_parameter = self._zb_current_session.get_parameter
+        self._zb_set_parameter = self._zb_current_session.set_parameter
+        self._zb_terminate = self._zb_current_session.terminate
 
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# zugbruecke session client and session interface
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        # Routines only availabe on Wine / Windows - accessed via server
+        # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-		# Start new zugbruecke session
-		self._zb_current_session = __session_client_class__(parameter = parameter, force = force)
+        self.FormatError = self._zb_current_session.ctypes_FormatError
 
-		# Offer access to session internals
-		self._zb_get_parameter = self._zb_current_session.get_parameter
-		self._zb_set_parameter = self._zb_current_session.set_parameter
-		self._zb_terminate = self._zb_current_session.terminate
+        self.get_last_error = self._zb_current_session.ctypes_get_last_error
 
+        self.GetLastError = self._zb_current_session.ctypes_GetLastError
 
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# Routines only availabe on Wine / Windows - accessed via server
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        self.set_last_error = self._zb_current_session.ctypes_set_last_error
 
-		self.FormatError = self._zb_current_session.ctypes_FormatError
+        self.WinError = self._zb_current_session.ctypes_WinError
 
-		self.get_last_error = self._zb_current_session.ctypes_get_last_error
+        # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        # Routines from ctypes.util
+        # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-		self.GetLastError = self._zb_current_session.ctypes_GetLastError
+        class _util:
+            find_msvcrt = staticmethod(self._zb_current_session.ctypes_find_msvcrt)
+            find_library = staticmethod(self._zb_current_session.ctypes_find_library)
 
-		self.set_last_error = self._zb_current_session.ctypes_set_last_error
+        self._util = _util
 
-		self.WinError = self._zb_current_session.ctypes_WinError
+        # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        # CFUNCTYPE & WINFUNCTYPE
+        # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+        # CFUNCTYPE and WINFUNCTYPE function pointer factories
+        self.CFUNCTYPE = self._zb_current_session.ctypes_CFUNCTYPE
+        self.WINFUNCTYPE = self._zb_current_session.ctypes_WINFUNCTYPE
 
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# Routines from ctypes.util
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        # Used as cache by CFUNCTYPE and WINFUNCTYPE
+        self._c_functype_cache = self._zb_current_session.data.cache_dict["func_type"][
+            _FUNCFLAG_CDECL
+        ]
+        self._win_functype_cache = self._zb_current_session.data.cache_dict[
+            "func_type"
+        ][_FUNCFLAG_STDCALL]
 
-		class _util:
-			find_msvcrt = staticmethod(self._zb_current_session.ctypes_find_msvcrt)
-			find_library = staticmethod(self._zb_current_session.ctypes_find_library)
-		self._util = _util
+        # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        # Wine-related stuff
+        # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+        self._zb_path_unix_to_wine = self._zb_current_session.path_unix_to_wine
+        self._zb_path_wine_to_unix = self._zb_current_session.path_wine_to_unix
 
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# CFUNCTYPE & WINFUNCTYPE
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        # Set up and expose dll library loader objects
+        # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-		# CFUNCTYPE and WINFUNCTYPE function pointer factories
-		self.CFUNCTYPE = self._zb_current_session.ctypes_CFUNCTYPE
-		self.WINFUNCTYPE = self._zb_current_session.ctypes_WINFUNCTYPE
+        # Set up and expose dll library loader objects
+        self.cdll = LibraryLoader(self.CDLL)
+        self.windll = LibraryLoader(self.WinDLL)
+        self.oledll = LibraryLoader(self.OleDLL)
 
-		# Used as cache by CFUNCTYPE and WINFUNCTYPE
-		self._c_functype_cache = self._zb_current_session.data.cache_dict['func_type'][_FUNCFLAG_CDECL]
-		self._win_functype_cache = self._zb_current_session.data.cache_dict['func_type'][_FUNCFLAG_STDCALL]
+    # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    # Allow readonly access to session states
+    # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+    @property
+    def _zb_id(self):
+        return self._zb_current_session.id
 
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# Wine-related stuff
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    @property
+    def _zb_up(self):
+        return self._zb_current_session.up
 
-		self._zb_path_unix_to_wine = self._zb_current_session.path_unix_to_wine
-		self._zb_path_wine_to_unix = self._zb_current_session.path_wine_to_unix
+    # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    # Routines only availabe on Wine / Windows, currently stubbed in zugbruecke
+    # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+    @staticmethod
+    def DllCanUnloadNow():  # EXPORT
+        pass  # TODO stub - required for COM
 
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# Set up and expose dll library loader objects
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    @staticmethod
+    def DllGetClassObject(rclsid, riid, ppv):  # EXPORT
+        pass  # TODO stub - required for COM
 
-		# Set up and expose dll library loader objects
-		self.cdll = LibraryLoader(self.CDLL)
-		self.windll = LibraryLoader(self.WinDLL)
-		self.oledll = LibraryLoader(self.OleDLL)
+    class HRESULT:  # EXPORT
+        pass  # TODO stub - special form of c_long, will require changes to argument parser
 
+    @staticmethod
+    def _check_HRESULT(result):  # EXPORT
+        pass  # TODO stub - method for HRESULT, checks error bit, raises error if true. Needs reimplementation.
 
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# Allow readonly access to session states
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    # Wrapper around DLL / shared object interface classes
+    # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-	@property
-	def _zb_id(self):
-		return self._zb_current_session.id
+    # Wrapper for CDLL class
+    def CDLL(
+        self,
+        name,
+        mode=DEFAULT_MODE,
+        handle=None,  # TODO ignored, see #54
+        use_errno=False,
+        use_last_error=False,
+    ):
 
-	@property
-	def _zb_up(self):
-		return self._zb_current_session.up
+        return self._zb_current_session.load_library(
+            dll_name=name,
+            dll_type="cdll",
+            dll_param={
+                "mode": mode,
+                "use_errno": use_errno,
+                "use_last_error": use_last_error,
+            },
+        )
 
+    # Wrapper for WinDLL class
+    def WinDLL(
+        self,
+        name,
+        mode=DEFAULT_MODE,
+        handle=None,  # TODO ignored, see #54
+        use_errno=False,
+        use_last_error=False,
+    ):
 
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# Routines only availabe on Wine / Windows, currently stubbed in zugbruecke
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        return self._zb_current_session.load_library(
+            dll_name=name,
+            dll_type="windll",
+            dll_param={
+                "mode": mode,
+                "use_errno": use_errno,
+                "use_last_error": use_last_error,
+            },
+        )
 
-	@staticmethod
-	def DllCanUnloadNow(): # EXPORT
-		pass # TODO stub - required for COM
+    # Wrapper for OleDLL class
+    def OleDLL(
+        self,
+        name,
+        mode=DEFAULT_MODE,
+        handle=None,  # TODO ignored, see #54
+        use_errno=False,
+        use_last_error=False,
+    ):
 
-	@staticmethod
-	def DllGetClassObject(rclsid, riid, ppv): # EXPORT
-		pass # TODO stub - required for COM
-
-	class HRESULT: # EXPORT
-		pass # TODO stub - special form of c_long, will require changes to argument parser
-
-	@staticmethod
-	def _check_HRESULT(result): # EXPORT
-		pass # TODO stub - method for HRESULT, checks error bit, raises error if true. Needs reimplementation.
-
-
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# Wrapper around DLL / shared object interface classes
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-	# Wrapper for CDLL class
-	def CDLL(
-		self,
-		name, mode = DEFAULT_MODE,
-		handle = None, # TODO ignored, see #54
-		use_errno = False,
-		use_last_error = False
-		):
-
-		return self._zb_current_session.load_library(
-			dll_name = name, dll_type = 'cdll', dll_param = {
-				'mode': mode, 'use_errno': use_errno, 'use_last_error': use_last_error
-				}
-			)
-
-
-	# Wrapper for WinDLL class
-	def WinDLL(
-		self,
-		name, mode = DEFAULT_MODE,
-		handle = None, # TODO ignored, see #54
-		use_errno = False,
-		use_last_error = False
-		):
-
-		return self._zb_current_session.load_library(
-			dll_name = name, dll_type = 'windll', dll_param = {
-				'mode': mode, 'use_errno': use_errno, 'use_last_error': use_last_error
-				}
-			)
-
-
-	# Wrapper for OleDLL class
-	def OleDLL(
-		self,
-		name, mode = DEFAULT_MODE,
-		handle = None, # TODO ignored, see #54
-		use_errno = False,
-		use_last_error = False
-		):
-
-		return self._zb_current_session.load_library(
-			dll_name = name, dll_type = 'oledll', dll_param = {
-				'mode': mode, 'use_errno': use_errno, 'use_last_error': use_last_error
-				}
-			)
+        return self._zb_current_session.load_library(
+            dll_name=name,
+            dll_type="oledll",
+            dll_param={
+                "mode": mode,
+                "use_errno": use_errno,
+                "use_last_error": use_last_error,
+            },
+        )
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # more static components from ctypes
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-_ctypes_veryprivate_ = [
-	'__version__'
-	]
+_ctypes_veryprivate_ = ["__version__"]
 
 __ctypes_private__ = [
-	'_CFuncPtr',
-	'_FUNCFLAG_PYTHONAPI',
-	'_FUNCFLAG_USE_ERRNO',
-	'_FUNCFLAG_USE_LASTERROR',
-	'_Pointer',
-	'_SimpleCData',
-	'_calcsize',
-	'_cast',
-	'_cast_addr',
-	'_check_size',
-	'_ctypes_version',
-	'_dlopen', # behaviour depends on platform
-	'_endian',
-	'_memmove_addr',
-	'_memset_addr',
-	'_pointer_type_cache',
-	'_reset_cache',
-	'_string_at',
-	'_string_at_addr',
-	'_wstring_at',
-	'_wstring_at_addr'
-	]
+    "_CFuncPtr",
+    "_FUNCFLAG_PYTHONAPI",
+    "_FUNCFLAG_USE_ERRNO",
+    "_FUNCFLAG_USE_LASTERROR",
+    "_Pointer",
+    "_SimpleCData",
+    "_calcsize",
+    "_cast",
+    "_cast_addr",
+    "_check_size",
+    "_ctypes_version",
+    "_dlopen",  # behaviour depends on platform
+    "_endian",
+    "_memmove_addr",
+    "_memset_addr",
+    "_pointer_type_cache",
+    "_reset_cache",
+    "_string_at",
+    "_string_at_addr",
+    "_wstring_at",
+    "_wstring_at_addr",
+]
 
 __ctypes_public__ = [
-	'ARRAY', # Python 3.6: Deprecated XXX
-	'ArgumentError',
-	'Array',
-	'BigEndianStructure',
-	'LittleEndianStructure',
-	'POINTER',
-	'PYFUNCTYPE',
-	'PyDLL',
-	'RTLD_GLOBAL',
-	'RTLD_LOCAL',
-	'SetPointerType', # Python 3.6: Deprecated XXX
-	'Structure',
-	'Union',
-	'addressof',
-	'alignment',
-	'byref',
-	'c_bool',
-	'c_buffer',
-	'c_byte',
-	'c_char',
-	'c_char_p',
-	'c_double',
-	'c_float',
-	'c_int',
-	'c_int16',
-	'c_int32',
-	'c_int64',
-	'c_int8',
-	'c_long',
-	'c_longdouble',
-	'c_longlong',
-	'c_short',
-	'c_size_t',
-	'c_ssize_t',
-	'c_ubyte',
-	'c_uint',
-	'c_uint16',
-	'c_uint32',
-	'c_uint64',
-	'c_uint8',
-	'c_ulong',
-	'c_ulonglong',
-	'c_ushort',
-	'c_void_p',
-	'c_voidp',
-	'c_wchar',
-	'c_wchar_p',
-	'cast',
-	'create_string_buffer',
-	'create_unicode_buffer',
-	'get_errno',
-	'memmove',
-	'memset',
-	'pointer',
-	'py_object',
-	'pydll',
-	'pythonapi',
-	'resize',
-	'set_errno',
-	'sizeof',
-	'string_at',
-	'wstring_at'
-	]
+    "ARRAY",  # Python 3.6: Deprecated XXX
+    "ArgumentError",
+    "Array",
+    "BigEndianStructure",
+    "LittleEndianStructure",
+    "POINTER",
+    "PYFUNCTYPE",
+    "PyDLL",
+    "RTLD_GLOBAL",
+    "RTLD_LOCAL",
+    "SetPointerType",  # Python 3.6: Deprecated XXX
+    "Structure",
+    "Union",
+    "addressof",
+    "alignment",
+    "byref",
+    "c_bool",
+    "c_buffer",
+    "c_byte",
+    "c_char",
+    "c_char_p",
+    "c_double",
+    "c_float",
+    "c_int",
+    "c_int16",
+    "c_int32",
+    "c_int64",
+    "c_int8",
+    "c_long",
+    "c_longdouble",
+    "c_longlong",
+    "c_short",
+    "c_size_t",
+    "c_ssize_t",
+    "c_ubyte",
+    "c_uint",
+    "c_uint16",
+    "c_uint32",
+    "c_uint64",
+    "c_uint8",
+    "c_ulong",
+    "c_ulonglong",
+    "c_ushort",
+    "c_void_p",
+    "c_voidp",
+    "c_wchar",
+    "c_wchar_p",
+    "cast",
+    "create_string_buffer",
+    "create_unicode_buffer",
+    "get_errno",
+    "memmove",
+    "memset",
+    "pointer",
+    "py_object",
+    "pydll",
+    "pythonapi",
+    "resize",
+    "set_errno",
+    "sizeof",
+    "string_at",
+    "wstring_at",
+]
 
 for __ctypes_item__ in _ctypes_veryprivate_ + __ctypes_private__ + __ctypes_public__:
-	__ctypes_attr__ = getattr(__ctypes__, __ctypes_item__)
-	if hasattr(__ctypes_attr__, '__call__'):
-		__ctypes_attr__ = staticmethod(__ctypes_attr__)
-	setattr(session_class, __ctypes_item__, __ctypes_attr__)
+    __ctypes_attr__ = getattr(__ctypes__, __ctypes_item__)
+    if hasattr(__ctypes_attr__, "__call__"):
+        __ctypes_attr__ = staticmethod(__ctypes_attr__)
+    setattr(session_class, __ctypes_item__, __ctypes_attr__)

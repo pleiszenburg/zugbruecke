@@ -67,28 +67,31 @@ import pytest
 # TEST(s)
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-@pytest.mark.parametrize('arch,conv,ctypes,dll_handle', get_context(__file__))
+
+@pytest.mark.parametrize("arch,conv,ctypes,dll_handle", get_context(__file__))
 def test_sqrt_int(arch, conv, ctypes, dll_handle):
 
-		get_const_int = dll_handle.get_const_int_a
-		get_const_int.restype = ctypes.c_int16
+    get_const_int = dll_handle.get_const_int_a
+    get_const_int.restype = ctypes.c_int16
 
-		assert 7 == get_const_int()
+    assert 7 == get_const_int()
 
-@pytest.mark.parametrize('arch,conv,ctypes,dll_handle', get_context(__file__))
+
+@pytest.mark.parametrize("arch,conv,ctypes,dll_handle", get_context(__file__))
 def test_sqrt_int_with_tuple(arch, conv, ctypes, dll_handle):
 
-		get_const_int = dll_handle.get_const_int_b
-		get_const_int.argtypes = tuple()
-		get_const_int.restype = ctypes.c_int16
+    get_const_int = dll_handle.get_const_int_b
+    get_const_int.argtypes = tuple()
+    get_const_int.restype = ctypes.c_int16
 
-		assert 6 == get_const_int()
+    assert 6 == get_const_int()
 
-@pytest.mark.parametrize('arch,conv,ctypes,dll_handle', get_context(__file__))
+
+@pytest.mark.parametrize("arch,conv,ctypes,dll_handle", get_context(__file__))
 def test_sqrt_int_with_list(arch, conv, ctypes, dll_handle):
 
-		get_const_int = dll_handle.get_const_int_c
-		get_const_int.argtypes = []
-		get_const_int.restype = ctypes.c_int16
+    get_const_int = dll_handle.get_const_int_c
+    get_const_int.argtypes = []
+    get_const_int.restype = ctypes.c_int16
 
-		assert 5 == get_const_int()
+    assert 5 == get_const_int()

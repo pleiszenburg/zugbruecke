@@ -39,111 +39,117 @@ import traceback
 # CALLBACK CLIENT CLASS
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+
 class callback_translator_client_class:
+    def __init__(
+        self, data, routine_name, routine_handler, argtypes_d, restype_d, memsync_d
+    ):
 
+        # Store my own name
+        self.name = routine_name
 
-	def __init__(self, data, routine_name, routine_handler, argtypes_d, restype_d, memsync_d):
+        # Store handler
+        self.handler = routine_handler
 
-		# Store my own name
-		self.name = routine_name
+        # Store handle on data
+        self.data = data
 
-		# Store handler
-		self.handler = routine_handler
+        # Get handle on log
+        self.log = self.data.log
 
-		# Store handle on data
-		self.data = data
+        # Store definition of argument types
+        self.argtypes_d = argtypes_d
 
-		# Get handle on log
-		self.log = self.data.log
+        # Store definition of return value type
+        self.restype_d = restype_d
 
-		# Store definition of argument types
-		self.argtypes_d = argtypes_d
+        # Store memsync definition
+        self.memsync_d = memsync_d
 
-		# Store definition of return value type
-		self.restype_d = restype_d
+    def __call__(self, arg_message_list, arg_memory_list):
 
-		# Store memsync definition
-		self.memsync_d = memsync_d
+        # Log status
+        self.log.out(
+            '[callback-client] Trying to call callback routine "%s" ...' % self.name
+        )
 
+        try:
 
-	def __call__(self, arg_message_list, arg_memory_list):
+            # Unpack arguments
+            args_list = self.data.arg_list_unpack(arg_message_list, self.argtypes_d)
 
-		# Log status
-		self.log.out('[callback-client] Trying to call callback routine "%s" ...' % self.name)
+            # Unpack pointer data
+            self.data.server_unpack_memory_list(
+                args_list, arg_memory_list, self.memsync_d
+            )
 
-		try:
+            # Default return value
+            return_value = None
 
-			# Unpack arguments
-			args_list = self.data.arg_list_unpack(arg_message_list, self.argtypes_d)
+        except Exception as e:
 
-			# Unpack pointer data
-			self.data.server_unpack_memory_list(args_list, arg_memory_list, self.memsync_d)
+            # Log status
+            self.log.out("[callback-client] ... call preparation failed!")
 
-			# Default return value
-			return_value = None
+            # Push traceback to log
+            self.log.err(traceback.format_exc())
 
-		except Exception as e:
+            raise e
 
-			# Log status
-			self.log.out('[callback-client] ... call preparation failed!')
+        # This is risky
+        try:
 
-			# Push traceback to log
-			self.log.err(traceback.format_exc())
+            # Call actual callback function (ctypes function pointer)
+            return_value = self.handler(*tuple(args_list))
 
-			raise e
+        except Exception as e:
 
-		# This is risky
-		try:
+            # Log status
+            self.log.out("[callback-client] ... call failed!")
 
-			# Call actual callback function (ctypes function pointer)
-			return_value = self.handler(*tuple(args_list))
+            # Push traceback to log
+            self.log.err(traceback.format_exc())
 
-		except Exception as e:
+            # Pack return package and return it
+            return {
+                "args": arg_message_list,
+                "return_value": return_value,
+                "memory": arg_memory_list,
+                "success": False,
+                "exception": e,
+            }
 
-			# Log status
-			self.log.out('[callback-client] ... call failed!')
+        try:
 
-			# Push traceback to log
-			self.log.err(traceback.format_exc())
+            # Pack memory for return
+            self.data.server_pack_memory_list(
+                args_list, return_value, arg_memory_list, self.memsync_d
+            )
 
-			# Pack return package and return it
-			return {
-				'args': arg_message_list,
-				'return_value': return_value,
-				'memory': arg_memory_list,
-				'success': False,
-				'exception': e
-				}
+            # Get new arg message list
+            arg_message_list = self.data.arg_list_pack(args_list, self.argtypes_d)
 
-		try:
+            # Pack return value
+            return_message = self.data.return_msg_pack(return_value, self.restype_d)
 
-			# Pack memory for return
-			self.data.server_pack_memory_list(args_list, return_value, arg_memory_list, self.memsync_d)
+            # Log status
+            self.log.out("[callback-client] ... done.")
 
-			# Get new arg message list
-			arg_message_list = self.data.arg_list_pack(args_list, self.argtypes_d)
+            # Ship data back to Wine side
+            return {
+                "args": arg_message_list,
+                "return_value": return_message,
+                "memory": arg_memory_list,
+                "success": True,
+                "exception": None,
+            }
 
-			# Pack return value
-			return_message = self.data.return_msg_pack(return_value, self.restype_d)
+        except Exception as e:
 
-			# Log status
-			self.log.out('[callback-client] ... done.')
+            # Log status
+            self.log.out("[callback-client] ... call post-processing failed!")
 
-			# Ship data back to Wine side
-			return {
-				'args': arg_message_list,
-				'return_value': return_message,
-				'memory': arg_memory_list,
-				'success': True,
-				'exception': None
-				}
+            # Push traceback to log
+            self.log.err(traceback.format_exc())
 
-		except Exception as e:
-
-			# Log status
-			self.log.out('[callback-client] ... call post-processing failed!')
-
-			# Push traceback to log
-			self.log.err(traceback.format_exc())
-
-			raise e
+            raise e

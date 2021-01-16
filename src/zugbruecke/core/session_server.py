@@ -40,184 +40,184 @@ from .data import data_class
 from .dll_server import dll_server_class
 from .log import log_class
 from .path import path_class
-from .rpc import (
-	mp_client_safe_connect,
-	mp_server_class
-	)
+from .rpc import mp_client_safe_connect, mp_server_class
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # SESSION SERVER CLASS
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+
 class session_server_class:
+    def __init__(self, session_id, parameter):
 
+        # Store session id and parameter
+        self.id = session_id
+        self.p = parameter
 
-	def __init__(self, session_id, parameter):
+        # Connect to Unix side
+        self.rpc_client = mp_client_safe_connect(
+            socket_path=("localhost", self.p["port_socket_unix"]),
+            authkey="zugbruecke_unix",
+            timeout_after_seconds=self.p["timeout_start"],
+        )
 
-		# Store session id and parameter
-		self.id = session_id
-		self.p = parameter
+        # Start logging session and connect it with log on unix side
+        self.log = log_class(self.id, self.p, rpc_client=self.rpc_client)
 
-		# Connect to Unix side
-		self.rpc_client = mp_client_safe_connect(
-			socket_path = ('localhost', self.p['port_socket_unix']),
-			authkey = 'zugbruecke_unix',
-			timeout_after_seconds = self.p['timeout_start']
-			)
+        # Status log
+        self.log.out("[session-server] STARTING ...")
 
-		# Start logging session and connect it with log on unix side
-		self.log = log_class(self.id, self.p, rpc_client = self.rpc_client)
+        # Mark session as up
+        self.up = True
 
-		# Status log
-		self.log.out('[session-server] STARTING ...')
+        # Offer methods for converting paths
+        path = path_class()
+        self.path_unix_to_wine = path.unix_to_wine
+        self.path_wine_to_unix = path.wine_to_unix
 
-		# Mark session as up
-		self.up = True
+        # Start dict for dll files and routines
+        self.dll_dict = {}
 
-		# Offer methods for converting paths
-		path = path_class()
-		self.path_unix_to_wine = path.unix_to_wine
-		self.path_wine_to_unix = path.wine_to_unix
+        # Organize all DLL types
+        self.dll_types = {
+            "cdll": ctypes.CDLL,
+            "windll": ctypes.WinDLL,
+            "oledll": ctypes.OleDLL,
+        }
 
-		# Start dict for dll files and routines
-		self.dll_dict = {}
+        # Set data cache and parser
+        self.data = data_class(
+            self.log, is_server=True, callback_client=self.rpc_client
+        )
 
-		# Organize all DLL types
-		self.dll_types = {
-			'cdll': ctypes.CDLL,
-			'windll': ctypes.WinDLL,
-			'oledll': ctypes.OleDLL
-			}
+        # Create server
+        self.rpc_server = mp_server_class(
+            ("localhost", self.p["port_socket_wine"]),
+            "zugbruecke_wine",
+            log=self.log,
+            terminate_function=self.__terminate__,
+        )
 
-		# Set data cache and parser
-		self.data = data_class(self.log, is_server = True, callback_client = self.rpc_client)
+        # Register call: Accessing a dll
+        self.rpc_server.register_function(self.__load_library__, "load_library")
+        # Expose routine for updating parameters
+        self.rpc_server.register_function(self.__set_parameter__, "set_parameter")
+        # Register destructur: Call goes into xmlrpc-server first, which then terminates parent
+        self.rpc_server.register_function(self.rpc_server.terminate, "terminate")
+        # Convert path: Unix to Wine
+        self.rpc_server.register_function(self.path_unix_to_wine, "path_unix_to_wine")
+        # Convert path: Wine to Unix
+        self.rpc_server.register_function(self.path_wine_to_unix, "path_wine_to_unix")
 
-		# Create server
-		self.rpc_server = mp_server_class(
-			('localhost', self.p['port_socket_wine']),
-			'zugbruecke_wine',
-			log = self.log,
-			terminate_function = self.__terminate__
-			)
+        # Expose ctypes stuff
+        self.__expose_ctypes_routines__()
 
-		# Register call: Accessing a dll
-		self.rpc_server.register_function(self.__load_library__, 'load_library')
-		# Expose routine for updating parameters
-		self.rpc_server.register_function(self.__set_parameter__, 'set_parameter')
-		# Register destructur: Call goes into xmlrpc-server first, which then terminates parent
-		self.rpc_server.register_function(self.rpc_server.terminate, 'terminate')
-		# Convert path: Unix to Wine
-		self.rpc_server.register_function(self.path_unix_to_wine, 'path_unix_to_wine')
-		# Convert path: Wine to Unix
-		self.rpc_server.register_function(self.path_wine_to_unix, 'path_wine_to_unix')
+        # Status log
+        self.log.out(
+            "[session-server] ctypes server is listening on port %d."
+            % self.p["port_socket_wine"]
+        )
+        self.log.out("[session-server] STARTED.")
+        self.log.out("[session-server] Serve forever ...")
 
-		# Expose ctypes stuff
-		self.__expose_ctypes_routines__()
+        # Run server ...
+        self.rpc_server.server_forever_in_thread(daemon=False)
 
-		# Status log
-		self.log.out('[session-server] ctypes server is listening on port %d.' % self.p['port_socket_wine'])
-		self.log.out('[session-server] STARTED.')
-		self.log.out('[session-server] Serve forever ...')
+        # Indicate to session client that the server is up
+        self.rpc_client.set_server_status(True)
 
-		# Run server ...
-		self.rpc_server.server_forever_in_thread(daemon = False)
+    def __expose_ctypes_routines__(self):
 
-		# Indicate to session client that the server is up
-		self.rpc_client.set_server_status(True)
+        # As-is exported platform-specific routines from ctypes
+        for mod, routine in [
+            (ctypes, "FormatError"),
+            (ctypes, "get_last_error"),
+            (ctypes, "GetLastError"),
+            (ctypes, "WinError"),
+            (ctypes, "set_last_error"),
+            (ctypes.util, "find_msvcrt"),
+            (ctypes.util, "find_library"),
+        ]:
 
+            self.rpc_server.register_function(
+                getattr(mod, routine), "ctypes_" + routine
+            )
 
-	def __expose_ctypes_routines__(self):
+    def __load_library__(self, dll_name, dll_type, dll_param):
+        """
+        Exposed interface
+        """
 
-		# As-is exported platform-specific routines from ctypes
-		for mod, routine in [
-			(ctypes, 'FormatError'),
-			(ctypes, 'get_last_error'),
-			(ctypes, 'GetLastError'),
-			(ctypes, 'WinError'),
-			(ctypes, 'set_last_error'),
-			(ctypes.util, 'find_msvcrt'),
-			(ctypes.util, 'find_library'),
-			]:
+        # Although this should happen only once per dll, lets be on the safe side
+        if dll_name in self.dll_dict.keys():
+            return (True, self.dll_dict[dll_name].hash_id)  # Success & dll hash_id
 
-			self.rpc_server.register_function(getattr(mod, routine), 'ctypes_' + routine)
+        # Status log
+        self.log.out(
+            '[session-server] Attaching to DLL file "%s" with calling convention "%s" ...'
+            % (dll_name, dll_type)
+        )
 
+        try:
 
-	def __load_library__(self, dll_name, dll_type, dll_param):
-		"""
-		Exposed interface
-		"""
+            # Attach to DLL with ctypes
+            handler = self.dll_types[dll_type](
+                dll_name,
+                mode=dll_param["mode"],
+                handle=None,
+                use_errno=dll_param["use_errno"],
+                use_last_error=dll_param["use_last_error"],
+            )
 
-		# Although this should happen only once per dll, lets be on the safe side
-		if dll_name in self.dll_dict.keys():
-			return (True, self.dll_dict[dll_name].hash_id) # Success & dll hash_id
+        except OSError as e:
 
-		# Status log
-		self.log.out('[session-server] Attaching to DLL file "%s" with calling convention "%s" ...' % (
-			dll_name, dll_type
-			))
+            # Log status
+            self.log.out("[session-server] ... failed!")
 
-		try:
+            # Reraise error
+            raise e
 
-			# Attach to DLL with ctypes
-			handler = self.dll_types[dll_type](
-				dll_name, mode = dll_param['mode'], handle = None,
-				use_errno = dll_param['use_errno'],
-				use_last_error = dll_param['use_last_error']
-				)
+        except Exception as e:
 
-		except OSError as e:
+            # Push traceback to log
+            self.log.err(traceback.format_exc())
 
-			# Log status
-			self.log.out('[session-server] ... failed!')
+            raise e
 
-			# Reraise error
-			raise e
+        # Load library
+        self.dll_dict[dll_name] = dll_server_class(self, dll_name, dll_type, handler)
 
-		except Exception as e:
+        # Log status
+        self.log.out("[session-server] ... attached.")
 
-			# Push traceback to log
-			self.log.err(traceback.format_exc())
+        # Return success and dll's hash id
+        return self.dll_dict[dll_name].hash_id
 
-			raise e
+    def __set_parameter__(self, parameter):
 
-		# Load library
-		self.dll_dict[dll_name] = dll_server_class(
-			self, dll_name, dll_type, handler
-			)
+        self.p.update(parameter)
 
-		# Log status
-		self.log.out('[session-server] ... attached.')
+    def __terminate__(self):
+        """
+        Exposed interface
+        """
 
-		# Return success and dll's hash id
-		return self.dll_dict[dll_name].hash_id
+        # Run only if session still up
+        if not self.up:
+            return
 
+        # Status log
+        self.log.out("[session-server] TERMINATING ...")
 
-	def __set_parameter__(self, parameter):
+        # Terminate log
+        self.log.terminate()
 
-		self.p.update(parameter)
+        # Session down
+        self.up = False
 
+        # Status log
+        self.log.out("[session-server] TERMINATED.")
 
-	def __terminate__(self):
-		"""
-		Exposed interface
-		"""
-
-		# Run only if session still up
-		if not self.up:
-			return
-
-		# Status log
-		self.log.out('[session-server] TERMINATING ...')
-
-		# Terminate log
-		self.log.terminate()
-
-		# Session down
-		self.up = False
-
-		# Status log
-		self.log.out('[session-server] TERMINATED.')
-
-		# Indicate to session client that server was terminated
-		self.rpc_client.set_server_status(False)
+        # Indicate to session client that server was terminated
+        self.rpc_client.set_server_status(False)

@@ -39,21 +39,28 @@ import pytest
 # TEST(s)
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-@pytest.mark.parametrize('arch,conv,ctypes,dll_path', get_context(__file__, handle = False))
+
+@pytest.mark.parametrize(
+    "arch,conv,ctypes,dll_path", get_context(__file__, handle=False)
+)
 def test_missingdll(arch, conv, ctypes, dll_path):
 
-	missing_path = 'tests/nonexistent_%s_%s.dll' % (conv, arch)
+    missing_path = "tests/nonexistent_%s_%s.dll" % (conv, arch)
 
-	with pytest.raises(OSError):
-		dll = getattr(ctypes, conv).LoadLibrary(missing_path)
+    with pytest.raises(OSError):
+        dll = getattr(ctypes, conv).LoadLibrary(missing_path)
 
-@pytest.mark.parametrize('arch,conv,ctypes,dll_path', get_context(__file__, handle = False))
+
+@pytest.mark.parametrize(
+    "arch,conv,ctypes,dll_path", get_context(__file__, handle=False)
+)
 def test_missingdll_attr(arch, conv, ctypes, dll_path):
 
-	missing_attr = 'nonexistent_%s_%s_attr' % (conv, arch)
+    missing_attr = "nonexistent_%s_%s_attr" % (conv, arch)
 
-	with pytest.raises(OSError):
-		dll = getattr(ctypes.cdll, missing_attr)
+    with pytest.raises(OSError):
+        dll = getattr(ctypes.cdll, missing_attr)
+
 
 # def test_missingdll_oledll(): # TODO
 #

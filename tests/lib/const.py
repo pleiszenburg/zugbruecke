@@ -30,7 +30,7 @@ specific language governing rights and limitations under the License.
 # CONST
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-DLL_FLD = 'dlls'
+DLL_FLD = "dlls"
 
 DLL_HEADER = """
 
@@ -60,31 +60,27 @@ DLL_SOURCE = """
 
 """
 
-ARCHS = ['win32', 'win64']
-CONVENTIONS = ['cdll', 'windll']
+ARCHS = ["win32", "win64"]
+CONVENTIONS = ["cdll", "windll"]
 
 PREFIX = {
-	'cdll': '__declspec(dllexport)',
-	'windll': '__declspec(dllexport)',
-	}
+    "cdll": "__declspec(dllexport)",
+    "windll": "__declspec(dllexport)",
+}
 SUFFIX = {
-	'cdll': '__cdecl',
-	'windll': '__stdcall',
-	}
+    "cdll": "__cdecl",
+    "windll": "__stdcall",
+}
 
 CC = {
-	'win32': 'i686-w64-mingw32-gcc',
-	'win64': 'x86_64-w64-mingw32-gcc',
-	}
-_CFLAGS = [
-	'-Wall',
-	'-shared',
-	'-std=c99'
-	]
+    "win32": "i686-w64-mingw32-gcc",
+    "win64": "x86_64-w64-mingw32-gcc",
+}
+_CFLAGS = ["-Wall", "-shared", "-std=c99"]
 CFLAGS = {
-	'cdll': _CFLAGS + ['-Wl,--subsystem,windows'],
-	'windll': _CFLAGS + ['-Wl,-add-stdcall-alias'],
-	}
+    "cdll": _CFLAGS + ["-Wl,--subsystem,windows"],
+    "windll": _CFLAGS + ["-Wl,-add-stdcall-alias"],
+}
 LDFLAGS = [
-	'-lm',
-	]
+    "-lm",
+]

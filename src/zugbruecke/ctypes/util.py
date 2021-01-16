@@ -44,7 +44,7 @@ from . import _util
 
 _globals = globals()
 for _util_item in dir(_util):
-	if _util_item.startswith('__'):
-		continue
-	_globals[_util_item] = getattr(_util, _util_item)
+    if _util_item.startswith("__"):
+        continue
+    _globals[_util_item] = getattr(_util, _util_item)
 del _util, _util_item, _globals

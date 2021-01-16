@@ -67,11 +67,15 @@ import pytest
 # TEST(s)
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-@pytest.mark.parametrize('arch,conv,ctypes,dll_handle', get_context(__file__))
+
+@pytest.mark.parametrize("arch,conv,ctypes,dll_handle", get_context(__file__))
 def test_gdc(arch, conv, ctypes, dll_handle):
 
-	gcd = dll_handle.gcd
-	gcd.argtypes = (ctypes.c_int, ctypes.c_int) # TODO: sizeof(int) win32 vs win64 vs unix
-	gcd.restype = ctypes.c_int
+    gcd = dll_handle.gcd
+    gcd.argtypes = (
+        ctypes.c_int,
+        ctypes.c_int,
+    )  # TODO: sizeof(int) win32 vs win64 vs unix
+    gcd.restype = ctypes.c_int
 
-	assert 7 == gcd(35, 42)
+    assert 7 == gcd(35, 42)

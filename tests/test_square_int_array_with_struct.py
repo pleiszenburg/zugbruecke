@@ -70,65 +70,56 @@ import pytest
 # CLASSES AND ROUTINES
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+
 class sample_class:
+    def __init__(self, ctypes, dll_handle):
 
-	def __init__(self, ctypes, dll_handle):
+        self._c = ctypes
 
-		self._c = ctypes
+        class int_array_data(self._c.Structure):
+            _fields_ = [
+                ("data", self._c.POINTER(self._c.c_int16)),
+                ("len", self._c.c_int16),
+            ]
 
-		class int_array_data(self._c.Structure):
-			_fields_ = [
-				('data', self._c.POINTER(self._c.c_int16)),
-				('len', self._c.c_int16)
-				]
-		self._int_array_data = int_array_data
+        self._int_array_data = int_array_data
 
-		self._square_int_array_with_struct = dll_handle.square_int_array_with_struct
-		self._square_int_array_with_struct.argtypes = (
-			self._c.POINTER(self._int_array_data),
-			self._c.POINTER(self._int_array_data)
-			)
-		self._square_int_array_with_struct.memsync = [
-			{
-				'p': [0, 'data'],
-				'l': [0, 'len'],
-				't': 'c_int16'
-				},
-			{
-				'p': [1, 'data'],
-				'l': [1, 'len'],
-				't': 'c_int16'
-				}
-			]
+        self._square_int_array_with_struct = dll_handle.square_int_array_with_struct
+        self._square_int_array_with_struct.argtypes = (
+            self._c.POINTER(self._int_array_data),
+            self._c.POINTER(self._int_array_data),
+        )
+        self._square_int_array_with_struct.memsync = [
+            {"p": [0, "data"], "l": [0, "len"], "t": "c_int16"},
+            {"p": [1, "data"], "l": [1, "len"], "t": "c_int16"},
+        ]
 
-	def square_int_array_with_struct(self, in_array):
+    def square_int_array_with_struct(self, in_array):
 
-		in_array_obj = self._int_array_data()
-		out_array_obj = self._int_array_data()
+        in_array_obj = self._int_array_data()
+        out_array_obj = self._int_array_data()
 
-		in_array_obj.data = self._c.cast(
-			self._c.pointer((self._c.c_int16 * len(in_array))(*in_array)),
-			self._c.POINTER(self._c.c_int16)
-			)
-		in_array_obj.len = len(in_array)
+        in_array_obj.data = self._c.cast(
+            self._c.pointer((self._c.c_int16 * len(in_array))(*in_array)),
+            self._c.POINTER(self._c.c_int16),
+        )
+        in_array_obj.len = len(in_array)
 
-		self._square_int_array_with_struct(
-			in_array_obj,
-			out_array_obj
-			)
+        self._square_int_array_with_struct(in_array_obj, out_array_obj)
 
-		return self._c.cast(
-			out_array_obj.data,
-			self._c.POINTER(self._c.c_int16 * len(in_array))
-			).contents[:]
+        return self._c.cast(
+            out_array_obj.data, self._c.POINTER(self._c.c_int16 * len(in_array))
+        ).contents[:]
+
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # TEST(s)
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-@pytest.mark.parametrize('arch,conv,ctypes,dll_handle', get_context(__file__))
+
+@pytest.mark.parametrize("arch,conv,ctypes,dll_handle", get_context(__file__))
 def test_square_int_array_with_struct(arch, conv, ctypes, dll_handle):
 
-	sample = sample_class(ctypes, dll_handle)
+    sample = sample_class(ctypes, dll_handle)
 
-	assert [4, 16, 9, 25] == sample.square_int_array_with_struct([2, 4, 3, 5])
+    assert [4, 16, 9, 25] == sample.square_int_array_with_struct([2, 4, 3, 5])

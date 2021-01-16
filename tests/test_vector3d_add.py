@@ -100,98 +100,106 @@ import pytest
 # CLASSES AND ROUTINES
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+
 class sample_class_a:
+    def __init__(self, ctypes, dll_handle):
+        class vector3d(ctypes.Structure):
+            _fields_ = [
+                ("x", ctypes.c_int16),
+                ("y", ctypes.c_int16),
+                ("z", ctypes.c_int16),
+            ]
 
-	def __init__(self, ctypes, dll_handle):
+        self._vector3d = vector3d
 
-		class vector3d(ctypes.Structure):
-			_fields_ = [
-				('x', ctypes.c_int16),
-				('y', ctypes.c_int16),
-				('z', ctypes.c_int16)
-				]
-		self._vector3d = vector3d
+        self._vector3d_add = dll_handle.vector3d_add
+        self._vector3d_add.argtypes = (
+            ctypes.POINTER(self._vector3d),
+            ctypes.POINTER(self._vector3d),
+        )
+        self._vector3d_add.restype = ctypes.POINTER(self._vector3d)
 
-		self._vector3d_add = dll_handle.vector3d_add
-		self._vector3d_add.argtypes = (ctypes.POINTER(self._vector3d), ctypes.POINTER(self._vector3d))
-		self._vector3d_add.restype = ctypes.POINTER(self._vector3d)
+    def vector3d_add(self, v1, v2):
+        def struct_from_dict(in_dict):
+            return self._vector3d(*tuple(in_dict[key] for key in ["x", "y", "z"]))
 
-	def vector3d_add(self, v1, v2):
+        def dict_from_struct(in_struct):
+            return {key: getattr(in_struct.contents, key) for key in ["x", "y", "z"]}
 
-		def struct_from_dict(in_dict):
-			return self._vector3d(*tuple(in_dict[key] for key in ['x', 'y', 'z']))
-		def dict_from_struct(in_struct):
-			return {key: getattr(in_struct.contents, key) for key in ['x', 'y', 'z']}
+        return dict_from_struct(
+            self._vector3d_add(struct_from_dict(v1), struct_from_dict(v2))
+        )
 
-		return dict_from_struct(self._vector3d_add(
-			struct_from_dict(v1), struct_from_dict(v2)
-			))
 
 class sample_class_b:
+    def __init__(self, ctypes, dll_handle):
 
-	def __init__(self, ctypes, dll_handle):
+        self._c = ctypes
 
-		self._c = ctypes
+        class vector3d(self._c.Structure):
+            _fields_ = [
+                ("x", self._c.c_int16),
+                ("y", self._c.c_int16),
+                ("z", self._c.c_int16),
+            ]
 
-		class vector3d(self._c.Structure):
-			_fields_ = [
-				('x', self._c.c_int16),
-				('y', self._c.c_int16),
-				('z', self._c.c_int16)
-				]
-		self._vector3d = vector3d
+        self._vector3d = vector3d
 
-		self._vector3d_add_array = dll_handle.vector3d_add_array
-		self._vector3d_add_array.argtypes = (self._c.POINTER(self._vector3d), self._c.c_int16)
-		self._vector3d_add_array.restype = self._c.POINTER(self._vector3d)
-		self._vector3d_add_array.memsync = [
-			{
-				'p': [0],
-				'l': [1],
-				't': 'vector3d@{ID:d}'.format(ID = id(vector3d))
-				}
-			]
+        self._vector3d_add_array = dll_handle.vector3d_add_array
+        self._vector3d_add_array.argtypes = (
+            self._c.POINTER(self._vector3d),
+            self._c.c_int16,
+        )
+        self._vector3d_add_array.restype = self._c.POINTER(self._vector3d)
+        self._vector3d_add_array.memsync = [
+            {"p": [0], "l": [1], "t": "vector3d@{ID:d}".format(ID=id(vector3d))}
+        ]
 
-	def vector3d_add_array(self, v):
+    def vector3d_add_array(self, v):
 
-		length = len(v)
+        length = len(v)
 
-		def dict_from_struct(in_struct):
-			return {key: getattr(in_struct.contents, key) for key in ['x', 'y', 'z']}
+        def dict_from_struct(in_struct):
+            return {key: getattr(in_struct.contents, key) for key in ["x", "y", "z"]}
 
-		v_ctypes = (self._vector3d * length)()
-		for i in range(length):
-			for key in v[i].keys():
-				setattr(v_ctypes[i], key, v[i][key])
+        v_ctypes = (self._vector3d * length)()
+        for i in range(length):
+            for key in v[i].keys():
+                setattr(v_ctypes[i], key, v[i][key])
 
-		return dict_from_struct(self._vector3d_add_array(
-			self._c.cast(self._c.pointer(v_ctypes), self._c.POINTER(self._vector3d)), length
-			))
+        return dict_from_struct(
+            self._vector3d_add_array(
+                self._c.cast(
+                    self._c.pointer(v_ctypes), self._c.POINTER(self._vector3d)
+                ),
+                length,
+            )
+        )
+
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # TEST(s)
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-@pytest.mark.parametrize('arch,conv,ctypes,dll_handle', get_context(__file__))
+
+@pytest.mark.parametrize("arch,conv,ctypes,dll_handle", get_context(__file__))
 def test_vector3d_add(arch, conv, ctypes, dll_handle):
 
-	v1 = {'x': 5, 'y': 7, 'z': 2}
-	v2 = {'x': 1, 'y': 9, 'z': 8}
-	added = {'x': 6, 'y': 16, 'z': 10}
+    v1 = {"x": 5, "y": 7, "z": 2}
+    v2 = {"x": 1, "y": 9, "z": 8}
+    added = {"x": 6, "y": 16, "z": 10}
 
-	sample = sample_class_a(ctypes, dll_handle)
+    sample = sample_class_a(ctypes, dll_handle)
 
-	assert added == sample.vector3d_add(v1, v2)
+    assert added == sample.vector3d_add(v1, v2)
 
-@pytest.mark.parametrize('arch,conv,ctypes,dll_handle', get_context(__file__))
+
+@pytest.mark.parametrize("arch,conv,ctypes,dll_handle", get_context(__file__))
 def test_vector3d_add_array(arch, conv, ctypes, dll_handle):
 
-	v = [
-		{'x': 5, 'y': 7, 'z': 2},
-		{'x': 1, 'y': 9, 'z': 8}
-		]
-	added = {'x': 6, 'y': 16, 'z': 10}
+    v = [{"x": 5, "y": 7, "z": 2}, {"x": 1, "y": 9, "z": 8}]
+    added = {"x": 6, "y": 16, "z": 10}
 
-	sample = sample_class_b(ctypes, dll_handle)
+    sample = sample_class_b(ctypes, dll_handle)
 
-	assert added == sample.vector3d_add_array(v)
+    assert added == sample.vector3d_add_array(v)

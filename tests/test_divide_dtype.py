@@ -61,8 +61,8 @@ SOURCE = """
 """
 
 EXTRA = {
-	'DTYPES': ['int', 'int8_t', 'int16_t', 'int32_t'] # TODO: 'int64_t' only on win64
-	}
+    "DTYPES": ["int", "int8_t", "int16_t", "int32_t"]  # TODO: 'int64_t' only on win64
+}
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # IMPORT
@@ -70,50 +70,53 @@ EXTRA = {
 
 from .lib.ctypes import get_context
 from .lib.param import (
-	get_int_limits,
-	force_int_overflow,
-	MAX_EXAMPLES,
-	)
+    get_int_limits,
+    force_int_overflow,
+    MAX_EXAMPLES,
+)
 
 from hypothesis import (
-	given,
-	settings,
-	strategies as st,
-	)
+    given,
+    settings,
+    strategies as st,
+)
 import pytest
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # TEST(s)
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-@pytest.mark.parametrize('arch,conv,ctypes,dll_handle', get_context(__file__))
-@pytest.mark.parametrize('bits', [8, 16, 32])
-@given(data = st.data())
-@settings(max_examples = MAX_EXAMPLES)
+
+@pytest.mark.parametrize("arch,conv,ctypes,dll_handle", get_context(__file__))
+@pytest.mark.parametrize("bits", [8, 16, 32])
+@given(data=st.data())
+@settings(max_examples=MAX_EXAMPLES)
 def test_divide_dtype(data, bits, arch, conv, ctypes, dll_handle):
 
-	int_limits = get_int_limits(bits, sign = True)
-	x = data.draw(st.integers(**int_limits))
-	y = data.draw(st.integers(**int_limits))
+    int_limits = get_int_limits(bits, sign=True)
+    x = data.draw(st.integers(**int_limits))
+    y = data.draw(st.integers(**int_limits))
 
-	dtype = getattr(ctypes, 'c_int{BITS:d}'.format(BITS = bits))
-	divide_int = getattr(dll_handle, 'test_divide_int{BITS:d}_t'.format(BITS = bits))
-	divide_int.argtypes = (dtype, dtype, ctypes.POINTER(dtype))
-	divide_int.restype = dtype
+    dtype = getattr(ctypes, "c_int{BITS:d}".format(BITS=bits))
+    divide_int = getattr(dll_handle, "test_divide_int{BITS:d}_t".format(BITS=bits))
+    divide_int.argtypes = (dtype, dtype, ctypes.POINTER(dtype))
+    divide_int.restype = dtype
 
-	rem_ = dtype()
-	quot = divide_int(x, y, rem_)
-	rem = rem_.value
+    rem_ = dtype()
+    quot = divide_int(x, y, rem_)
+    rem = rem_.value
 
-	if y != 0:
+    if y != 0:
 
-		v_quot = force_int_overflow(x // y, bits, True)
-		v_rem = force_int_overflow(abs(x) % abs(y) * (1, -1)[x < 0], bits, True) # HACK C99
-		if v_rem != 0 and ((x < 0) ^ (y < 0)): # HACK C99
-			v_quot = force_int_overflow(v_quot + 1, bits, True)
+        v_quot = force_int_overflow(x // y, bits, True)
+        v_rem = force_int_overflow(
+            abs(x) % abs(y) * (1, -1)[x < 0], bits, True
+        )  # HACK C99
+        if v_rem != 0 and ((x < 0) ^ (y < 0)):  # HACK C99
+            v_quot = force_int_overflow(v_quot + 1, bits, True)
 
-		assert (v_quot, v_rem) == (quot, rem)
+        assert (v_quot, v_rem) == (quot, rem)
 
-	else:
+    else:
 
-		assert (0, 0) == (quot, rem)
+        assert (0, 0) == (quot, rem)

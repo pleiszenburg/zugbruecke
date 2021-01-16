@@ -74,52 +74,55 @@ import pytest
 # CLASSES AND ROUTINES
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+
 class sample_class:
+    def __init__(self, conv, ctypes, dll_handle):
 
-	def __init__(self, conv, ctypes, dll_handle):
+        if conv == "cdll":
+            func_type = ctypes.CFUNCTYPE
+        elif conv == "windll":
+            func_type = ctypes.WINFUNCTYPE
+        else:
+            raise ValueError("unknown calling convention", conv)
+        conveyor_belt = func_type(ctypes.c_int16, ctypes.c_int16)
 
-		if conv == 'cdll':
-			func_type = ctypes.CFUNCTYPE
-		elif conv == 'windll':
-			func_type = ctypes.WINFUNCTYPE
-		else:
-			raise ValueError('unknown calling convention', conv)
-		conveyor_belt = func_type(ctypes.c_int16, ctypes.c_int16)
+        class conveyor_belt_data(ctypes.Structure):
+            _fields_ = [("len", ctypes.c_int16), ("get_data", conveyor_belt)]
 
-		class conveyor_belt_data(ctypes.Structure):
-			_fields_ = [
-				('len', ctypes.c_int16),
-				('get_data', conveyor_belt)
-				]
-		self._conveyor_belt_data = conveyor_belt_data
+        self._conveyor_belt_data = conveyor_belt_data
 
-		self._sum_elements_from_callback_in_struct = dll_handle.sum_elements_from_callback_in_struct
-		self._sum_elements_from_callback_in_struct.argtypes = (ctypes.POINTER(conveyor_belt_data),)
-		self._sum_elements_from_callback_in_struct.restype = ctypes.c_int16
+        self._sum_elements_from_callback_in_struct = (
+            dll_handle.sum_elements_from_callback_in_struct
+        )
+        self._sum_elements_from_callback_in_struct.argtypes = (
+            ctypes.POINTER(conveyor_belt_data),
+        )
+        self._sum_elements_from_callback_in_struct.restype = ctypes.c_int16
 
-		self.DATA = [1, 6, 8, 4, 9, 7, 4, 2, 5, 2]
+        self.DATA = [1, 6, 8, 4, 9, 7, 4, 2, 5, 2]
 
-		@conveyor_belt
-		def get_data(index):
-			print((index, self.DATA[index]))
-			return self.DATA[index]
+        @conveyor_belt
+        def get_data(index):
+            print((index, self.DATA[index]))
+            return self.DATA[index]
 
-		self._get_data = get_data
+        self._get_data = get_data
 
+    def sum_elements_from_callback_in_struct(self):
 
-	def sum_elements_from_callback_in_struct(self):
+        in_struct = self._conveyor_belt_data(len(self.DATA), self._get_data)
 
-		in_struct = self._conveyor_belt_data(len(self.DATA), self._get_data)
+        return self._sum_elements_from_callback_in_struct(in_struct)
 
-		return self._sum_elements_from_callback_in_struct(in_struct)
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # TEST(s)
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-@pytest.mark.parametrize('arch,conv,ctypes,dll_handle', get_context(__file__))
+
+@pytest.mark.parametrize("arch,conv,ctypes,dll_handle", get_context(__file__))
 def test_callback_simple(arch, conv, ctypes, dll_handle):
 
-	sample = sample_class(conv, ctypes, dll_handle)
+    sample = sample_class(conv, ctypes, dll_handle)
 
-	assert 48 == sample.sum_elements_from_callback_in_struct()
+    assert 48 == sample.sum_elements_from_callback_in_struct()

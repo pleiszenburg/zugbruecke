@@ -57,8 +57,9 @@ import pytest
 # TEST(s)
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-@pytest.mark.parametrize('arch,conv,ctypes,dll_handle', get_context(__file__))
+
+@pytest.mark.parametrize("arch,conv,ctypes,dll_handle", get_context(__file__))
 def test_missingroutine(arch, conv, ctypes, dll_handle):
 
-	with pytest.raises(AttributeError):
-		missing_routine = dll_handle.missing_routine
+    with pytest.raises(AttributeError):
+        missing_routine = dll_handle.missing_routine

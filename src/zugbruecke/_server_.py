@@ -41,51 +41,40 @@ from .core.session_server import session_server_class
 # ROUTINES
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+
 def run():
 
-	# Parse arguments comming from unix side
-	parser = argparse.ArgumentParser()
-	parser.add_argument(
-		'--id', type = str, nargs = 1
-		)
-	parser.add_argument(
-		'--port_socket_unix', type = int, nargs = 1
-		)
-	parser.add_argument(
-		'--port_socket_wine', type = int, nargs = 1
-		)
-	parser.add_argument(
-		'--log_level', type = int, nargs = 1
-		)
-	parser.add_argument(
-		'--log_write', type = int, nargs = 1
-		)
-	parser.add_argument(
-		'--timeout_start', type = float, nargs = 1
-		)
-	args = parser.parse_args()
+    # Parse arguments comming from unix side
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--id", type=str, nargs=1)
+    parser.add_argument("--port_socket_unix", type=int, nargs=1)
+    parser.add_argument("--port_socket_wine", type=int, nargs=1)
+    parser.add_argument("--log_level", type=int, nargs=1)
+    parser.add_argument("--log_write", type=int, nargs=1)
+    parser.add_argument("--timeout_start", type=float, nargs=1)
+    args = parser.parse_args()
 
-	# Generate parameter dict
-	parameter = {
-		'id': args.id[0],
-		'platform': 'WINE',
-		'stdout': False,
-		'stderr': False,
-		'log_write': bool(args.log_write[0]),
-		'log_level': args.log_level[0],
-		'port_socket_wine': args.port_socket_wine[0],
-		'port_socket_unix': args.port_socket_unix[0],
-		'timeout_start': args.timeout_start[0]
-		}
+    # Generate parameter dict
+    parameter = {
+        "id": args.id[0],
+        "platform": "WINE",
+        "stdout": False,
+        "stderr": False,
+        "log_write": bool(args.log_write[0]),
+        "log_level": args.log_level[0],
+        "port_socket_wine": args.port_socket_wine[0],
+        "port_socket_unix": args.port_socket_unix[0],
+        "timeout_start": args.timeout_start[0],
+    }
 
-	# Fire up wine server session with parsed parameters
-	session = session_server_class(parameter['id'], parameter)
+    # Fire up wine server session with parsed parameters
+    session = session_server_class(parameter["id"], parameter)
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # MAIN
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
-	run()
+    run()

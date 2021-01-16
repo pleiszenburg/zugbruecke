@@ -57,10 +57,11 @@ import pytest
 # TEST(s)
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-@pytest.mark.parametrize('arch,conv,ctypes,dll_handle', get_context(__file__))
+
+@pytest.mark.parametrize("arch,conv,ctypes,dll_handle", get_context(__file__))
 def test_argtypes_neither_list_nor_tuple(arch, conv, ctypes, dll_handle):
 
-	sqrt_int = dll_handle.sqrt_int
+    sqrt_int = dll_handle.sqrt_int
 
-	with pytest.raises(TypeError):
-		sqrt_int.argtypes = ctypes.c_int16
+    with pytest.raises(TypeError):
+        sqrt_int.argtypes = ctypes.c_int16

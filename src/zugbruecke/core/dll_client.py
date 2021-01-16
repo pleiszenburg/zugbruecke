@@ -38,103 +38,103 @@ from .routine_client import routine_client_class
 # DLL CLIENT CLASS
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-class dll_client_class(): # Representing one idividual dll to be called into, returned by LoadLibrary
 
+class dll_client_class:  # Representing one idividual dll to be called into, returned by LoadLibrary
+    def __init__(self, parent_session, dll_name, dll_type, hash_id):
 
-	def __init__(self, parent_session, dll_name, dll_type, hash_id):
+        # Store dll parameters name, path and type
+        self.name = dll_name
+        self.calling_convention = dll_type
 
-		# Store dll parameters name, path and type
-		self.name = dll_name
-		self.calling_convention = dll_type
+        # Store pointer to zugbruecke session
+        self.session = parent_session
 
-		# Store pointer to zugbruecke session
-		self.session = parent_session
+        # For convenience ...
+        self.rpc_client = self.session.rpc_client
 
-		# For convenience ...
-		self.rpc_client = self.session.rpc_client
+        # Get handle on log
+        self.log = self.session.log
 
-		# Get handle on log
-		self.log = self.session.log
+        # Store my hash id
+        self.hash_id = hash_id
 
-		# Store my hash id
-		self.hash_id = hash_id
+        # Start dict for dll routines
+        self.routines = {}
 
-		# Start dict for dll routines
-		self.routines = {}
+        # Expose routine registration
+        self.__register_routine_on_server__ = getattr(
+            self.rpc_client, self.hash_id + "_register_routine"
+        )
 
-		# Expose routine registration
-		self.__register_routine_on_server__ = getattr(self.rpc_client, self.hash_id + '_register_routine')
+        # Expose string reprentation of dll object
+        self.__get_repr__ = getattr(self.rpc_client, self.hash_id + "_repr")
 
-		# Expose string reprentation of dll object
-		self.__get_repr__ = getattr(self.rpc_client, self.hash_id + '_repr')
+    def __attach_to_routine__(self, name):
 
+        # Status log
+        self.log.out(
+            '[dll-client] Trying to attach to routine "%s" in DLL file "%s" ...'
+            % (str(name), self.name)
+        )
 
-	def __attach_to_routine__(self, name):
+        # Log status
+        self.log.out("[dll-client] ... unknown, registering  ...")
 
-		# Status log
-		self.log.out('[dll-client] Trying to attach to routine "%s" in DLL file "%s" ...' % (str(name), self.name))
+        # Only if name is a string ...
+        if isinstance(name, str):
 
-		# Log status
-		self.log.out('[dll-client] ... unknown, registering  ...')
+            # Original ctypes does that
+            if name.startswith("__") and name.endswith("__"):
+                raise AttributeError(name)
 
-		# Only if name is a string ...
-		if isinstance(name, str):
+        try:
 
-			# Original ctypes does that
-			if name.startswith('__') and name.endswith('__'):
-				raise AttributeError(name)
+            # Register routine in wine
+            self.__register_routine_on_server__(name)
 
-		try:
+        except AttributeError as e:
 
-			# Register routine in wine
-			self.__register_routine_on_server__(name)
+            # Log status
+            self.log.out("[dll-client] ... failed!")
 
-		except AttributeError as e:
+            raise e
 
-			# Log status
-			self.log.out('[dll-client] ... failed!')
+        # Create new instance of routine_client
+        self.routines[name] = routine_client_class(self, name)
 
-			raise e
+        # Log status
+        self.log.out("[dll-client] ... registered (unconfigured) ...")
 
-		# Create new instance of routine_client
-		self.routines[name] = routine_client_class(self, name)
+        # If name is a string ...
+        if isinstance(name, str):
 
-		# Log status
-		self.log.out('[dll-client] ... registered (unconfigured) ...')
+            # Set attribute for future use
+            setattr(self, name, self.routines[name])
 
-		# If name is a string ...
-		if isinstance(name, str):
+        # Log status
+        self.log.out("[dll-client] ... return handler.")
 
-			# Set attribute for future use
-			setattr(self, name, self.routines[name])
+        # Return handler
+        return self.routines[name]
 
-		# Log status
-		self.log.out('[dll-client] ... return handler.')
+    def __getattr__(self, name):
 
-		# Return handler
-		return self.routines[name]
+        if name in ["__objclass__"]:
+            raise AttributeError(name)
 
+        return self.__attach_to_routine__(name)
 
-	def __getattr__(self, name):
+    def __getitem__(self, name_or_ordinal):
 
-		if name in ['__objclass__']:
-			raise AttributeError(name)
+        # Is it in dict?
+        if name_or_ordinal in self.routines.keys():
 
-		return self.__attach_to_routine__(name)
+            # Return handle
+            return self.routines[name_or_ordinal]
 
+        # Generate new handle and return
+        return self.__attach_to_routine__(name_or_ordinal)
 
-	def __getitem__(self, name_or_ordinal):
+    def __repr__(self):
 
-		# Is it in dict?
-		if name_or_ordinal in self.routines.keys():
-
-			# Return handle
-			return self.routines[name_or_ordinal]
-
-		# Generate new handle and return
-		return self.__attach_to_routine__(name_or_ordinal)
-
-
-	def __repr__(self):
-
-		return self.__get_repr__()
+        return self.__get_repr__()

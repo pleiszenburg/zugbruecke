@@ -31,26 +31,34 @@ specific language governing rights and limitations under the License.
 # TYPES
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+
 class config_parser_error(Exception):
-	pass
+    pass
+
 
 class wine_error(Exception):
-	pass
+    pass
+
 
 class data_error(Exception):
-	pass
+    pass
+
 
 class data_flag_error(data_error):
-	pass
+    pass
+
 
 class data_type_error(data_error):
-	pass
+    pass
+
 
 class data_group_error(data_error):
-	pass
+    pass
+
 
 class data_memsyncpath_error(data_error):
-	pass
+    pass
+
 
 class data_memsyncsyntax_error(data_error):
-	pass
+    pass

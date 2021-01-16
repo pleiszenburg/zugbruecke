@@ -43,50 +43,47 @@ import traceback
 # CONST
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-ZB_CONFIG_FN = '.zugbruecke.json'
+ZB_CONFIG_FN = ".zugbruecke.json"
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # CLASSES AND ROUTINES
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+
 def run_test(test_module, test_routine):
 
-	cwd = os.path.dirname(os.path.abspath(__file__))
+    cwd = os.path.dirname(os.path.abspath(__file__))
 
-	test_fld = None
-	with open('setup.cfg', 'r') as f:
-		for line in f:
-			if not 'testpaths = ' in line:
-				continue
-			test_fld = line.split(' = ', 1)[1].strip()
-			break
-	if test_fld is None:
-		raise # TODO
-	if not os.path.isdir(os.path.join(cwd, test_fld)):
-		raise # TODO
+    test_fld = None
+    with open("setup.cfg", "r") as f:
+        for line in f:
+            if not "testpaths = " in line:
+                continue
+            test_fld = line.split(" = ", 1)[1].strip()
+            break
+    if test_fld is None:
+        raise  # TODO
+    if not os.path.isdir(os.path.join(cwd, test_fld)):
+        raise  # TODO
 
-	sys.path.append(os.path.join(cwd, test_fld))
+    sys.path.append(os.path.join(cwd, test_fld))
 
-	getattr(importlib.import_module(test_module), test_routine)()
+    getattr(importlib.import_module(test_module), test_routine)()
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # INIT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
-	parser = argparse.ArgumentParser()
-	parser.add_argument(
-		'-m', '--module', type = str, nargs = 1
-		)
-	parser.add_argument(
-		'-r', '--routine', type = str, nargs = 1
-		)
-	args = parser.parse_args()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-m", "--module", type=str, nargs=1)
+    parser.add_argument("-r", "--routine", type=str, nargs=1)
+    args = parser.parse_args()
 
-	try:
-		run_test(args.module[0], args.routine[0])
-	except:
-		traceback.print_exc()
+    try:
+        run_test(args.module[0], args.routine[0])
+    except:
+        traceback.print_exc()

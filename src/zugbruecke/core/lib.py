@@ -41,36 +41,37 @@ import socket
 # LIBRARY ROUTINES
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+
 def get_free_port():
 
-	s = socket.socket()
-	s.bind(('', 0))
-	port = s.getsockname()[1]
-	s.close()
+    s = socket.socket()
+    s.bind(("", 0))
+    port = s.getsockname()[1]
+    s.close()
 
-	return port
+    return port
 
 
 def get_hash_of_string(str_in):
 
-	return hashlib.sha256(str_in.encode('utf-8')).hexdigest()
+    return hashlib.sha256(str_in.encode("utf-8")).hexdigest()
 
 
-def get_location_of_file(filename = ''):
+def get_location_of_file(filename=""):
 
-	if filename == '':
-		filename = __file__
+    if filename == "":
+        filename = __file__
 
-	return os.path.split(os.path.realpath(filename))[0]
+    return os.path.split(os.path.realpath(filename))[0]
 
 
 def get_randhashstr(dig):
 
-	# Return hash string with dig digits
-	return (('%0' + str(dig) + 'x') % random.randrange(16**dig))
+    # Return hash string with dig digits
+    return ("%0" + str(dig) + "x") % random.randrange(16 ** dig)
 
 
 def generate_session_id():
 
-	# A session id by default is an 8 digit hash string
-	return get_randhashstr(8)
+    # A session id by default is an 8 digit hash string
+    return get_randhashstr(8)

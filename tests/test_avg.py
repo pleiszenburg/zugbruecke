@@ -66,55 +66,60 @@ import pytest
 # CLASSES AND ROUTINES
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+
 class sample_class:
+    def __init__(self, ctypes, dll_handle):
+        class DoubleArrayType:
+            def from_param(self, param):
+                typename = type(param).__name__
+                if hasattr(self, "from_" + typename):
+                    return getattr(self, "from_" + typename)(param)
+                elif isinstance(param, ctypes.Array):
+                    return param
+                else:
+                    raise TypeError("Can't convert %s" % typename)
 
-	def __init__(self, ctypes, dll_handle):
+            def from_array(self, param):
+                if param.typecode != "d":
+                    raise TypeError("must be an array of doubles")
+                ptr, _ = param.buffer_info()
+                return ctypes.cast(ptr, ctypes.POINTER(ctypes.c_double))
 
-		class DoubleArrayType:
-			def from_param(self, param):
-				typename = type(param).__name__
-				if hasattr(self, 'from_' + typename):
-					return getattr(self, 'from_' + typename)(param)
-				elif isinstance(param, ctypes.Array):
-					return param
-				else:
-					raise TypeError('Can\'t convert %s' % typename)
-			def from_array(self, param):
-				if param.typecode != 'd':
-					raise TypeError('must be an array of doubles')
-				ptr, _ = param.buffer_info()
-				return ctypes.cast(ptr, ctypes.POINTER(ctypes.c_double))
-			def from_list(self, param):
-				val = ((ctypes.c_double)*len(param))(*param)
-				return val
-			from_tuple = from_list
-			def from_ndarray(self, param):
-				return param.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
+            def from_list(self, param):
+                val = ((ctypes.c_double) * len(param))(*param)
+                return val
 
-		DoubleArray = DoubleArrayType()
-		self._avg = dll_handle.avg
-		self._avg.memsync = [ # Regular ctypes on Windows should ignore this statement
-			{
-				'p': [0], # "path" to argument containing the pointer
-				'l': [1], # "path" to argument containing the length
-				't': 'c_double', # type of argument (optional, default char/byte): sizeof(type) * length == bytes
-				'_c': DoubleArray # custom datatype
-				}
-			]
-		self._avg.argtypes = (DoubleArray, ctypes.c_int)
-		self._avg.restype = ctypes.c_double
+            from_tuple = from_list
 
-	def avg(self, values):
+            def from_ndarray(self, param):
+                return param.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
 
-		return self._avg(values, len(values))
+        DoubleArray = DoubleArrayType()
+        self._avg = dll_handle.avg
+        self._avg.memsync = [  # Regular ctypes on Windows should ignore this statement
+            {
+                "p": [0],  # "path" to argument containing the pointer
+                "l": [1],  # "path" to argument containing the length
+                "t": "c_double",  # type of argument (optional, default char/byte): sizeof(type) * length == bytes
+                "_c": DoubleArray,  # custom datatype
+            }
+        ]
+        self._avg.argtypes = (DoubleArray, ctypes.c_int)
+        self._avg.restype = ctypes.c_double
+
+    def avg(self, values):
+
+        return self._avg(values, len(values))
+
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # TEST(s)
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-@pytest.mark.parametrize('arch,conv,ctypes,dll_handle', get_context(__file__))
+
+@pytest.mark.parametrize("arch,conv,ctypes,dll_handle", get_context(__file__))
 def test_avg(arch, conv, ctypes, dll_handle):
 
-	sample = sample_class(ctypes, dll_handle)
+    sample = sample_class(ctypes, dll_handle)
 
-	assert pytest.approx(2.5, 0.0000001) == sample.avg([1, 2, 3, 4])
+    assert pytest.approx(2.5, 0.0000001) == sample.avg([1, 2, 3, 4])

@@ -41,101 +41,99 @@ from .routine_server import routine_server_class
 # DLL SERVER CLASS
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-class dll_server_class(): # Representing one idividual dll to be called into
 
+class dll_server_class:  # Representing one idividual dll to be called into
+    def __init__(self, parent_session, dll_name, dll_type, handler):
 
-	def __init__(self, parent_session, dll_name, dll_type, handler):
+        # Store dll parameters name, path and type
+        self.name = dll_name
+        self.calling_convention = dll_type
 
-		# Store dll parameters name, path and type
-		self.name = dll_name
-		self.calling_convention = dll_type
+        # Store pointer to _server_ session
+        self.session = parent_session
 
-		# Store pointer to _server_ session
-		self.session = parent_session
+        # Get handle on log
+        self.log = self.session.log
 
-		# Get handle on log
-		self.log = self.session.log
+        # Store handler on dll
+        self.handler = handler
 
-		# Store handler on dll
-		self.handler = handler
+        # Start dict for dll routines
+        self.routines = {}
 
-		# Start dict for dll routines
-		self.routines = {}
+        # Hash my own path as unique ID
+        self.hash_id = get_hash_of_string(self.name)
 
-		# Hash my own path as unique ID
-		self.hash_id = get_hash_of_string(self.name)
+        # Export registration of my functions directly
+        self.session.rpc_server.register_function(
+            self.__get_repr__, self.hash_id + "_repr"
+        )
+        self.session.rpc_server.register_function(
+            self.__register_routine__, self.hash_id + "_register_routine"
+        )
 
-		# Export registration of my functions directly
-		self.session.rpc_server.register_function(
-			self.__get_repr__,
-			self.hash_id + '_repr'
-			)
-		self.session.rpc_server.register_function(
-			self.__register_routine__,
-			self.hash_id + '_register_routine'
-			)
+    def __get_repr__(self):
 
+        return self.handler.__repr__()
 
-	def __get_repr__(self):
+    def __register_routine__(self, routine_name):
+        """
+        Exposed interface
+        """
 
-		return self.handler.__repr__()
+        # Just in case this routine is already known
+        if routine_name in self.routines.keys():
+            return True  # Success
 
+        # Log status
+        self.log.out(
+            '[dll-server] Trying to access "%s" in DLL file "%s" ...'
+            % (str(routine_name), self.name)
+        )
 
-	def __register_routine__(self, routine_name):
-		"""
-		Exposed interface
-		"""
+        # Try to attach to routine with ctypes
+        try:
 
-		# Just in case this routine is already known
-		if routine_name in self.routines.keys():
-			return True # Success
+            # If name is a string
+            if isinstance(routine_name, str):
 
-		# Log status
-		self.log.out('[dll-server] Trying to access "%s" in DLL file "%s" ...' % (str(routine_name), self.name))
+                # Get handler on routine in dll as attribute
+                routine_handler = getattr(self.handler, routine_name)
 
-		# Try to attach to routine with ctypes
-		try:
+            # If name is an integer
+            else:
 
-			# If name is a string
-			if isinstance(routine_name, str):
+                # Get handler on routine in dll as item
+                routine_handler = self.handler[routine_name]
 
-				# Get handler on routine in dll as attribute
-				routine_handler = getattr(
-					self.handler, routine_name
-					)
+        except AttributeError as e:
 
-			# If name is an integer
-			else:
+            # Log status
+            self.log.out("[dll-server] ... failed!")
 
-				# Get handler on routine in dll as item
-				routine_handler = self.handler[routine_name]
+            raise e
 
-		except AttributeError as e:
+        except Exception as e:
 
-			# Log status
-			self.log.out('[dll-server] ... failed!')
+            # Push traceback to log
+            self.log.err(traceback.format_exc())
 
-			raise e
+            raise e
 
-		except Exception as e:
+        # Generate new instance of routine class
+        self.routines[routine_name] = routine_server_class(
+            self, routine_name, routine_handler
+        )
 
-			# Push traceback to log
-			self.log.err(traceback.format_exc())
+        # Export call and configration directly
+        self.session.rpc_server.register_function(
+            self.routines[routine_name],
+            self.hash_id + "_" + str(routine_name) + "_handle_call",
+        )
+        self.session.rpc_server.register_function(
+            self.routines[routine_name].__configure__,
+            self.hash_id + "_" + str(routine_name) + "_configure",
+        )
 
-			raise e
-
-		# Generate new instance of routine class
-		self.routines[routine_name] = routine_server_class(self, routine_name, routine_handler)
-
-		# Export call and configration directly
-		self.session.rpc_server.register_function(
-			self.routines[routine_name],
-			self.hash_id + '_' + str(routine_name) + '_handle_call'
-			)
-		self.session.rpc_server.register_function(
-			self.routines[routine_name].__configure__,
-			self.hash_id + '_' + str(routine_name) + '_configure'
-			)
-
-		# Log status
-		self.log.out('[dll-server] ... done.')
+        # Log status
+        self.log.out("[dll-server] ... done.")

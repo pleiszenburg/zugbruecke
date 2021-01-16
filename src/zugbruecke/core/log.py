@@ -43,177 +43,183 @@ import time
 
 # https://en.wikipedia.org/wiki/ANSI_escape_code
 c = {
-	'RESET': '\033[0;0m',
-	'BOLD': '\033[;1m',
-	'REVERSE': '\033[;7m',
-	'GREY': '\033[1;30m',
-	'RED': '\033[1;31m',
-	'GREEN': '\033[1;32m',
-	'YELLOW': '\033[1;33m',
-	'BLUE': '\033[1;34m',
-	'MAGENTA': '\033[1;35m',
-	'CYAN': '\033[1;36m',
-	'WHITE': '\033[1;37m'
-	}
+    "RESET": "\033[0;0m",
+    "BOLD": "\033[;1m",
+    "REVERSE": "\033[;7m",
+    "GREY": "\033[1;30m",
+    "RED": "\033[1;31m",
+    "GREEN": "\033[1;32m",
+    "YELLOW": "\033[1;33m",
+    "BLUE": "\033[1;34m",
+    "MAGENTA": "\033[1;35m",
+    "CYAN": "\033[1;36m",
+    "WHITE": "\033[1;37m",
+}
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # LOG CLASS
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+
 class log_class:
+    def __init__(self, session_id, parameter, rpc_server=None, rpc_client=None):
 
+        # Store id and parameter
+        self.id = session_id
+        self.p = parameter
 
-	def __init__(self, session_id, parameter, rpc_server = None, rpc_client = None):
+        # Log is up
+        self.up = True
 
-		# Store id and parameter
-		self.id = session_id
-		self.p = parameter
+        # Start arrays for stdout and stderr logs
+        self.log = {}
+        self.log["out"] = []
+        self.log["err"] = []
 
-		# Log is up
-		self.up = True
+        # Determine platform
+        if "platform" not in self.p.keys():
+            self.p["platform"] = "UNIX"
 
-		# Start arrays for stdout and stderr logs
-		self.log = {}
-		self.log['out'] = []
-		self.log['err'] = []
+        # Open logfiles
+        if self.p["log_write"]:
+            self.f = {}
+            self.f["out"] = "%s_%s.txt" % (self.p["platform"], "out")
+            self.f["err"] = "%s_%s.txt" % (self.p["platform"], "err")
 
-		# Determine platform
-		if 'platform' not in self.p.keys():
-			self.p['platform'] = 'UNIX'
+        # Fire up server if required
+        self.server_port = 0
+        if rpc_server is not None:
+            self.server = rpc_server
+            self.server.register_function(
+                self.__receive_message_from_client__, "transfer_message"
+            )
 
-		# Open logfiles
-		if self.p['log_write']:
-			self.f = {}
-			self.f['out'] = '%s_%s.txt' % (self.p['platform'], 'out')
-			self.f['err'] = '%s_%s.txt' % (self.p['platform'], 'err')
+        # Fire up client if required
+        if rpc_client is not None:
+            self.client = rpc_client
 
-		# Fire up server if required
-		self.server_port = 0
-		if rpc_server is not None:
-			self.server = rpc_server
-			self.server.register_function(self.__receive_message_from_client__, 'transfer_message')
+    def terminate(self):
 
-		# Fire up client if required
-		if rpc_client is not None:
-			self.client = rpc_client
+        if self.up:
 
+            # Nothing to do, just a placeholder
 
-	def terminate(self):
+            # Log down
+            self.up = False
 
-		if self.up:
+    def __append_message_to_log__(self, message):
 
-			# Nothing to do, just a placeholder
+        self.log[message["pipe"]].append(message)
 
-			# Log down
-			self.up = False
+    def __compile_message_dict_list__(self, message, pipe_name, level):
 
+        message_lines = []
 
-	def __append_message_to_log__(self, message):
+        if not isinstance(message, str):
+            message = pformat(message)
 
-		self.log[message['pipe']].append(message)
+        for line in message.split("\n"):
+            if line.strip() != "":
+                message_lines.append(
+                    {
+                        "level": level,
+                        "platform": self.p["platform"],
+                        "id": self.id,
+                        "time": round(time.time(), 2),
+                        "pipe": pipe_name,
+                        "cnt": line,
+                    }
+                )
 
+        return message_lines
 
-	def __compile_message_dict_list__(self, message, pipe_name, level):
+    def __print_message__(self, messages):
 
-		message_lines = []
+        message_list = []
 
-		if not isinstance(message, str):
-			message = pformat(message)
+        message_list.append(
+            c["GREY"] + "(%.2f/%s) " % (messages["time"], messages["id"]) + c["RESET"]
+        )
+        if messages["platform"] == "UNIX":
+            message_list.append(c["BLUE"])
+        elif messages["platform"] == "WINE":
+            message_list.append(c["MAGENTA"])
+        else:
+            message_list.append(c["WHITE"])
+        message_list.append("%s " % messages["platform"] + c["RESET"])
+        if messages["pipe"] == "out":
+            message_list.append(c["GREEN"])
+        elif messages["pipe"] == "err":
+            message_list.append(c["RED"])
+        message_list.append(messages["pipe"][0] + c["RESET"])
+        message_list.append(": ")
+        if any(
+            ext in messages["cnt"]
+            for ext in [
+                "fixme:",
+                "err:",
+                "wine: ",
+                "wine client error",
+                ":warn:",
+                ":trace:",
+            ]
+        ):
+            message_list.append(c["GREY"])
+        else:
+            message_list.append(c["WHITE"])
+        message_list.append(messages["cnt"] + c["RESET"])
+        message_list.append("\n")
 
-		for line in message.split('\n'):
-			if line.strip() != '':
-				message_lines.append({
-					'level': level,
-					'platform': self.p['platform'],
-					'id': self.id,
-					'time': round(time.time(), 2),
-					'pipe': pipe_name,
-					'cnt': line
-					})
+        message_string = "".join(message_list)
 
-		return message_lines
+        if messages["pipe"] == "out":
+            sys.stdout.write(message_string)
+        elif messages["pipe"] == "err":
+            sys.stderr.write(message_string)
+        else:
+            raise ValueError("unknown pipe name")
 
+    def __process_messages__(self, messages, pipe, level):
 
-	def __print_message__(self, messages):
+        message_dict_list = []
+        for message in messages:
+            message_dict_list.extend(
+                self.__compile_message_dict_list__(message, pipe, level)
+            )
 
-		message_list = []
+        for mesage_dict in message_dict_list:
+            self.__process_message_dict__(mesage_dict)
 
-		message_list.append(c['GREY'] + '(%.2f/%s) ' % (messages['time'], messages['id']) + c['RESET'])
-		if messages['platform'] == 'UNIX':
-			message_list.append(c['BLUE'])
-		elif messages['platform'] == 'WINE':
-			message_list.append(c['MAGENTA'])
-		else:
-			message_list.append(c['WHITE'])
-		message_list.append('%s ' % messages['platform'] + c['RESET'])
-		if messages['pipe'] == 'out':
-			message_list.append(c['GREEN'])
-		elif messages['pipe'] == 'err':
-			message_list.append(c['RED'])
-		message_list.append(messages['pipe'][0] + c['RESET'])
-		message_list.append(': ')
-		if any(ext in messages['cnt'] for ext in ['fixme:', 'err:', 'wine: ', 'wine client error', ':warn:', ':trace:']):
-			message_list.append(c['GREY'])
-		else:
-			message_list.append(c['WHITE'])
-		message_list.append(messages['cnt'] + c['RESET'])
-		message_list.append('\n')
+    def __process_message_dict__(self, mesage_dict):
 
-		message_string = ''.join(message_list)
+        self.__append_message_to_log__(mesage_dict)
+        if self.p["std" + mesage_dict["pipe"]]:
+            self.__print_message__(mesage_dict)
+        if hasattr(self, "client"):
+            self.__push_message_to_server__(mesage_dict)
+        if self.p["log_write"]:
+            self.__store_message__(mesage_dict)
 
-		if messages['pipe'] == 'out':
-			sys.stdout.write(message_string)
-		elif messages['pipe'] == 'err':
-			sys.stderr.write(message_string)
-		else:
-			raise ValueError('unknown pipe name')
+    def __push_message_to_server__(self, message):
 
+        self.client.transfer_message(json.dumps(message))
 
-	def __process_messages__(self, messages, pipe, level):
+    def __receive_message_from_client__(self, message):
 
-		message_dict_list = []
-		for message in messages:
-			message_dict_list.extend(self.__compile_message_dict_list__(message, pipe, level))
+        self.__process_message_dict__(json.loads(message))
 
-		for mesage_dict in message_dict_list:
-			self.__process_message_dict__(mesage_dict)
+    def __store_message__(self, message):
 
+        with open(self.f[message["pipe"]], "a+") as f:
+            f.write(json.dumps(message) + "\n")
 
-	def __process_message_dict__(self, mesage_dict):
+    def out(self, *messages, level=1):
 
-			self.__append_message_to_log__(mesage_dict)
-			if self.p['std' + mesage_dict['pipe']]:
-				self.__print_message__(mesage_dict)
-			if hasattr(self, 'client'):
-				self.__push_message_to_server__(mesage_dict)
-			if self.p['log_write']:
-				self.__store_message__(mesage_dict)
+        if level <= self.p["log_level"]:
+            self.__process_messages__(messages, "out", level)
 
+    def err(self, *messages, level=1):
 
-	def __push_message_to_server__(self, message):
-
-		self.client.transfer_message(json.dumps(message))
-
-
-	def __receive_message_from_client__(self, message):
-
-		self.__process_message_dict__(json.loads(message))
-
-
-	def __store_message__(self, message):
-
-		with open(self.f[message['pipe']], 'a+') as f:
-			f.write(json.dumps(message) + '\n')
-
-
-	def out(self, *messages, level = 1):
-
-		if level <= self.p['log_level']:
-			self.__process_messages__(messages, 'out', level)
-
-
-	def err(self, *messages, level = 1):
-
-		if level <= self.p['log_level']:
-			self.__process_messages__(messages, 'err', level)
+        if level <= self.p["log_level"]:
+            self.__process_messages__(messages, "err", level)

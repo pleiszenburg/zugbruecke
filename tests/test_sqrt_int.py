@@ -57,11 +57,12 @@ import pytest
 # TEST(s)
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-@pytest.mark.parametrize('arch,conv,ctypes,dll_handle', get_context(__file__))
+
+@pytest.mark.parametrize("arch,conv,ctypes,dll_handle", get_context(__file__))
 def test_sqrt_int(arch, conv, ctypes, dll_handle):
 
-	sqrt_int = dll_handle.sqrt_int
-	sqrt_int.argtypes = (ctypes.c_int16,)
-	sqrt_int.restype = ctypes.c_int16
+    sqrt_int = dll_handle.sqrt_int
+    sqrt_int.argtypes = (ctypes.c_int16,)
+    sqrt_int.restype = ctypes.c_int16
 
-	assert 3 == sqrt_int(9)
+    assert 3 == sqrt_int(9)

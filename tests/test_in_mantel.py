@@ -71,28 +71,33 @@ import pytest
 # CLASSES AND ROUTINES
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+
 class sample_class:
+    def __init__(self, ctypes, dll_handle):
 
-	def __init__(self, ctypes, dll_handle):
+        self.in_mandel = dll_handle.in_mandel
+        self.in_mandel.argtypes = (ctypes.c_double, ctypes.c_double, ctypes.c_int)
+        self.in_mandel.restype = (
+            ctypes.c_int
+        )  # TODO: sizeof(int) win32 vs win64 vs unix
 
-		self.in_mandel = dll_handle.in_mandel
-		self.in_mandel.argtypes = (ctypes.c_double, ctypes.c_double, ctypes.c_int)
-		self.in_mandel.restype = ctypes.c_int # TODO: sizeof(int) win32 vs win64 vs unix
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # TEST(s)
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-@pytest.mark.parametrize('arch,conv,ctypes,dll_handle', get_context(__file__))
+
+@pytest.mark.parametrize("arch,conv,ctypes,dll_handle", get_context(__file__))
 def test_in_mantel_inside(arch, conv, ctypes, dll_handle):
 
-	sample = sample_class(ctypes, dll_handle)
+    sample = sample_class(ctypes, dll_handle)
 
-	assert 1 == sample.in_mandel(0.0, 0.0, 500)
+    assert 1 == sample.in_mandel(0.0, 0.0, 500)
 
-@pytest.mark.parametrize('arch,conv,ctypes,dll_handle', get_context(__file__))
+
+@pytest.mark.parametrize("arch,conv,ctypes,dll_handle", get_context(__file__))
 def test_in_mantel_outside(arch, conv, ctypes, dll_handle):
 
-	sample = sample_class(ctypes, dll_handle)
+    sample = sample_class(ctypes, dll_handle)
 
-	assert 0 == sample.in_mandel(2.0, 1.0, 500)
+    assert 0 == sample.in_mandel(2.0, 1.0, 500)

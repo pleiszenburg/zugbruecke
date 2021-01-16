@@ -39,12 +39,20 @@ import pytest
 # TEST(s)
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-@pytest.mark.parametrize('arch,conv,ctypes,dll_path', get_context(__file__, handle = False))
+
+@pytest.mark.parametrize(
+    "arch,conv,ctypes,dll_path", get_context(__file__, handle=False)
+)
 def test_find_library(arch, conv, ctypes, dll_path):
 
-	assert ctypes._util.find_library('kernel32') == 'C:\\windows\\system32\\kernel32.dll'
+    assert (
+        ctypes._util.find_library("kernel32") == "C:\\windows\\system32\\kernel32.dll"
+    )
 
-@pytest.mark.parametrize('arch,conv,ctypes,dll_path', get_context(__file__, handle = False))
+
+@pytest.mark.parametrize(
+    "arch,conv,ctypes,dll_path", get_context(__file__, handle=False)
+)
 def test_find_msvcrt(arch, conv, ctypes, dll_path):
 
-	assert ctypes._util.find_msvcrt() == None
+    assert ctypes._util.find_msvcrt() == None
