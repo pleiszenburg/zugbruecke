@@ -6,11 +6,11 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	src/zugbruecke/core/session.py: Classes for managing zugbruecke sessions
+    src/zugbruecke/core/session.py: Classes for managing zugbruecke sessions
 
-	Required to run on platform / side: [UNIX]
+    Required to run on platform / side: [UNIX]
 
-	Copyright (C) 2017-2021 Sebastian M. Ernst <ernst@pleiszenburg.de>
+    Copyright (C) 2017-2021 Sebastian M. Ernst <ernst@pleiszenburg.de>
 
 <LICENSE_BLOCK>
 The contents of this file are subject to the GNU Lesser General Public License
@@ -45,7 +45,7 @@ from .interpreter import interpreter_session_class
 from .lib import get_free_port
 from .log import log_class
 from .rpc import mp_client_safe_connect, mp_server_class
-from ..wenv import env_class
+from .wenv import Env
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -349,7 +349,9 @@ class session_client_class:
         self.log.out("[session-client] STARTING (STAGE 2) ...")
 
         # Ensure a working Wine-Python environment
-        env_class(self.p).ensure()
+        env = Env(**self.p)
+        env.ensure()
+        env.setup_zugbruecke()
 
         # Prepare python command for ctypes server or interpreter
         self.__prepare_python_command__()
