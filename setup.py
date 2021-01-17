@@ -94,19 +94,14 @@ setup(
     scripts=[],
     include_package_data=True,
     python_requires=">=3.{MINOR:d}".format(MINOR=python_minor_min),
-    install_requires=[],
+    install_requires=["wenv"],
     extras_require={
         "dev": requirements_test
         + ["Jinja2", pls, "setuptools", "Sphinx", "sphinx_rtd_theme", "twine", "wheel"],
         "certifi": ["certifi"],
     },
     zip_safe=False,
-    entry_points={
-        "console_scripts": [
-            "wenv = zugbruecke.wenv:cli",
-            "_wenv_python = zugbruecke.wenv:shebang",
-        ]
-    },
+    entry_points={},
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Intended Audience :: Developers",

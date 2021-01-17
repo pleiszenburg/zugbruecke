@@ -22,6 +22,7 @@ Changes
 | commands   | - ``wine-python``                                 + - ``wenv python``                                 +
 |            | - ``wine-pip``                                    + - ``wenv pip``                                    +
 |            | - ``wine-pytest``                                 + - ``wenv pytest``                                 +
+|            |                                                   + - New Python package called ``wenv``              +
 +------------+---------------------------------------------------+---------------------------------------------------+
 | shebang    | ``#!/usr/bin/env wine-python``                    + ``#!/usr/bin/env _wenv_python``                   +
 +------------+---------------------------------------------------+---------------------------------------------------+
@@ -34,7 +35,7 @@ As a consequence, ``zugbruecke.current_session`` is no longer available. ``zugbr
 
 The ``set_parameter`` method, now renamed into ``_zb_set_parameter``, only accepts a single key-value pair instead of a dictionary.
 
-Furthermore, the shell scripts ``wine-python``, ``wine-pip`` and ``wine-pytest`` have been removed. Their functionality was consolidated into a single new script, ``wenv``. One can now call ``wenv python``, ``wenv pip`` and ``wenv pytest``. This change was necessary for allowing a more generic interface to entry points of arbitrary third party packages. Run ``wenv help`` for more information.
+Furthermore, the shell scripts ``wine-python``, ``wine-pip`` and ``wine-pytest`` have been removed. Their functionality was consolidated into a new Python package called ``wenv``. One can now call ``wenv python``, ``wenv pip`` and ``wenv pytest``. This change was necessary for allowing a more generic interface to entry points of arbitrary third party packages. Run ``wenv help`` for more information.
 
 The ``version`` configuration parameter for controlling the version of *Wine Python* has been renamed to ``pythonversion``.
 
