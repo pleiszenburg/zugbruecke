@@ -32,8 +32,6 @@ specific language governing rights and limitations under the License.
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 import ctypes
-from functools import partial
-from pprint import pformat as pf
 
 from .errors import data_memsyncsyntax_error
 

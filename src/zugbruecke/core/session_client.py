@@ -42,7 +42,7 @@ from .config import config_class
 from .data import data_class
 from .dll_client import dll_client_class
 from .interpreter import interpreter_session_class
-from .lib import get_free_port, get_location_of_file
+from .lib import get_free_port
 from .log import log_class
 from .rpc import mp_client_safe_connect, mp_server_class
 from ..wenv import env_class

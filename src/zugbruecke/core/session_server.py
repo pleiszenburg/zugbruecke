@@ -33,7 +33,6 @@ specific language governing rights and limitations under the License.
 
 import ctypes
 import ctypes.util
-import time
 import traceback
 
 from .data import data_class

@@ -33,9 +33,6 @@ specific language governing rights and limitations under the License.
 
 import ctypes
 
-# from pprint import pformat as pf
-# import traceback
-
 from ..const import GROUP_VOID
 from ..errors import data_memsyncpath_error
 from .memory import (

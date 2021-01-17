@@ -34,8 +34,6 @@ specific language governing rights and limitations under the License.
 import ctypes
 from ctypes import _FUNCFLAG_CDECL
 
-# from pprint import pformat as pf
-
 from ..const import (
     _FUNCFLAG_STDCALL,
     FLAG_POINTER,
@@ -44,7 +42,7 @@ from ..const import (
     GROUP_STRUCT,
     GROUP_FUNCTION,
 )
-from ..errors import data_flag_error, data_type_error, data_memsyncsyntax_error
+from ..errors import data_flag_error, data_type_error
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

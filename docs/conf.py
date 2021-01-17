@@ -38,7 +38,7 @@ def fetch_version_string():
     setup_py_lines = setup_py.split("\n")
     for line in setup_py_lines:
         if "_version_" in line:
-            version = line.split("'")[1].split("'")[0]
+            version = line.split('"')[1].split('"')[0]
             break
 
     return version
