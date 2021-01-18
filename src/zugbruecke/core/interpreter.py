@@ -6,11 +6,11 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	src/zugbruecke/core/interpreter.py: Class for managing Python interpreter on Wine
+    src/zugbruecke/core/interpreter.py: Class for managing Python interpreter on Wine
 
-	Required to run on platform / side: [UNIX]
+    Required to run on platform / side: [UNIX]
 
-	Copyright (C) 2017-2021 Sebastian M. Ernst <ernst@pleiszenburg.de>
+    Copyright (C) 2017-2021 Sebastian M. Ernst <ernst@pleiszenburg.de>
 
 <LICENSE_BLOCK>
 The contents of this file are subject to the GNU Lesser General Public License
@@ -164,17 +164,12 @@ class interpreter_session_class:
             k: os.environ[k] for k in os.environ.keys()
         }  # HACK Required for Travis CI
         envvar_update_dict = dict(
-            ZUGBRUECKE_ARCH=self.p["arch"],  # Architecture
-            ZUGBRUECKE_WINEPREFIX=self.p["wineprefix"],  # Wine prefix / directory
-            ZUGBRUECKE_WINEDEBUG=self.p["winedebug"],  # Wine debug level
-            ZUGBRUECKE_PYTHONPREFIX=self.p[
-                "pythonprefix"
-            ],  # Python prefix for Wine Python (can be a Unix path)
+            WENV_ARCH=self.p["arch"],  # Architecture
         )
         envvar_dict.update(envvar_update_dict)
 
         # Log status
-        self.log.out("[interpreter] Environment: " + str(envvar_update_dict))
+        self.log.out("[interpreter] Environment: " + str(envvar_dict))
 
         # Fire up Wine-Python process
         self.proc_winepython = subprocess.Popen(
