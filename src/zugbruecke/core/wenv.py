@@ -39,6 +39,7 @@ from wenv import Env as _Env
 # HELPER
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+
 def _symlink(src, dest):
 
     if not os.path.lexists(dest):
@@ -51,15 +52,17 @@ def _symlink(src, dest):
     if os.readlink(dest) != src:
         raise OSError('"{LINK:s}" points to the wrong source'.format(LINK=dest))
 
+
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # CLASS
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
 
 class Env(_Env):
     def setup_zugbruecke(self):
 
         # Package path in unix-python site-packages
-        unix_pkg_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+        unix_pkg_path = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
         # Package path in wine-python site-packages
         wine_pkg_path = os.path.abspath(
             os.path.join(self._path_dict["sitepackages"], "zugbruecke")

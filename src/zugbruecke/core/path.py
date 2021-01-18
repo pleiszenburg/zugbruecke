@@ -60,8 +60,10 @@ class path_class:
         """
 
         out_path = self._unix_to_wine(
-            ctypes.cast(ctypes.create_string_buffer(in_path.encode('utf-8')), wintypes.LPCSTR)
+            ctypes.cast(
+                ctypes.create_string_buffer(in_path.encode("utf-8")), wintypes.LPCSTR
             )
+        )
 
         if out_path is None:
             raise wine_error()
@@ -76,9 +78,9 @@ class path_class:
 
         out_path = self._wine_to_unix(
             ctypes.cast(ctypes.create_unicode_buffer(in_path), wintypes.LPCWSTR)
-            )
+        )
 
         if out_path is None:
             raise wine_error()
 
-        return out_path.decode('utf-8')
+        return out_path.decode("utf-8")
