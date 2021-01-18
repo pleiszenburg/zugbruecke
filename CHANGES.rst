@@ -51,6 +51,7 @@ On older versions of Linux such as *Ubuntu 14.04* alias *Trusty Tahr* (released 
 * FEATURE: Timeouts for start and stop of the server component can be configured.
 * FEATURE: Both code and branch coverage of *zugbruecke* can now be analyzed with ``coverage``.
 * FEATURE: Added official support for CPython 3.8, see #56.
+* FEATURE: Added official support for CPython 3.9, see #74.
 * FEATURE: *Wine Python* can be based on beta versions and release candidates of *CPython*.
 * FEATURE: All code is tested for both, 32bit and 64bit DLLs (previously only 32bit DLLs received regular testing), see #58.
 * FEATURE: All code is tested for both, the cdll/cdecl and windll/stdcall calling conventions (previously only windll/stdcall received regular testing), see #60.
