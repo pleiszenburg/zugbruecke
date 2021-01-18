@@ -6,11 +6,11 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	tests/test_paths.py: Converting paths between Unix and Wine/Windows formats
+    tests/test_paths.py: Converting paths between Unix and Wine/Windows formats
 
-	Required to run on platform / side: [UNIX, WINE]
+    Required to run on platform / side: [UNIX, WINE]
 
-	Copyright (C) 2017-2021 Sebastian M. Ernst <ernst@pleiszenburg.de>
+    Copyright (C) 2017-2021 Sebastian M. Ernst <ernst@pleiszenburg.de>
 
 <LICENSE_BLOCK>
 The contents of this file are subject to the GNU Lesser General Public License
@@ -69,17 +69,6 @@ def test_path_unix_to_wine_rel(arch, conv, ctypes, dll_path):
 @pytest.mark.parametrize(
     "arch,conv,ctypes,dll_path", get_context(__file__, handle=False)
 )
-def test_path_unix_to_wine_fail1(arch, conv, ctypes, dll_path):
-
-    PATH_A = "a" * 270
-    with pytest.raises(ValueError):
-        path_out = ctypes._zb_path_unix_to_wine(PATH_A)
-
-
-@pytest.mark.skipif(PLATFORM != "unix", reason="only relevant for unix side")
-@pytest.mark.parametrize(
-    "arch,conv,ctypes,dll_path", get_context(__file__, handle=False)
-)
 def test_path_wine_to_unix_abs(arch, conv, ctypes, dll_path):
 
     PATH_A = "C:\\"
@@ -93,30 +82,8 @@ def test_path_wine_to_unix_abs(arch, conv, ctypes, dll_path):
 @pytest.mark.parametrize(
     "arch,conv,ctypes,dll_path", get_context(__file__, handle=False)
 )
-def test_path_wine_to_unix_fail1(arch, conv, ctypes, dll_path):
-
-    PATH_A = "\\doesnotexist"
-    with pytest.raises(wine_error):
-        path_out = ctypes._zb_path_wine_to_unix(PATH_A)
-
-
-@pytest.mark.skipif(PLATFORM != "unix", reason="only relevant for unix side")
-@pytest.mark.parametrize(
-    "arch,conv,ctypes,dll_path", get_context(__file__, handle=False)
-)
-def test_path_wine_to_unix_fail2(arch, conv, ctypes, dll_path):
-
-    PATH_A = "c:\\doesnotexist"
-    with pytest.raises(wine_error):
-        path_out = ctypes._zb_path_wine_to_unix(PATH_A)
-
-
-@pytest.mark.skipif(PLATFORM != "unix", reason="only relevant for unix side")
-@pytest.mark.parametrize(
-    "arch,conv,ctypes,dll_path", get_context(__file__, handle=False)
-)
-def test_path_wine_to_unix_fail3(arch, conv, ctypes, dll_path):
+def test_path_wine_to_unix_fail(arch, conv, ctypes, dll_path):
 
     PATH_A = "a" * 270
-    with pytest.raises(ValueError):
+    with pytest.raises(wine_error):
         path_out = ctypes._zb_path_wine_to_unix(PATH_A)
