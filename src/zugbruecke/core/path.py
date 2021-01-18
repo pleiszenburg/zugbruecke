@@ -42,7 +42,11 @@ from .errors import wine_error
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
-class path_class:
+class PathStyles:
+    """
+    Coverts paths fron Unix to Wine format and vice versa
+    """
+
     def __init__(self):
 
         self._unix_to_wine = ctypes.cdll.kernel32.wine_get_dos_file_name
@@ -53,7 +57,7 @@ class path_class:
         self._wine_to_unix.argtypes = (wintypes.LPCWSTR,)
         self._wine_to_unix.restype = wintypes.LPCSTR
 
-    def unix_to_wine(self, in_path):
+    def unix_to_wine(self, in_path: str) -> str:
         """
         In: Unix path
         Out: Wine path
@@ -70,7 +74,7 @@ class path_class:
 
         return out_path
 
-    def wine_to_unix(self, in_path):
+    def wine_to_unix(self, in_path: str) -> str:
         """
         In: Wine path
         Out: Unix path

@@ -38,7 +38,7 @@ import traceback
 from .data import data_class
 from .dll_server import dll_server_class
 from .log import log_class
-from .path import path_class
+from .path import PathStyles
 from .rpc import mp_client_safe_connect, mp_server_class
 
 
@@ -71,7 +71,7 @@ class session_server_class:
         self.up = True
 
         # Offer methods for converting paths
-        path = path_class()
+        path = PathStyles()
         self.path_unix_to_wine = path.unix_to_wine
         self.path_wine_to_unix = path.wine_to_unix
 
