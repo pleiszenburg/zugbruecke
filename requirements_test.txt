@@ -2,3 +2,4 @@ hypothesis
 pytest
 coverage
 pytest-cov
+typeguard
