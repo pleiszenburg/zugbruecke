@@ -86,11 +86,6 @@ class Log(LogABC):
         # Log is up
         self._up = True
 
-        # Start arrays for stdout and stderr logs
-        self.log = {}
-        self.log["out"] = []
-        self.log["err"] = []
-
         # Determine platform
         if "platform" not in self._p.keys():
             self._p["platform"] = "UNIX"
@@ -121,10 +116,6 @@ class Log(LogABC):
 
             # Log down
             self._up = False
-
-    def __append_message_to_log__(self, message):
-
-        self.log[message["pipe"]].append(message)
 
     def __compile_message_dict_list__(self, message, pipe_name, level):
 
@@ -207,7 +198,6 @@ class Log(LogABC):
 
     def __process_message_dict__(self, mesage_dict):
 
-        self.__append_message_to_log__(mesage_dict)
         if self._p["std" + mesage_dict["pipe"]]:
             self.__print_message__(mesage_dict)
         if hasattr(self, "client"):
