@@ -36,8 +36,10 @@ from abc import ABC
 # CLASSES
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+
 class InterpreterABC(ABC):
     pass
+
 
 class LogABC(ABC):
     pass

@@ -102,13 +102,13 @@ class Interpreter(InterpreterABC):
         in_stream.close()
 
     @staticmethod
-    def _start_stream_worker(in_stream: BinaryIO, worker_function: Callable) -> Tuple[Thread, Queue]:
+    def _start_stream_worker(
+        in_stream: BinaryIO, worker_function: Callable
+    ) -> Tuple[Thread, Queue]:
         """starts reader thread and returns a thread object and a queue object"""
 
         out_queue = Queue()
-        reader_thread = Thread(
-            target=worker_function, args=(in_stream, out_queue)
-        )
+        reader_thread = Thread(target=worker_function, args=(in_stream, out_queue))
         reader_thread.daemon = True
         reader_thread.start()
         return reader_thread, out_queue

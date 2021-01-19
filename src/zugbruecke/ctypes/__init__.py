@@ -44,10 +44,7 @@ from ..core.session import (
 _session = _session_class()
 _globals = globals()
 for _ctypes_item in dir(_session):
-    if (
-        _ctypes_item.startswith("__")
-        and not _ctypes_item in _ctypes_veryprivate
-    ):
+    if _ctypes_item.startswith("__") and not _ctypes_item in _ctypes_veryprivate:
         continue
     _globals[_ctypes_item] = getattr(_session, _ctypes_item)
 del _globals, _session, _session_class, _ctypes_item, _ctypes_veryprivate
