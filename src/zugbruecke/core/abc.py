@@ -79,3 +79,7 @@ class RpcClientABC(ABC):
 
 class RpcServerABC(ABC):
     pass
+
+
+class SessionClientABC(ABC):
+    pass

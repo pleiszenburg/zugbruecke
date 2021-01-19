@@ -42,6 +42,7 @@ import os
 import signal
 import time
 
+from .abc import SessionClientABC
 from .const import _FUNCFLAG_STDCALL, CONVENTIONS
 from .config import Config
 from .data import data_class
@@ -58,7 +59,11 @@ from .wenv import Env
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
-class session_client_class:
+class SessionClient(SessionClientABC):
+    """
+    Managing a zugbruecke session
+    """
+
     def __init__(self, parameter=None, force=False):
 
         if parameter is None:

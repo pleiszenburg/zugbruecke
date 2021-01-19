@@ -44,7 +44,7 @@ from ctypes import _FUNCFLAG_CDECL, DEFAULT_MODE, LibraryLoader
 # IMPORT: zugbruecke core and missing ctypes flags
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-from .session_client import session_client_class as __session_client_class__
+from .session_client import SessionClient
 from .const import _FUNCFLAG_STDCALL  # EXPORT
 
 
@@ -83,7 +83,7 @@ class session_class:
         # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
         # Start new zugbruecke session
-        self._zb_current_session = __session_client_class__(
+        self._zb_current_session = SessionClient(
             parameter=parameter, force=force
         )
 
