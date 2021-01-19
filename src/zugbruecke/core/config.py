@@ -48,6 +48,7 @@ from .typeguard import typechecked
 # CONFIGURATION CLASS
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+
 @typechecked
 class Config(ConfigABC):
     """
@@ -70,7 +71,9 @@ class Config(ConfigABC):
         if "id" not in self._data.keys():
             self._data["id"] = generate_session_id()  # Generate unique session id
         if "platform" not in self._data.keys():
-            self._data["platform"] = "WINE" if sys.platform.startswith("win") else "UNIX"
+            self._data["platform"] = (
+                "WINE" if sys.platform.startswith("win") else "UNIX"
+            )
 
     def __len__(self) -> int:
 
