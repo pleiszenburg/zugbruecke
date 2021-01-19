@@ -68,7 +68,7 @@ def run():
     }
 
     # Fire up wine server session with parsed parameters
-    session = session_server_class(parameter["id"], parameter)
+    _ = session_server_class(parameter["id"], parameter)
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
