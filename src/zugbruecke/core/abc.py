@@ -36,7 +36,20 @@ from abc import ABC
 # CLASSES
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+
 class ConfigABC(ABC):
+    pass
+
+
+class DataABC(ABC):
+    pass
+
+
+class DllClientABC(ABC):
+    pass
+
+
+class DllServerABC(ABC):
     pass
 
 
@@ -49,6 +62,14 @@ class LogABC(ABC):
 
 
 class MessageABC(ABC):
+    pass
+
+
+class RoutineClientABC(ABC):
+    pass
+
+
+class RoutineServerABC(ABC):
     pass
 
 
