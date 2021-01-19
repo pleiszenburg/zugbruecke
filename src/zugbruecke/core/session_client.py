@@ -41,7 +41,7 @@ from .const import _FUNCFLAG_STDCALL
 from .config import config_class
 from .data import data_class
 from .dll_client import dll_client_class
-from .interpreter import interpreter_session_class
+from .interpreter import Interpreter
 from .lib import get_free_port
 from .log import log_class
 from .rpc import mp_client_safe_connect, mp_server_class
@@ -357,7 +357,7 @@ class session_client_class:
         self.__prepare_python_command__()
 
         # Initialize interpreter session
-        self.interpreter_session = interpreter_session_class(self.id, self.p, self.log)
+        self.interpreter_session = Interpreter(self.id, self.p, self.log)
 
         # Wait for server to appear
         self.__wait_for_server_status_change__(target_status=True)

@@ -44,9 +44,11 @@ import threading
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
-class interpreter_session_class:
+class Interpreter:
+    """
+    Class for managing Python interpreter on Wine
+    """
 
-    # session init
     def __init__(self, session_id, parameter, session_log):
 
         # Set ID, parameters and pointer to log
@@ -61,7 +63,7 @@ class interpreter_session_class:
         self.up = True
 
         # Start wine python
-        self.__python_start__()
+        self._python_start()
 
         # Log status
         self.log.out("[interpreter] STARTED.")
@@ -76,10 +78,10 @@ class interpreter_session_class:
         self.log.out("[interpreter] TERMINATING ...")
 
         # Shut down wine python
-        self.__python_stop__()
+        self._python_stop()
 
         # Shut down processing thread
-        self.__thread_stop__()
+        self._thread_stop()
 
         # Log status
         self.log.out("[interpreter] TERMINATED.")
@@ -88,7 +90,7 @@ class interpreter_session_class:
         self.up = False
 
     @staticmethod
-    def __stream_worker__(in_stream, out_queue):
+    def _stream_worker(in_stream, out_queue):
         """reads lines from stream and puts them into queue"""
 
         for line in iter(in_stream.readline, b""):
@@ -96,7 +98,7 @@ class interpreter_session_class:
         in_stream.close()
 
     @staticmethod
-    def __start_stream_worker__(in_stream, worker_function):
+    def _start_stream_worker(in_stream, worker_function):
         """starts reader thread and returns a thread object and a queue object"""
 
         out_queue = queue.Queue()
@@ -108,7 +110,7 @@ class interpreter_session_class:
         return reader_thread, out_queue
 
     @staticmethod
-    def __read_stream__(in_queue, processing_function):
+    def _read_stream(in_queue, processing_function):
         """reads lines from queue and processes them"""
 
         try:
@@ -120,20 +122,20 @@ class interpreter_session_class:
             processing_function(line.strip("\n"))
             in_queue.task_done()
 
-    def __processing_worker__(self):
+    def _processing_worker(self):
         """reads lines from queues and puts them into process methods"""
 
         # Log status
         self.log.out("[interpreter] Starting log processing thread ...")
 
-        while self.__is_alive__():
+        while self._is_alive():
             time.sleep(0.1)
             while not self.stdout_queue.empty():
-                interpreter_session_class.__read_stream__(
+                self._read_stream(
                     self.stdout_queue, lambda line: self.log.out("[P] " + line)
                 )
             while not self.stderr_queue.empty():
-                interpreter_session_class.__read_stream__(
+                self._read_stream(
                     self.stderr_queue, lambda line: self.log.err("[P] " + line)
                 )
 
@@ -148,11 +150,11 @@ class interpreter_session_class:
         # Log status
         self.log.out("[interpreter] ... worker threads and queues joined.")
 
-    def __is_alive__(self):
+    def _is_alive(self):
 
         return self.proc_winepython.poll() is None
 
-    def __python_start__(self):
+    def _python_start(self):
 
         # Log status
         self.log.out(
@@ -193,28 +195,24 @@ class interpreter_session_class:
         (
             self.stdout_thread,
             self.stdout_queue,
-        ) = interpreter_session_class.__start_stream_worker__(
-            self.proc_winepython.stdout, interpreter_session_class.__stream_worker__
-        )
+        ) = self._start_stream_worker(self.proc_winepython.stdout, self._stream_worker)
         (
             self.stderr_thread,
             self.stderr_queue,
-        ) = interpreter_session_class.__start_stream_worker__(
-            self.proc_winepython.stderr, interpreter_session_class.__stream_worker__
-        )
+        ) = self._start_stream_worker(self.proc_winepython.stderr, self._stream_worker)
 
         # Log status
         self.log.out("[interpreter] Stream reader threads started.")
 
         # Start processing thread for pushing lines into log
-        self.processing_thread = threading.Thread(target=self.__processing_worker__)
+        self.processing_thread = threading.Thread(target=self._processing_worker)
         self.processing_thread.daemon = True
         self.processing_thread.start()
 
         # Log status
         self.log.out("[interpreter] Log processing thread started.")
 
-    def __python_stop__(self):
+    def _python_stop(self):
 
         self.log.out("[interpreter] Ensure process has terminated, waiting ...")
 
@@ -227,12 +225,12 @@ class interpreter_session_class:
         started_waiting_at = time.time()
         # Wait for process
         while (
-            self.__is_alive__()
+            self._is_alive()
             and started_waiting_at + timeout_after_seconds > time.time()
         ):
             time.sleep(wait_for_seconds)
         # Is process still alive?
-        if self.__is_alive__():
+        if self._is_alive():
             self.log.out(
                 "[interpreter] ... did not terminate after %d seconds, sending SIGINT ..."
                 % timeout_after_seconds
@@ -249,12 +247,12 @@ class interpreter_session_class:
         started_waiting_at = time.time()
         # Wait for process
         while (
-            self.__is_alive__()
+            self._is_alive()
             and started_waiting_at + timeout_after_seconds > time.time()
         ):
             time.sleep(wait_for_seconds)
         # Is process still alive?
-        if self.__is_alive__():
+        if self._is_alive():
             self.log.out(
                 "[interpreter] ... did not terminate after %d seconds, sending SIGTERM ..."
                 % timeout_after_seconds
@@ -268,14 +266,14 @@ class interpreter_session_class:
             return
 
         # Is process still alive?
-        if self.__is_alive__():
+        if self._is_alive():
             self.log.out("[interpreter] ... failed to terminate with SIGTERM!")
             raise TimeoutError("interpreter process could not be terminated")
         else:
             self.log.out("[interpreter] ... terminated with SIGTERM.")
             return
 
-    def __thread_stop__(self):
+    def _thread_stop(self):
 
         timeout_after_seconds = self.p["timeout_stop"]
 
