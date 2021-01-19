@@ -245,7 +245,7 @@ class session_client_class:
         self.p[key] = value
 
         if self.stage > 1:
-            self.rpc_client.set_parameter(parameter)
+            self.rpc_client.set_parameter({key: value})
 
     def terminate(self, signum=None, frame=None):
 
