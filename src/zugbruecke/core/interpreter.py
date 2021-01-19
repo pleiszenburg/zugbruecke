@@ -32,12 +32,12 @@ specific language governing rights and limitations under the License.
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 import os
-import queue
+from queue import Queue, Empty
 import signal
 import subprocess
 import time
-from typing import Dict
-import threading
+from typing import BinaryIO, Callable, Dict, Tuple
+from threading import Thread
 
 from .abc import InterpreterABC, LogABC
 from .lib import get_free_port
@@ -94,7 +94,7 @@ class Interpreter(InterpreterABC):
         self._up = False
 
     @staticmethod
-    def _stream_worker(in_stream, out_queue):
+    def _stream_worker(in_stream: BinaryIO, out_queue: Queue):
         """reads lines from stream and puts them into queue"""
 
         for line in iter(in_stream.readline, b""):
@@ -102,11 +102,11 @@ class Interpreter(InterpreterABC):
         in_stream.close()
 
     @staticmethod
-    def _start_stream_worker(in_stream, worker_function):
+    def _start_stream_worker(in_stream: BinaryIO, worker_function: Callable) -> Tuple[Thread, Queue]:
         """starts reader thread and returns a thread object and a queue object"""
 
-        out_queue = queue.Queue()
-        reader_thread = threading.Thread(
+        out_queue = Queue()
+        reader_thread = Thread(
             target=worker_function, args=(in_stream, out_queue)
         )
         reader_thread.daemon = True
@@ -114,12 +114,12 @@ class Interpreter(InterpreterABC):
         return reader_thread, out_queue
 
     @staticmethod
-    def _read_stream(in_queue, processing_function):
+    def _read_stream(in_queue: Queue, processing_function: Callable):
         """reads lines from queue and processes them"""
 
         try:
             line = in_queue.get_nowait()
-        except queue.Empty:
+        except Empty:
             pass
         else:
             line = line.decode("utf-8")
@@ -154,7 +154,7 @@ class Interpreter(InterpreterABC):
         # Log status
         self._log.out("[interpreter] ... worker threads and queues joined.")
 
-    def _is_alive(self):
+    def _is_alive(self) -> bool:
 
         return self._proc_winepython.poll() is None
 
@@ -237,7 +237,7 @@ class Interpreter(InterpreterABC):
         self._log.out("[interpreter] Stream reader threads started.")
 
         # Start processing thread for pushing lines into log
-        self._processing_thread = threading.Thread(target=self._processing_worker)
+        self._processing_thread = Thread(target=self._processing_worker)
         self._processing_thread.daemon = True
         self._processing_thread.start()
 
