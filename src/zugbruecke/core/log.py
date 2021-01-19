@@ -35,7 +35,7 @@ import json
 from pprint import pformat
 import sys
 import time
-from typing import Dict, Union
+from typing import Any, Dict, List, Union
 
 from .abc import LogABC, RpcClientABC, RpcServerABC
 from .typeguard import typechecked
@@ -72,7 +72,8 @@ class Log(LogABC):
     gathering, managing & displaying logs
     """
 
-    def __init__(self,
+    def __init__(
+        self,
         session_id: str,
         parameter: Dict,
         rpc_server: Union[None, RpcServerABC] = None,
@@ -83,84 +84,74 @@ class Log(LogABC):
         self._id = session_id
         self._p = parameter
 
-        # Log is up
-        self._up = True
-
         # Determine platform
         if "platform" not in self._p.keys():
             self._p["platform"] = "UNIX"
 
-        # Open logfiles
+        # Create filenames for logfiles
+        self._f = None
         if self._p["log_write"]:
-            self.f = {}
-            self.f["out"] = "%s_%s.txt" % (self._p["platform"], "out")
-            self.f["err"] = "%s_%s.txt" % (self._p["platform"], "err")
+            self._f = {
+                "out": "zb_{ID:s}_{PLATFORM:s}_out.txt".format(
+                    ID=self._id,
+                    PLATFORM=self._p["platform"],
+                ),
+                "err": "zb_{ID:s}_{PLATFORM:s}_err.txt".format(
+                    ID=self._id,
+                    PLATFORM=self._p["platform"],
+                ),
+            }
 
-        # Fire up server if required
-        self.server_port = 0
+        # Setup RPC server
+        self._server = rpc_server
         if rpc_server is not None:
-            self.server = rpc_server
-            self.server.register_function(
-                self.__receive_message_from_client__, "transfer_message"
-            )
+            self._server.register_function(self._receive_message, "transfer_message")
 
-        # Fire up client if required
-        if rpc_client is not None:
-            self.client = rpc_client
+        # Setup RPC client
+        self._client = rpc_client
+
+        # Log is up
+        self._up = True
+
+    def err(self, *raw_messages: Any, level: int = 1):
+
+        if level <= self._p["log_level"]:
+            self._process_raw_messages(raw_messages, "err", level)
+
+    def out(self, *raw_messages: Any, level: int = 1):
+
+        if level <= self._p["log_level"]:
+            self._process_raw_messages(raw_messages, "out", level)
 
     def terminate(self):
 
-        if self._up:
+        if not self._up:
+            return
 
-            # Nothing to do, just a placeholder
+        self._up = False
 
-            # Log down
-            self._up = False
-
-    def __compile_message_dict_list__(self, message, pipe_name, level):
-
-        message_lines = []
-
-        if not isinstance(message, str):
-            message = pformat(message)
-
-        for line in message.split("\n"):
-            if line.strip() != "":
-                message_lines.append(
-                    {
-                        "level": level,
-                        "platform": self._p["platform"],
-                        "id": self._id,
-                        "time": round(time.time(), 2),
-                        "pipe": pipe_name,
-                        "cnt": line,
-                    }
-                )
-
-        return message_lines
-
-    def __print_message__(self, messages):
+    def _print_message(self, message: Dict):
 
         message_list = []
 
         message_list.append(
-            c["GREY"] + "(%.2f/%s) " % (messages["time"], messages["id"]) + c["RESET"]
+            c["GREY"] + "(%.2f/%s) " % (message["time"], message["id"]) + c["RESET"]
         )
-        if messages["platform"] == "UNIX":
+        if message["platform"] == "UNIX":
             message_list.append(c["BLUE"])
-        elif messages["platform"] == "WINE":
+        elif message["platform"] == "WINE":
             message_list.append(c["MAGENTA"])
         else:
             message_list.append(c["WHITE"])
-        message_list.append("%s " % messages["platform"] + c["RESET"])
-        if messages["pipe"] == "out":
+        message_list.append("%s " % message["platform"] + c["RESET"])
+        if message["pipe"] == "out":
             message_list.append(c["GREEN"])
-        elif messages["pipe"] == "err":
+        elif message["pipe"] == "err":
             message_list.append(c["RED"])
-        message_list.append(messages["pipe"][0] + c["RESET"])
+        message_list.append(message["pipe"][0] + c["RESET"])
         message_list.append(": ")
         if any(
-            ext in messages["cnt"]
+            ext in message["cnt"]
             for ext in [
                 "fixme:",
                 "err:",
@@ -173,57 +164,65 @@ class Log(LogABC):
             message_list.append(c["GREY"])
         else:
             message_list.append(c["WHITE"])
-        message_list.append(messages["cnt"] + c["RESET"])
+        message_list.append(message["cnt"] + c["RESET"])
         message_list.append("\n")
 
         message_string = "".join(message_list)
 
-        if messages["pipe"] == "out":
+        if message["pipe"] == "out":
             sys.stdout.write(message_string)
-        elif messages["pipe"] == "err":
+        elif message["pipe"] == "err":
             sys.stderr.write(message_string)
         else:
             raise ValueError("unknown pipe name")
 
-    def __process_messages__(self, messages, pipe, level):
+    def _process_raw_messages(self, raw_messages: Any, pipe: str, level: int):
 
-        message_dict_list = []
-        for message in messages:
-            message_dict_list.extend(
-                self.__compile_message_dict_list__(message, pipe, level)
-            )
+        for raw_message in raw_messages:
+            for message in self._compile_raw_message(raw_message, pipe, level):
+                self._process_message(message)
 
-        for mesage_dict in message_dict_list:
-            self.__process_message_dict__(mesage_dict)
+    def _compile_raw_message(
+        self, raw_message: Any, pipe: str, level: int
+    ) -> List[Dict]:
 
-    def __process_message_dict__(self, mesage_dict):
+        raw_message = (
+            raw_message if isinstance(raw_message, str) else pformat(raw_message)
+        )
+        message_time = round(time.time(), 2)
+        return [
+            {
+                "level": level,
+                "platform": self._p["platform"],
+                "id": self._id,
+                "time": message_time,
+                "pipe": pipe,
+                "cnt": line,
+            }
+            for line in raw_message.split("\n")
+            if len(line.strip()) != 0
+        ]
 
-        if self._p["std" + mesage_dict["pipe"]]:
-            self.__print_message__(mesage_dict)
-        if hasattr(self, "client"):
-            self.__push_message_to_server__(mesage_dict)
+    def _process_message(self, mesage: Dict):
+
+        if self._p["std" + mesage["pipe"]]:
+            self._print_message(mesage)
+
+        if self._client is not None:
+            self._send_message(mesage)
+
         if self._p["log_write"]:
-            self.__store_message__(mesage_dict)
+            self._store_message(mesage)
 
-    def __push_message_to_server__(self, message):
+    def _send_message(self, message: Dict):
 
-        self.client.transfer_message(json.dumps(message))
+        self._client.transfer_message(json.dumps(message))
 
-    def __receive_message_from_client__(self, message):
+    def _receive_message(self, serialized_message: str):
 
-        self.__process_message_dict__(json.loads(message))
+        self._process_message(json.loads(serialized_message))
 
-    def __store_message__(self, message):
+    def _store_message(self, message: Dict):
 
-        with open(self.f[message["pipe"]], "a+") as f:
+        with open(self._f[message["pipe"]], "a+") as f:
             f.write(json.dumps(message) + "\n")
-
-    def out(self, *messages, level=1):
-
-        if level <= self._p["log_level"]:
-            self.__process_messages__(messages, "out", level)
-
-    def err(self, *messages, level=1):
-
-        if level <= self._p["log_level"]:
-            self.__process_messages__(messages, "err", level)
