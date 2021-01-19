@@ -45,6 +45,10 @@ class LogABC(ABC):
     pass
 
 
+class MessageABC(ABC):
+    pass
+
+
 class RpcClientABC(ABC):
     pass
 
