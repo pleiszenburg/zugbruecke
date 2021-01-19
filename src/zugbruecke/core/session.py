@@ -27,6 +27,13 @@ specific language governing rights and limitations under the License.
 """
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# IMPORT: Standard library
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+from typing import Union
+
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # IMPORT: Original ctypes
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -44,9 +51,10 @@ from ctypes import _FUNCFLAG_CDECL, DEFAULT_MODE, LibraryLoader
 # IMPORT: zugbruecke core and missing ctypes flags
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-from .abc import CtypesSessionABC
+from .abc import ConfigABC, CtypesSessionABC
 from .session_client import SessionClient
 from .const import _FUNCFLAG_STDCALL  # EXPORT
+from .typeguard import typechecked
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -54,6 +62,7 @@ from .const import _FUNCFLAG_STDCALL  # EXPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
+@typechecked
 class CtypesSession(CtypesSessionABC):
 
     # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -69,24 +78,14 @@ class CtypesSession(CtypesSessionABC):
     # constructor
     # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-    def __init__(self, parameter=None, force=False):
-
-        if parameter is None:
-            parameter = {}
-        elif not isinstance(parameter, dict):
-            raise TypeError('parameter "parameter" must be a dict')
-
-        if not isinstance(force, bool):
-            raise TypeError('parameter "force" must be a bool')
+    def __init__(self, config: Union[ConfigABC, None] = None):
 
         # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         # zugbruecke session client and session interface
         # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
         # Start new zugbruecke session
-        self._zb_current_session = SessionClient(
-            parameter=parameter, force=force
-        )
+        self._zb_current_session = SessionClient(config = config)
 
         # Offer access to session internals
         self._zb_get_parameter = self._zb_current_session.get_parameter

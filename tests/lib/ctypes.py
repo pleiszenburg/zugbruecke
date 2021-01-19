@@ -46,7 +46,7 @@ ARCHITECTURE = architecture()[0][:2]
 if any([platform.startswith(os_name) for os_name in ["linux", "darwin", "freebsd"]]):
     import zugbruecke
 
-    CTYPES = {arch: zugbruecke.CtypesSession({"arch": arch}) for arch in ARCHS}
+    CTYPES = {arch: zugbruecke.CtypesSession(zugbruecke.Config(arch = arch)) for arch in ARCHS}
     PLATFORM = "unix"
 elif platform.startswith("win"):
     import ctypes

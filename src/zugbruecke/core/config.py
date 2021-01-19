@@ -122,6 +122,10 @@ class Config(ConfigABC):
 
         return self._data.keys()
 
+    def as_dict(self):
+
+        return self._data.copy()
+
     def _get_default_config_directory(self) -> str:
 
         return os.path.join(os.path.expanduser("~"), CONFIG_FLD)
