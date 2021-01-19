@@ -36,8 +36,10 @@ import queue
 import signal
 import subprocess
 import time
+from typing import Dict
 import threading
 
+from .abc import InterpreterABC, LogABC
 from .lib import get_free_port
 
 
@@ -46,12 +48,12 @@ from .lib import get_free_port
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
-class Interpreter:
+class Interpreter(InterpreterABC):
     """
     Class for managing Python interpreter on Wine
     """
 
-    def __init__(self, session_id, parameter, session_log):
+    def __init__(self, session_id: str, parameter: Dict, session_log: LogABC):
 
         # Set ID, parameters and pointer to log
         self._id = session_id

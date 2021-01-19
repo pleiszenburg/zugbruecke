@@ -36,6 +36,8 @@ from pprint import pformat
 import sys
 import time
 
+from .abc import LogABC
+
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # CONSTANTS
@@ -62,7 +64,7 @@ c = {
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
-class log_class:
+class log_class(LogABC):
     def __init__(self, session_id, parameter, rpc_server=None, rpc_client=None):
 
         # Store id and parameter
