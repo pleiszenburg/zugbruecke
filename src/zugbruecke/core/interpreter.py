@@ -41,13 +41,14 @@ from threading import Thread
 
 from .abc import InterpreterABC, LogABC
 from .lib import get_free_port
+from .typeguard import typechecked
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # WINE PYTHON INTERPRETER CLASS
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-
+@typechecked
 class Interpreter(InterpreterABC):
     """
     Class for managing Python interpreter on Wine
