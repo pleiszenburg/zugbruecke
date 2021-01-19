@@ -6,11 +6,11 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	src/zugbruecke/core/data/__init__.py: Arguments, return values and memory
+    src/zugbruecke/core/data/__init__.py: Arguments, return values and memory
 
-	Required to run on platform / side: [UNIX, WINE]
+    Required to run on platform / side: [UNIX, WINE]
 
-	Copyright (C) 2017-2021 Sebastian M. Ernst <ernst@pleiszenburg.de>
+    Copyright (C) 2017-2021 Sebastian M. Ernst <ernst@pleiszenburg.de>
 
 <LICENSE_BLOCK>
 The contents of this file are subject to the GNU Lesser General Public License
@@ -38,6 +38,7 @@ from .arg_definition import arguments_definition_class
 from .mem_contents import memory_contents_class
 from .mem_definition import memory_definition_class
 
+from ..abc import DataABC
 from ..const import _FUNCFLAG_STDCALL
 
 
@@ -47,6 +48,7 @@ from ..const import _FUNCFLAG_STDCALL
 
 
 class data_class(
+    DataABC,
     arguments_contents_class,
     arguments_definition_class,
     memory_contents_class,
