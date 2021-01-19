@@ -353,9 +353,6 @@ class session_client_class:
         env.ensure()
         env.setup_zugbruecke()
 
-        # Prepare python command for ctypes server or interpreter
-        self.__prepare_python_command__()
-
         # Initialize interpreter session
         self.interpreter_session = Interpreter(self.id, self.p, self.log)
 
@@ -402,29 +399,6 @@ class session_client_class:
 
         # Start server into its own thread
         self.rpc_server.server_forever_in_thread()
-
-    def __prepare_python_command__(self):
-
-        # Get socket for ctypes bridge
-        self.p["port_socket_wine"] = get_free_port()
-
-        # Prepare command with minimal meta info. All other info can be passed via sockets.
-        self.p["server_command_list"] = [
-            "-m",
-            "zugbruecke._server_",
-            "--id",
-            self.id,
-            "--port_socket_wine",
-            str(self.p["port_socket_wine"]),
-            "--port_socket_unix",
-            str(self.p["port_socket_unix"]),
-            "--log_level",
-            str(self.p["log_level"]),
-            "--log_write",
-            str(int(self.p["log_write"])),
-            "--timeout_start",
-            str(int(self.p["timeout_start"])),
-        ]
 
     def __wait_for_server_status_change__(self, target_status):
 

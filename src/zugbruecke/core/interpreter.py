@@ -38,6 +38,8 @@ import subprocess
 import time
 import threading
 
+from .lib import get_free_port
+
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # WINE PYTHON INTERPRETER CLASS
@@ -154,35 +156,63 @@ class Interpreter:
 
         return self._proc_winepython.poll() is None
 
-    def _python_start(self):
+    def _set_cli_params(self):
 
-        # Log status
-        self._log.out(
-            "[interpreter] Command: " + " ".join(self._p["server_command_list"])
-        )
+        # Get socket for ctypes bridge
+        self._p["port_socket_wine"] = get_free_port()
+
+        # Prepare command with minimal meta info. All other info can be passed via sockets.
+        self._p["server_cli_params"] = [
+            "-m",
+            "zugbruecke._server_",
+            "--id",
+            self._id,
+            "--port_socket_wine",
+            str(self._p["port_socket_wine"]),
+            "--port_socket_unix",
+            str(self._p["port_socket_unix"]),
+            "--log_level",
+            str(self._p["log_level"]),
+            "--log_write",
+            str(int(self._p["log_write"])),
+            "--timeout_start",
+            str(int(self._p["timeout_start"])),
+        ]
+
+    def _set_env_dict(self):
 
         # Prepare environment for interpreter - inherit from settings of current session!
-        envvar_dict = {
+        self._p["server_env"] = {
             k: os.environ[k] for k in os.environ.keys()
         }  # HACK Required for Travis CI
         envvar_update_dict = dict(
             WENV_ARCH=self._p["arch"],  # Architecture
             WENV_PYTHONVERSION=self._p["pythonversion"],  # Version of Wine Python
         )
-        envvar_dict.update(envvar_update_dict)
+        self._p["server_env"].update(envvar_update_dict)
+
+    def _python_start(self):
+
+        self._set_cli_params()
+        self._set_env_dict()
 
         # Log status
-        self._log.out("[interpreter] Environment: " + str(envvar_dict))
+        self._log.out(
+            "[interpreter] Command: " + " ".join(self._p["server_cli_params"])
+        )
+
+        # Log status
+        self._log.out("[interpreter] Environment: " + str(self._p["server_env"]))
 
         # Fire up Wine-Python process
         self._proc_winepython = subprocess.Popen(
-            ["wenv", "python", "-u"] + self._p["server_command_list"],
+            ["wenv", "python", "-u"] + self._p["server_cli_params"],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             shell=False,
             start_new_session=True,
             close_fds=True,
-            env=envvar_dict,
+            env=self._p["server_env"],
         )
 
         # Status log
