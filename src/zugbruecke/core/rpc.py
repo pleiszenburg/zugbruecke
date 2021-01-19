@@ -36,6 +36,8 @@ from threading import Thread
 import time
 import traceback
 
+from .abc import RpcClientABC, RpcServerABC
+
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # CLASSES AND CONSTRUCTOR ROUTINES
@@ -73,7 +75,7 @@ def mp_client_safe_connect(
     raise TimeoutError("mp_client failed to start")
 
 
-class mp_client_class:
+class mp_client_class(RpcClientABC):
     def __init__(self, socket_path, authkey):
 
         # Start new client on top of socket
@@ -145,7 +147,7 @@ class mp_server_handler_class:
             pass
 
 
-class mp_server_class:
+class mp_server_class(RpcServerABC):
     def __init__(self, socket_path, authkey, log=None, terminate_function=None):
 
         # Set log, likely None

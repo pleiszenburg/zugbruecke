@@ -43,3 +43,11 @@ class InterpreterABC(ABC):
 
 class LogABC(ABC):
     pass
+
+
+class RpcClientABC(ABC):
+    pass
+
+
+class RpcServerABC(ABC):
+    pass

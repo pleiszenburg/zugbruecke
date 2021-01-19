@@ -37,7 +37,7 @@ import traceback
 
 from .data import data_class
 from .dll_server import dll_server_class
-from .log import log_class
+from .log import Log
 from .path import PathStyles
 from .rpc import mp_client_safe_connect, mp_server_class
 
@@ -62,7 +62,7 @@ class session_server_class:
         )
 
         # Start logging session and connect it with log on unix side
-        self.log = log_class(self.id, self.p, rpc_client=self.rpc_client)
+        self.log = Log(self.id, self.p, rpc_client=self.rpc_client)
 
         # Status log
         self.log.out("[session-server] STARTING ...")

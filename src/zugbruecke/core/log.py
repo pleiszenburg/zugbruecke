@@ -6,11 +6,11 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	src/zugbruecke/core/log.py: Classes for gathering, managing & displaying logs
+    src/zugbruecke/core/log.py: Classes for gathering, managing & displaying logs
 
-	Required to run on platform / side: [UNIX, WINE]
+    Required to run on platform / side: [UNIX, WINE]
 
-	Copyright (C) 2017-2021 Sebastian M. Ernst <ernst@pleiszenburg.de>
+    Copyright (C) 2017-2021 Sebastian M. Ernst <ernst@pleiszenburg.de>
 
 <LICENSE_BLOCK>
 The contents of this file are subject to the GNU Lesser General Public License
@@ -35,8 +35,10 @@ import json
 from pprint import pformat
 import sys
 import time
+from typing import Dict, Union
 
-from .abc import LogABC
+from .abc import LogABC, RpcClientABC, RpcServerABC
+from .typeguard import typechecked
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -64,8 +66,18 @@ c = {
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
-class log_class(LogABC):
-    def __init__(self, session_id, parameter, rpc_server=None, rpc_client=None):
+@typechecked
+class Log(LogABC):
+    """
+    gathering, managing & displaying logs
+    """
+
+    def __init__(self,
+        session_id: str,
+        parameter: Dict,
+        rpc_server: Union[None, RpcServerABC] = None,
+        rpc_client: Union[None, RpcClientABC] = None,
+    ):
 
         # Store id and parameter
         self.id = session_id

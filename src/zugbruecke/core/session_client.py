@@ -43,7 +43,7 @@ from .data import data_class
 from .dll_client import dll_client_class
 from .interpreter import Interpreter
 from .lib import get_free_port
-from .log import log_class
+from .log import Log
 from .rpc import mp_client_safe_connect, mp_server_class
 from .wenv import Env
 
@@ -299,7 +299,7 @@ class session_client_class:
         self.__start_rpc_server__()
 
         # Start session logging
-        self.log = log_class(self.id, self.p, rpc_server=self.rpc_server)
+        self.log = Log(self.id, self.p, rpc_server=self.rpc_server)
 
         # Log status
         self.log.out("[session-client] STARTING (STAGE 1) ...")
