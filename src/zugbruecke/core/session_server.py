@@ -6,11 +6,11 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	src/zugbruecke/core/session_server.py: Handling session on Wine side
+    src/zugbruecke/core/session_server.py: Handling session on Wine side
 
-	Required to run on platform / side: [WINE]
+    Required to run on platform / side: [WINE]
 
-	Copyright (C) 2017-2021 Sebastian M. Ernst <ernst@pleiszenburg.de>
+    Copyright (C) 2017-2021 Sebastian M. Ernst <ernst@pleiszenburg.de>
 
 <LICENSE_BLOCK>
 The contents of this file are subject to the GNU Lesser General Public License
@@ -36,7 +36,7 @@ import ctypes.util
 import traceback
 
 from .data import data_class
-from .dll_server import dll_server_class
+from .dll_server import DllServer
 from .log import Log
 from .path import PathStyles
 from .rpc import mp_client_safe_connect, mp_server_class
@@ -79,7 +79,7 @@ class session_server_class:
         self.dll_dict = {}
 
         # Organize all DLL types
-        self.dll_types = {
+        self._conventions = {
             "cdll": ctypes.CDLL,
             "windll": ctypes.WinDLL,
             "oledll": ctypes.OleDLL,
@@ -99,7 +99,7 @@ class session_server_class:
         )
 
         # Register call: Accessing a dll
-        self.rpc_server.register_function(self.__load_library__, "load_library")
+        self.rpc_server.register_function(self._load_library, "load_library")
         # Expose routine for updating parameters
         self.rpc_server.register_function(self.__set_parameter__, "set_parameter")
         # Register destructur: Call goes into xmlrpc-server first, which then terminates parent
@@ -143,55 +143,55 @@ class session_server_class:
                 getattr(mod, routine), "ctypes_" + routine
             )
 
-    def __load_library__(self, dll_name, dll_type, dll_param):
+    def _load_library(
+        self,
+        name: str,
+        hash_id: str,
+        convention: str,
+        mode: int,
+        use_errno: bool,
+        use_last_error: bool,
+    ):
         """
-        Exposed interface
+        Exposed interface, called by session client
         """
 
-        # Although this should happen only once per dll, lets be on the safe side
-        if dll_name in self.dll_dict.keys():
-            return (True, self.dll_dict[dll_name].hash_id)  # Success & dll hash_id
+        if name in self.dll_dict.keys():
+            return
 
-        # Status log
         self.log.out(
-            '[session-server] Attaching to DLL file "%s" with calling convention "%s" ...'
-            % (dll_name, dll_type)
+            '[session-server] Attaching to DLL file "{FN:s}" with calling convention "{CONVENTION:s}" ...'.format(
+                FN=name,
+                CONVENTION=convention,
+            )
         )
 
         try:
-
-            # Attach to DLL with ctypes
-            handler = self.dll_types[dll_type](
-                dll_name,
-                mode=dll_param["mode"],
+            handler = self._conventions[convention](
+                name,
+                mode=mode,
                 handle=None,
-                use_errno=dll_param["use_errno"],
-                use_last_error=dll_param["use_last_error"],
+                use_errno=use_errno,
+                use_last_error=use_last_error,
             )
-
         except OSError as e:
-
-            # Log status
             self.log.out("[session-server] ... failed!")
-
-            # Reraise error
             raise e
-
         except Exception as e:
-
-            # Push traceback to log
             self.log.err(traceback.format_exc())
-
             raise e
 
-        # Load library
-        self.dll_dict[dll_name] = dll_server_class(self, dll_name, dll_type, handler)
+        self.dll_dict[name] = DllServer(
+            name,
+            hash_id,
+            convention,
+            handler,
+            self.log,
+            self.rpc_server,
+            self.data,
+        )
 
-        # Log status
         self.log.out("[session-server] ... attached.")
-
-        # Return success and dll's hash id
-        return self.dll_dict[dll_name].hash_id
 
     def __set_parameter__(self, parameter):
 

@@ -194,13 +194,11 @@ class session_class:
     ):
 
         return self._zb_current_session.load_library(
-            dll_name=name,
-            dll_type="cdll",
-            dll_param={
-                "mode": mode,
-                "use_errno": use_errno,
-                "use_last_error": use_last_error,
-            },
+            name=name,
+            convention="cdll",
+            mode=mode,
+            use_errno=use_errno,
+            use_last_error=use_last_error,
         )
 
     # Wrapper for WinDLL class
@@ -214,13 +212,11 @@ class session_class:
     ):
 
         return self._zb_current_session.load_library(
-            dll_name=name,
-            dll_type="windll",
-            dll_param={
-                "mode": mode,
-                "use_errno": use_errno,
-                "use_last_error": use_last_error,
-            },
+            name=name,
+            convention="windll",
+            mode=mode,
+            use_errno=use_errno,
+            use_last_error=use_last_error,
         )
 
     # Wrapper for OleDLL class
@@ -234,13 +230,11 @@ class session_class:
     ):
 
         return self._zb_current_session.load_library(
-            dll_name=name,
-            dll_type="oledll",
-            dll_param={
-                "mode": mode,
-                "use_errno": use_errno,
-                "use_last_error": use_last_error,
-            },
+            name=name,
+            convention="oledll",
+            mode=mode,
+            use_errno=use_errno,
+            use_last_error=use_last_error,
         )
 
 

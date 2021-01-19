@@ -32,17 +32,22 @@ specific language governing rights and limitations under the License.
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 import atexit
-from ctypes import _FUNCFLAG_CDECL, _FUNCFLAG_USE_ERRNO, _FUNCFLAG_USE_LASTERROR
+from ctypes import (
+    _FUNCFLAG_CDECL,
+    _FUNCFLAG_USE_ERRNO,
+    _FUNCFLAG_USE_LASTERROR,
+    DEFAULT_MODE,
+)
 import os
 import signal
 import time
 
-from .const import _FUNCFLAG_STDCALL
+from .const import _FUNCFLAG_STDCALL, CONVENTIONS
 from .config import Config
 from .data import data_class
-from .dll_client import dll_client_class
+from .dll_client import DllClient
 from .interpreter import Interpreter
-from .lib import get_free_port
+from .lib import get_free_port, get_hash_of_string
 from .log import Log
 from .rpc import mp_client_safe_connect, mp_server_class
 from .wenv import Env
@@ -158,59 +163,61 @@ class session_client_class:
 
         return self.data.generate_callback_decorator(flags, restype, *argtypes)
 
-    def load_library(self, dll_name, dll_type, dll_param={}):
+    def load_library(
+        self,
+        name: str,
+        convention: str,
+        mode: int = DEFAULT_MODE,
+        use_errno: bool = False,
+        use_last_error: bool = False,
+    ):
+        """
+        Public API
+        """
 
-        # If in stage 1, fire up stage 2
         if self.stage == 1:
             self.__init_stage_2__()
 
-        # Check whether dll has already been touched
-        if dll_name in self.dll_dict.keys():
+        if convention not in CONVENTIONS:
+            raise ValueError("unknown convention")
 
-            # Return reference on existing dll object
-            return self.dll_dict[dll_name]
+        if name in self.dll_dict.keys():
+            return self.dll_dict[name]
 
-        # Is DLL type known?
-        if dll_type not in ["cdll", "windll", "oledll"]:
-
-            # Raise error if unknown
-            raise ValueError("unknown dll type")
-
-        # Fix parameters dict with defauls values
-        if "mode" not in dll_param.keys():
-            dll_param["mode"] = 0
-        if "use_errno" not in dll_param.keys():
-            dll_param["use_errno"] = False
-        if "use_last_error" not in dll_param.keys():
-            dll_param["use_last_error"] = False
-
-        # Log status
         self.log.out(
-            '[session-client] Attaching to DLL file "%s" with calling convention "%s" ...'
-            % (dll_name, dll_type)
+            '[session-client] Attaching to DLL file "{FN:s}" with calling convention "{CONVENTION:s}" ...'.format(
+                FN=name,
+                CONVENTION=convention,
+            )
         )
 
+        hash_id = get_hash_of_string(name)
+
         try:
-
-            # Tell wine about the dll and its type
-            hash_id = self.rpc_client.load_library(dll_name, dll_type, dll_param)
-
+            self.rpc_client.load_library(
+                name,
+                hash_id,
+                convention,
+                mode,
+                use_errno,
+                use_last_error,
+            )
         except OSError as e:
-
-            # Log status
             self.log.out("[session-client] ... failed!")
-
-            # If DLL was not found, reraise error
             raise e
 
-        # Fire up new dll object
-        self.dll_dict[dll_name] = dll_client_class(self, dll_name, dll_type, hash_id)
+        self.dll_dict[name] = DllClient(
+            name,
+            hash_id,
+            convention,
+            self.log,
+            self.rpc_client,
+            self.data,
+        )
 
-        # Log status
         self.log.out("[session-client] ... attached.")
 
-        # Return reference on existing dll object
-        return self.dll_dict[dll_name]
+        return self.dll_dict[name]
 
     def path_unix_to_wine(self, in_path):
 

@@ -6,11 +6,11 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	src/zugbruecke/core/routine_server.py: Classes for managing routines in DLLs
+    src/zugbruecke/core/routine_server.py: Classes for managing routines in DLLs
 
-	Required to run on platform / side: [WINE]
+    Required to run on platform / side: [WINE]
 
-	Copyright (C) 2017-2021 Sebastian M. Ernst <ernst@pleiszenburg.de>
+    Copyright (C) 2017-2021 Sebastian M. Ernst <ernst@pleiszenburg.de>
 
 <LICENSE_BLOCK>
 The contents of this file are subject to the GNU Lesser General Public License
@@ -31,54 +31,88 @@ specific language governing rights and limitations under the License.
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+from ctypes import _CFuncPtr
 from pprint import pformat as pf
 import traceback
+from typing import Dict, List, Union
 
+from .abc import DataABC, LogABC, RoutineServerABC, RpcServerABC
+from .typeguard import typechecked
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # DLL SERVER CLASS
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
-class routine_server_class:
-    def __init__(self, parent_dll, routine_name, routine_handler):
+@typechecked
+class RoutineServer(RoutineServerABC):
+    """
+    Representing a routine in a DLL
+    """
 
-        # Store handle on parent dll
-        self.dll = parent_dll
+    def __init__(
+        self,
+        name: Union[str, int],
+        handler: _CFuncPtr,
+        hash_id: str,
+        convention: str,
+        dll_name: str,
+        log: LogABC,
+        rpc_server: RpcServerABC,
+        data: DataABC,
+    ):
 
-        # Store pointer to zugbruecke session
-        self.session = self.dll.session
+        self._name = name
+        self._handler = handler
 
-        # Get handle on log
-        self.log = self.dll.log
+        self._convention = convention
+        self._dll_name = dll_name
 
-        # Store my own name
-        self.name = routine_name
+        self._log = log
+        self._data = data
 
-        # Required by arg definitions and contents
-        self.data = self.session.data
+        self._argtypes_d = None
+        self._restype_d = None
+        self._memsync_d = None
 
-        # Set routine handler
-        self.handler = routine_handler
+        # Export call and configration directly
+        rpc_server.register_function(
+            self,
+            "{HASH_ID:s}_{NAME:s}_handle_call".format(
+                HASH_ID=hash_id,
+                NAME=str(name),
+            ),
+        )
+        rpc_server.register_function(
+            self._configure,
+            "{HASH_ID:s}_{NAME:s}_configure".format(
+                HASH_ID=hash_id,
+                NAME=str(name),
+            ),
+        )
 
-    def __call__(self, arg_message_list, arg_memory_list):
+    def __call__(self, arg_message_list: List, arg_memory_list: List) -> Dict:
         """
         TODO: Optimize for speed!
         """
 
-        # Log status
-        self.log.out('[routine-server] Trying call routine "%s" ...' % self.name)
+        self._log.out(
+            '[routine-server] Trying to call routine "{NAME:s}" in DLL file "{DLL_NAME:s}" ...'.format(
+                NAME=str(self._name),
+                DLL_NAME=self._dll_name,
+            )
+        )
 
         try:
 
             # Unpack passed arguments, handle pointers and structs ...
-            args_list = self.data.arg_list_unpack(
-                arg_message_list, self.argtypes_d, self.dll.calling_convention
+            args_list = self._data.arg_list_unpack(
+                arg_message_list, self._argtypes_d, self._convention
             )
 
             # Unpack pointer data
-            self.data.server_unpack_memory_list(
-                args_list, arg_memory_list, self.memsync_d
+            self._data.server_unpack_memory_list(
+                args_list, arg_memory_list, self._memsync_d
             )
 
             # Default return value
@@ -86,26 +120,20 @@ class routine_server_class:
 
         except Exception as e:
 
-            # Log status
-            self.log.out("[routine-server] ... call preparation failed!")
-
-            # Push traceback to log
-            self.log.err(traceback.format_exc())
+            self._log.out("[routine-server] ... call preparation failed!")
+            self._log.err(traceback.format_exc())
 
             raise e
 
         try:
 
             # Call into dll
-            return_value = self.handler(*tuple(args_list))
+            return_value = self._handler(*tuple(args_list))
 
         except Exception as e:
 
-            # Log status
-            self.log.out("[routine-server] ... call failed!")
-
-            # Push traceback to log
-            self.log.err(traceback.format_exc())
+            self._log.out("[routine-server] ... call failed!")
+            self._log.err(traceback.format_exc())
 
             # Pack return package and return it
             return {
@@ -119,20 +147,19 @@ class routine_server_class:
         try:
 
             # Pack memory for return
-            self.data.server_pack_memory_list(
-                args_list, return_value, arg_memory_list, self.memsync_d
+            self._data.server_pack_memory_list(
+                args_list, return_value, arg_memory_list, self._memsync_d
             )
 
             # Get new arg message list
-            arg_message_list = self.data.arg_list_pack(
-                args_list, self.argtypes_d, self.dll.calling_convention
+            arg_message_list = self._data.arg_list_pack(
+                args_list, self._argtypes_d, self._convention
             )
 
             # Get new return message list
-            return_message = self.data.return_msg_pack(return_value, self.restype_d)
+            return_message = self._data.return_msg_pack(return_value, self._restype_d)
 
-            # Log status
-            self.log.out("[routine-server] ... done.")
+            self._log.out("[routine-server] ... done.")
 
             # Pack return package and return it
             return {
@@ -145,46 +172,42 @@ class routine_server_class:
 
         except Exception as e:
 
-            # Log status
-            self.log.out("[routine-server] ... call post-processing failed!")
-
-            # Push traceback to log
-            self.log.err(traceback.format_exc())
+            self._log.out("[routine-server] ... call post-processing failed!")
+            self._log.err(traceback.format_exc())
 
             raise e
 
-    def __configure__(self, argtypes_d, restype_d, memsync_d):
+    def _configure(self, argtypes_d: List, restype_d: Dict, memsync_d: List):
 
         # Store argtype definition dict
-        self.argtypes_d = argtypes_d
+        self._argtypes_d = argtypes_d
 
         # Store return value definition dict
-        self.restype_d = restype_d
+        self._restype_d = restype_d
 
         try:
 
             # Parse and apply argtype definition dict to actual ctypes routine
-            _argtypes = self.data.unpack_definition_argtypes(argtypes_d)
+            _argtypes = self._data.unpack_definition_argtypes(argtypes_d)
             # Only configure if there are definitions, otherwise calls with int parameters without definition fail
             if len(_argtypes) > 0:
-                self.handler.argtypes = _argtypes
+                self._handler.argtypes = _argtypes
 
             # Parse and apply restype definition dict to actual ctypes routine
-            self.handler.restype = self.data.unpack_definition_returntype(restype_d)
+            self._handler.restype = self._data.unpack_definition_returntype(restype_d)
 
             # Store memory sync instructions
-            self.memsync_d = self.data.unpack_definition_memsync(memsync_d)
+            self._memsync_d = self._data.unpack_definition_memsync(memsync_d)
 
         except Exception as e:
 
             # Push traceback to log
-            self.log.err(traceback.format_exc())
+            self._log.err(traceback.format_exc())
 
             raise e
 
-        # Log status
-        self.log.out(" memsync: \n%s" % pf(self.memsync_d))
-        self.log.out(" argtypes: \n%s" % pf(self.handler.argtypes))
-        self.log.out(" argtypes_d: \n%s" % pf(self.argtypes_d))
-        self.log.out(" restype: \n%s" % pf(self.handler.restype))
-        self.log.out(" restype_d: \n%s" % pf(self.restype_d))
+        self._log.out(" memsync: \n%s" % pf(self._memsync_d))
+        self._log.out(" argtypes: \n%s" % pf(self._handler.argtypes))
+        self._log.out(" argtypes_d: \n%s" % pf(self._argtypes_d))
+        self._log.out(" restype: \n%s" % pf(self._handler.restype))
+        self._log.out(" restype_d: \n%s" % pf(self._restype_d))
