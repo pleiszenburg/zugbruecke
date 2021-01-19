@@ -6,19 +6,19 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	src/zugbruecke/ctypes/wintypes.py: ctypes-based wintypes, hacks for VARIANT_BOOL
+    src/zugbruecke/ctypes/wintypes.py: ctypes-based wintypes, hacks for VARIANT_BOOL
 
-	Required to run on platform / side: [UNIX]
+    Required to run on platform / side: [UNIX]
 
-	Original file:
-	https://github.com/python/cpython/blob/3.6/Lib/ctypes/wintypes.py
-	https://github.com/python/cpython/commit/cc868d430b0416e588d53698f560b236c6ba88d2
+    Original file:
+    https://github.com/python/cpython/blob/3.6/Lib/ctypes/wintypes.py
+    https://github.com/python/cpython/commit/cc868d430b0416e588d53698f560b236c6ba88d2
 
-	Original license:
-	https://github.com/python/cpython/blob/3.6/LICENSE
+    Original license:
+    https://github.com/python/cpython/blob/3.6/LICENSE
 
-	Modifications from original:
-	Copyright (C) 2017-2021 Sebastian M. Ernst <ernst@pleiszenburg.de>
+    Modifications from original:
+    Copyright (C) 2017-2021 Sebastian M. Ernst <ernst@pleiszenburg.de>
 
 <LICENSE_BLOCK>
 The contents of this file are subject to the GNU Lesser General Public License

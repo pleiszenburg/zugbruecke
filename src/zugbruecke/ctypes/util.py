@@ -6,15 +6,15 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	src/zugbruecke/ctypes/util.py: ctypes.util for POSIX, hacked for DLL compatibility
+    src/zugbruecke/ctypes/util.py: ctypes.util for POSIX, hacked for DLL compatibility
 
-	Required to run on platform / side: [UNIX]
+    Required to run on platform / side: [UNIX]
 
-	Based on:
-	https://github.com/python/cpython/blob/master/Lib/ctypes/util.py
-	https://github.com/python/cpython/commit/a76f014278bd1643e93fdfa9e88f9414ce8354a6
+    Based on:
+    https://github.com/python/cpython/blob/master/Lib/ctypes/util.py
+    https://github.com/python/cpython/commit/a76f014278bd1643e93fdfa9e88f9414ce8354a6
 
-	Copyright (C) 2017-2021 Sebastian M. Ernst <ernst@pleiszenburg.de>
+    Copyright (C) 2017-2021 Sebastian M. Ernst <ernst@pleiszenburg.de>
 
 <LICENSE_BLOCK>
 The contents of this file are subject to the GNU Lesser General Public License
