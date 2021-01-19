@@ -8,7 +8,7 @@ https://github.com/pleiszenburg/zugbruecke
 
     src/zugbruecke/core/config.py: Handles the module's configuration
 
-    Required to run on platform / side: [UNIX]
+    Required to run on platform / side: [UNIX, WINE]
 
     Copyright (C) 2017-2021 Sebastian M. Ernst <ernst@pleiszenburg.de>
 
