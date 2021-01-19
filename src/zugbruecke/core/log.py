@@ -80,11 +80,11 @@ class Log(LogABC):
     ):
 
         # Store id and parameter
-        self.id = session_id
-        self.p = parameter
+        self._id = session_id
+        self._p = parameter
 
         # Log is up
-        self.up = True
+        self._up = True
 
         # Start arrays for stdout and stderr logs
         self.log = {}
@@ -92,14 +92,14 @@ class Log(LogABC):
         self.log["err"] = []
 
         # Determine platform
-        if "platform" not in self.p.keys():
-            self.p["platform"] = "UNIX"
+        if "platform" not in self._p.keys():
+            self._p["platform"] = "UNIX"
 
         # Open logfiles
-        if self.p["log_write"]:
+        if self._p["log_write"]:
             self.f = {}
-            self.f["out"] = "%s_%s.txt" % (self.p["platform"], "out")
-            self.f["err"] = "%s_%s.txt" % (self.p["platform"], "err")
+            self.f["out"] = "%s_%s.txt" % (self._p["platform"], "out")
+            self.f["err"] = "%s_%s.txt" % (self._p["platform"], "err")
 
         # Fire up server if required
         self.server_port = 0
@@ -115,12 +115,12 @@ class Log(LogABC):
 
     def terminate(self):
 
-        if self.up:
+        if self._up:
 
             # Nothing to do, just a placeholder
 
             # Log down
-            self.up = False
+            self._up = False
 
     def __append_message_to_log__(self, message):
 
@@ -138,8 +138,8 @@ class Log(LogABC):
                 message_lines.append(
                     {
                         "level": level,
-                        "platform": self.p["platform"],
-                        "id": self.id,
+                        "platform": self._p["platform"],
+                        "id": self._id,
                         "time": round(time.time(), 2),
                         "pipe": pipe_name,
                         "cnt": line,
@@ -208,11 +208,11 @@ class Log(LogABC):
     def __process_message_dict__(self, mesage_dict):
 
         self.__append_message_to_log__(mesage_dict)
-        if self.p["std" + mesage_dict["pipe"]]:
+        if self._p["std" + mesage_dict["pipe"]]:
             self.__print_message__(mesage_dict)
         if hasattr(self, "client"):
             self.__push_message_to_server__(mesage_dict)
-        if self.p["log_write"]:
+        if self._p["log_write"]:
             self.__store_message__(mesage_dict)
 
     def __push_message_to_server__(self, message):
@@ -230,10 +230,10 @@ class Log(LogABC):
 
     def out(self, *messages, level=1):
 
-        if level <= self.p["log_level"]:
+        if level <= self._p["log_level"]:
             self.__process_messages__(messages, "out", level)
 
     def err(self, *messages, level=1):
 
-        if level <= self.p["log_level"]:
+        if level <= self._p["log_level"]:
             self.__process_messages__(messages, "err", level)
