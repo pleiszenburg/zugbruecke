@@ -48,6 +48,7 @@ from .typeguard import typechecked
 # WINE PYTHON INTERPRETER CLASS
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+
 @typechecked
 class Interpreter(InterpreterABC):
     """
