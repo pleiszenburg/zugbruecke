@@ -36,10 +36,10 @@ from queue import Queue, Empty
 import signal
 import subprocess
 import time
-from typing import BinaryIO, Callable, Dict, Tuple
+from typing import BinaryIO, Callable, Tuple
 from threading import Thread
 
-from .abc import InterpreterABC, LogABC
+from .abc import ConfigABC, InterpreterABC, LogABC
 from .lib import get_free_port
 from .typeguard import typechecked
 
@@ -55,7 +55,7 @@ class Interpreter(InterpreterABC):
     Class for managing Python interpreter on Wine
     """
 
-    def __init__(self, session_id: str, parameter: Dict, session_log: LogABC):
+    def __init__(self, session_id: str, parameter: ConfigABC, session_log: LogABC):
 
         # Set ID, parameters and pointer to log
         self._id = session_id

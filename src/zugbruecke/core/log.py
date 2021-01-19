@@ -35,9 +35,9 @@ import json
 from pprint import pformat
 import sys
 import time
-from typing import Any, Dict, List, Union
+from typing import Any, List, Union
 
-from .abc import LogABC, MessageABC, RpcClientABC, RpcServerABC
+from .abc import ConfigABC, LogABC, MessageABC, RpcClientABC, RpcServerABC
 from .const import PLATFORMS
 from .typeguard import typechecked
 
@@ -76,7 +76,7 @@ class Log(LogABC):
     def __init__(
         self,
         session_id: str,
-        parameter: Dict,
+        parameter: ConfigABC,
         rpc_server: Union[None, RpcServerABC] = None,
         rpc_client: Union[None, RpcClientABC] = None,
     ):
@@ -84,10 +84,6 @@ class Log(LogABC):
         # Store id and parameter
         self._id = session_id
         self._p = parameter
-
-        # Determine platform
-        if "platform" not in self._p.keys():
-            self._p["platform"] = "UNIX"
 
         # Create filenames for logfiles
         self._f = None
