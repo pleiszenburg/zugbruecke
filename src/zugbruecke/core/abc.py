@@ -41,6 +41,10 @@ class ConfigABC(ABC):
     pass
 
 
+class CtypesSessionABC(ABC):
+    pass
+
+
 class DataABC(ABC):
     pass
 

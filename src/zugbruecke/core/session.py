@@ -6,11 +6,11 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	src/zugbruecke/core/session.py: A user-facing ctypes-drop-in-replacement session
+    src/zugbruecke/core/session.py: A user-facing ctypes-drop-in-replacement session
 
-	Required to run on platform / side: [UNIX]
+    Required to run on platform / side: [UNIX]
 
-	Copyright (C) 2017-2021 Sebastian M. Ernst <ernst@pleiszenburg.de>
+    Copyright (C) 2017-2021 Sebastian M. Ernst <ernst@pleiszenburg.de>
 
 <LICENSE_BLOCK>
 The contents of this file are subject to the GNU Lesser General Public License
@@ -44,6 +44,7 @@ from ctypes import _FUNCFLAG_CDECL, DEFAULT_MODE, LibraryLoader
 # IMPORT: zugbruecke core and missing ctypes flags
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+from .abc import CtypesSessionABC
 from .session_client import SessionClient
 from .const import _FUNCFLAG_STDCALL  # EXPORT
 
@@ -53,7 +54,7 @@ from .const import _FUNCFLAG_STDCALL  # EXPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
-class session_class:
+class CtypesSession(CtypesSessionABC):
 
     # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     # static components
@@ -337,4 +338,4 @@ for __ctypes_item__ in _ctypes_veryprivate_ + __ctypes_private__ + __ctypes_publ
     __ctypes_attr__ = getattr(__ctypes__, __ctypes_item__)
     if hasattr(__ctypes_attr__, "__call__"):
         __ctypes_attr__ = staticmethod(__ctypes_attr__)
-    setattr(session_class, __ctypes_item__, __ctypes_attr__)
+    setattr(CtypesSession, __ctypes_item__, __ctypes_attr__)

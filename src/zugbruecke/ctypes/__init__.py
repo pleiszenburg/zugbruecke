@@ -32,7 +32,7 @@ specific language governing rights and limitations under the License.
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 from ..core.session import (
-    session_class as _session_class,
+    CtypesSession as _CtypesSession,
     _ctypes_veryprivate_ as _ctypes_veryprivate,
 )
 
@@ -41,10 +41,10 @@ from ..core.session import (
 # Setup module
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-_session = _session_class()
+_session = _CtypesSession()
 _globals = globals()
 for _ctypes_item in dir(_session):
     if _ctypes_item.startswith("__") and not _ctypes_item in _ctypes_veryprivate:
         continue
     _globals[_ctypes_item] = getattr(_session, _ctypes_item)
-del _globals, _session, _session_class, _ctypes_item, _ctypes_veryprivate
+del _globals, _session, _CtypesSession, _ctypes_item, _ctypes_veryprivate

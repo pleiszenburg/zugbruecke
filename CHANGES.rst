@@ -17,7 +17,7 @@ Changes
 +------------+---------------------------------------------------+---------------------------------------------------+
 | session    | .. code:: python                                  + .. code:: python                                  +
 | class      |                                                   +                                                   +
-|            |     zugbruecke.session                            +     zugbruecke.ctypes_session                     +
+|            |     zugbruecke.session                            +     zugbruecke.CtypesSession                      +
 +------------+---------------------------------------------------+---------------------------------------------------+
 | commands   | - ``wine-python``                                 + - ``wenv python``                                 +
 |            | - ``wine-pip``                                    + - ``wenv pip``                                    +
@@ -31,7 +31,7 @@ Changes
 
 The above significant change was mandatory for allowing to cleanup a lot of old code and to remove long-standing bugs. The main issue was that importing ``zugbruecke`` would implicitly start a new session. This could not be prohibited. With the new package layout, it becomes possible to import sub-modules of ``zugbruecke`` without implicitly starting a session. One of the more significant added benefits therefore is that this change also allows much more fine-grained tests.
 
-As a consequence, ``zugbruecke.current_session`` is no longer available. ``zugbruecke.ctypes`` on its own is now the default session. Besides, the class ``zugbruecke.session`` was renamed into ``zugbruecke.ctypes_session`` and has now a fully compatible ``ctypes`` drop-in replacement interface as well. Both, ``zugbruecke.ctypes`` and custom sessions constructed from ``zugbruecke.ctypes_session``, now have methods and properties prefixed with ``_zb_`` for manipulating their configuration, termination and Wine-related tasks.
+As a consequence, ``zugbruecke.current_session`` is no longer available. ``zugbruecke.ctypes`` on its own is now the default session. Besides, the class ``zugbruecke.session`` was renamed into ``zugbruecke.CtypesSession`` and has now a fully compatible ``ctypes`` drop-in replacement interface as well. Both, ``zugbruecke.ctypes`` and custom sessions constructed from ``zugbruecke.CtypesSession``, now have methods and properties prefixed with ``_zb_`` for manipulating their configuration, termination and Wine-related tasks.
 
 The ``set_parameter`` method, now renamed into ``_zb_set_parameter``, only accepts a single key-value pair instead of a dictionary.
 

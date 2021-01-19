@@ -6,11 +6,11 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	tests/lib/ctypes.py: Offers handles on ctypes/zugbruecke sessions and DLLs
+    tests/lib/ctypes.py: Offers handles on ctypes/zugbruecke sessions and DLLs
 
-	Required to run on platform / side: [UNIX, WINE]
+    Required to run on platform / side: [UNIX, WINE]
 
-	Copyright (C) 2017-2021 Sebastian M. Ernst <ernst@pleiszenburg.de>
+    Copyright (C) 2017-2021 Sebastian M. Ernst <ernst@pleiszenburg.de>
 
 <LICENSE_BLOCK>
 The contents of this file are subject to the GNU Lesser General Public License
@@ -46,7 +46,7 @@ ARCHITECTURE = architecture()[0][:2]
 if any([platform.startswith(os_name) for os_name in ["linux", "darwin", "freebsd"]]):
     import zugbruecke
 
-    CTYPES = {arch: zugbruecke.ctypes_session({"arch": arch}) for arch in ARCHS}
+    CTYPES = {arch: zugbruecke.CtypesSession({"arch": arch}) for arch in ARCHS}
     PLATFORM = "unix"
 elif platform.startswith("win"):
     import ctypes
