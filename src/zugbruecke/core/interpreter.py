@@ -165,6 +165,7 @@ class interpreter_session_class:
         }  # HACK Required for Travis CI
         envvar_update_dict = dict(
             WENV_ARCH=self.p["arch"],  # Architecture
+            WENV_PYTHONVERSION=self.p["pythonversion"], # Version of Wine Python
         )
         envvar_dict.update(envvar_update_dict)
 
