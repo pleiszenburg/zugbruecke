@@ -6,11 +6,11 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	src/zugbruecke/ctypes/__init__.py: ctypes drop-in replacement
+    src/zugbruecke/ctypes/__init__.py: ctypes drop-in replacement
 
-	Required to run on platform / side: [UNIX]
+    Required to run on platform / side: [UNIX]
 
-	Copyright (C) 2017-2021 Sebastian M. Ernst <ernst@pleiszenburg.de>
+    Copyright (C) 2017-2021 Sebastian M. Ernst <ernst@pleiszenburg.de>
 
 <LICENSE_BLOCK>
 The contents of this file are subject to the GNU Lesser General Public License
@@ -32,8 +32,8 @@ specific language governing rights and limitations under the License.
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 from ..core.session import (
-    session_class as __session_class__,
-    _ctypes_veryprivate_ as __ctypes_veryprivate__,
+    session_class as _session_class,
+    _ctypes_veryprivate_ as _ctypes_veryprivate,
 )
 
 
@@ -41,13 +41,13 @@ from ..core.session import (
 # Setup module
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-__session__ = __session_class__()
-__globals__ = globals()
-for __ctypes_item__ in dir(__session__):
+_session = _session_class()
+_globals = globals()
+for _ctypes_item in dir(_session):
     if (
-        __ctypes_item__.startswith("__")
-        and not __ctypes_item__ in __ctypes_veryprivate__
+        _ctypes_item.startswith("__")
+        and not _ctypes_item in _ctypes_veryprivate
     ):
         continue
-    __globals__[__ctypes_item__] = getattr(__session__, __ctypes_item__)
-del __globals__, __session__, __session_class__, __ctypes_item__, __ctypes_veryprivate__
+    _globals[_ctypes_item] = getattr(_session, _ctypes_item)
+del _globals, _session, _session_class, _ctypes_item, _ctypes_veryprivate
