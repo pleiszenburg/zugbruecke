@@ -67,6 +67,7 @@ On older versions of Linux such as *Ubuntu 14.04* alias *Trusty Tahr* (released 
 * FIX: ``zugbruecke`` raised TypeError if too many arguments were given too a configured cdll function (``ctypes`` does not), see #62.
 * FIX: If a struct type was used in a function call with memsync first (before use in a function call without memsync), configuring (and calling) the function failed, see #63.
 * FIX: Path conversion would fail for Wine 5.13 and later.
+* FIX: Memory leak: Sessions would collect all log data for as long as they were running, see #76.
 * The configuration module was refactored and made clearer and faster, allowing to implement new options.
 
 0.0.15 (2020-07-10)
