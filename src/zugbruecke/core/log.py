@@ -70,7 +70,7 @@ c = {
 @typechecked
 class Log(LogABC):
     """
-    gathering, managing & displaying logs
+    Gathering, managing & displaying logs
     """
 
     def __init__(
