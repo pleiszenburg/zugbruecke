@@ -32,6 +32,7 @@ specific language governing rights and limitations under the License.
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 import sys as _sys
+
 if not _sys.platform.startswith("win"):
     from .core.session import CtypesSession
 del _sys

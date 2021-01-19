@@ -80,9 +80,7 @@ class SessionClient(SessionClientABC):
         self._rpc_server = mp_server_class(
             ("localhost", self._p["port_socket_unix"]), "zugbruecke_unix"
         )  # Log is added later
-        self._rpc_server.register_function(
-            self._set_server_status, "set_server_status"
-        )
+        self._rpc_server.register_function(self._set_server_status, "set_server_status")
         self._rpc_server.server_forever_in_thread()
 
         # Start session logging
@@ -91,11 +89,14 @@ class SessionClient(SessionClientABC):
         self._log.out("[session-client] STARTING ...")
         self._log.out(
             "[session-client] Configured Wine-Python version is {PYTHONVERSION:s} for {ARCH:s}.".format(
-                PYTHONVERSION = self._p["pythonversion"], ARCH = self._p["arch"],
+                PYTHONVERSION=self._p["pythonversion"],
+                ARCH=self._p["arch"],
             )
         )
         self._log.out(
-            "[session-client] Log socket port: {PORT:d}.".format(PORT = self._p["port_socket_unix"])
+            "[session-client] Log socket port: {PORT:d}.".format(
+                PORT=self._p["port_socket_unix"]
+            )
         )
 
         # Set data cache and parser
@@ -135,7 +136,7 @@ class SessionClient(SessionClientABC):
             "find_msvcrt",
             "find_library",
         ):
-            name = "ctypes_{ROUTINE:s}".format(ROUTINE = routine)
+            name = "ctypes_{ROUTINE:s}".format(ROUTINE=routine)
             setattr(self, name, getattr(self._rpc_client, name))
 
         self._log.out("[session-client] STARTED.")

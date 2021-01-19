@@ -85,7 +85,7 @@ class CtypesSession(CtypesSessionABC):
         # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
         # Start new zugbruecke session
-        self._zb_current_session = SessionClient(config = config)
+        self._zb_current_session = SessionClient(config=config)
 
         # Offer access to session internals
         self._zb_get_parameter = self._zb_current_session.get_parameter
