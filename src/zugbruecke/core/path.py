@@ -35,6 +35,7 @@ import ctypes
 from ctypes import wintypes
 
 from .errors import wine_error
+from .typeguard import typechecked
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -42,6 +43,7 @@ from .errors import wine_error
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
+@typechecked
 class PathStyles:
     """
     Coverts paths fron Unix to Wine format and vice versa
