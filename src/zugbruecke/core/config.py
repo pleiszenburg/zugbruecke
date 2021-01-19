@@ -6,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-    src/zugbruecke/core/config.py: Handles the modules configuration
+    src/zugbruecke/core/config.py: Handles the module's configuration
 
     Required to run on platform / side: [UNIX]
 
@@ -34,6 +34,7 @@ specific language governing rights and limitations under the License.
 import os
 import json
 
+from .abc import ConfigABC
 from .const import CONFIG_FLD, CONFIG_FN
 from .errors import config_parser_error
 from .lib import generate_session_id
@@ -44,7 +45,11 @@ from .lib import generate_session_id
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
-class config_class(dict):
+class Config(ConfigABC, dict):
+    """
+    Handles the module's configuration
+    """
+
     def __init__(self, **override_dict):
 
         # Call parent constructur, just in case

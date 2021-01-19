@@ -36,6 +36,9 @@ from abc import ABC
 # CLASSES
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+class ConfigABC(ABC):
+    pass
+
 
 class InterpreterABC(ABC):
     pass
