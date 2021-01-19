@@ -128,7 +128,9 @@ class Log(LogABC):
     def _process_raw(self, raw_messages: Any, pipe: str, level: int):
 
         for raw_message in raw_messages:
-            for message in Message.from_raw(raw_message, pipe, level, self._id, self._p["platform"]):
+            for message in Message.from_raw(
+                raw_message, pipe, level, self._id, self._p["platform"]
+            ):
                 self._process(message)
 
     def _process(self, message: MessageABC):
@@ -157,7 +159,8 @@ class Message(MessageABC):
     Container for log messages
     """
 
-    def __init__(self,
+    def __init__(
+        self,
         level: int,
         platform: str,
         id: str,
@@ -170,19 +173,26 @@ class Message(MessageABC):
         assert pipe in ("out", "err")
 
         self._level, self._platform, self._id, self._time, self._pipe, self._cnt = (
-            level, platform, id, time, pipe, cnt,
+            level,
+            platform,
+            id,
+            time,
+            pipe,
+            cnt,
         )
 
     def as_serialized(self) -> str:
 
-        return json.dumps(dict(
-            level = self._level,
-            platform = self._platform,
-            id = self._id,
-            time = self._time,
-            pipe = self._pipe,
-            cnt = self._cnt,
-        ))
+        return json.dumps(
+            dict(
+                level=self._level,
+                platform=self._platform,
+                id=self._id,
+                time=self._time,
+                pipe=self._pipe,
+                cnt=self._cnt,
+            )
+        )
 
     def print(self):
 
@@ -229,7 +239,9 @@ class Message(MessageABC):
         return self._pipe
 
     @classmethod
-    def from_raw(cls, raw_message: Any, pipe: str, level: int, id: str, platform: str) -> List[MessageABC]:
+    def from_raw(
+        cls, raw_message: Any, pipe: str, level: int, id: str, platform: str
+    ) -> List[MessageABC]:
 
         raw_message = (
             raw_message if isinstance(raw_message, str) else pformat(raw_message)
@@ -237,12 +249,12 @@ class Message(MessageABC):
         message_time = round(time.time(), 2)
         return [
             cls(
-                level = level,
-                platform = platform,
-                id = id,
-                time = message_time,
-                pipe = pipe,
-                cnt = line,
+                level=level,
+                platform=platform,
+                id=id,
+                time=message_time,
+                pipe=pipe,
+                cnt=line,
             )
             for line in raw_message.split("\n")
             if len(line.strip()) != 0
