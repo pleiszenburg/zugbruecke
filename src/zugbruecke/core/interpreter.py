@@ -136,22 +136,22 @@ class Interpreter(InterpreterABC):
 
         while self._is_alive():
             time.sleep(0.1)
-            while not self.stdout_queue.empty():
+            while not self._stdout_queue.empty():
                 self._read_stream(
-                    self.stdout_queue, lambda line: self._log.out("[P] " + line)
+                    self._stdout_queue, lambda line: self._log.out("[P] " + line)
                 )
-            while not self.stderr_queue.empty():
+            while not self._stderr_queue.empty():
                 self._read_stream(
-                    self.stderr_queue, lambda line: self._log.err("[P] " + line)
+                    self._stderr_queue, lambda line: self._log.err("[P] " + line)
                 )
 
         # Log status
         self._log.out("[interpreter] Joining worker threads and queues ...")
 
-        self.stdout_queue.join()
-        self.stderr_queue.join()
-        self.stdout_thread.join()
-        self.stderr_thread.join()
+        self._stdout_queue.join()
+        self._stderr_queue.join()
+        self._stdout_thread.join()
+        self._stderr_thread.join()
 
         # Log status
         self._log.out("[interpreter] ... worker threads and queues joined.")
@@ -227,12 +227,12 @@ class Interpreter(InterpreterABC):
 
         # Start worker threads and queues for reading from streams
         (
-            self.stdout_thread,
-            self.stdout_queue,
+            self._stdout_thread,
+            self._stdout_queue,
         ) = self._start_stream_worker(self._proc_winepython.stdout, self._stream_worker)
         (
-            self.stderr_thread,
-            self.stderr_queue,
+            self._stderr_thread,
+            self._stderr_queue,
         ) = self._start_stream_worker(self._proc_winepython.stderr, self._stream_worker)
 
         # Log status
