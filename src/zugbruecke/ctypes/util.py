@@ -10,10 +10,6 @@ https://github.com/pleiszenburg/zugbruecke
 
     Required to run on platform / side: [UNIX]
 
-    Based on:
-    https://github.com/python/cpython/blob/master/Lib/ctypes/util.py
-    https://github.com/python/cpython/commit/a76f014278bd1643e93fdfa9e88f9414ce8354a6
-
     Copyright (C) 2017-2021 Sebastian M. Ernst <ernst@pleiszenburg.de>
 
 <LICENSE_BLOCK>
