@@ -129,7 +129,7 @@ class SessionClient(SessionClientABC):
             timeout_after_seconds=self._p["timeout_start"],
         )
 
-        for routine in (
+        for name in (
             "FormatError",
             "get_last_error",
             "GetLastError",
@@ -138,12 +138,11 @@ class SessionClient(SessionClientABC):
             "find_msvcrt",
             "find_library",
         ):
-            name = "ctypes_{ROUTINE:s}".format(ROUTINE=routine)
             setattr(self, name, getattr(self._rpc_client, name))
 
         self._log.out("[session-client] STARTED.")
 
-    def ctypes_CFUNCTYPE(
+    def CFUNCTYPE(
         self, restype: Any, *argtypes: Any, **kw: Dict[str, bool]
     ) -> _CFuncPtr:  # EXPORT
 
@@ -158,7 +157,7 @@ class SessionClient(SessionClientABC):
 
         return self._data.generate_callback_decorator(flags, restype, *argtypes)
 
-    def ctypes_WINFUNCTYPE(
+    def WINFUNCTYPE(
         self, restype: Any, *argtypes: Any, **kw: Dict[str, bool]
     ) -> _CFuncPtr:  # EXPORT
 
@@ -278,6 +277,21 @@ class SessionClient(SessionClientABC):
         self._log.terminate()
 
         self._client_up = False
+
+    @property
+    def id(self) -> str:
+
+        return self._id
+
+    @property
+    def client_up(self) -> bool:
+
+        return self._client_up
+
+    @property
+    def server_up(self) -> bool:
+
+        return self._server_up
 
     @property
     def data(self) -> DataABC:  # Accessed by CtypesSession
