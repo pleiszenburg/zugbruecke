@@ -6,11 +6,11 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	src/zugbruecke/core/lib.py: General purpose routines
+    src/zugbruecke/core/lib.py: General purpose routines
 
-	Required to run on platform / side: [UNIX, WINE]
+    Required to run on platform / side: [UNIX, WINE]
 
-	Copyright (C) 2017-2021 Sebastian M. Ernst <ernst@pleiszenburg.de>
+    Copyright (C) 2017-2021 Sebastian M. Ernst <ernst@pleiszenburg.de>
 
 <LICENSE_BLOCK>
 The contents of this file are subject to the GNU Lesser General Public License
@@ -32,9 +32,10 @@ specific language governing rights and limitations under the License.
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 import hashlib
-import os
 import random
 import socket
+
+from .typeguard import typechecked
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -42,7 +43,8 @@ import socket
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
-def get_free_port():
+@typechecked
+def get_free_port() -> int:
 
     s = socket.socket()
     s.bind(("", 0))
@@ -52,26 +54,19 @@ def get_free_port():
     return port
 
 
-def get_hash_of_string(str_in):
+@typechecked
+def get_hash_of_string(in_str: str) -> str:
 
-    return hashlib.sha256(str_in.encode("utf-8")).hexdigest()
-
-
-def get_location_of_file(filename=""):
-
-    if filename == "":
-        filename = __file__
-
-    return os.path.split(os.path.realpath(filename))[0]
+    return hashlib.sha256(in_str.encode("utf-8")).hexdigest()
 
 
-def get_randhashstr(dig):
+@typechecked
+def get_randhashstr(digits: int) -> str:
 
-    # Return hash string with dig digits
-    return ("%0" + str(dig) + "x") % random.randrange(16 ** dig)
+    return "{{NUMBER:0{DIGITS:d}x}}".format(DIGITS = digits).format(NUMBER = random.randrange(16 ** digits))
 
 
-def generate_session_id():
+@typechecked
+def generate_session_id() -> str:
 
-    # A session id by default is an 8 digit hash string
-    return get_randhashstr(8)
+    return get_randhashstr(8) # 8 digit hash string by default
