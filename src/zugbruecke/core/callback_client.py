@@ -34,7 +34,7 @@ specific language governing rights and limitations under the License.
 import traceback
 from typing import Callable, Dict, List
 
-from .abc import CallbackClientABC, DataABC
+from .abc import CallbackClientABC, DataABC, LogABC, RpcServerABC
 from .typeguard import typechecked
 
 
@@ -51,50 +51,41 @@ class CallbackClient(CallbackClientABC):
 
     def __init__(
         self,
+        name: str,
+        handler: Callable,
+        rpc_server: RpcServerABC,
         data: DataABC,
-        routine_name: str,
-        routine_handler: Callable,
+        log: LogABC,
         argtypes_d: List,
         restype_d: Dict,
         memsync_d: List,
     ):
 
-        # Store my own name
-        self.name = routine_name
+        self._name = name
+        self._handler = handler
+        self._data = data
+        self._log = log
+        self._argtypes_d = argtypes_d
+        self._restype_d = restype_d
+        self._memsync_d = memsync_d
 
-        # Store handler
-        self.handler = routine_handler
-
-        # Store handle on data
-        self.data = data
-
-        # Get handle on log
-        self.log = self.data.log
-
-        # Store definition of argument types
-        self.argtypes_d = argtypes_d
-
-        # Store definition of return value type
-        self.restype_d = restype_d
-
-        # Store memsync definition
-        self.memsync_d = memsync_d
+        rpc_server.register_function(self, public_name=name)
 
     def __call__(self, arg_message_list, arg_memory_list):
 
         # Log status
-        self.log.out(
-            '[callback-client] Trying to call callback routine "%s" ...' % self.name
+        self._log.out(
+            '[callback-client] Trying to call callback routine "%s" ...' % self._name
         )
 
         try:
 
             # Unpack arguments
-            args_list = self.data.arg_list_unpack(arg_message_list, self.argtypes_d)
+            args_list = self._data.arg_list_unpack(arg_message_list, self._argtypes_d)
 
             # Unpack pointer data
-            self.data.server_unpack_memory_list(
-                args_list, arg_memory_list, self.memsync_d
+            self._data.server_unpack_memory_list(
+                args_list, arg_memory_list, self._memsync_d
             )
 
             # Default return value
@@ -103,10 +94,10 @@ class CallbackClient(CallbackClientABC):
         except Exception as e:
 
             # Log status
-            self.log.out("[callback-client] ... call preparation failed!")
+            self._log.out("[callback-client] ... call preparation failed!")
 
             # Push traceback to log
-            self.log.err(traceback.format_exc())
+            self._log.err(traceback.format_exc())
 
             raise e
 
@@ -114,15 +105,15 @@ class CallbackClient(CallbackClientABC):
         try:
 
             # Call actual callback function (ctypes function pointer)
-            return_value = self.handler(*tuple(args_list))
+            return_value = self._handler(*tuple(args_list))
 
         except Exception as e:
 
             # Log status
-            self.log.out("[callback-client] ... call failed!")
+            self._log.out("[callback-client] ... call failed!")
 
             # Push traceback to log
-            self.log.err(traceback.format_exc())
+            self._log.err(traceback.format_exc())
 
             # Pack return package and return it
             return {
@@ -136,18 +127,18 @@ class CallbackClient(CallbackClientABC):
         try:
 
             # Pack memory for return
-            self.data.server_pack_memory_list(
-                args_list, return_value, arg_memory_list, self.memsync_d
+            self._data.server_pack_memory_list(
+                args_list, return_value, arg_memory_list, self._memsync_d
             )
 
             # Get new arg message list
-            arg_message_list = self.data.arg_list_pack(args_list, self.argtypes_d)
+            arg_message_list = self._data.arg_list_pack(args_list, self._argtypes_d)
 
             # Pack return value
-            return_message = self.data.return_msg_pack(return_value, self.restype_d)
+            return_message = self._data.return_msg_pack(return_value, self._restype_d)
 
             # Log status
-            self.log.out("[callback-client] ... done.")
+            self._log.out("[callback-client] ... done.")
 
             # Ship data back to Wine side
             return {
@@ -161,9 +152,9 @@ class CallbackClient(CallbackClientABC):
         except Exception as e:
 
             # Log status
-            self.log.out("[callback-client] ... call post-processing failed!")
+            self._log.out("[callback-client] ... call post-processing failed!")
 
             # Push traceback to log
-            self.log.err(traceback.format_exc())
+            self._log.err(traceback.format_exc())
 
             raise e

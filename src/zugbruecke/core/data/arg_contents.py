@@ -243,19 +243,16 @@ class arguments_contents_class:
             # Just return its name
             return func_name
 
-        # Generate and store callback translator in cache
+        # Generate and store callback in cache
         self.cache_dict["func_handle"][func_name] = CallbackClient(
-            self,
-            func_name,
-            func_ptr,
-            func_def_dict["_argtypes_"],
-            func_def_dict["_restype_"],
-            self.unpack_definition_memsync(func_def_dict["_memsync_"]),
-        )
-
-        # Register translator at RPC server
-        self.callback_server.register_function(
-            self.cache_dict["func_handle"][func_name], public_name=func_name
+            name = func_name,
+            handler = func_ptr,
+            rpc_server = self.callback_server,
+            data = self,
+            log = self.log,
+            argtypes_d = func_def_dict["_argtypes_"],
+            restype_d = func_def_dict["_restype_"],
+            memsync_d = self.unpack_definition_memsync(func_def_dict["_memsync_"]),
         )
 
         # Return name of callback entry
@@ -475,12 +472,13 @@ class arguments_contents_class:
         # Generate, decorate and store callback translator in cache
         self.cache_dict["func_handle"][func_name] = func_def_dict["_factory_type_"](
             CallbackServer(
-                self,
-                func_name,
-                getattr(self.callback_client, func_name),
-                func_def_dict["_argtypes_"],
-                func_def_dict["_restype_"],
-                self.unpack_definition_memsync(func_def_dict["_memsync_"]),
+                name = func_name,
+                rpc_client = self.callback_client,
+                data = self,
+                log = self.log,
+                argtypes_d = func_def_dict["_argtypes_"],
+                restype_d = func_def_dict["_restype_"],
+                memsync_d = self.unpack_definition_memsync(func_def_dict["_memsync_"]),
             )
         )
 
