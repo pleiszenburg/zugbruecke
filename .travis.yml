@@ -33,11 +33,6 @@ language: python
 # Python 3.4 is availabe for trusty and xenial, Python >= 3.5 xenial only
 matrix:
     include:
-        - dist: trusty
-          python: "3.4"
-          env:
-              - ZUGBRUECKE__ISSUES_50_WORKAROUND=TRUE
-              - ZUGBRUECKE_LOG_LEVEL=100
         - dist: xenial
           python: "3.5"
           env:
@@ -55,6 +50,11 @@ matrix:
               - ZUGBRUECKE_LOG_LEVEL=100
         - dist: xenial
           python: "3.8"
+          env:
+              - ZUGBRUECKE__ISSUES_50_WORKAROUND=FALSE
+              - ZUGBRUECKE_LOG_LEVEL=100
+        - dist: xenial
+          python: "3.9"
           env:
               - ZUGBRUECKE__ISSUES_50_WORKAROUND=FALSE
               - ZUGBRUECKE_LOG_LEVEL=100
