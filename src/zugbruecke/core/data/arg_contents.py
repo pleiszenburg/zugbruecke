@@ -44,7 +44,7 @@ from ..const import (
 )
 from ..callback_client import callback_translator_client_class
 from ..callback_server import callback_translator_server_class
-from ..errors import data_flag_error, data_group_error
+from ..errors import DataFlagError, DataGroupError
 from .memory import is_null_pointer
 
 
@@ -168,7 +168,7 @@ class arguments_contents_class:
         # Strip away the pointers ... (all flags are pointers in this case)
         for flag in arg_def_dict["f"]:
             if flag != FLAG_POINTER:
-                raise data_flag_error("unknown non-pointer flag for scalar")
+                raise DataFlagError("unknown non-pointer flag for scalar")
             if is_null_pointer(arg_in):
                 # Just return None - will (hopefully) be overwritten by memsync
                 return None
@@ -224,7 +224,7 @@ class arguments_contents_class:
             # Handle unknown flags
             else:
 
-                raise data_flag_error("unknown non-pointer flag for array")
+                raise DataFlagError("unknown non-pointer flag for array")
 
         return arg_in
 
@@ -290,7 +290,7 @@ class arguments_contents_class:
         # Strip away the pointers ... (all flags are pointers in this case)
         for flag in arg_def_dict["f"]:
             if flag != FLAG_POINTER:
-                raise data_flag_error("unknown non-pointer flag for scalar")
+                raise DataFlagError("unknown non-pointer flag for scalar")
             old_arg = self.__item_pointer_strip__(old_arg)
             new_arg = self.__item_pointer_strip__(new_arg)
 
@@ -304,7 +304,7 @@ class arguments_contents_class:
         elif arg_def_dict["g"] == GROUP_FUNCTION:
             pass  # Nothing to do?
         else:
-            raise data_group_error("unexpected datatype group")
+            raise DataGroupError("unexpected datatype group")
 
     def __sync_item_array__(self, old_arg, new_arg, arg_def_dict, flag_index_start=0):
 
@@ -347,12 +347,12 @@ class arguments_contents_class:
                             "functions in arrays are not supported"
                         )
                     else:
-                        raise data_group_error("unexpected datatype group")
+                        raise DataGroupError("unexpected datatype group")
 
             # Handle unknown flags
             else:
 
-                raise data_flag_error("unknown non-pointer flag for array")
+                raise DataFlagError("unknown non-pointer flag for array")
 
     def __sync_item_struct__(self, old_struct, new_struct, struct_def_dict):
 
@@ -387,12 +387,12 @@ class arguments_contents_class:
             return None
         # Handle everything else ...
         else:
-            raise data_group_error("unexpected datatype group")
+            raise DataGroupError("unexpected datatype group")
 
         # Step through flags in reverse order (if it's not a memsync field)
         for flag in reversed(arg_def_dict["f"]):
             if flag != FLAG_POINTER:
-                raise data_flag_error("unknown non-pointer flag for scalar")
+                raise DataFlagError("unknown non-pointer flag for scalar")
             arg_rebuilt = ctypes.pointer(arg_rebuilt)
 
         return arg_rebuilt
@@ -437,13 +437,13 @@ class arguments_contents_class:
                 arg_in = arg_type(*arg_in)
             # Handle unknown flags
             else:
-                raise data_flag_error("unknown non-pointer flag for array")
+                raise DataFlagError("unknown non-pointer flag for array")
 
         # No dive, we're at the bottom - just get the original ctypes type
         else:
 
             if flag == FLAG_POINTER:
-                raise data_flag_error("unexpected pointer flag for array")
+                raise DataFlagError("unexpected pointer flag for array")
 
             if arg_def_dict["g"] == GROUP_FUNDAMENTAL:
                 arg_type = getattr(ctypes, arg_def_dict["t"]) * flag
@@ -456,7 +456,7 @@ class arguments_contents_class:
             elif arg_def_dict["g"] == GROUP_FUNCTION:
                 raise NotImplementedError("functions in arrays are not supported")
             else:
-                raise data_group_error("unexpected datatype group")
+                raise DataGroupError("unexpected datatype group")
 
         return arg_type, arg_in
 

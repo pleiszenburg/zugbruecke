@@ -36,29 +36,29 @@ class ConfigParserError(Exception):
     pass
 
 
-class wine_error(Exception):
+class WineError(Exception):
     pass
 
 
-class data_error(Exception):
+class DataError(Exception):
     pass
 
 
-class data_flag_error(data_error):
+class DataFlagError(DataError):
     pass
 
 
-class data_type_error(data_error):
+class DataTypeError(DataError):
     pass
 
 
-class data_group_error(data_error):
+class DataGroupError(DataError):
     pass
 
 
-class data_memsyncpath_error(data_error):
+class DataMemsyncpathError(DataError):
     pass
 
 
-class data_memsyncsyntax_error(data_error):
+class DataMemsyncsyntaxError(DataError):
     pass

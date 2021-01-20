@@ -58,7 +58,7 @@ import pytest
 from sys import platform
 
 if any([platform.startswith(os_name) for os_name in ["linux", "darwin", "freebsd"]]):
-    from zugbruecke.core.errors import data_memsyncsyntax_error
+    from zugbruecke.core.errors import DataMemsyncsyntaxError
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # TEST(s)
@@ -74,7 +74,7 @@ def test_memsync_on_routine_not_list(arch, conv, ctypes, dll_handle):
         [platform.startswith(os_name) for os_name in ["linux", "darwin", "freebsd"]]
     ):
         with pytest.raises(
-            data_memsyncsyntax_error, match="memsync attribute must be a list"
+            DataMemsyncsyntaxError, match="memsync attribute must be a list"
         ):
             sub_ints.memsync = {}
     elif platform.startswith("win"):
@@ -95,7 +95,7 @@ def test_memsync_on_callback_not_list(arch, conv, ctypes, dll_handle):
 
     # BUG temporarily disabled - see below
     # if any([platform.startswith(os_name) for os_name in ['linux', 'darwin', 'freebsd']]):
-    # 	with pytest.raises(data_memsyncsyntax_error, match = 'memsync attribute must be a list'):
+    # 	with pytest.raises(DataMemsyncsyntaxError, match = 'memsync attribute must be a list'):
     # 		conveyor_belt.memsync = {}
     # elif platform.startswith('win'):
     # 	conveyor_belt.memsync = {}
@@ -108,7 +108,7 @@ def test_memsync_on_callback_not_list(arch, conv, ctypes, dll_handle):
         [platform.startswith(os_name) for os_name in ["linux", "darwin", "freebsd"]]
     ):
         with pytest.raises(
-            data_memsyncsyntax_error, match="memsync attribute must be a list"
+            DataMemsyncsyntaxError, match="memsync attribute must be a list"
         ):
             ctypes._zb_current_session.data.pack_definition_memsync(
                 conveyor_belt.memsync

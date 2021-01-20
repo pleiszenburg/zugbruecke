@@ -35,7 +35,7 @@ import pytest
 from .lib.ctypes import get_context, PLATFORM
 
 if PLATFORM == "unix":
-    from zugbruecke.core.errors import wine_error
+    from zugbruecke.core.errors import WineError
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # TEST(s)
@@ -85,5 +85,5 @@ def test_path_wine_to_unix_abs(arch, conv, ctypes, dll_path):
 def test_path_wine_to_unix_fail(arch, conv, ctypes, dll_path):
 
     PATH_A = "a" * 270
-    with pytest.raises(wine_error):
+    with pytest.raises(WineError):
         path_out = ctypes._zb_path_wine_to_unix(PATH_A)

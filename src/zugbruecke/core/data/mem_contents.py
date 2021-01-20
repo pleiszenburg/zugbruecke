@@ -34,7 +34,7 @@ specific language governing rights and limitations under the License.
 import ctypes
 
 from ..const import GROUP_VOID
-from ..errors import data_memsyncpath_error
+from ..errors import DataMemsyncpathError
 from .memory import (
     generate_pointer_from_bytes,
     is_null_pointer,
@@ -176,7 +176,7 @@ class memory_contents_class:
             elif isinstance(path_element, str) and element_index == 0:
 
                 if path_element != "r":
-                    raise data_memsyncpath_error(
+                    raise DataMemsyncpathError(
                         'field with name (type string) is not return value ("r")'
                     )
 
@@ -208,7 +208,7 @@ class memory_contents_class:
         elif memsync_path[0] == "r":
             arg_type = restype_d
         else:
-            raise data_memsyncpath_error(
+            raise DataMemsyncpathError(
                 'field is neither return value ("r") nor parameter (type int)'
             )
 

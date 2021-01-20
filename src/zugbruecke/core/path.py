@@ -34,7 +34,7 @@ specific language governing rights and limitations under the License.
 import ctypes
 from ctypes import wintypes
 
-from .errors import wine_error
+from .errors import WineError
 from .typeguard import typechecked
 
 
@@ -75,7 +75,7 @@ class PathStyles:
         )
 
         if out_path is None:
-            raise wine_error()
+            raise WineError()
 
         return out_path
 
@@ -93,6 +93,6 @@ class PathStyles:
         )
 
         if out_path is None:
-            raise wine_error()
+            raise WineError()
 
         return out_path.decode("utf-8")
