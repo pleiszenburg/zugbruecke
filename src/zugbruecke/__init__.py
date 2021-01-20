@@ -38,4 +38,4 @@ if not _sys.platform.startswith("win"):
 del _sys
 
 from .core.config import Config
-from .core.error import *
+from .core.errors import *
