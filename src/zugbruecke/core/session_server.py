@@ -36,7 +36,7 @@ import ctypes.util
 import traceback
 from typing import Any
 
-from .abc import SessionServerABC
+from .abc import ConfigABC, SessionServerABC
 from .data import data_class
 from .dll_server import DllServer
 from .log import Log
@@ -54,11 +54,10 @@ class SessionServer(SessionServerABC):
     Managing a zugbruecke session
     """
 
-    def __init__(self, session_id, parameter):
+    def __init__(self, config: ConfigABC):
 
-        # Store session id and parameter
-        self.id = session_id
-        self.p = parameter
+        self.p = config
+        self.id = self.p["id"]
 
         # Connect to Unix side
         self.rpc_client = mp_client_safe_connect(
