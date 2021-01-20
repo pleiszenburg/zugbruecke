@@ -84,16 +84,21 @@ class RoutineClient(RoutineClientABC):
         self._restype = ctypes.c_int
         self._restype_d = None
 
-        # Get handle on server-side configure
-        self._configure_on_server = getattr(
-            rpc_client,
-            "{HASH_ID:s}_{NAME:s}_configure".format(HASH_ID=hash_id, NAME=str(name)),
-        )
-
-        # Get handle on server-side handle_call
-        self._handle_call_on_server = getattr(
-            rpc_client, hash_id + "_" + str(self._name) + "_handle_call"
-        )
+        for attr in (
+            "call",
+            "configure",
+            "get_repr",
+        ):
+            setattr(
+                self,
+                "_{ATTR:s}_on_server".format(ATTR=attr),
+                getattr(
+                    rpc_client,
+                    "{HASH_ID:s}_{NAME:s}_{ATTR:s}".format(
+                        HASH_ID=hash_id, NAME=str(self._name), ATTR=attr
+                    ),
+                ),
+            )
 
     def __call__(self, *args: Any) -> Any:
         """
@@ -120,7 +125,7 @@ class RoutineClient(RoutineClientABC):
         mem_package_list = self._data.client_pack_memory_list(args, self._memsync_d)
 
         # Actually call routine in DLL! TODO Handle kw ...
-        return_dict = self._handle_call_on_server(
+        return_dict = self._call_on_server(
             self._data.arg_list_pack(args, self._argtypes_d, self._convention),
             mem_package_list,
         )
@@ -165,6 +170,10 @@ class RoutineClient(RoutineClientABC):
 
         # Return result. return_value will be None if there was not a result.
         return return_value
+
+    def __repr__(self) -> str:
+
+        return self._get_repr_on_server()
 
     def _configure(self):
 
