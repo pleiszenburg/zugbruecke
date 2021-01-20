@@ -65,6 +65,9 @@ class PathStyles:
         Out: Wine path
         """
 
+        if not isinstance(in_path, str):
+            raise TypeError("in_path must by of type str")
+
         out_path = self._unix_to_wine(
             ctypes.cast(
                 ctypes.create_string_buffer(in_path.encode("utf-8")), wintypes.LPCSTR
@@ -81,6 +84,9 @@ class PathStyles:
         In: Wine path
         Out: Unix path
         """
+
+        if not isinstance(in_path, str):
+            raise TypeError("in_path must by of type str")
 
         out_path = self._wine_to_unix(
             ctypes.cast(ctypes.create_unicode_buffer(in_path), wintypes.LPCWSTR)
