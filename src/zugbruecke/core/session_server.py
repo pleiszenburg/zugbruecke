@@ -121,10 +121,7 @@ class SessionServer(SessionServerABC):
         self._log.out("[session-server] STARTED.")
         self._log.out("[session-server] Serve forever ...")
 
-        # Run server ...
         self._rpc_server.server_forever_in_thread(daemon=False)
-
-        # Indicate to session client that the server is up
         self._rpc_client.set_server_status(True)
 
     def load_library(
@@ -137,7 +134,7 @@ class SessionServer(SessionServerABC):
         use_last_error: bool,
     ):
         """
-        Exposed interface, called by session client
+        Called by session client
         """
 
         if name in self._dlls.keys():
@@ -179,31 +176,21 @@ class SessionServer(SessionServerABC):
 
     def set_parameter(self, key: str, value: Any):
         """
-        Exposed interface
+        Called by session client
         """
 
         self._p[key] = value
 
     def _terminate(self):
         """
-        Exposed interface
+        Called by session client via RPC server termination
         """
 
-        # Run only if session still up
         if not self._up:
             return
 
-        # Status log
         self._log.out("[session-server] TERMINATING ...")
-
-        # Terminate log
         self._log.terminate()
-
-        # Session down
         self._up = False
-
-        # Status log
         self._log.out("[session-server] TERMINATED.")
-
-        # Indicate to session client that server was terminated
         self._rpc_client.set_server_status(False)
