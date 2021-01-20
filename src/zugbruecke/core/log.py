@@ -95,17 +95,19 @@ class Log(LogABC):
 
         if rpc_server is not None:
             rpc_server.register_function(self._receive, "transfer_message")
-        self._transfer_message = rpc_client.transfer_message if rpc_client is not None else None
+        self._transfer_message = (
+            rpc_client.transfer_message if rpc_client is not None else None
+        )
 
     def err(self, *raw_messages: Any, level: int = 1):
 
         if level <= self._p["log_level"]:
-            self._process_raw(*raw_messages, pipe = "err", level = level)
+            self._process_raw(*raw_messages, pipe="err", level=level)
 
     def out(self, *raw_messages: Any, level: int = 1):
 
         if level <= self._p["log_level"]:
-            self._process_raw(*raw_messages, pipe = "out", level = level)
+            self._process_raw(*raw_messages, pipe="out", level=level)
 
     def terminate(self):
 

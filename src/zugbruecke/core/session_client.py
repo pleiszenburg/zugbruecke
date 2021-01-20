@@ -144,13 +144,15 @@ class SessionClient(SessionClientABC):
             setattr(self, name, getattr(self._rpc_client, name))
 
         for name in ("load_library", "set_parameter", "terminate"):
-            setattr(self, "_{NAME:s}_on_server".format(NAME = name), getattr(self._rpc_client, name))
+            setattr(
+                self,
+                "_{NAME:s}_on_server".format(NAME=name),
+                getattr(self._rpc_client, name),
+            )
 
         self._log.out("[session-client] STARTED.")
 
-    def CFUNCTYPE(
-        self, restype: Any, *argtypes: Any, **kw: Dict[str, bool]
-    ) -> Type:
+    def CFUNCTYPE(self, restype: Any, *argtypes: Any, **kw: Dict[str, bool]) -> Type:
 
         flags = _FUNCFLAG_CDECL
 
@@ -163,9 +165,7 @@ class SessionClient(SessionClientABC):
 
         return self._data.generate_callback_decorator(flags, restype, *argtypes)
 
-    def WINFUNCTYPE(
-        self, restype: Any, *argtypes: Any, **kw: Dict[str, bool]
-    ) -> Type:
+    def WINFUNCTYPE(self, restype: Any, *argtypes: Any, **kw: Dict[str, bool]) -> Type:
 
         flags = _FUNCFLAG_STDCALL
 
