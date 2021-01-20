@@ -79,7 +79,8 @@ class RpcClient(RpcClientABC):
         return call_rpc_server
 
     @classmethod
-    def from_safe_connect(cls,
+    def from_safe_connect(
+        cls,
         socket_path: Tuple[str, int],
         authkey: str,
         timeout_after_seconds: Union[int, float] = 30,
@@ -111,7 +112,8 @@ class RpcServer(RpcServerABC):
     RPC client
     """
 
-    def __init__(self,
+    def __init__(
+        self,
         socket_path: Tuple[str, int],
         authkey: str,
         log: Union[LogABC, None] = None,
@@ -145,9 +147,13 @@ class RpcServer(RpcServerABC):
 
         return self._up
 
-    def register_function(self, function_pointer: Callable, public_name: Union[str, None] = None):
+    def register_function(
+        self, function_pointer: Callable, public_name: Union[str, None] = None
+    ):
 
-        self._functions[function_pointer.__name__ if public_name is None else public_name] = function_pointer
+        self._functions[
+            function_pointer.__name__ if public_name is None else public_name
+        ] = function_pointer
 
     def terminate(self):
 
