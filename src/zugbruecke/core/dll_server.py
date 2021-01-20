@@ -73,25 +73,25 @@ class DllServer(DllServerABC):
 
         self._routines = {}
 
-        # Export registration of my functions directly
-        self._rpc_server.register_function(
-            self._get_repr, "{HASH_ID:s}_repr".format(HASH_ID=self._hash_id)
-        )
-        self._rpc_server.register_function(
-            self._register_routine,
-            "{HASH_ID:s}_register_routine".format(HASH_ID=self._hash_id),
-        )
+        for name in (
+            "get_repr",
+            "register_routine",
+        ):
+            self._rpc_server.register_function(
+                getattr(self, name),
+                "{HASH_ID:s}_{NAME:s}".format(HASH_ID=self._hash_id, NAME=name),
+            )
 
-    def _get_repr(self) -> str:
+    def get_repr(self) -> str:
         """
-        Exposed interface
+        Called by DLL client
         """
 
         return repr(self._handler)
 
-    def _register_routine(self, name: Union[str, int]):
+    def register_routine(self, name: Union[str, int]):
         """
-        Exposed interface
+        Called by DLL client
         """
 
         if name in self._routines.keys():

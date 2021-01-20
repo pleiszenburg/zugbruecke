@@ -69,13 +69,18 @@ class DllClient(DllClientABC):
 
         self._routines = {}
 
-        # Expose routine registration
-        self._register_routine_on_server = getattr(
-            self._rpc_client, self._hash_id + "_register_routine"
-        )
-
-        # Expose string reprentation of dll object
-        self._get_repr = getattr(self._rpc_client, self._hash_id + "_repr")
+        for name in (
+            "get_repr",
+            "register_routine",
+        ):
+            setattr(
+                self,
+                "_{NAME:s}_on_server".format(NAME = name),
+                getattr(
+                    self._rpc_client,
+                    "{HASH_ID:s}_{NAME:s}".format(HASH_ID=self._hash_id, NAME=name),
+                ),
+            )
 
     def __getattr__(self, name: str) -> RoutineClientABC:
 
@@ -96,7 +101,7 @@ class DllClient(DllClientABC):
 
     def __repr__(self) -> str:
 
-        return self._get_repr()
+        return self._get_repr_on_server()
 
     def _register_routine(self, name: Union[str, int]):
 
