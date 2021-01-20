@@ -39,7 +39,7 @@ from typing import Any, Dict, Generator, Union
 
 from .abc import ConfigABC
 from .const import CONFIG_FLD, CONFIG_FN
-from .errors import config_parser_error
+from .errors import ConfigParserError
 from .lib import generate_session_id
 from .typeguard import typechecked
 
@@ -168,18 +168,18 @@ class Config(ConfigABC):
             with open(try_path, "r", encoding="utf-8") as f:
                 cnt = f.read()
         except:
-            raise config_parser_error('Config file could not be read: "%s"' % try_path)
+            raise ConfigParserError('Config file could not be read: "%s"' % try_path)
 
         # Try to parse it
         try:
             cnt_dict = json.loads(cnt)
         except:
-            raise config_parser_error(
+            raise ConfigParserError(
                 'Config file could not be parsed: "%s"' % try_path
             )
 
         # Ensure that config has the right format
         if not isinstance(cnt_dict, dict):
-            raise config_parser_error('Config file is malformed: "%s"' % try_path)
+            raise ConfigParserError('Config file is malformed: "%s"' % try_path)
 
         return cnt_dict
