@@ -81,11 +81,11 @@ class Log(LogABC):
         rpc_client: Union[None, RpcClientABC] = None,
     ):
 
-        # Store id and parameter
         self._id = session_id
         self._p = parameter
 
-        # Create filenames for logfiles
+        self._up = True
+
         self._f = None
         if self._p["log_write"]:
             self._f = "zb_{ID:s}_{PLATFORM:s}.txt".format(
@@ -93,26 +93,19 @@ class Log(LogABC):
                 PLATFORM=self._p["platform"],
             )
 
-        # Setup RPC server
-        self._server = rpc_server
         if rpc_server is not None:
-            self._server.register_function(self._receive, "transfer_message")
-
-        # Setup RPC client
-        self._client = rpc_client
-
-        # Log is up
-        self._up = True
+            rpc_server.register_function(self._receive, "transfer_message")
+        self._transfer_message = rpc_client.transfer_message if rpc_client is not None else None
 
     def err(self, *raw_messages: Any, level: int = 1):
 
         if level <= self._p["log_level"]:
-            self._process_raw(raw_messages, "err", level)
+            self._process_raw(*raw_messages, pipe = "err", level = level)
 
     def out(self, *raw_messages: Any, level: int = 1):
 
         if level <= self._p["log_level"]:
-            self._process_raw(raw_messages, "out", level)
+            self._process_raw(*raw_messages, pipe = "out", level = level)
 
     def terminate(self):
 
@@ -121,7 +114,7 @@ class Log(LogABC):
 
         self._up = False
 
-    def _process_raw(self, raw_messages: Any, pipe: str, level: int):
+    def _process_raw(self, *raw_messages: Any, pipe: str, level: int):
 
         for raw_message in raw_messages:
             for message in Message.from_raw(
@@ -134,7 +127,7 @@ class Log(LogABC):
         if self._p["std" + message.pipe]:
             message.print()
 
-        if self._client is not None:
+        if self._transfer_message is not None:
             self._send(message)
 
         if self._p["log_write"]:
@@ -142,7 +135,7 @@ class Log(LogABC):
 
     def _send(self, message: MessageABC):
 
-        self._client.transfer_message(message.as_serialized())
+        self._transfer_message(message.as_serialized())
 
     def _receive(self, serialized_message: str):
 
