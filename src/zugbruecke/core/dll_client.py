@@ -106,7 +106,7 @@ class DllClient(DllClientABC):
     def _register_routine(self, name: Union[str, int]):
 
         self._log.out(
-            '[dll-client] Trying to attach to register routine "{NAME:s}" in DLL file "{FN:s}" ...'.format(
+            '[dll-client] Trying to register routine "{NAME:s}" in DLL file "{FN:s}" ...'.format(
                 NAME=str(name),
                 FN=self._name,
             )
