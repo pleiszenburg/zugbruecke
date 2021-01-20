@@ -6,11 +6,11 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	tests/test_error_argtypes.py: Checks for proper error handling of argtypes definition
+    tests/test_error_argtypes.py: Checks for proper error handling of argtypes definition
 
-	Required to run on platform / side: [UNIX, WINE]
+    Required to run on platform / side: [UNIX, WINE]
 
-	Copyright (C) 2017-2021 Sebastian M. Ernst <ernst@pleiszenburg.de>
+    Copyright (C) 2017-2021 Sebastian M. Ernst <ernst@pleiszenburg.de>
 
 <LICENSE_BLOCK>
 The contents of this file are subject to the GNU Lesser General Public License

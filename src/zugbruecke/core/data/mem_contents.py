@@ -8,9 +8,9 @@ https://github.com/pleiszenburg/zugbruecke
 
 	src/zugbruecke/core/data/mem_contents.py: (Un-) packing of memory
 
-	Required to run on platform / side: [UNIX, WINE]
+    Required to run on platform / side: [UNIX, WINE]
 
-	Copyright (C) 2017-2021 Sebastian M. Ernst <ernst@pleiszenburg.de>
+    Copyright (C) 2017-2021 Sebastian M. Ernst <ernst@pleiszenburg.de>
 
 <LICENSE_BLOCK>
 The contents of this file are subject to the GNU Lesser General Public License
