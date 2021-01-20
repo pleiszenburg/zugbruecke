@@ -75,7 +75,7 @@ class DllClient(DllClientABC):
         ):
             setattr(
                 self,
-                "_{NAME:s}_on_server".format(NAME = name),
+                "_{NAME:s}_on_server".format(NAME=name),
                 getattr(
                     self._rpc_client,
                     "{HASH_ID:s}_{NAME:s}".format(HASH_ID=self._hash_id, NAME=name),
