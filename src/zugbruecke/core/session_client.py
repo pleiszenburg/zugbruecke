@@ -245,9 +245,7 @@ class SessionClient(SessionClientABC):
         self._p[key] = value
         self._rpc_client.set_parameter(key, value)
 
-    def set_server_status(
-        self, status: bool
-    ):
+    def set_server_status(self, status: bool):
         """
         Called by session server
         """

@@ -110,9 +110,7 @@ class SessionServer(SessionServerABC):
             (self, "path_unix_to_wine"),
             (self, "path_wine_to_unix"),
         ]:
-            self._rpc_server.register_function(
-                getattr(source, name), name
-            )
+            self._rpc_server.register_function(getattr(source, name), name)
 
         self._log.out(
             "[session-server] ctypes server is listening on port %d."
