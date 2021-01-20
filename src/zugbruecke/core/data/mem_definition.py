@@ -6,11 +6,11 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	src/zugbruecke/core/data/mem_definition.py: (Un-) packing of memory definitions
+    src/zugbruecke/core/data/mem_definition.py: (Un-) packing of memory definitions
 
-	Required to run on platform / side: [UNIX, WINE]
+    Required to run on platform / side: [UNIX, WINE]
 
-	Copyright (C) 2017-2020 Sebastian M. Ernst <ernst@pleiszenburg.de>
+    Copyright (C) 2017-2021 Sebastian M. Ernst <ernst@pleiszenburg.de>
 
 <LICENSE_BLOCK>
 The contents of this file are subject to the GNU Lesser General Public License
@@ -33,67 +33,73 @@ specific language governing rights and limitations under the License.
 
 import ctypes
 
-from ..errors import data_memsyncsyntax_error
+from ..errors import DataMemsyncsyntaxError
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # CLASS: Memory content packing and unpacking
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-class memory_definition_class():
 
+class memory_definition_class:
+    def pack_definition_memsync(self, memsync_d_list):
 
-	def pack_definition_memsync(self, memsync_d_list):
+        # HACK this error should be raised by a class property of FunctionType class
+        # BUG class property of FunctionType class causes segfault in Python 3.5 on Wine 4
+        # TODO temporary replacement, remove in future release!
+        if not isinstance(memsync_d_list, list):
+            raise DataMemsyncsyntaxError("memsync attribute must be a list")
 
-		# HACK this error should be raised by a class property of FunctionType class
-		# BUG class property of FunctionType class causes segfault in Python 3.5 on Wine 4
-		# TODO temporary replacement, remove in future release!
-		if not isinstance(memsync_d_list, list):
-			raise data_memsyncsyntax_error('memsync attribute must be a list')
+        return [
+            self.__pack_memsync_definition_dict__(memsync_d)
+            for memsync_d in memsync_d_list
+        ]
 
-		return [self.__pack_memsync_definition_dict__(memsync_d) for memsync_d in memsync_d_list]
+    def unpack_definition_memsync(self, memsync_d_list):
 
+        return [
+            self.__unpack_memsync_definition_dict__(memsync_d)
+            for memsync_d in memsync_d_list
+        ]
 
-	def unpack_definition_memsync(self, memsync_d_list):
+    def __pack_memsync_definition_dict__(self, memsync_d):
 
-		return [self.__unpack_memsync_definition_dict__(memsync_d) for memsync_d in memsync_d_list]
+        if not isinstance(memsync_d, dict) and not isinstance(memsync_d, tuple):
+            raise DataMemsyncsyntaxError(
+                "memsync definition must either be a dict or a tuple"
+            )
 
+        # TODO handle tuples (pointers to pointer arrays ...)
 
-	def __pack_memsync_definition_dict__(self, memsync_d):
+        # Keep everything, which is not private (does not start with '_')
+        return {
+            key: memsync_d[key] for key in memsync_d.keys() if not key.startswith("_")
+        }
 
-		if not isinstance(memsync_d, dict) and not isinstance(memsync_d, tuple):
-			raise data_memsyncsyntax_error('memsync definition must either be a dict or a tuple')
+    def __unpack_memsync_definition_dict__(self, memsync_d):
 
-		# TODO handle tuples (pointers to pointer arrays ...)
+        # Null-terminated string - off by default
+        if "n" not in memsync_d.keys():
+            memsync_d["n"] = False
 
-		# Keep everything, which is not private (does not start with '_')
-		return {key: memsync_d[key] for key in memsync_d.keys() if not key.startswith('_')}
+        # Compile length function
+        if "f" in memsync_d.keys():
+            memsync_d["_f"] = eval(memsync_d["f"])  # HACK?
 
+        # Defaut type, if nothing is given, is unsigned byte
+        if "t" not in memsync_d.keys():
+            memsync_d["t"] = "c_ubyte"
 
-	def __unpack_memsync_definition_dict__(self, memsync_d):
+        # Get actual type class - if it is not a ctypes member, try struct cache
+        memsync_d["_t"] = getattr(ctypes, memsync_d["t"], None)
+        if memsync_d["_t"] is None:
+            memsync_d["_t"] = self.cache_dict["struct_type"][memsync_d["t"]]
 
-		# Null-terminated string - off by default
-		if 'n' not in memsync_d.keys():
-			memsync_d['n'] = False
+        # Compute the size of type '_t'
+        memsync_d["s"] = ctypes.sizeof(memsync_d["_t"])
 
-		# Compile length function
-		if 'f' in memsync_d.keys():
-			memsync_d['_f'] = eval(memsync_d['f']) # HACK?
+        # Handle Unicode - off by default
+        if "w" not in memsync_d.keys():
+            memsync_d["w"] = False
 
-		# Defaut type, if nothing is given, is unsigned byte
-		if 't' not in memsync_d.keys():
-			memsync_d['t'] = 'c_ubyte'
-
-		# Get actual type class - if it is not a ctypes member, try struct cache
-		memsync_d['_t'] = getattr(ctypes, memsync_d['t'], None)
-		if memsync_d['_t'] is None:
-			memsync_d['_t'] = self.cache_dict['struct_type'][memsync_d['t']]
-
-		# Compute the size of type '_t'
-		memsync_d['s'] = ctypes.sizeof(memsync_d['_t'])
-
-		# Handle Unicode - off by default
-		if 'w' not in memsync_d.keys():
-			memsync_d['w'] = False
-
-		return memsync_d
+        return memsync_d

@@ -6,11 +6,11 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	src/zugbruecke/core/interpreter.py: Class for managing Python interpreter on Wine
+    src/zugbruecke/core/interpreter.py: Class for managing Python interpreter on Wine
 
-	Required to run on platform / side: [UNIX]
+    Required to run on platform / side: [UNIX]
 
-	Copyright (C) 2017-2020 Sebastian M. Ernst <ernst@pleiszenburg.de>
+    Copyright (C) 2017-2021 Sebastian M. Ernst <ernst@pleiszenburg.de>
 
 <LICENSE_BLOCK>
 The contents of this file are subject to the GNU Lesser General Public License
@@ -32,247 +32,292 @@ specific language governing rights and limitations under the License.
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 import os
-import queue
+from queue import Queue, Empty
 import signal
 import subprocess
 import time
-import threading
+from typing import BinaryIO, Callable, Tuple
+from threading import Thread
+
+from .abc import ConfigABC, InterpreterABC, LogABC
+from .lib import get_free_port
+from .typeguard import typechecked
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # WINE PYTHON INTERPRETER CLASS
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-class interpreter_session_class():
 
+@typechecked
+class Interpreter(InterpreterABC):
+    """
+    Class for managing Python interpreter on Wine
+    """
 
-	# session init
-	def __init__(self, session_id, parameter, session_log):
+    def __init__(self, session_id: str, parameter: ConfigABC, session_log: LogABC):
 
-		# Set ID, parameters and pointer to log
-		self.id = session_id
-		self.p = parameter
-		self.log = session_log
+        # Set ID, parameters and pointer to log
+        self._id = session_id
+        self._p = parameter
+        self._log = session_log
 
-		# Log status
-		self.log.out('[interpreter] STARTING ...')
+        # Log status
+        self._log.out("[interpreter] STARTING ...")
 
-		# Session is up
-		self.up = True
+        # Session is up
+        self._up = True
 
-		# Start wine python
-		self.__python_start__()
+        # Start wine python
+        self._python_start()
 
-		# Log status
-		self.log.out('[interpreter] STARTED.')
+        # Log status
+        self._log.out("[interpreter] STARTED.")
 
+    # session destructor
+    def terminate(self):
 
-	# session destructor
-	def terminate(self):
+        if not self._up:
+            return
 
-		if not self.up:
-			return
+        # Log status
+        self._log.out("[interpreter] TERMINATING ...")
 
-		# Log status
-		self.log.out('[interpreter] TERMINATING ...')
+        # Shut down wine python
+        self._python_stop()
 
-		# Shut down wine python
-		self.__python_stop__()
+        # Shut down processing thread
+        self._thread_stop()
 
-		# Shut down processing thread
-		self.__thread_stop__()
+        # Log status
+        self._log.out("[interpreter] TERMINATED.")
 
-		# Log status
-		self.log.out('[interpreter] TERMINATED.')
+        # Session is down
+        self._up = False
 
-		# Session is down
-		self.up = False
+    @staticmethod
+    def _stream_worker(in_stream: BinaryIO, out_queue: Queue):
+        """reads lines from stream and puts them into queue"""
 
+        for line in iter(in_stream.readline, b""):
+            out_queue.put(line)
+        in_stream.close()
 
-	@staticmethod
-	def __stream_worker__(in_stream, out_queue):
-		"""reads lines from stream and puts them into queue"""
+    @staticmethod
+    def _start_stream_worker(
+        in_stream: BinaryIO, worker_function: Callable
+    ) -> Tuple[Thread, Queue]:
+        """starts reader thread and returns a thread object and a queue object"""
 
-		for line in iter(in_stream.readline, b''):
-			out_queue.put(line)
-		in_stream.close()
+        out_queue = Queue()
+        reader_thread = Thread(target=worker_function, args=(in_stream, out_queue))
+        reader_thread.daemon = True
+        reader_thread.start()
+        return reader_thread, out_queue
 
+    @staticmethod
+    def _read_stream(in_queue: Queue, processing_function: Callable):
+        """reads lines from queue and processes them"""
 
-	@staticmethod
-	def __start_stream_worker__(in_stream, worker_function):
-		"""starts reader thread and returns a thread object and a queue object"""
+        try:
+            line = in_queue.get_nowait()
+        except Empty:
+            pass
+        else:
+            line = line.decode("utf-8")
+            processing_function(line.strip("\n"))
+            in_queue.task_done()
 
-		out_queue = queue.Queue()
-		reader_thread = threading.Thread(
-			target = worker_function, args = (in_stream, out_queue)
-			)
-		reader_thread.daemon = True
-		reader_thread.start()
-		return reader_thread, out_queue
+    def _processing_worker(self):
+        """reads lines from queues and puts them into process methods"""
 
+        # Log status
+        self._log.out("[interpreter] Starting log processing thread ...")
 
-	@staticmethod
-	def __read_stream__(in_queue, processing_function):
-		"""reads lines from queue and processes them"""
+        while self._is_alive():
+            time.sleep(0.1)
+            while not self._stdout_queue.empty():
+                self._read_stream(
+                    self._stdout_queue, lambda line: self._log.out("[P] " + line)
+                )
+            while not self._stderr_queue.empty():
+                self._read_stream(
+                    self._stderr_queue, lambda line: self._log.err("[P] " + line)
+                )
 
-		try:
-			line = in_queue.get_nowait()
-		except queue.Empty:
-			pass
-		else:
-			line = line.decode('utf-8')
-			processing_function(line.strip('\n'))
-			in_queue.task_done()
+        # Log status
+        self._log.out("[interpreter] Joining worker threads and queues ...")
 
+        self._stdout_queue.join()
+        self._stderr_queue.join()
+        self._stdout_thread.join()
+        self._stderr_thread.join()
 
-	def __processing_worker__(self):
-		"""reads lines from queues and puts them into process methods"""
+        # Log status
+        self._log.out("[interpreter] ... worker threads and queues joined.")
 
-		# Log status
-		self.log.out('[interpreter] Starting log processing thread ...')
+    def _is_alive(self) -> bool:
 
-		while self.__is_alive__():
-			time.sleep(0.1)
-			while not self.stdout_queue.empty():
-				interpreter_session_class.__read_stream__(
-					self.stdout_queue,
-					lambda line: self.log.out('[P] ' + line)
-					)
-			while not self.stderr_queue.empty():
-				interpreter_session_class.__read_stream__(
-					self.stderr_queue,
-					lambda line: self.log.err('[P] ' + line)
-					)
+        return self._proc_winepython.poll() is None
 
-		# Log status
-		self.log.out('[interpreter] Joining worker threads and queues ...')
+    def _set_cli_params(self):
 
-		self.stdout_queue.join()
-		self.stderr_queue.join()
-		self.stdout_thread.join()
-		self.stderr_thread.join()
+        # Get socket for ctypes bridge
+        self._p["port_socket_wine"] = get_free_port()
 
-		# Log status
-		self.log.out('[interpreter] ... worker threads and queues joined.')
+        # Prepare command with minimal meta info. All other info can be passed via sockets.
+        self._p["server_cli_params"] = [
+            "-m",
+            "zugbruecke._server_",
+            "--id",
+            self._id,
+            "--port_socket_wine",
+            str(self._p["port_socket_wine"]),
+            "--port_socket_unix",
+            str(self._p["port_socket_unix"]),
+            "--log_level",
+            str(self._p["log_level"]),
+            "--log_write",
+            str(int(self._p["log_write"])),
+            "--timeout_start",
+            str(int(self._p["timeout_start"])),
+        ]
 
+    def _set_env_dict(self):
 
-	def __is_alive__(self):
+        # Prepare environment for interpreter - inherit from settings of current session!
+        self._p["server_env"] = {
+            k: os.environ[k] for k in os.environ.keys()
+        }  # HACK Required for Travis CI
+        envvar_update_dict = dict(
+            WENV_ARCH=self._p["arch"],  # Architecture
+            WENV_PYTHONVERSION=self._p["pythonversion"],  # Version of Wine Python
+        )
+        self._p["server_env"].update(envvar_update_dict)
 
-		return self.proc_winepython.poll() is None
+    def _python_start(self):
 
+        self._set_cli_params()
+        self._set_env_dict()
 
-	def __python_start__(self):
+        # Log status
+        self._log.out(
+            "[interpreter] Command: " + " ".join(self._p["server_cli_params"])
+        )
 
-		# Log status
-		self.log.out('[interpreter] Command: ' + ' '.join(self.p['server_command_list']))
+        # Log status
+        self._log.out("[interpreter] Environment: " + str(self._p["server_env"]))
 
-		# Prepare environment for interpreter - inherit from settings of current session!
-		envvar_dict = {k: os.environ[k] for k in os.environ.keys()} # HACK Required for Travis CI
-		envvar_update_dict = dict(
-			ZUGBRUECKE_ARCH = self.p['arch'], # Architecture
-			ZUGBRUECKE_WINEPREFIX = self.p['wineprefix'], # Wine prefix / directory
-			ZUGBRUECKE_WINEDEBUG = self.p['winedebug'], # Wine debug level
-			ZUGBRUECKE_PYTHONPREFIX = self.p['pythonprefix'], # Python prefix for Wine Python (can be a Unix path)
-			)
-		envvar_dict.update(envvar_update_dict)
+        # Fire up Wine-Python process
+        self._proc_winepython = subprocess.Popen(
+            ["wenv", "python", "-u"] + self._p["server_cli_params"],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            shell=False,
+            start_new_session=True,
+            close_fds=True,
+            env=self._p["server_env"],
+        )
 
-		# Log status
-		self.log.out('[interpreter] Environment: ' + str(envvar_update_dict))
+        # Status log
+        self._log.out("[interpreter] Started with PID %d." % self._proc_winepython.pid)
 
-		# Fire up Wine-Python process
-		self.proc_winepython = subprocess.Popen(
-			['wenv', 'python', '-u'] + self.p['server_command_list'],
-			stdout = subprocess.PIPE,
-			stderr = subprocess.PIPE,
-			shell = False,
-			start_new_session = True,
-			close_fds = True,
-			env = envvar_dict,
-			)
+        # Log status
+        self._log.out("[interpreter] Starting stream reader threads ...")
 
-		# Status log
-		self.log.out('[interpreter] Started with PID %d.' % self.proc_winepython.pid)
+        # Start worker threads and queues for reading from streams
+        (
+            self._stdout_thread,
+            self._stdout_queue,
+        ) = self._start_stream_worker(self._proc_winepython.stdout, self._stream_worker)
+        (
+            self._stderr_thread,
+            self._stderr_queue,
+        ) = self._start_stream_worker(self._proc_winepython.stderr, self._stream_worker)
 
-		# Log status
-		self.log.out('[interpreter] Starting stream reader threads ...')
+        # Log status
+        self._log.out("[interpreter] Stream reader threads started.")
 
-		# Start worker threads and queues for reading from streams
-		self.stdout_thread, self.stdout_queue = interpreter_session_class.__start_stream_worker__(
-			self.proc_winepython.stdout, interpreter_session_class.__stream_worker__
-			)
-		self.stderr_thread, self.stderr_queue = interpreter_session_class.__start_stream_worker__(
-			self.proc_winepython.stderr, interpreter_session_class.__stream_worker__
-			)
+        # Start processing thread for pushing lines into log
+        self._processing_thread = Thread(target=self._processing_worker)
+        self._processing_thread.daemon = True
+        self._processing_thread.start()
 
-		# Log status
-		self.log.out('[interpreter] Stream reader threads started.')
+        # Log status
+        self._log.out("[interpreter] Log processing thread started.")
 
-		# Start processing thread for pushing lines into log
-		self.processing_thread = threading.Thread(
-			target = self.__processing_worker__
-			)
-		self.processing_thread.daemon = True
-		self.processing_thread.start()
+    def _python_stop(self):
 
-		# Log status
-		self.log.out('[interpreter] Log processing thread started.')
+        self._log.out("[interpreter] Ensure process has terminated, waiting ...")
 
+        # Time-step
+        wait_for_seconds = 0.01
+        # Timeout
+        timeout_after_seconds = self._p["timeout_stop"]
 
-	def __python_stop__(self):
+        # Start waiting at ...
+        started_waiting_at = time.time()
+        # Wait for process
+        while (
+            self._is_alive()
+            and started_waiting_at + timeout_after_seconds > time.time()
+        ):
+            time.sleep(wait_for_seconds)
+        # Is process still alive?
+        if self._is_alive():
+            self._log.out(
+                "[interpreter] ... did not terminate after %d seconds, sending SIGINT ..."
+                % timeout_after_seconds
+            )
+            os.killpg(os.getpgid(self._proc_winepython.pid), signal.SIGINT)
+        else:
+            self._log.out(
+                "[interpreter] ... terminated on its own after %.02f seconds."
+                % (time.time() - started_waiting_at)
+            )
+            return
 
-		self.log.out('[interpreter] Ensure process has terminated, waiting ...')
+        # Start waiting at ...
+        started_waiting_at = time.time()
+        # Wait for process
+        while (
+            self._is_alive()
+            and started_waiting_at + timeout_after_seconds > time.time()
+        ):
+            time.sleep(wait_for_seconds)
+        # Is process still alive?
+        if self._is_alive():
+            self._log.out(
+                "[interpreter] ... did not terminate after %d seconds, sending SIGTERM ..."
+                % timeout_after_seconds
+            )
+            os.killpg(os.getpgid(self._proc_winepython.pid), signal.SIGTERM)
+        else:
+            self._log.out(
+                "[interpreter] ... terminated with SIGINT after %.02f seconds."
+                % (time.time() - started_waiting_at)
+            )
+            return
 
-		# Time-step
-		wait_for_seconds = 0.01
-		# Timeout
-		timeout_after_seconds = self.p['timeout_stop']
+        # Is process still alive?
+        if self._is_alive():
+            self._log.out("[interpreter] ... failed to terminate with SIGTERM!")
+            raise TimeoutError("interpreter process could not be terminated")
+        else:
+            self._log.out("[interpreter] ... terminated with SIGTERM.")
+            return
 
-		# Start waiting at ...
-		started_waiting_at = time.time()
-		# Wait for process
-		while self.__is_alive__() and started_waiting_at + timeout_after_seconds > time.time():
-			time.sleep(wait_for_seconds)
-		# Is process still alive?
-		if self.__is_alive__():
-			self.log.out('[interpreter] ... did not terminate after %d seconds, sending SIGINT ...' % timeout_after_seconds)
-			os.killpg(os.getpgid(self.proc_winepython.pid), signal.SIGINT)
-		else:
-			self.log.out('[interpreter] ... terminated on its own after %.02f seconds.' % (time.time() - started_waiting_at))
-			return
+    def _thread_stop(self):
 
-		# Start waiting at ...
-		started_waiting_at = time.time()
-		# Wait for process
-		while self.__is_alive__() and started_waiting_at + timeout_after_seconds > time.time():
-			time.sleep(wait_for_seconds)
-		# Is process still alive?
-		if self.__is_alive__():
-			self.log.out('[interpreter] ... did not terminate after %d seconds, sending SIGTERM ...' % timeout_after_seconds)
-			os.killpg(os.getpgid(self.proc_winepython.pid), signal.SIGTERM)
-		else:
-			self.log.out('[interpreter] ... terminated with SIGINT after %.02f seconds.' % (time.time() - started_waiting_at))
-			return
+        timeout_after_seconds = self._p["timeout_stop"]
 
-		# Is process still alive?
-		if self.__is_alive__():
-			self.log.out('[interpreter] ... failed to terminate with SIGTERM!')
-			raise TimeoutError('interpreter process could not be terminated')
-		else:
-			self.log.out('[interpreter] ... terminated with SIGTERM.')
-			return
+        self._log.out("[interpreter] Joining processing thread ...")
 
+        # Joining thread ...
+        self._processing_thread.join(timeout=timeout_after_seconds)
+        if self._processing_thread.is_alive():
+            self._log.out("[interpreter] ... failed to join thread!")
+            raise TimeoutError("processing thread could not be terminated")
 
-	def __thread_stop__(self):
-
-		timeout_after_seconds = self.p['timeout_stop']
-
-		self.log.out('[interpreter] Joining processing thread ...')
-
-		# Joining thread ...
-		self.processing_thread.join(timeout = timeout_after_seconds)
-		if self.processing_thread.is_alive():
-			self.log.out('[interpreter] ... failed to join thread!')
-			raise TimeoutError('processing thread could not be terminated')
-
-		# Log status
-		self.log.out('[interpreter] ... joined.')
+        # Log status
+        self._log.out("[interpreter] ... joined.")

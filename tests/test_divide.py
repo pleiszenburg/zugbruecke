@@ -6,11 +6,11 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	tests/test_divide.py: Tests by reference argument passing (int pointer)
+    tests/test_divide.py: Tests by reference argument passing (int pointer)
 
-	Required to run on platform / side: [UNIX, WINE]
+    Required to run on platform / side: [UNIX, WINE]
 
-	Copyright (C) 2017-2020 Sebastian M. Ernst <ernst@pleiszenburg.de>
+    Copyright (C) 2017-2021 Sebastian M. Ernst <ernst@pleiszenburg.de>
 
 <LICENSE_BLOCK>
 The contents of this file are subject to the GNU Lesser General Public License
@@ -64,41 +64,42 @@ from .lib.ctypes import get_context
 from .lib.param import MAX_EXAMPLES
 
 from hypothesis import (
-	given,
-	settings,
-	strategies as st,
-	)
+    given,
+    settings,
+    strategies as st,
+)
 import pytest
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # TEST(s)
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-@pytest.mark.parametrize('arch,conv,ctypes,dll_handle', get_context(__file__))
+
+@pytest.mark.parametrize("arch,conv,ctypes,dll_handle", get_context(__file__))
 @given(
-	x = st.integers(min_value = -1 * 2 ** 31, max_value = 2 ** 31 - 1),
-	y = st.integers(min_value = -1 * 2 ** 31, max_value = 2 ** 31 - 1)
-	)
-@settings(max_examples = MAX_EXAMPLES)
+    x=st.integers(min_value=-1 * 2 ** 31, max_value=2 ** 31 - 1),
+    y=st.integers(min_value=-1 * 2 ** 31, max_value=2 ** 31 - 1),
+)
+@settings(max_examples=MAX_EXAMPLES)
 def test_divide(x, y, arch, conv, ctypes, dll_handle):
 
-	divide_int = dll_handle.divide_int
-	divide_int.argtypes = (ctypes.c_int, ctypes.c_int, ctypes.POINTER(ctypes.c_int))
-	divide_int.restype = ctypes.c_int
+    divide_int = dll_handle.divide_int
+    divide_int.argtypes = (ctypes.c_int, ctypes.c_int, ctypes.POINTER(ctypes.c_int))
+    divide_int.restype = ctypes.c_int
 
-	rem_ = ctypes.c_int()
-	quot = divide_int(x, y, rem_)
-	rem = rem_.value
+    rem_ = ctypes.c_int()
+    quot = divide_int(x, y, rem_)
+    rem = rem_.value
 
-	if y != 0:
+    if y != 0:
 
-		v_quot = x // y
-		v_rem = abs(x) % abs(y) * (1, -1)[x < 0] # HACK C99
-		if v_rem != 0 and ((x < 0) ^ (y < 0)): # HACK C99
-			v_quot += 1
+        v_quot = x // y
+        v_rem = abs(x) % abs(y) * (1, -1)[x < 0]  # HACK C99
+        if v_rem != 0 and ((x < 0) ^ (y < 0)):  # HACK C99
+            v_quot += 1
 
-		assert (v_quot, v_rem) == (quot, rem)
+        assert (v_quot, v_rem) == (quot, rem)
 
-	else:
+    else:
 
-		assert (0, 0) == (quot, rem)
+        assert (0, 0) == (quot, rem)

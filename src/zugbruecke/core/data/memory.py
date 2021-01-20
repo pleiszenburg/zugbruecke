@@ -6,11 +6,11 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	src/zugbruecke/core/data/memory.py: Handles memory transfers between both sides
+    src/zugbruecke/core/data/memory.py: Handles memory transfers between both sides
 
-	Required to run on platform / side: [UNIX, WINE]
+    Required to run on platform / side: [UNIX, WINE]
 
-	Copyright (C) 2017-2020 Sebastian M. Ernst <ernst@pleiszenburg.de>
+    Copyright (C) 2017-2021 Sebastian M. Ernst <ernst@pleiszenburg.de>
 
 <LICENSE_BLOCK>
 The contents of this file are subject to the GNU Lesser General Public License
@@ -37,24 +37,36 @@ import ctypes
 # ROUTINES
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+
 def generate_pointer_from_bytes(in_bytes):
 
-	return ctypes.cast(ctypes.pointer((ctypes.c_ubyte * len(in_bytes)).from_buffer_copy(in_bytes)), ctypes.c_void_p)
+    return ctypes.cast(
+        ctypes.pointer((ctypes.c_ubyte * len(in_bytes)).from_buffer_copy(in_bytes)),
+        ctypes.c_void_p,
+    )
 
 
 def overwrite_pointer_with_bytes(ctypes_pointer, in_bytes):
 
-	ctypes.memmove(ctypes_pointer, ctypes.pointer((ctypes.c_ubyte * len(in_bytes)).from_buffer_copy(in_bytes)), len(in_bytes))
+    ctypes.memmove(
+        ctypes_pointer,
+        ctypes.pointer((ctypes.c_ubyte * len(in_bytes)).from_buffer_copy(in_bytes)),
+        len(in_bytes),
+    )
 
 
 def serialize_pointer_into_bytes(ctypes_pointer, size_bytes):
 
-	return bytes(ctypes.cast(ctypes_pointer, ctypes.POINTER(ctypes.c_ubyte * size_bytes)).contents)
+    return bytes(
+        ctypes.cast(
+            ctypes_pointer, ctypes.POINTER(ctypes.c_ubyte * size_bytes)
+        ).contents
+    )
 
 
 def is_null_pointer(ctypes_pointer):
 
-	try:
-		return ctypes.cast(ctypes_pointer, ctypes.c_void_p).value is None
-	except ctypes.ArgumentError: # catch non-pointer arguments
-		return False
+    try:
+        return ctypes.cast(ctypes_pointer, ctypes.c_void_p).value is None
+    except ctypes.ArgumentError:  # catch non-pointer arguments
+        return False

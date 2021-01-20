@@ -6,7 +6,7 @@
 #
 #	Required to run on platform / side: [UNIX]
 #
-# 	Copyright (C) 2017-2020 Sebastian M. Ernst <ernst@pleiszenburg.de>
+# 	Copyright (C) 2017-2021 Sebastian M. Ernst <ernst@pleiszenburg.de>
 #
 # <LICENSE_BLOCK>
 # The contents of this file are subject to the GNU Lesser General Public License
@@ -20,6 +20,8 @@
 # specific language governing rights and limitations under the License.
 # </LICENSE_BLOCK>
 
+black:
+	black .
 
 clean:
 	-rm -r build/*
@@ -63,12 +65,12 @@ upload_test:
 
 install:
 	pip install -U -e .[dev]
-	ZUGBRUECKE_ARCH=win32 wenv init
-	ZUGBRUECKE_ARCH=win32 wenv pip install -r requirements_test.txt
-	ZUGBRUECKE_ARCH=win32 wenv init_coverage
-	ZUGBRUECKE_ARCH=win64 wenv init
-	ZUGBRUECKE_ARCH=win64 wenv pip install -r requirements_test.txt
-	ZUGBRUECKE_ARCH=win64 wenv init_coverage
+	WENV_ARCH=win32 wenv init
+	WENV_ARCH=win32 wenv pip install -r requirements_test.txt
+	WENV_ARCH=win32 wenv init_coverage
+	WENV_ARCH=win64 wenv init
+	WENV_ARCH=win64 wenv pip install -r requirements_test.txt
+	WENV_ARCH=win64 wenv init_coverage
 
 test:
 	make docu
@@ -78,9 +80,9 @@ test_quick:
 	make clean
 	python -m tests.lib.build
 	make clean_py
-	ZUGBRUECKE_ARCH=win32 wenv pytest --hypothesis-show-statistics
+	WENV_ARCH=win32 wenv pytest --hypothesis-show-statistics
 	make clean_py
-	ZUGBRUECKE_ARCH=win64 wenv pytest --hypothesis-show-statistics
+	WENV_ARCH=win64 wenv pytest --hypothesis-show-statistics
 	make clean_py
 	pytest --cov=zugbruecke --cov-config=setup.cfg --hypothesis-show-statistics # --capture=no
-	mv .coverage .coverage.e9.0 ; coverage combine ; coverage html
+	# mv .coverage .coverage.e9.0 ; coverage combine ; coverage html # TODO fix!

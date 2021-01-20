@@ -6,11 +6,11 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	src/zugbruecke/core/routine_client.py: Classes for managing routines in DLLs
+    src/zugbruecke/core/routine_client.py: Classes for managing routines in DLLs
 
-	Required to run on platform / side: [UNIX]
+    Required to run on platform / side: [UNIX]
 
-	Copyright (C) 2017-2020 Sebastian M. Ernst <ernst@pleiszenburg.de>
+    Copyright (C) 2017-2021 Sebastian M. Ernst <ernst@pleiszenburg.de>
 
 <LICENSE_BLOCK>
 The contents of this file are subject to the GNU Lesser General Public License
@@ -32,202 +32,222 @@ specific language governing rights and limitations under the License.
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 import ctypes
-from functools import partial
 from pprint import pformat as pf
+from typing import Any, List, Tuple, Union
 
-from .errors import data_memsyncsyntax_error
+from .abc import DataABC, LogABC, RoutineClientABC, RpcClientABC
+from .errors import DataMemsyncsyntaxError
+from .typeguard import typechecked
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # DLL CLIENT CLASS
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-class routine_client_class():
 
+@typechecked
+class RoutineClient(RoutineClientABC):
+    """
+    Representing a routine in a DLL
+    """
+
+    def __init__(
+        self,
+        name: Union[str, int],
+        hash_id: str,
+        convention: str,
+        dll_name: str,
+        log: LogABC,
+        rpc_client: RpcClientABC,
+        data: DataABC,
+    ):
+
+        self._name = name
+
+        self._convention = convention
+        self._dll_name = dll_name
+        self._log = log
+        self._data = data
+
+        # Set call status
+        self._configured = False
+
+        # By default, there is no memory to sync
+        self._memsync = []
+        self._memsync_d = None
+
+        # By default, assume no arguments
+        self._argtypes = []
+        self._argtypes_d = None
+
+        # By default, assume c_int return value like ctypes expects
+        self._restype = ctypes.c_int
+        self._restype_d = None
+
+        for attr in (
+            "call",
+            "configure",
+            "get_repr",
+        ):
+            setattr(
+                self,
+                "_{ATTR:s}_on_server".format(ATTR=attr),
+                getattr(
+                    rpc_client,
+                    "{HASH_ID:s}_{NAME:s}_{ATTR:s}".format(
+                        HASH_ID=hash_id, NAME=str(self._name), ATTR=attr
+                    ),
+                ),
+            )
+
+    def __call__(self, *args: Any) -> Any:
+        """
+        TODO Optimize for speed!
+        """
+
+        self._log.out(
+            '[routine-client] Trying to call routine "{NAME:s}" in DLL file "{DLL_NAME:s}" ...'.format(
+                NAME=str(self._name),
+                DLL_NAME=self._dll_name,
+            )
+        )
+
+        if not self._configured:
+            self._configure()
+
+        self._log.out(
+            '[routine-client] ... parameters are "{ARGS:s}". Packing and pushing to server ...'.format(
+                ARGS=pf(args)
+            )
+        )
+
+        # Handle memory
+        mem_package_list = self._data.client_pack_memory_list(args, self._memsync_d)
+
+        # Actually call routine in DLL! TODO Handle kw ...
+        return_dict = self._call_on_server(
+            self._data.arg_list_pack(args, self._argtypes_d, self._convention),
+            mem_package_list,
+        )
+
+        self._log.out(
+            "[routine-client] ... received feedback from server, unpacking & syncing arguments ..."
+        )
+
+        # Unpack return dict (call may have failed partially only)
+        self._data.arg_list_sync(
+            args,
+            self._data.arg_list_unpack(
+                return_dict["args"],
+                self._argtypes_d,
+                self._convention,
+            ),
+            self._argtypes_d,
+        )
 
-	def __init__(self, parent_dll, routine_name):
+        self._log.out("[routine-client] ... unpacking return value ...")
 
-		# Store handle on parent dll
-		self.dll = parent_dll
+        # Unpack return value of routine
+        return_value = self._data.return_msg_unpack(
+            return_dict["return_value"], self._restype_d
+        )
 
-		# Store pointer to zugbruecke session
-		self.session = self.dll.session
+        self._log.out("[routine-client] ... overwriting memory ...")
 
-		# For convenience ...
-		self.rpc_client = self.dll.rpc_client
+        # Unpack memory (call may have failed partially only)
+        self._data.client_unpack_memory_list(
+            args, return_value, return_dict["memory"], self._memsync_d
+        )
 
-		# Get handle on log
-		self.log = self.dll.log
+        self._log.out("[routine-client] ... everything unpacked and overwritten ...")
 
-		# Store my own name
-		self.name = routine_name
+        # Raise the original error if call was not a success
+        if not return_dict["success"]:
+            self._log.out("[routine-client] ... call raised an error.")
+            raise return_dict["exception"]
 
-		# Required by arg definitions and contents
-		self.data = self.session.data
+        self._log.out("[routine-client] ... return.")
 
-		# Set call status
-		self.called = False
+        # Return result. return_value will be None if there was not a result.
+        return return_value
 
-		# By default, there is no memory to sync
-		self.__memsync__ = []
+    def __repr__(self) -> str:
 
-		# By default, assume no arguments
-		self.__argtypes__ = []
+        return self._get_repr_on_server()
 
-		# By default, assume c_int return value like ctypes expects
-		self.__restype__ = ctypes.c_int
+    def _configure(self):
 
-		# Get handle on server-side configure
-		self.__configure_on_server__ = getattr(
-			self.rpc_client, self.dll.hash_id + '_' + str(self.name) + '_configure'
-			)
+        self._log.out(
+            "[routine-client] ... has not been called before. Configuring ..."
+        )
 
-		# Get handle on server-side handle_call
-		self.__handle_call_on_server__ = getattr(
-			self.rpc_client, self.dll.hash_id + '_' + str(self.name) + '_handle_call'
-			)
+        # Prepare list of arguments by parsing them into list of dicts (TODO field name / kw)
+        self._argtypes_d = self._data.pack_definition_argtypes(self._argtypes)
 
+        # Parse return type
+        self._restype_d = self._data.pack_definition_returntype(self._restype)
 
-	def __call__(self, *args):
-		"""
-		TODO Optimize for speed!
-		"""
+        # Compile memsync statements HACK just unpack the user input ...
+        self._memsync_d = self._data.unpack_definition_memsync(self._memsync)
 
-		# Log status
-		self.log.out('[routine-client] Trying to call routine "%s" in DLL file "%s" ...' % (self.name, self.dll.name))
+        # Pack memsync_d again for shipping
+        memsync_d_packed = self._data.pack_definition_memsync(self._memsync_d)
 
-		# Has this routine ever been called?
-		if not self.called:
+        # Adjust definitions with void pointers
+        self._data.apply_memsync_to_argtypes_and_restype_definition(
+            self._memsync_d, self._argtypes_d, self._restype_d
+        )
 
-			# Log status
-			self.log.out('[routine-client] ... has not been called before. Configuring ...')
+        # Log status
+        self._log.out("<memsync>", self._memsync_d, "</memsync>")
+        self._log.out("<argtypes>", self._argtypes, "</argtypes>")
+        self._log.out("<argtypes_d>", self._argtypes_d, "</argtypes_d>")
+        self._log.out("<restype>", self._restype, "</restype>")
+        self._log.out("<restype_d>", self._restype_d, "</restype_d>")
 
-			# Tell wine-python about types
-			self.__configure__()
+        # Pass argument and return value types as strings ...
+        _ = self._configure_on_server(
+            self._argtypes_d, self._restype_d, memsync_d_packed
+        )
 
-			# Change status of routine - it has been called once and is therefore configured
-			self.called = True
+        # Change status of routine - it has been called once and is therefore configured
+        self._configured = True
 
-			# Log status
-			self.log.out('[routine-client] ... configured. Proceeding ...')
+        # Log status
+        self._log.out("[routine-client] ... configured. Proceeding ...")
 
-		# Log status
-		self.log.out('[routine-client] ... parameters are "%r". Packing and pushing to server ...' % (args,))
+    @property
+    def argtypes(self) -> Union[List, Tuple]:
 
-		# Handle memory
-		mem_package_list = self.data.client_pack_memory_list(args, self.memsync_d)
+        return self._argtypes
 
-		# Actually call routine in DLL! TODO Handle kw ...
-		return_dict = self.__handle_call_on_server__(
-			self.data.arg_list_pack(args, self.argtypes_d, self.dll.calling_convention), mem_package_list
-			)
+    @argtypes.setter
+    def argtypes(self, value: Union[List, Tuple]):
 
-		# Log status
-		self.log.out('[routine-client] ... received feedback from server, unpacking & syncing arguments ...')
+        if not isinstance(value, list) and not isinstance(value, tuple):
+            raise TypeError  # original ctypes does that
 
-		# Unpack return dict (call may have failed partially only)
-		self.data.arg_list_sync(
-			args,
-			self.data.arg_list_unpack(return_dict['args'], self.argtypes_d, self.dll.calling_convention),
-			self.argtypes_d
-			)
+        self._argtypes = value
 
-		# Log status
-		self.log.out('[routine-client] ... unpacking return value ...')
+    @property
+    def restype(self) -> Any:
 
-		# Unpack return value of routine
-		return_value = self.data.return_msg_unpack(return_dict['return_value'], self.restype_d)
+        return self._restype
 
-		# Log status
-		self.log.out('[routine-client] ... overwriting memory ...')
+    @restype.setter
+    def restype(self, value: Any):
 
-		# Unpack memory (call may have failed partially only)
-		self.data.client_unpack_memory_list(args, return_value, return_dict['memory'], self.memsync_d)
+        self._restype = value
 
-		# Log status
-		self.log.out('[routine-client] ... everything unpacked and overwritten ...')
+    @property
+    def memsync(self) -> List:
 
-		# Raise the original error if call was not a success
-		if not return_dict['success']:
-			self.log.out('[routine-client] ... call raised an error.')
-			raise return_dict['exception']
+        return self._memsync
 
-		# Log status
-		self.log.out('[routine-client] ... return.')
+    @memsync.setter
+    def memsync(self, value: List):
 
-		# Return result. return_value will be None if there was not a result.
-		return return_value
+        if not isinstance(value, list):
+            raise DataMemsyncsyntaxError("memsync attribute must be a list")
 
-
-	def __configure__(self):
-
-		# Prepare list of arguments by parsing them into list of dicts (TODO field name / kw)
-		self.argtypes_d = self.data.pack_definition_argtypes(self.__argtypes__)
-
-		# Parse return type
-		self.restype_d = self.data.pack_definition_returntype(self.__restype__)
-
-		# Compile memsync statements HACK just unpack the user input ...
-		self.memsync_d = self.data.unpack_definition_memsync(self.__memsync__)
-
-		# Pack memsync_d again for shipping
-		memsync_d_packed = self.data.pack_definition_memsync(self.memsync_d)
-
-		# Adjust definitions with void pointers
-		self.data.apply_memsync_to_argtypes_and_restype_definition(
-			self.memsync_d, self.argtypes_d, self.restype_d
-			)
-
-		# Log status
-		self.log.out('<memsync>', self.memsync_d, '</memsync>')
-		self.log.out('<argtypes>', self.__argtypes__, '</argtypes>')
-		self.log.out('<argtypes_d>', self.argtypes_d, '</argtypes_d>')
-		self.log.out('<restype>', self.__restype__, '</restype>')
-		self.log.out('<restype_d>', self.restype_d, '</restype_d>')
-
-		# Pass argument and return value types as strings ...
-		result = self.__configure_on_server__(
-			self.argtypes_d, self.restype_d, memsync_d_packed
-			)
-
-
-	@property
-	def argtypes(self):
-
-		return self.__argtypes__
-
-
-	@argtypes.setter
-	def argtypes(self, value):
-
-		if not isinstance(value, list) and not isinstance(value, tuple):
-			raise TypeError # original ctypes does that
-
-		self.__argtypes__ = value
-
-
-	@property
-	def restype(self):
-
-		return self.__restype__
-
-
-	@restype.setter
-	def restype(self, value):
-
-		self.__restype__ = value
-
-
-	@property
-	def memsync(self):
-
-		return self.__memsync__
-
-
-	@memsync.setter
-	def memsync(self, value):
-
-		if not isinstance(value, list):
-			raise data_memsyncsyntax_error('memsync attribute must be a list')
-
-		self.__memsync__ = value
+        self._memsync = value

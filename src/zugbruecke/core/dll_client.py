@@ -6,11 +6,11 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	src/zugbruecke/core/dll_client.py: Classes for managing the access to DLLs
+    src/zugbruecke/core/dll_client.py: Classes for managing the access to DLLs
 
-	Required to run on platform / side: [UNIX]
+    Required to run on platform / side: [UNIX]
 
-	Copyright (C) 2017-2020 Sebastian M. Ernst <ernst@pleiszenburg.de>
+    Copyright (C) 2017-2021 Sebastian M. Ernst <ernst@pleiszenburg.de>
 
 <LICENSE_BLOCK>
 The contents of this file are subject to the GNU Lesser General Public License
@@ -31,110 +31,101 @@ specific language governing rights and limitations under the License.
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-from .routine_client import routine_client_class
+from typing import Union
+
+from .abc import DataABC, DllClientABC, LogABC, RoutineClientABC, RpcClientABC
+from .routine_client import RoutineClient
+from .typeguard import typechecked
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # DLL CLIENT CLASS
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-class dll_client_class(): # Representing one idividual dll to be called into, returned by LoadLibrary
 
+@typechecked
+class DllClient(DllClientABC):
+    """
+    Representing one idividual dll to be called into, returned by LoadLibrary
+    """
 
-	def __init__(self, parent_session, dll_name, dll_type, hash_id):
+    def __init__(
+        self,
+        name: str,
+        hash_id: str,
+        convention: str,
+        log: LogABC,
+        rpc_client: RpcClientABC,
+        data: DataABC,
+    ):
 
-		# Store dll parameters name, path and type
-		self.name = dll_name
-		self.calling_convention = dll_type
+        self._name = name
+        self._hash_id = hash_id
+        self._convention = convention
 
-		# Store pointer to zugbruecke session
-		self.session = parent_session
+        self._log = log
+        self._rpc_client = rpc_client
+        self._data = data
 
-		# For convenience ...
-		self.rpc_client = self.session.rpc_client
+        self._routines = {}
 
-		# Get handle on log
-		self.log = self.session.log
+        for name in (
+            "get_repr",
+            "register_routine",
+        ):
+            setattr(
+                self,
+                "_{NAME:s}_on_server".format(NAME=name),
+                getattr(
+                    self._rpc_client,
+                    "{HASH_ID:s}_{NAME:s}".format(HASH_ID=self._hash_id, NAME=name),
+                ),
+            )
 
-		# Store my hash id
-		self.hash_id = hash_id
+    def __getattr__(self, name: str) -> RoutineClientABC:
 
-		# Start dict for dll routines
-		self.routines = {}
+        if name in ["__objclass__", "__name__"]:
+            raise AttributeError(name)
 
-		# Expose routine registration
-		self.__register_routine_on_server__ = getattr(self.rpc_client, self.hash_id + '_register_routine')
+        if name not in self._routines.keys():
+            self._register_routine(name)
 
-		# Expose string reprentation of dll object
-		self.__get_repr__ = getattr(self.rpc_client, self.hash_id + '_repr')
+        return self._routines[name]
 
+    def __getitem__(self, name_or_ordinal: Union[str, int]) -> RoutineClientABC:
 
-	def __attach_to_routine__(self, name):
+        if name_or_ordinal not in self._routines.keys():
+            self._register_routine(name_or_ordinal)
 
-		# Status log
-		self.log.out('[dll-client] Trying to attach to routine "%s" in DLL file "%s" ...' % (str(name), self.name))
+        return self._routines[name_or_ordinal]
 
-		# Log status
-		self.log.out('[dll-client] ... unknown, registering  ...')
+    def __repr__(self) -> str:
 
-		# Only if name is a string ...
-		if isinstance(name, str):
+        return self._get_repr_on_server()
 
-			# Original ctypes does that
-			if name.startswith('__') and name.endswith('__'):
-				raise AttributeError(name)
+    def _register_routine(self, name: Union[str, int]):
 
-		try:
+        self._log.out(
+            '[dll-client] Trying to register routine "{NAME:s}" in DLL file "{FN:s}" ...'.format(
+                NAME=str(name),
+                FN=self._name,
+            )
+        )
 
-			# Register routine in wine
-			self.__register_routine_on_server__(name)
+        try:
+            self._register_routine_on_server(name)
+        except AttributeError as e:
+            self._log.out("[dll-client] ... failed!")
+            raise e
 
-		except AttributeError as e:
+        self._routines[name] = RoutineClient(
+            name,
+            self._hash_id,
+            self._convention,
+            self._name,
+            self._log,
+            self._rpc_client,
+            self._data,
+        )
 
-			# Log status
-			self.log.out('[dll-client] ... failed!')
-
-			raise e
-
-		# Create new instance of routine_client
-		self.routines[name] = routine_client_class(self, name)
-
-		# Log status
-		self.log.out('[dll-client] ... registered (unconfigured) ...')
-
-		# If name is a string ...
-		if isinstance(name, str):
-
-			# Set attribute for future use
-			setattr(self, name, self.routines[name])
-
-		# Log status
-		self.log.out('[dll-client] ... return handler.')
-
-		# Return handler
-		return self.routines[name]
-
-
-	def __getattr__(self, name):
-
-		if name in ['__objclass__']:
-			raise AttributeError(name)
-
-		return self.__attach_to_routine__(name)
-
-
-	def __getitem__(self, name_or_ordinal):
-
-		# Is it in dict?
-		if name_or_ordinal in self.routines.keys():
-
-			# Return handle
-			return self.routines[name_or_ordinal]
-
-		# Generate new handle and return
-		return self.__attach_to_routine__(name_or_ordinal)
-
-
-	def __repr__(self):
-
-		return self.__get_repr__()
+        self._log.out("[dll-client] ... registered (unconfigured).")

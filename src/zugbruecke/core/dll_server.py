@@ -6,11 +6,11 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	src/zugbruecke/core/dll_server.py: Classes for managing the access to DLLs
+    src/zugbruecke/core/dll_server.py: Classes for managing the access to DLLs
 
-	Required to run on platform / side: [WINE]
+    Required to run on platform / side: [WINE]
 
-	Copyright (C) 2017-2020 Sebastian M. Ernst <ernst@pleiszenburg.de>
+    Copyright (C) 2017-2021 Sebastian M. Ernst <ernst@pleiszenburg.de>
 
 <LICENSE_BLOCK>
 The contents of this file are subject to the GNU Lesser General Public License
@@ -31,111 +31,101 @@ specific language governing rights and limitations under the License.
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+from ctypes import CDLL
 import traceback
+from typing import Union
 
-from .lib import get_hash_of_string
-from .routine_server import routine_server_class
+from .abc import DataABC, DllServerABC, LogABC, RpcServerABC
+from .routine_server import RoutineServer
+from .typeguard import typechecked
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # DLL SERVER CLASS
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-class dll_server_class(): # Representing one idividual dll to be called into
 
+@typechecked
+class DllServer(DllServerABC):
+    """
+    Representing one idividual dll to be called into
+    """
 
-	def __init__(self, parent_session, dll_name, dll_type, handler):
+    def __init__(
+        self,
+        name: str,
+        hash_id: str,
+        convention: str,
+        handler: CDLL,
+        log: LogABC,
+        rpc_server: RpcServerABC,
+        data: DataABC,
+    ):
 
-		# Store dll parameters name, path and type
-		self.name = dll_name
-		self.calling_convention = dll_type
+        self._name = name
+        self._convention = convention
+        self._hash_id = hash_id
+        self._handler = handler
 
-		# Store pointer to _server_ session
-		self.session = parent_session
+        self._log = log
+        self._rpc_server = rpc_server
+        self._data = data
 
-		# Get handle on log
-		self.log = self.session.log
+        self._routines = {}
 
-		# Store handler on dll
-		self.handler = handler
+        for name in (
+            "get_repr",
+            "register_routine",
+        ):
+            self._rpc_server.register_function(
+                getattr(self, name),
+                "{HASH_ID:s}_{NAME:s}".format(HASH_ID=self._hash_id, NAME=name),
+            )
 
-		# Start dict for dll routines
-		self.routines = {}
+    def get_repr(self) -> str:
+        """
+        Called by DLL client
+        """
 
-		# Hash my own path as unique ID
-		self.hash_id = get_hash_of_string(self.name)
+        return repr(self._handler)
 
-		# Export registration of my functions directly
-		self.session.rpc_server.register_function(
-			self.__get_repr__,
-			self.hash_id + '_repr'
-			)
-		self.session.rpc_server.register_function(
-			self.__register_routine__,
-			self.hash_id + '_register_routine'
-			)
+    def register_routine(self, name: Union[str, int]):
+        """
+        Called by DLL client
+        """
 
+        if name in self._routines.keys():
+            return
 
-	def __get_repr__(self):
+        self._log.out(
+            '[dll-server] Trying to access "{NAME:s}" in DLL file "{DLL_NAME:s}" ...'.format(
+                NAME=str(name),
+                DLL_NAME=self._name,
+            )
+        )
 
-		return self.handler.__repr__()
+        try:
+            if isinstance(name, str):
+                routine_handler = getattr(self._handler, name)
+            else:
+                routine_handler = self._handler[name]
+        except AttributeError as e:
+            self._log.out("[dll-server] ... failed!")
+            raise e
+        except Exception as e:
+            self._log.err(traceback.format_exc())
+            raise e
 
+        # Generate new instance of routine class
+        self._routines[name] = RoutineServer(
+            name,
+            routine_handler,
+            self._hash_id,
+            self._convention,
+            self._name,
+            self._log,
+            self._rpc_server,
+            self._data,
+        )
 
-	def __register_routine__(self, routine_name):
-		"""
-		Exposed interface
-		"""
-
-		# Just in case this routine is already known
-		if routine_name in self.routines.keys():
-			return True # Success
-
-		# Log status
-		self.log.out('[dll-server] Trying to access "%s" in DLL file "%s" ...' % (str(routine_name), self.name))
-
-		# Try to attach to routine with ctypes
-		try:
-
-			# If name is a string
-			if isinstance(routine_name, str):
-
-				# Get handler on routine in dll as attribute
-				routine_handler = getattr(
-					self.handler, routine_name
-					)
-
-			# If name is an integer
-			else:
-
-				# Get handler on routine in dll as item
-				routine_handler = self.handler[routine_name]
-
-		except AttributeError as e:
-
-			# Log status
-			self.log.out('[dll-server] ... failed!')
-
-			raise e
-
-		except Exception as e:
-
-			# Push traceback to log
-			self.log.err(traceback.format_exc())
-
-			raise e
-
-		# Generate new instance of routine class
-		self.routines[routine_name] = routine_server_class(self, routine_name, routine_handler)
-
-		# Export call and configration directly
-		self.session.rpc_server.register_function(
-			self.routines[routine_name],
-			self.hash_id + '_' + str(routine_name) + '_handle_call'
-			)
-		self.session.rpc_server.register_function(
-			self.routines[routine_name].__configure__,
-			self.hash_id + '_' + str(routine_name) + '_configure'
-			)
-
-		# Log status
-		self.log.out('[dll-server] ... done.')
+        self._log.out("[dll-server] ... done.")

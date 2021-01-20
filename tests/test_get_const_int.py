@@ -6,11 +6,11 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	tests/test_sqrt_int.py: Test function call without parameters
+    tests/test_sqrt_int.py: Test function call without parameters
 
-	Required to run on platform / side: [UNIX, WINE]
+    Required to run on platform / side: [UNIX, WINE]
 
-	Copyright (C) 2017-2020 Sebastian M. Ernst <ernst@pleiszenburg.de>
+    Copyright (C) 2017-2021 Sebastian M. Ernst <ernst@pleiszenburg.de>
 
 <LICENSE_BLOCK>
 The contents of this file are subject to the GNU Lesser General Public License
@@ -67,28 +67,31 @@ import pytest
 # TEST(s)
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-@pytest.mark.parametrize('arch,conv,ctypes,dll_handle', get_context(__file__))
+
+@pytest.mark.parametrize("arch,conv,ctypes,dll_handle", get_context(__file__))
 def test_sqrt_int(arch, conv, ctypes, dll_handle):
 
-		get_const_int = dll_handle.get_const_int_a
-		get_const_int.restype = ctypes.c_int16
+    get_const_int = dll_handle.get_const_int_a
+    get_const_int.restype = ctypes.c_int16
 
-		assert 7 == get_const_int()
+    assert 7 == get_const_int()
 
-@pytest.mark.parametrize('arch,conv,ctypes,dll_handle', get_context(__file__))
+
+@pytest.mark.parametrize("arch,conv,ctypes,dll_handle", get_context(__file__))
 def test_sqrt_int_with_tuple(arch, conv, ctypes, dll_handle):
 
-		get_const_int = dll_handle.get_const_int_b
-		get_const_int.argtypes = tuple()
-		get_const_int.restype = ctypes.c_int16
+    get_const_int = dll_handle.get_const_int_b
+    get_const_int.argtypes = tuple()
+    get_const_int.restype = ctypes.c_int16
 
-		assert 6 == get_const_int()
+    assert 6 == get_const_int()
 
-@pytest.mark.parametrize('arch,conv,ctypes,dll_handle', get_context(__file__))
+
+@pytest.mark.parametrize("arch,conv,ctypes,dll_handle", get_context(__file__))
 def test_sqrt_int_with_list(arch, conv, ctypes, dll_handle):
 
-		get_const_int = dll_handle.get_const_int_c
-		get_const_int.argtypes = []
-		get_const_int.restype = ctypes.c_int16
+    get_const_int = dll_handle.get_const_int_c
+    get_const_int.argtypes = []
+    get_const_int.restype = ctypes.c_int16
 
-		assert 5 == get_const_int()
+    assert 5 == get_const_int()

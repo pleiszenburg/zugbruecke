@@ -6,11 +6,11 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	setup.py: Used for package distribution
+    setup.py: Used for package distribution
 
-	Required to run on platform / side: [UNIX]
+    Required to run on platform / side: [UNIX]
 
-	Copyright (C) 2017-2020 Sebastian M. Ernst <ernst@pleiszenburg.de>
+    Copyright (C) 2017-2021 Sebastian M. Ernst <ernst@pleiszenburg.de>
 
 <LICENSE_BLOCK>
 The contents of this file are subject to the GNU Lesser General Public License
@@ -31,10 +31,7 @@ specific language governing rights and limitations under the License.
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-from setuptools import (
-	find_packages,
-	setup
-	)
+from setuptools import find_packages, setup
 import os
 from sys import platform, version_info
 
@@ -44,94 +41,87 @@ from sys import platform, version_info
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
-_version_ = '0.1.0'
+_version_ = "0.1.0"
 
 
 # List all versions of Python which are supported
 python_minor_min = 4
-python_minor_max = 8
+python_minor_max = 9
 confirmed_python_versions = [
-	'Programming Language :: Python :: 3.{MINOR:d}'.format(MINOR = minor)
-	for minor in range(python_minor_min, python_minor_max + 1)
-	]
+    "Programming Language :: Python :: 3.{MINOR:d}".format(MINOR=minor)
+    for minor in range(python_minor_min, python_minor_max + 1)
+]
 
 
 # Fetch readme file
-with open(os.path.join(os.path.dirname(__file__), 'README.rst')) as f:
-	long_description = f.read()
+with open(os.path.join(os.path.dirname(__file__), "README.rst")) as f:
+    long_description = f.read()
 
 
 # Fetch test requirements
-with open(os.path.join(os.path.dirname(__file__), 'requirements_test.txt')) as f:
-	requirements_test = [rq.strip() for rq in f.read().split('\n') if len(rq.strip()) > 0]
+with open(os.path.join(os.path.dirname(__file__), "requirements_test.txt")) as f:
+    requirements_test = [
+        rq.strip() for rq in f.read().split("\n") if len(rq.strip()) > 0
+    ]
 
 
 # Just in case someone is actually running this on Windows ...
-if platform.startswith('win'):
-	raise SystemExit('You are already running Windows. No need for this package!')
+if platform.startswith("win"):
+    raise SystemExit("You are already running Windows. No need for this package!")
 
 
 # Python 3.4 dependency / CI fix
-pls = 'python-language-server'
+pls = "python-language-server"
 assert version_info.major == 3
 if version_info.minor <= 4:
-	pls += '<0.32.0'
+    pls += "<0.32.0"
 
 
 setup(
-	name = 'zugbruecke',
-	packages = find_packages('src'),
-	package_dir = {'': 'src'},
-	version = _version_,
-	description = 'Calling routines in Windows DLLs from Python scripts running under Linux, MacOS or BSD',
-	long_description = long_description,
-	author = 'Sebastian M. Ernst',
-	author_email = 'ernst@pleiszenburg.de',
-	url = 'https://github.com/pleiszenburg/zugbruecke',
-	download_url = 'https://github.com/pleiszenburg/zugbruecke/archive/v%s.tar.gz' % _version_,
-	license = 'LGPLv2',
-	keywords = ['ctypes', 'wine'],
-	scripts = [],
-	include_package_data = True,
-	python_requires = '>=3.{MINOR:d}'.format(MINOR = python_minor_min),
-	install_requires = [],
-	extras_require = {
-		'dev': requirements_test + [
-			'Jinja2',
-			pls,
-			'setuptools',
-			'Sphinx',
-			'sphinx_rtd_theme',
-			'twine',
-			'wheel'
-			],
-		'certifi': [
-			'certifi'
-			]
-		},
-	zip_safe = False,
-	entry_points = {'console_scripts': [
-		'wenv = zugbruecke.wenv:cli',
-		'_wenv_python = zugbruecke.wenv:shebang'
-		]},
-	classifiers = [
-		'Development Status :: 3 - Alpha',
-		'Intended Audience :: Developers',
-		'Intended Audience :: Information Technology',
-		'Intended Audience :: Science/Research',
-		'Intended Audience :: System Administrators',
-		'License :: OSI Approved :: GNU Lesser General Public License v2 (LGPLv2)',
-		'Operating System :: MacOS',
-		'Operating System :: POSIX :: BSD',
-		'Operating System :: POSIX :: Linux',
-		'Programming Language :: Python :: 3'
-		] + confirmed_python_versions + [
-		'Programming Language :: Python :: 3 :: Only',
-		'Programming Language :: Python :: Implementation :: CPython',
-		'Topic :: Scientific/Engineering',
-		'Topic :: Software Development',
-		'Topic :: System :: Operating System',
-		'Topic :: System :: Operating System Kernels',
-		'Topic :: Utilities'
-		]
-	)
+    name="zugbruecke",
+    packages=find_packages("src"),
+    package_dir={"": "src"},
+    version=_version_,
+    description="Calling routines in Windows DLLs from Python scripts running under Linux, MacOS or BSD",
+    long_description=long_description,
+    author="Sebastian M. Ernst",
+    author_email="ernst@pleiszenburg.de",
+    url="https://github.com/pleiszenburg/zugbruecke",
+    download_url="https://github.com/pleiszenburg/zugbruecke/archive/v%s.tar.gz"
+    % _version_,
+    license="LGPLv2",
+    keywords=["ctypes", "wine"],
+    scripts=[],
+    include_package_data=True,
+    python_requires=">=3.{MINOR:d}".format(MINOR=python_minor_min),
+    install_requires=["wenv"],
+    extras_require={
+        "dev": requirements_test
+        + ["Jinja2", pls, "setuptools", "Sphinx", "sphinx_rtd_theme", "twine", "wheel"],
+        "certifi": ["certifi"],
+    },
+    zip_safe=False,
+    entry_points={},
+    classifiers=[
+        "Development Status :: 3 - Alpha",
+        "Intended Audience :: Developers",
+        "Intended Audience :: Information Technology",
+        "Intended Audience :: Science/Research",
+        "Intended Audience :: System Administrators",
+        "License :: OSI Approved :: GNU Lesser General Public License v2 (LGPLv2)",
+        "Operating System :: MacOS",
+        "Operating System :: POSIX :: BSD",
+        "Operating System :: POSIX :: Linux",
+        "Programming Language :: Python :: 3",
+    ]
+    + confirmed_python_versions
+    + [
+        "Programming Language :: Python :: 3 :: Only",
+        "Programming Language :: Python :: Implementation :: CPython",
+        "Topic :: Scientific/Engineering",
+        "Topic :: Software Development",
+        "Topic :: System :: Operating System",
+        "Topic :: System :: Operating System Kernels",
+        "Topic :: Utilities",
+    ],
+)

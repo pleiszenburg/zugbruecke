@@ -6,11 +6,11 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	tests/test_util.py: Testing methods crom ctypes.util
+    tests/test_util.py: Testing methods crom ctypes.util
 
-	Required to run on platform / side: [UNIX, WINE]
+    Required to run on platform / side: [UNIX, WINE]
 
-	Copyright (C) 2017-2020 Sebastian M. Ernst <ernst@pleiszenburg.de>
+    Copyright (C) 2017-2021 Sebastian M. Ernst <ernst@pleiszenburg.de>
 
 <LICENSE_BLOCK>
 The contents of this file are subject to the GNU Lesser General Public License
@@ -39,12 +39,20 @@ import pytest
 # TEST(s)
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-@pytest.mark.parametrize('arch,conv,ctypes,dll_path', get_context(__file__, handle = False))
+
+@pytest.mark.parametrize(
+    "arch,conv,ctypes,dll_path", get_context(__file__, handle=False)
+)
 def test_find_library(arch, conv, ctypes, dll_path):
 
-	assert ctypes._util.find_library('kernel32') == 'C:\\windows\\system32\\kernel32.dll'
+    assert (
+        ctypes._util.find_library("kernel32") == "C:\\windows\\system32\\kernel32.dll"
+    )
 
-@pytest.mark.parametrize('arch,conv,ctypes,dll_path', get_context(__file__, handle = False))
+
+@pytest.mark.parametrize(
+    "arch,conv,ctypes,dll_path", get_context(__file__, handle=False)
+)
 def test_find_msvcrt(arch, conv, ctypes, dll_path):
 
-	assert ctypes._util.find_msvcrt() == None
+    assert ctypes._util.find_msvcrt() == None

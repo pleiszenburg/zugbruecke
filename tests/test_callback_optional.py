@@ -6,11 +6,11 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	tests/test_callback_optional.py: Optional callback routines as arguments
+    tests/test_callback_optional.py: Optional callback routines as arguments
 
-	Required to run on platform / side: [UNIX, WINE]
+    Required to run on platform / side: [UNIX, WINE]
 
-	Copyright (C) 2017-2020 Sebastian M. Ernst <ernst@pleiszenburg.de>
+    Copyright (C) 2017-2021 Sebastian M. Ernst <ernst@pleiszenburg.de>
 
 <LICENSE_BLOCK>
 The contents of this file are subject to the GNU Lesser General Public License
@@ -86,51 +86,54 @@ import pytest
 # CLASSES AND ROUTINES
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+
 class sample_class_a:
+    def __init__(self, conv, ctypes, dll_handle):
 
-	def __init__(self, conv, ctypes, dll_handle):
+        if conv == "cdll":
+            func_type = ctypes.CFUNCTYPE
+        elif conv == "windll":
+            func_type = ctypes.WINFUNCTYPE
+        else:
+            raise ValueError("unknown calling convention", conv)
+        conveyor_belt = func_type(ctypes.c_int16, ctypes.c_int16)
 
-		if conv == 'cdll':
-			func_type = ctypes.CFUNCTYPE
-		elif conv == 'windll':
-			func_type = ctypes.WINFUNCTYPE
-		else:
-			raise ValueError('unknown calling convention', conv)
-		conveyor_belt = func_type(ctypes.c_int16, ctypes.c_int16)
+        self._use_optional_callback = dll_handle.use_optional_callback_a
+        self._use_optional_callback.argtypes = (ctypes.c_int16, conveyor_belt)
+        self._use_optional_callback.restype = ctypes.c_int16
 
-		self._use_optional_callback = dll_handle.use_optional_callback_a
-		self._use_optional_callback.argtypes = (ctypes.c_int16, conveyor_belt)
-		self._use_optional_callback.restype = ctypes.c_int16
+        @conveyor_belt
+        def process_data(in_data):
+            return in_data ** 2
 
-		@conveyor_belt
-		def process_data(in_data):
-			return in_data ** 2
+        self.__process_data__ = process_data
 
-		self.__process_data__ = process_data
+    def use_optional_callback(self, some_data):
+        return self._use_optional_callback(some_data, self.__process_data__)
 
-	def use_optional_callback(self, some_data):
-		return self._use_optional_callback(some_data, self.__process_data__)
 
 class sample_class_b:
+    def __init__(self, ctypes, dll_handle):
+        self._use_optional_callback = dll_handle.use_optional_callback_b
+        self._use_optional_callback.argtypes = (ctypes.c_int16, ctypes.c_void_p)
+        self._use_optional_callback.restype = ctypes.c_int16
 
-	def __init__(self, ctypes, dll_handle):
-		self._use_optional_callback = dll_handle.use_optional_callback_b
-		self._use_optional_callback.argtypes = (ctypes.c_int16, ctypes.c_void_p)
-		self._use_optional_callback.restype = ctypes.c_int16
+    def do_not_use_optional_callback(self, some_data):
+        return self._use_optional_callback(some_data, None)
 
-	def do_not_use_optional_callback(self, some_data):
-		return self._use_optional_callback(some_data, None)
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # TEST(s)
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-@pytest.mark.parametrize('arch,conv,ctypes,dll_handle', get_context(__file__))
-def test_use_optional_callback(arch, conv, ctypes, dll_handle):
-	sample = sample_class_a(conv, ctypes, dll_handle)
-	assert 18 == sample.use_optional_callback(3)
 
-@pytest.mark.parametrize('arch,conv,ctypes,dll_handle', get_context(__file__))
+@pytest.mark.parametrize("arch,conv,ctypes,dll_handle", get_context(__file__))
+def test_use_optional_callback(arch, conv, ctypes, dll_handle):
+    sample = sample_class_a(conv, ctypes, dll_handle)
+    assert 18 == sample.use_optional_callback(3)
+
+
+@pytest.mark.parametrize("arch,conv,ctypes,dll_handle", get_context(__file__))
 def test_do_not_use_optional_callback(arch, conv, ctypes, dll_handle):
-	sample = sample_class_b(ctypes, dll_handle)
-	assert 14 == sample.do_not_use_optional_callback(7)
+    sample = sample_class_b(ctypes, dll_handle)
+    assert 14 == sample.do_not_use_optional_callback(7)

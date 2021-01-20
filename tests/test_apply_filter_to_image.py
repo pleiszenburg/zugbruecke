@@ -6,11 +6,11 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	tests/test_apply_filter_to_image.py: Demonstrates memsync on callback routines
+    tests/test_apply_filter_to_image.py: Demonstrates memsync on callback routines
 
-	Required to run on platform / side: [UNIX, WINE]
+    Required to run on platform / side: [UNIX, WINE]
 
-	Copyright (C) 2017-2020 Sebastian M. Ernst <ernst@pleiszenburg.de>
+    Copyright (C) 2017-2021 Sebastian M. Ernst <ernst@pleiszenburg.de>
 
 <LICENSE_BLOCK>
 The contents of this file are subject to the GNU Lesser General Public License
@@ -153,157 +153,159 @@ import pytest
 # CLASSES AND ROUTINES
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+
 class sample_class:
+    def __init__(self, arch, conv, ctypes, dll_handle):
 
-	def __init__(self, arch, conv, ctypes, dll_handle):
+        self._c = ctypes
+        self._dll = dll_handle
 
-		self._c = ctypes
-		self._dll = dll_handle
+        class image_data(self._c.Structure):
+            _fields_ = [
+                ("data", self._c.POINTER(self._c.c_int16)),
+                ("width", self._c.c_int16),
+                ("height", self._c.c_int16),
+            ]
 
-		class image_data(self._c.Structure):
-			_fields_ = [
-				('data', self._c.POINTER(self._c.c_int16)),
-				('width', self._c.c_int16),
-				('height', self._c.c_int16)
-				]
-		self.image_data = image_data
+        self.image_data = image_data
 
-		if conv == 'cdll':
-			func_type = self._c.CFUNCTYPE
-		elif conv == 'windll':
-			func_type = self._c.WINFUNCTYPE
-		else:
-			raise ValueError('unknown calling convention', conv)
-		filter_func_type = func_type(self._c.c_int16, self._c.POINTER(image_data))
-		filter_func_type.memsync = [
-			{
-				'p': [0, 'data'],
-				'l': ([0, 'width'], [0, 'height']),
-				'f': 'lambda x, y: x * y',
-				't': 'c_int16'
-				}
-			]
+        if conv == "cdll":
+            func_type = self._c.CFUNCTYPE
+        elif conv == "windll":
+            func_type = self._c.WINFUNCTYPE
+        else:
+            raise ValueError("unknown calling convention", conv)
+        filter_func_type = func_type(self._c.c_int16, self._c.POINTER(image_data))
+        filter_func_type.memsync = [
+            {
+                "p": [0, "data"],
+                "l": ([0, "width"], [0, "height"]),
+                "f": "lambda x, y: x * y",
+                "t": "c_int16",
+            }
+        ]
 
-		self.__apply_filter_to_image__ = self._dll.apply_filter_to_image
-		self.__apply_filter_to_image__.argtypes = (
-			self._c.POINTER(image_data),
-			self._c.POINTER(image_data),
-			filter_func_type
-			)
-		self.__apply_filter_to_image__.memsync = [
-			{
-				'p': [0, 'data'],
-				'l': ([0, 'width'], [0, 'height']),
-				'f': 'lambda x, y: x * y',
-				't': 'c_int16'
-				},
-			{
-				'p': [1, 'data'],
-				'l': ([1, 'width'], [1, 'height']),
-				'f': 'lambda x, y: x * y',
-				't': 'c_int16'
-				}
-			]
+        self.__apply_filter_to_image__ = self._dll.apply_filter_to_image
+        self.__apply_filter_to_image__.argtypes = (
+            self._c.POINTER(image_data),
+            self._c.POINTER(image_data),
+            filter_func_type,
+        )
+        self.__apply_filter_to_image__.memsync = [
+            {
+                "p": [0, "data"],
+                "l": ([0, "width"], [0, "height"]),
+                "f": "lambda x, y: x * y",
+                "t": "c_int16",
+            },
+            {
+                "p": [1, "data"],
+                "l": ([1, "width"], [1, "height"]),
+                "f": "lambda x, y: x * y",
+                "t": "c_int16",
+            },
+        ]
 
-		@filter_func_type
-		def filter_edge_detection(in_buffer):
+        @filter_func_type
+        def filter_edge_detection(in_buffer):
 
-			filter_matrix = [
-				[0,  1, 0],
-				[1, -4, 1],
-				[0,  1, 0]
-				]
+            filter_matrix = [[0, 1, 0], [1, -4, 1], [0, 1, 0]]
 
-			width = in_buffer.contents.width
-			height = in_buffer.contents.height
+            width = in_buffer.contents.width
+            height = in_buffer.contents.height
 
-			assert width == 3 and height == 3
+            assert width == 3 and height == 3
 
-			in_matrix = self.array_to_matrix(
-				self._c.cast(
-					in_buffer.contents.data,
-					self._c.POINTER(self._c.c_int16 * (width * height))
-					).contents[:],
-				width,
-				height
-				)
+            in_matrix = self.array_to_matrix(
+                self._c.cast(
+                    in_buffer.contents.data,
+                    self._c.POINTER(self._c.c_int16 * (width * height)),
+                ).contents[:],
+                width,
+                height,
+            )
 
-			out_value = 0
-			for matrix_line, filter_line in zip(in_matrix, filter_matrix):
-				out_value += sum([a * b for a, b in zip(matrix_line, filter_line)])
+            out_value = 0
+            for matrix_line, filter_line in zip(in_matrix, filter_matrix):
+                out_value += sum([a * b for a, b in zip(matrix_line, filter_line)])
 
-			return out_value
+            return out_value
 
-		self.__filter_edge_detection__ = filter_edge_detection
+        self.__filter_edge_detection__ = filter_edge_detection
 
+    def apply_filter_to_image(self, in_image):
 
-	def apply_filter_to_image(self, in_image):
+        width = len(in_image[0])
+        height = len(in_image)
 
-		width = len(in_image[0])
-		height = len(in_image)
+        in_image_ctypes = self.image_data()
+        out_image_ctypes = self.image_data()
 
-		in_image_ctypes = self.image_data()
-		out_image_ctypes = self.image_data()
+        in_image_ctypes.width = self._c.c_int16(width)
+        in_image_ctypes.height = self._c.c_int16(height)
+        in_image_ctypes.data = self._c.cast(
+            self._c.pointer(
+                (self._c.c_int16 * (width * height))(*self.matrix_to_array(in_image))
+            ),
+            self._c.POINTER(self._c.c_int16),
+        )
 
-		in_image_ctypes.width = self._c.c_int16(width)
-		in_image_ctypes.height = self._c.c_int16(height)
-		in_image_ctypes.data = self._c.cast(
-			self._c.pointer((self._c.c_int16 * (width * height))(*self.matrix_to_array(in_image))),
-			self._c.POINTER(self._c.c_int16)
-			)
+        self.__apply_filter_to_image__(
+            self._c.pointer(in_image_ctypes),
+            self._c.pointer(out_image_ctypes),
+            self.__filter_edge_detection__,
+        )
 
-		self.__apply_filter_to_image__(
-			self._c.pointer(in_image_ctypes),
-			self._c.pointer(out_image_ctypes),
-			self.__filter_edge_detection__
-			)
+        return self.array_to_matrix(
+            self._c.cast(
+                out_image_ctypes.data,
+                self._c.POINTER(self._c.c_int16 * (width * height)),
+            ).contents[:],
+            width,
+            height,
+        )
 
-		return self.array_to_matrix(
-			self._c.cast(out_image_ctypes.data, self._c.POINTER(self._c.c_int16 * (width * height))).contents[:],
-			width,
-			height
-			)
+    def array_to_matrix(self, in_array, a_width, a_height):
+        return [in_array[(i * a_width) : ((i + 1) * a_width)] for i in range(a_height)]
 
-
-	def array_to_matrix(self, in_array, a_width, a_height):
-		return [in_array[(i * a_width):((i + 1) * a_width)] for i in range(a_height)]
-
-
-	def matrix_to_array(self, in_matrix):
-		return [item for line_list in in_matrix for item in line_list]
+    def matrix_to_array(self, in_matrix):
+        return [item for line_list in in_matrix for item in line_list]
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # TEST(s)
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-@pytest.mark.parametrize('arch,conv,ctypes,dll_handle', get_context(__file__))
+
+@pytest.mark.parametrize("arch,conv,ctypes,dll_handle", get_context(__file__))
 def test_apply_filter_to_image(arch, conv, ctypes, dll_handle):
 
-	sample = sample_class(arch, conv, ctypes, dll_handle)
+    sample = sample_class(arch, conv, ctypes, dll_handle)
 
-	result = sample.apply_filter_to_image([
-		[253, 252, 254, 243, 243, 230, 251, 247, 255, 254],
-		[252, 254, 239, 144, 253, 247, 220, 252, 235, 255],
-		[252, 246, 166, 123, 168, 237, 244, 252, 235, 255],
-		[255, 228, 176, 103, 138, 250, 228, 252, 252, 252],
-		[219, 217, 146, 152, 146, 170, 250, 253, 246, 243],
-		[254, 162, 116, 128, 133, 154, 247, 255, 244, 253],
-		[224, 116, 136, 154, 129, 147, 189, 248, 254, 205],
-		[192, 105, 117, 138, 148, 101, 111, 248, 248, 239],
-		[254, 231, 168, 153, 124, 113, 111, 207, 238, 245],
-		[216, 255, 251, 235, 247, 227, 175, 182, 249, 248]
-		])
+    result = sample.apply_filter_to_image(
+        [
+            [253, 252, 254, 243, 243, 230, 251, 247, 255, 254],
+            [252, 254, 239, 144, 253, 247, 220, 252, 235, 255],
+            [252, 246, 166, 123, 168, 237, 244, 252, 235, 255],
+            [255, 228, 176, 103, 138, 250, 228, 252, 252, 252],
+            [219, 217, 146, 152, 146, 170, 250, 253, 246, 243],
+            [254, 162, 116, 128, 133, 154, 247, 255, 244, 253],
+            [224, 116, 136, 154, 129, 147, 189, 248, 254, 205],
+            [192, 105, 117, 138, 148, 101, 111, 248, 248, 239],
+            [254, 231, 168, 153, 124, 113, 111, 207, 238, 245],
+            [216, 255, 251, 235, 247, 227, 175, 182, 249, 248],
+        ]
+    )
 
-	assert [
-		[-508, -247, -282, -331, -246, -179, -307, -230, -284, -506],
-		[-249,  -27, -138,  282, -210,  -48,  114,  -54,   57, -276],
-		[-255,  -84,  120,   89,   79,  -39,  -39,  -25,   54, -278],
-		[-321,  -18,  -61,  177,  115, -227,   84,  -23,  -23, -258],
-		[-150, -113,   77,  -85,    9,  120, -102,   -9,    8, -221],
-		[-411,   55,  108,   43,   25,   81, -140,  -28,   32, -320],
-		[-334,  163,  -41,  -85,   66,  -15,   -3,  -46,  -71,  -74],
-		[-185,  236,   79,   20, -100,  115,  205, -178,  -13, -258],
-		[-377, -142,   80,   53,  165,  111,  162,  -49,   -3, -255],
-		[-355, -322, -346, -289, -402, -373, -180,  -97, -328, -498]
-		] == result
+    assert [
+        [-508, -247, -282, -331, -246, -179, -307, -230, -284, -506],
+        [-249, -27, -138, 282, -210, -48, 114, -54, 57, -276],
+        [-255, -84, 120, 89, 79, -39, -39, -25, 54, -278],
+        [-321, -18, -61, 177, 115, -227, 84, -23, -23, -258],
+        [-150, -113, 77, -85, 9, 120, -102, -9, 8, -221],
+        [-411, 55, 108, 43, 25, 81, -140, -28, 32, -320],
+        [-334, 163, -41, -85, 66, -15, -3, -46, -71, -74],
+        [-185, 236, 79, 20, -100, 115, 205, -178, -13, -258],
+        [-377, -142, 80, 53, 165, 111, 162, -49, -3, -255],
+        [-355, -322, -346, -289, -402, -373, -180, -97, -328, -498],
+    ] == result

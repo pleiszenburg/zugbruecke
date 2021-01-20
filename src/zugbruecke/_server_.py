@@ -7,11 +7,11 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	src/zugbruecke/_server_.py: Started with Python on Wine, executing DLL calls
+    src/zugbruecke/_server_.py: Started with Python on Wine, executing DLL calls
 
-	Required to run on platform / side: [WINE]
+    Required to run on platform / side: [WINE]
 
-	Copyright (C) 2017-2020 Sebastian M. Ernst <ernst@pleiszenburg.de>
+    Copyright (C) 2017-2021 Sebastian M. Ernst <ernst@pleiszenburg.de>
 
 <LICENSE_BLOCK>
 The contents of this file are subject to the GNU Lesser General Public License
@@ -34,58 +34,48 @@ specific language governing rights and limitations under the License.
 
 import argparse
 
-from .core.session_server import session_server_class
+from .core.config import Config
+from .core.session_server import SessionServer
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # ROUTINES
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+
 def run():
 
-	# Parse arguments comming from unix side
-	parser = argparse.ArgumentParser()
-	parser.add_argument(
-		'--id', type = str, nargs = 1
-		)
-	parser.add_argument(
-		'--port_socket_unix', type = int, nargs = 1
-		)
-	parser.add_argument(
-		'--port_socket_wine', type = int, nargs = 1
-		)
-	parser.add_argument(
-		'--log_level', type = int, nargs = 1
-		)
-	parser.add_argument(
-		'--log_write', type = int, nargs = 1
-		)
-	parser.add_argument(
-		'--timeout_start', type = float, nargs = 1
-		)
-	args = parser.parse_args()
+    # Parse arguments comming from unix side
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--id", type=str, nargs=1)
+    parser.add_argument("--port_socket_unix", type=int, nargs=1)
+    parser.add_argument("--port_socket_wine", type=int, nargs=1)
+    parser.add_argument("--log_level", type=int, nargs=1)
+    parser.add_argument("--log_write", type=int, nargs=1)
+    parser.add_argument("--timeout_start", type=float, nargs=1)
+    args = parser.parse_args()
 
-	# Generate parameter dict
-	parameter = {
-		'id': args.id[0],
-		'platform': 'WINE',
-		'stdout': False,
-		'stderr': False,
-		'log_write': bool(args.log_write[0]),
-		'log_level': args.log_level[0],
-		'port_socket_wine': args.port_socket_wine[0],
-		'port_socket_unix': args.port_socket_unix[0],
-		'timeout_start': args.timeout_start[0]
-		}
+    # Generate parameter dict
+    parameter = {
+        "id": args.id[0],
+        "platform": "WINE",
+        "stdout": False,
+        "stderr": False,
+        "log_write": bool(args.log_write[0]),
+        "log_level": args.log_level[0],
+        "port_socket_wine": args.port_socket_wine[0],
+        "port_socket_unix": args.port_socket_unix[0],
+        "timeout_start": args.timeout_start[0],
+    }
 
-	# Fire up wine server session with parsed parameters
-	session = session_server_class(parameter['id'], parameter)
+    # Fire up wine server session with parsed parameters
+    _ = SessionServer(Config(**parameter))
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # MAIN
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
-	run()
+    run()

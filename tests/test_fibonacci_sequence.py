@@ -6,11 +6,11 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	tests/test_fibonacci_sequence.py: Test allocation of memory by DLL, returned as struct
+    tests/test_fibonacci_sequence.py: Test allocation of memory by DLL, returned as struct
 
-	Required to run on platform / side: [UNIX, WINE]
+    Required to run on platform / side: [UNIX, WINE]
 
-	Copyright (C) 2017-2020 Sebastian M. Ernst <ernst@pleiszenburg.de>
+    Copyright (C) 2017-2021 Sebastian M. Ernst <ernst@pleiszenburg.de>
 
 <LICENSE_BLOCK>
 The contents of this file are subject to the GNU Lesser General Public License
@@ -70,45 +70,42 @@ import pytest
 # CLASSES AND ROUTINES
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+
 class sample_class:
+    def __init__(self, ctypes, dll_handle):
 
-	def __init__(self, ctypes, dll_handle):
+        self._c = ctypes
 
-		self._c = ctypes
+        class int_array_data(self._c.Structure):
+            _fields_ = [
+                ("data", self._c.POINTER(self._c.c_int16)),
+                ("len", self._c.c_int16),
+            ]
 
-		class int_array_data(self._c.Structure):
-			_fields_ = [
-				('data', self._c.POINTER(self._c.c_int16)),
-				('len', self._c.c_int16)
-				]
+        self._fibonacci_sequence = dll_handle.fibonacci_sequence
+        self._fibonacci_sequence.argtypes = (self._c.c_int16,)
+        self._fibonacci_sequence.restype = self._c.POINTER(int_array_data)
+        self._fibonacci_sequence.memsync = [
+            {"p": ["r", "data"], "l": ["r", "len"], "t": "c_int16"}
+        ]
 
-		self._fibonacci_sequence = dll_handle.fibonacci_sequence
-		self._fibonacci_sequence.argtypes = (self._c.c_int16,)
-		self._fibonacci_sequence.restype = self._c.POINTER(int_array_data)
-		self._fibonacci_sequence.memsync = [
-			{
-				'p': ['r', 'data'],
-				'l': ['r', 'len'],
-				't': 'c_int16'
-				}
-			]
+    def fibonacci_sequence(self, length):
 
-	def fibonacci_sequence(self, length):
+        out_array_obj = self._fibonacci_sequence(length)
 
-		out_array_obj = self._fibonacci_sequence(length)
+        return self._c.cast(
+            out_array_obj.contents.data, self._c.POINTER(self._c.c_int16 * length)
+        ).contents[:]
 
-		return self._c.cast(
-			out_array_obj.contents.data,
-			self._c.POINTER(self._c.c_int16 * length)
-			).contents[:]
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # TEST(s)
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-@pytest.mark.parametrize('arch,conv,ctypes,dll_handle', get_context(__file__))
+
+@pytest.mark.parametrize("arch,conv,ctypes,dll_handle", get_context(__file__))
 def test_fibonacci_sequence(arch, conv, ctypes, dll_handle):
 
-	sample = sample_class(ctypes, dll_handle)
+    sample = sample_class(ctypes, dll_handle)
 
-	assert [1, 1, 2, 3, 5, 8, 13, 21, 34, 55] == sample.fibonacci_sequence(10)
+    assert [1, 1, 2, 3, 5, 8, 13, 21, 34, 55] == sample.fibonacci_sequence(10)

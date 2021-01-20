@@ -6,11 +6,11 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	tests/lib/const.py: Holds constant values, flags, types
+    tests/lib/const.py: Holds constant values, flags, types
 
-	Required to run on platform / side: [UNIX, WINE]
+    Required to run on platform / side: [UNIX, WINE]
 
-	Copyright (C) 2017-2020 Sebastian M. Ernst <ernst@pleiszenburg.de>
+    Copyright (C) 2017-2021 Sebastian M. Ernst <ernst@pleiszenburg.de>
 
 <LICENSE_BLOCK>
 The contents of this file are subject to the GNU Lesser General Public License
@@ -30,7 +30,7 @@ specific language governing rights and limitations under the License.
 # CONST
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-DLL_FLD = 'dlls'
+DLL_FLD = "dlls"
 
 DLL_HEADER = """
 
@@ -60,31 +60,27 @@ DLL_SOURCE = """
 
 """
 
-ARCHS = ['win32', 'win64']
-CONVENTIONS = ['cdll', 'windll']
+ARCHS = ["win32", "win64"]
+CONVENTIONS = ["cdll", "windll"]
 
 PREFIX = {
-	'cdll': '__declspec(dllexport)',
-	'windll': '__declspec(dllexport)',
-	}
+    "cdll": "__declspec(dllexport)",
+    "windll": "__declspec(dllexport)",
+}
 SUFFIX = {
-	'cdll': '__cdecl',
-	'windll': '__stdcall',
-	}
+    "cdll": "__cdecl",
+    "windll": "__stdcall",
+}
 
 CC = {
-	'win32': 'i686-w64-mingw32-gcc',
-	'win64': 'x86_64-w64-mingw32-gcc',
-	}
-_CFLAGS = [
-	'-Wall',
-	'-shared',
-	'-std=c99'
-	]
+    "win32": "i686-w64-mingw32-gcc",
+    "win64": "x86_64-w64-mingw32-gcc",
+}
+_CFLAGS = ["-Wall", "-shared", "-std=c99"]
 CFLAGS = {
-	'cdll': _CFLAGS + ['-Wl,--subsystem,windows'],
-	'windll': _CFLAGS + ['-Wl,-add-stdcall-alias'],
-	}
+    "cdll": _CFLAGS + ["-Wl,--subsystem,windows"],
+    "windll": _CFLAGS + ["-Wl,-add-stdcall-alias"],
+}
 LDFLAGS = [
-	'-lm',
-	]
+    "-lm",
+]

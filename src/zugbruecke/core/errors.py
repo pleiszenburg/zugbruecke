@@ -6,11 +6,11 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	src/zugbruecke/core/errors.py: Exceptions
+    src/zugbruecke/core/errors.py: Exceptions
 
-	Required to run on platform / side: [UNIX, WINE]
+    Required to run on platform / side: [UNIX, WINE]
 
-	Copyright (C) 2017-2020 Sebastian M. Ernst <ernst@pleiszenburg.de>
+    Copyright (C) 2017-2021 Sebastian M. Ernst <ernst@pleiszenburg.de>
 
 <LICENSE_BLOCK>
 The contents of this file are subject to the GNU Lesser General Public License
@@ -31,26 +31,34 @@ specific language governing rights and limitations under the License.
 # TYPES
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-class config_parser_error(Exception):
-	pass
 
-class wine_error(Exception):
-	pass
+class ConfigParserError(Exception):
+    pass
 
-class data_error(Exception):
-	pass
 
-class data_flag_error(data_error):
-	pass
+class WineError(Exception):
+    pass
 
-class data_type_error(data_error):
-	pass
 
-class data_group_error(data_error):
-	pass
+class DataError(Exception):
+    pass
 
-class data_memsyncpath_error(data_error):
-	pass
 
-class data_memsyncsyntax_error(data_error):
-	pass
+class DataFlagError(DataError):
+    pass
+
+
+class DataTypeError(DataError):
+    pass
+
+
+class DataGroupError(DataError):
+    pass
+
+
+class DataMemsyncpathError(DataError):
+    pass
+
+
+class DataMemsyncsyntaxError(DataError):
+    pass

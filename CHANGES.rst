@@ -17,11 +17,12 @@ Changes
 +------------+---------------------------------------------------+---------------------------------------------------+
 | session    | .. code:: python                                  + .. code:: python                                  +
 | class      |                                                   +                                                   +
-|            |     zugbruecke.session                            +     zugbruecke.ctypes_session                     +
+|            |     zugbruecke.session                            +     zugbruecke.CtypesSession                      +
 +------------+---------------------------------------------------+---------------------------------------------------+
 | commands   | - ``wine-python``                                 + - ``wenv python``                                 +
 |            | - ``wine-pip``                                    + - ``wenv pip``                                    +
 |            | - ``wine-pytest``                                 + - ``wenv pytest``                                 +
+|            |                                                   + - New Python package called ``wenv``              +
 +------------+---------------------------------------------------+---------------------------------------------------+
 | shebang    | ``#!/usr/bin/env wine-python``                    + ``#!/usr/bin/env _wenv_python``                   +
 +------------+---------------------------------------------------+---------------------------------------------------+
@@ -30,11 +31,11 @@ Changes
 
 The above significant change was mandatory for allowing to cleanup a lot of old code and to remove long-standing bugs. The main issue was that importing ``zugbruecke`` would implicitly start a new session. This could not be prohibited. With the new package layout, it becomes possible to import sub-modules of ``zugbruecke`` without implicitly starting a session. One of the more significant added benefits therefore is that this change also allows much more fine-grained tests.
 
-As a consequence, ``zugbruecke.current_session`` is no longer available. ``zugbruecke.ctypes`` on its own is now the default session. Besides, the class ``zugbruecke.session`` was renamed into ``zugbruecke.ctypes_session`` and has now a fully compatible ``ctypes`` drop-in replacement interface as well. Both, ``zugbruecke.ctypes`` and custom sessions constructed from ``zugbruecke.ctypes_session``, now have methods and properties prefixed with ``_zb_`` for manipulating their configuration, termination and Wine-related tasks.
+As a consequence, ``zugbruecke.current_session`` is no longer available. ``zugbruecke.ctypes`` on its own is now the default session. Besides, the class ``zugbruecke.session`` was renamed into ``zugbruecke.CtypesSession`` and has now a fully compatible ``ctypes`` drop-in replacement interface as well. Both, ``zugbruecke.ctypes`` and custom sessions constructed from ``zugbruecke.CtypesSession``, now have methods and properties prefixed with ``_zb_`` for manipulating their configuration, termination and Wine-related tasks.
 
 The ``set_parameter`` method, now renamed into ``_zb_set_parameter``, only accepts a single key-value pair instead of a dictionary.
 
-Furthermore, the shell scripts ``wine-python``, ``wine-pip`` and ``wine-pytest`` have been removed. Their functionality was consolidated into a single new script, ``wenv``. One can now call ``wenv python``, ``wenv pip`` and ``wenv pytest``. This change was necessary for allowing a more generic interface to entry points of arbitrary third party packages. Run ``wenv help`` for more information.
+Furthermore, the shell scripts ``wine-python``, ``wine-pip`` and ``wine-pytest`` have been removed. Their functionality was consolidated into a new Python package called ``wenv``. One can now call ``wenv python``, ``wenv pip`` and ``wenv pytest``. This change was necessary for allowing a more generic interface to entry points of arbitrary third party packages. Run ``wenv help`` for more information.
 
 The ``version`` configuration parameter for controlling the version of *Wine Python* has been renamed to ``pythonversion``.
 
@@ -50,6 +51,7 @@ On older versions of Linux such as *Ubuntu 14.04* alias *Trusty Tahr* (released 
 * FEATURE: Timeouts for start and stop of the server component can be configured.
 * FEATURE: Both code and branch coverage of *zugbruecke* can now be analyzed with ``coverage``.
 * FEATURE: Added official support for CPython 3.8, see #56.
+* FEATURE: Added official support for CPython 3.9, see #74.
 * FEATURE: *Wine Python* can be based on beta versions and release candidates of *CPython*.
 * FEATURE: All code is tested for both, 32bit and 64bit DLLs (previously only 32bit DLLs received regular testing), see #58.
 * FEATURE: All code is tested for both, the cdll/cdecl and windll/stdcall calling conventions (previously only windll/stdcall received regular testing), see #60.
@@ -64,6 +66,8 @@ On older versions of Linux such as *Ubuntu 14.04* alias *Trusty Tahr* (released 
 * FIX: Different structure types from different name spaces BUT identical names caused crashes, see #61.
 * FIX: ``zugbruecke`` raised TypeError if too many arguments were given too a configured cdll function (``ctypes`` does not), see #62.
 * FIX: If a struct type was used in a function call with memsync first (before use in a function call without memsync), configuring (and calling) the function failed, see #63.
+* FIX: Path conversion would fail for Wine 5.13 and later.
+* FIX: Memory leak: Sessions would collect all log data for as long as they were running, see #76.
 * The configuration module was refactored and made clearer and faster, allowing to implement new options.
 
 0.0.15 (2020-07-10)

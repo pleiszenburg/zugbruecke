@@ -6,9 +6,9 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-    src/zugbruecke/ctypes/__init__.py: ctypes drop-in replacement
+    src/zugbruecke/core/typeguard.py: Wrapper around typeguard (optional)
 
-    Required to run on platform / side: [UNIX]
+    Required to run on platform / side: [UNIX, WINE]
 
     Copyright (C) 2017-2021 Sebastian M. Ernst <ernst@pleiszenburg.de>
 
@@ -26,25 +26,11 @@ specific language governing rights and limitations under the License.
 
 """
 
-
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# IMPORT: zugbruecke core
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-from ..core.session import (
-    CtypesSession as _CtypesSession,
-    _ctypes_veryprivate,
-)
-
-
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# Setup module
+# IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-_session = _CtypesSession()
-_globals = globals()
-for _ctypes_item in dir(_session):
-    if _ctypes_item.startswith("__") and not _ctypes_item in _ctypes_veryprivate:
-        continue
-    _globals[_ctypes_item] = getattr(_session, _ctypes_item)
-del _globals, _session, _CtypesSession, _ctypes_item, _ctypes_veryprivate
+try:
+    from typeguard import typechecked
+except ModuleNotFoundError:
+    typechecked = lambda x: x

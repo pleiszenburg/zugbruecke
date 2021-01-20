@@ -6,15 +6,11 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	src/zugbruecke/ctypes/util.py: ctypes.util for POSIX, hacked for DLL compatibility
+    src/zugbruecke/ctypes/util.py: ctypes.util for POSIX, hacked for DLL compatibility
 
-	Required to run on platform / side: [UNIX]
+    Required to run on platform / side: [UNIX]
 
-	Based on:
-	https://github.com/python/cpython/blob/master/Lib/ctypes/util.py
-	https://github.com/python/cpython/commit/a76f014278bd1643e93fdfa9e88f9414ce8354a6
-
-	Copyright (C) 2017-2020 Sebastian M. Ernst <ernst@pleiszenburg.de>
+    Copyright (C) 2017-2021 Sebastian M. Ernst <ernst@pleiszenburg.de>
 
 <LICENSE_BLOCK>
 The contents of this file are subject to the GNU Lesser General Public License
@@ -44,7 +40,7 @@ from . import _util
 
 _globals = globals()
 for _util_item in dir(_util):
-	if _util_item.startswith('__'):
-		continue
-	_globals[_util_item] = getattr(_util, _util_item)
+    if _util_item.startswith("__"):
+        continue
+    _globals[_util_item] = getattr(_util, _util_item)
 del _util, _util_item, _globals

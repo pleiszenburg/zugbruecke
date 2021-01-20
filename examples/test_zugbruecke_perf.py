@@ -11,7 +11,7 @@ https://github.com/pleiszenburg/zugbruecke
 
 	Required to run on platform / side: [UNIX, WINE]
 
-	Copyright (C) 2017-2020 Sebastian M. Ernst <ernst@pleiszenburg.de>
+	Copyright (C) 2017-2021 Sebastian M. Ernst <ernst@pleiszenburg.de>
 
 <LICENSE_BLOCK>
 The contents of this file are subject to the GNU Lesser General Public License
@@ -38,43 +38,44 @@ specific language governing rights and limitations under the License.
 import timeit
 from sys import platform
 
-if any([platform.startswith(os_name) for os_name in ['linux', 'darwin', 'freebsd']]):
+if any([platform.startswith(os_name) for os_name in ["linux", "darwin", "freebsd"]]):
 
-	f = open('.zugbruecke.json', 'w')
-	f.write('{}')
-	f.close()
+    f = open(".zugbruecke.json", "w")
+    f.write("{}")
+    f.close()
 
-	import zugbruecke.ctypes as ctypes
+    import zugbruecke.ctypes as ctypes
 
-elif platform.startswith('win'):
+elif platform.startswith("win"):
 
-	import ctypes
+    import ctypes
 
 else:
 
-	raise # TODO unsupported platform
+    raise  # TODO unsupported platform
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # RUN
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
-	_simple_demo_routine_ = ctypes.windll.LoadLibrary('demo_dll.dll').simple_demo_routine
-	_simple_demo_routine_.argtypes = [
-		ctypes.c_float,
-		ctypes.c_float
-		]
-	_simple_demo_routine_.restype = ctypes.c_float
-	return_value = _simple_demo_routine_(20.0, 1.07) # Run once, so everything is set up
-	return_value = _simple_demo_routine_(20.0, 1.07) # Run twice for checks ...
+    _simple_demo_routine_ = ctypes.windll.LoadLibrary(
+        "demo_dll.dll"
+    ).simple_demo_routine
+    _simple_demo_routine_.argtypes = [ctypes.c_float, ctypes.c_float]
+    _simple_demo_routine_.restype = ctypes.c_float
+    return_value = _simple_demo_routine_(
+        20.0, 1.07
+    )  # Run once, so everything is set up
+    return_value = _simple_demo_routine_(20.0, 1.07)  # Run twice for checks ...
 
-	def test_simple_demo_routine():
-		return_value = _simple_demo_routine_(20.0, 1.07)
+    def test_simple_demo_routine():
+        return_value = _simple_demo_routine_(20.0, 1.07)
 
-	t = timeit.Timer(
-		'test_simple_demo_routine()',
-		setup = "from __main__ import test_simple_demo_routine"
-		)
-	print('[TIME] %f' % t.timeit(number = 100000))
+    t = timeit.Timer(
+        "test_simple_demo_routine()",
+        setup="from __main__ import test_simple_demo_routine",
+    )
+    print("[TIME] %f" % t.timeit(number=100000))

@@ -6,11 +6,11 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	tests/test_sqrt_int.py: Test function with single parameter
+    tests/test_sqrt_int.py: Test function with single parameter
 
-	Required to run on platform / side: [UNIX, WINE]
+    Required to run on platform / side: [UNIX, WINE]
 
-	Copyright (C) 2017-2020 Sebastian M. Ernst <ernst@pleiszenburg.de>
+    Copyright (C) 2017-2021 Sebastian M. Ernst <ernst@pleiszenburg.de>
 
 <LICENSE_BLOCK>
 The contents of this file are subject to the GNU Lesser General Public License
@@ -57,11 +57,12 @@ import pytest
 # TEST(s)
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-@pytest.mark.parametrize('arch,conv,ctypes,dll_handle', get_context(__file__))
+
+@pytest.mark.parametrize("arch,conv,ctypes,dll_handle", get_context(__file__))
 def test_sqrt_int(arch, conv, ctypes, dll_handle):
 
-	sqrt_int = dll_handle.sqrt_int
-	sqrt_int.argtypes = (ctypes.c_int16,)
-	sqrt_int.restype = ctypes.c_int16
+    sqrt_int = dll_handle.sqrt_int
+    sqrt_int.argtypes = (ctypes.c_int16,)
+    sqrt_int.restype = ctypes.c_int16
 
-	assert 3 == sqrt_int(9)
+    assert 3 == sqrt_int(9)

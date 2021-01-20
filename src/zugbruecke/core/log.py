@@ -6,11 +6,11 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	src/zugbruecke/core/log.py: Classes for gathering, managing & displaying logs
+    src/zugbruecke/core/log.py: Classes for gathering, managing & displaying logs
 
-	Required to run on platform / side: [UNIX, WINE]
+    Required to run on platform / side: [UNIX, WINE]
 
-	Copyright (C) 2017-2020 Sebastian M. Ernst <ernst@pleiszenburg.de>
+    Copyright (C) 2017-2021 Sebastian M. Ernst <ernst@pleiszenburg.de>
 
 <LICENSE_BLOCK>
 The contents of this file are subject to the GNU Lesser General Public License
@@ -35,6 +35,11 @@ import json
 from pprint import pformat
 import sys
 import time
+from typing import Any, List, Union
+
+from .abc import ConfigABC, LogABC, MessageABC, RpcClientABC, RpcServerABC
+from .const import PLATFORMS
+from .typeguard import typechecked
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -43,177 +48,210 @@ import time
 
 # https://en.wikipedia.org/wiki/ANSI_escape_code
 c = {
-	'RESET': '\033[0;0m',
-	'BOLD': '\033[;1m',
-	'REVERSE': '\033[;7m',
-	'GREY': '\033[1;30m',
-	'RED': '\033[1;31m',
-	'GREEN': '\033[1;32m',
-	'YELLOW': '\033[1;33m',
-	'BLUE': '\033[1;34m',
-	'MAGENTA': '\033[1;35m',
-	'CYAN': '\033[1;36m',
-	'WHITE': '\033[1;37m'
-	}
+    "RESET": "\033[0;0m",
+    "BOLD": "\033[;1m",
+    "REVERSE": "\033[;7m",
+    "GREY": "\033[1;30m",
+    "RED": "\033[1;31m",
+    "GREEN": "\033[1;32m",
+    "YELLOW": "\033[1;33m",
+    "BLUE": "\033[1;34m",
+    "MAGENTA": "\033[1;35m",
+    "CYAN": "\033[1;36m",
+    "WHITE": "\033[1;37m",
+}
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # LOG CLASS
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-class log_class:
+
+@typechecked
+class Log(LogABC):
+    """
+    Gathering, managing & displaying logs
+    """
+
+    def __init__(
+        self,
+        session_id: str,
+        parameter: ConfigABC,
+        rpc_server: Union[None, RpcServerABC] = None,
+        rpc_client: Union[None, RpcClientABC] = None,
+    ):
+
+        self._id = session_id
+        self._p = parameter
+
+        self._up = True
+
+        self._f = None
+        if self._p["log_write"]:
+            self._f = "zb_{ID:s}_{PLATFORM:s}.txt".format(
+                ID=self._id,
+                PLATFORM=self._p["platform"],
+            )
+
+        if rpc_server is not None:
+            rpc_server.register_function(self._receive, "transfer_message")
+        self._transfer_message = (
+            rpc_client.transfer_message if rpc_client is not None else None
+        )
+
+    def err(self, *raw_messages: Any, level: int = 1):
+
+        if level <= self._p["log_level"]:
+            self._process_raw(*raw_messages, pipe="err", level=level)
+
+    def out(self, *raw_messages: Any, level: int = 1):
+
+        if level <= self._p["log_level"]:
+            self._process_raw(*raw_messages, pipe="out", level=level)
+
+    def terminate(self):
+
+        if not self._up:
+            return
+
+        self._up = False
+
+    def _process_raw(self, *raw_messages: Any, pipe: str, level: int):
+
+        for raw_message in raw_messages:
+            for message in Message.from_raw(
+                raw_message, pipe, level, self._id, self._p["platform"]
+            ):
+                self._process(message)
+
+    def _process(self, message: MessageABC):
+
+        if self._p["std" + message.pipe]:
+            message.print()
+
+        if self._transfer_message is not None:
+            self._send(message)
+
+        if self._p["log_write"]:
+            message.store(self._f)
+
+    def _send(self, message: MessageABC):
+
+        self._transfer_message(message.as_serialized())
+
+    def _receive(self, serialized_message: str):
+
+        self._process(Message.from_serialized(serialized_message))
 
 
-	def __init__(self, session_id, parameter, rpc_server = None, rpc_client = None):
+@typechecked
+class Message(MessageABC):
+    """
+    Container for log messages
+    """
 
-		# Store id and parameter
-		self.id = session_id
-		self.p = parameter
+    def __init__(
+        self,
+        level: int,
+        platform: str,
+        id: str,
+        time: float,
+        pipe: str,
+        cnt: str,
+    ):
 
-		# Log is up
-		self.up = True
+        assert platform in PLATFORMS
+        assert pipe in ("out", "err")
 
-		# Start arrays for stdout and stderr logs
-		self.log = {}
-		self.log['out'] = []
-		self.log['err'] = []
+        self._level, self._platform, self._id, self._time, self._pipe, self._cnt = (
+            level,
+            platform,
+            id,
+            time,
+            pipe,
+            cnt,
+        )
 
-		# Determine platform
-		if 'platform' not in self.p.keys():
-			self.p['platform'] = 'UNIX'
+    def as_serialized(self) -> str:
 
-		# Open logfiles
-		if self.p['log_write']:
-			self.f = {}
-			self.f['out'] = '%s_%s.txt' % (self.p['platform'], 'out')
-			self.f['err'] = '%s_%s.txt' % (self.p['platform'], 'err')
+        return json.dumps(
+            dict(
+                level=self._level,
+                platform=self._platform,
+                id=self._id,
+                time=self._time,
+                pipe=self._pipe,
+                cnt=self._cnt,
+            )
+        )
 
-		# Fire up server if required
-		self.server_port = 0
-		if rpc_server is not None:
-			self.server = rpc_server
-			self.server.register_function(self.__receive_message_from_client__, 'transfer_message')
+    def print(self):
 
-		# Fire up client if required
-		if rpc_client is not None:
-			self.client = rpc_client
+        message_list = []
 
+        message_list.append(
+            c["GREY"] + "(%.2f/%s) " % (self._time, self._id) + c["RESET"]
+        )
 
-	def terminate(self):
+        message_list.append(c["BLUE"] if self._platform == "UNIX" else c["MAGENTA"])
+        message_list.append("%s " % self._platform + c["RESET"])
 
-		if self.up:
+        message_list.append(c["GREEN"] if self._pipe == "out" else c["RED"])
+        message_list.append(self._pipe[0] + c["RESET"] + ": ")
+        if any(
+            ext in self._cnt
+            for ext in [
+                "fixme:",
+                "err:",
+                "wine: ",
+                "wine client error",
+                ":warn:",
+                ":trace:",
+            ]
+        ):
+            message_list.append(c["GREY"])
+        else:
+            message_list.append(c["WHITE"])
+        message_list.append(self._cnt + c["RESET"] + "\n")
 
-			# Nothing to do, just a placeholder
+        message_string = "".join(message_list)
 
-			# Log down
-			self.up = False
+        pipe = sys.stdout if self._pipe == "out" else sys.stderr
+        pipe.write(message_string)
 
+    def store(self, fn):
 
-	def __append_message_to_log__(self, message):
+        with open(fn, "a+") as f:
+            f.write(self.as_serialized() + "\n")
 
-		self.log[message['pipe']].append(message)
+    @property
+    def pipe(self) -> str:
 
+        return self._pipe
 
-	def __compile_message_dict_list__(self, message, pipe_name, level):
+    @classmethod
+    def from_raw(
+        cls, raw_message: Any, pipe: str, level: int, id: str, platform: str
+    ) -> List[MessageABC]:
 
-		message_lines = []
+        raw_message = (
+            raw_message if isinstance(raw_message, str) else pformat(raw_message)
+        )
+        message_time = round(time.time(), 2)
+        return [
+            cls(
+                level=level,
+                platform=platform,
+                id=id,
+                time=message_time,
+                pipe=pipe,
+                cnt=line,
+            )
+            for line in raw_message.split("\n")
+            if len(line.strip()) != 0
+        ]
 
-		if not isinstance(message, str):
-			message = pformat(message)
+    @classmethod
+    def from_serialized(cls, serialized: str) -> MessageABC:
 
-		for line in message.split('\n'):
-			if line.strip() != '':
-				message_lines.append({
-					'level': level,
-					'platform': self.p['platform'],
-					'id': self.id,
-					'time': round(time.time(), 2),
-					'pipe': pipe_name,
-					'cnt': line
-					})
-
-		return message_lines
-
-
-	def __print_message__(self, messages):
-
-		message_list = []
-
-		message_list.append(c['GREY'] + '(%.2f/%s) ' % (messages['time'], messages['id']) + c['RESET'])
-		if messages['platform'] == 'UNIX':
-			message_list.append(c['BLUE'])
-		elif messages['platform'] == 'WINE':
-			message_list.append(c['MAGENTA'])
-		else:
-			message_list.append(c['WHITE'])
-		message_list.append('%s ' % messages['platform'] + c['RESET'])
-		if messages['pipe'] == 'out':
-			message_list.append(c['GREEN'])
-		elif messages['pipe'] == 'err':
-			message_list.append(c['RED'])
-		message_list.append(messages['pipe'][0] + c['RESET'])
-		message_list.append(': ')
-		if any(ext in messages['cnt'] for ext in ['fixme:', 'err:', 'wine: ', 'wine client error', ':warn:', ':trace:']):
-			message_list.append(c['GREY'])
-		else:
-			message_list.append(c['WHITE'])
-		message_list.append(messages['cnt'] + c['RESET'])
-		message_list.append('\n')
-
-		message_string = ''.join(message_list)
-
-		if messages['pipe'] == 'out':
-			sys.stdout.write(message_string)
-		elif messages['pipe'] == 'err':
-			sys.stderr.write(message_string)
-		else:
-			raise ValueError('unknown pipe name')
-
-
-	def __process_messages__(self, messages, pipe, level):
-
-		message_dict_list = []
-		for message in messages:
-			message_dict_list.extend(self.__compile_message_dict_list__(message, pipe, level))
-
-		for mesage_dict in message_dict_list:
-			self.__process_message_dict__(mesage_dict)
-
-
-	def __process_message_dict__(self, mesage_dict):
-
-			self.__append_message_to_log__(mesage_dict)
-			if self.p['std' + mesage_dict['pipe']]:
-				self.__print_message__(mesage_dict)
-			if hasattr(self, 'client'):
-				self.__push_message_to_server__(mesage_dict)
-			if self.p['log_write']:
-				self.__store_message__(mesage_dict)
-
-
-	def __push_message_to_server__(self, message):
-
-		self.client.transfer_message(json.dumps(message))
-
-
-	def __receive_message_from_client__(self, message):
-
-		self.__process_message_dict__(json.loads(message))
-
-
-	def __store_message__(self, message):
-
-		with open(self.f[message['pipe']], 'a+') as f:
-			f.write(json.dumps(message) + '\n')
-
-
-	def out(self, *messages, level = 1):
-
-		if level <= self.p['log_level']:
-			self.__process_messages__(messages, 'out', level)
-
-
-	def err(self, *messages, level = 1):
-
-		if level <= self.p['log_level']:
-			self.__process_messages__(messages, 'err', level)
+        return cls(**json.loads(serialized))
