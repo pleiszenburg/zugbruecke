@@ -32,8 +32,10 @@ specific language governing rights and limitations under the License.
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 import traceback
+from typing import Callable, Dict, List
 
-from .abc import CallbackClientABC
+from .abc import CallbackClientABC, DataABC
+from .typeguard import typechecked
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -41,9 +43,20 @@ from .abc import CallbackClientABC
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
+@typechecked
 class CallbackClient(CallbackClientABC):
+    """
+    Representing a callback function
+    """
+
     def __init__(
-        self, data, routine_name, routine_handler, argtypes_d, restype_d, memsync_d
+        self,
+        data: DataABC,
+        routine_name: str,
+        routine_handler: Callable,
+        argtypes_d: List,
+        restype_d: Dict,
+        memsync_d: List,
     ):
 
         # Store my own name
