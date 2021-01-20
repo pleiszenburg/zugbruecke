@@ -34,6 +34,7 @@ specific language governing rights and limitations under the License.
 import ctypes
 import ctypes.util
 import traceback
+from typing import Any
 
 from .data import data_class
 from .dll_server import DllServer
@@ -193,9 +194,9 @@ class session_server_class:
 
         self.log.out("[session-server] ... attached.")
 
-    def __set_parameter__(self, parameter):
+    def __set_parameter__(self, key: str, value: Any):
 
-        self.p.update(parameter)
+        self.p[key] = value
 
     def __terminate__(self):
         """
