@@ -82,7 +82,9 @@ class RoutineServer(RoutineServerABC):
         ):
             rpc_server.register_function(
                 getattr(self, attr),
-                "{HASH_ID:s}_{NAME:s}_{ATTR:s}".format(HASH_ID=hash_id, NAME=str(self._name), ATTR=attr),
+                "{HASH_ID:s}_{NAME:s}_{ATTR:s}".format(
+                    HASH_ID=hash_id, NAME=str(self._name), ATTR=attr
+                ),
             )
 
     def call(self, arg_message_list: List, arg_memory_list: List) -> Dict:

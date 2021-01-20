@@ -94,7 +94,9 @@ class RoutineClient(RoutineClientABC):
                 "_{ATTR:s}_on_server".format(ATTR=attr),
                 getattr(
                     rpc_client,
-                    "{HASH_ID:s}_{NAME:s}_{ATTR:s}".format(HASH_ID=hash_id, NAME=str(self._name), ATTR=attr),
+                    "{HASH_ID:s}_{NAME:s}_{ATTR:s}".format(
+                        HASH_ID=hash_id, NAME=str(self._name), ATTR=attr
+                    ),
                 ),
             )
 
