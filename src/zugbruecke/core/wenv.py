@@ -6,11 +6,11 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	src/zugbruecke/core/wenv.py: Wenv package wrapper
+    src/zugbruecke/core/wenv.py: Wenv package wrapper
 
-	Required to run on platform / side: [UNIX]
+    Required to run on platform / side: [UNIX]
 
-	Copyright (C) 2017-2021 Sebastian M. Ernst <ernst@pleiszenburg.de>
+    Copyright (C) 2017-2021 Sebastian M. Ernst <ernst@pleiszenburg.de>
 
 <LICENSE_BLOCK>
 The contents of this file are subject to the GNU Lesser General Public License
@@ -59,6 +59,10 @@ def _symlink(src, dest):
 
 
 class Env(_Env):
+    """
+    Wine Python environment
+    """
+
     def setup_zugbruecke(self):
 
         # Package path in unix-python site-packages
