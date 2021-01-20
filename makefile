@@ -85,4 +85,4 @@ test_quick:
 	WENV_ARCH=win64 wenv pytest --hypothesis-show-statistics
 	make clean_py
 	pytest --cov=zugbruecke --cov-config=setup.cfg --hypothesis-show-statistics # --capture=no
-	mv .coverage .coverage.e9.0 ; coverage combine ; coverage html
+	# mv .coverage .coverage.e9.0 ; coverage combine ; coverage html # TODO fix!
