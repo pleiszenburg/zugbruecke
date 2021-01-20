@@ -82,7 +82,7 @@ class SessionClient(SessionClientABC):
         self._rpc_server = mp_server_class(
             ("localhost", self._p["port_socket_unix"]), "zugbruecke_unix"
         )  # Log is added later
-        self._rpc_server.register_function(self._set_server_status, "set_server_status")
+        self._rpc_server.register_function(self.set_server_status, "set_server_status")
         self._rpc_server.server_forever_in_thread()
 
         # Start session logging
@@ -144,7 +144,7 @@ class SessionClient(SessionClientABC):
 
     def CFUNCTYPE(
         self, restype: Any, *argtypes: Any, **kw: Dict[str, bool]
-    ) -> _CFuncPtr:  # EXPORT
+    ) -> _CFuncPtr:
 
         flags = _FUNCFLAG_CDECL
 
@@ -159,7 +159,7 @@ class SessionClient(SessionClientABC):
 
     def WINFUNCTYPE(
         self, restype: Any, *argtypes: Any, **kw: Dict[str, bool]
-    ) -> _CFuncPtr:  # EXPORT
+    ) -> _CFuncPtr:
 
         flags = _FUNCFLAG_STDCALL
 
@@ -180,9 +180,6 @@ class SessionClient(SessionClientABC):
         use_errno: bool = False,
         use_last_error: bool = False,
     ):
-        """
-        Public API
-        """
 
         if convention not in CONVENTIONS:
             raise ValueError("unknown convention")
@@ -248,6 +245,15 @@ class SessionClient(SessionClientABC):
         self._p[key] = value
         self._rpc_client.set_parameter(key, value)
 
+    def set_server_status(
+        self, status: bool
+    ):
+        """
+        Called by session server
+        """
+
+        self._server_up = status
+
     def terminate(
         self,
         signum: Union[int, None] = None,  # unsused, but required for signal handling
@@ -297,12 +303,6 @@ class SessionClient(SessionClientABC):
     def data(self) -> DataABC:  # Accessed by CtypesSession
 
         return self._data
-
-    def _set_server_status(
-        self, status: bool
-    ):  # Interface for session server through RPC
-
-        self._server_up = status
 
     def _wait_for_server_status_change(self, target_status: bool):
 
