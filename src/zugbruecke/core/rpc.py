@@ -6,11 +6,11 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-	src/zugbruecke/core/rpc.py: Customized RPC classes
+    src/zugbruecke/core/rpc.py: Customized RPC classes
 
-	Required to run on platform / side: [UNIX, WINE]
+    Required to run on platform / side: [UNIX, WINE]
 
-	Copyright (C) 2017-2021 Sebastian M. Ernst <ernst@pleiszenburg.de>
+    Copyright (C) 2017-2021 Sebastian M. Ernst <ernst@pleiszenburg.de>
 
 <LICENSE_BLOCK>
 The contents of this file are subject to the GNU Lesser General Public License
@@ -31,207 +31,177 @@ specific language governing rights and limitations under the License.
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-from multiprocessing.connection import Client, Listener
+from multiprocessing.connection import Client, Listener, _ConnectionBase
 from threading import Thread
 import time
 import traceback
+from typing import Any, Callable, Tuple, Union
 
-from .abc import RpcClientABC, RpcServerABC
+from .abc import LogABC, RpcClientABC, RpcServerABC
+from .typeguard import typechecked
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# CLASSES AND CONSTRUCTOR ROUTINES
+# CLASSES
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
-def mp_client_safe_connect(
-    socket_path, authkey, timeout_after_seconds=30, wait_for_seconds=0.01
-):
+@typechecked
+class RpcClient(RpcClientABC):
+    """
+    RPC client
+    """
 
-    # Already waited for ...
-    started_waiting_at = time.time()
+    def __init__(self, socket_path: Tuple[str, int], authkey: str):
 
-    # Run loop until socket appears
-    while True:
+        self._client = Client(socket_path, authkey=authkey.encode("utf-8"))
+        self._cache = {}
 
-        # Try to connect to server and get its status
+    def __getattr__(self, name: str) -> Callable:
+
         try:
-            # Fire up xmlrpc client
-            mp_client = mp_client_class(socket_path, authkey)
-            # Get status from server and return handle
-            if mp_client.__get_handler_status__():
-                return mp_client
-        except:
+            return self._cache[name]
+        except KeyError:
             pass
 
-        # Break the loop after timeout
-        if time.time() >= (started_waiting_at + timeout_after_seconds):
-            break
+        def call_rpc_server(*args: Any, **kwargs: Any) -> Any:
 
-        # Wait before trying again
-        time.sleep(wait_for_seconds)
+            self._client.send((name, args, kwargs))
+            result = self._client.recv()
 
-    # If client could not connect, raise an error
-    raise TimeoutError("mp_client failed to start")
-
-
-class mp_client_class(RpcClientABC):
-    def __init__(self, socket_path, authkey):
-
-        # Start new client on top of socket
-        self.client = Client(socket_path, authkey=authkey.encode("utf-8"))
-
-    def __getattr__(self, name):
-
-        # Handler routine in __getattr__ namespace
-        def do_rpc(*args, **kwargs):
-
-            # Send request to server
-            self.client.send((name, args, kwargs))
-            # Receive answer
-            result = self.client.recv()
-
-            # If the answer is an error, raise it
             if isinstance(result, Exception):
+                # TODO print traceback to stderr?
                 raise result
 
-            # Return answer
             return result
 
-        # Return pointer to handler routine
-        return do_rpc
+        self._cache[name] = call_rpc_server
+        return call_rpc_server
+
+    @classmethod
+    def from_safe_connect(cls,
+        socket_path: Tuple[str, int],
+        authkey: str,
+        timeout_after_seconds: Union[int, float] = 30,
+        wait_for_seconds: Union[int, float] = 0.01,
+    ) -> RpcClientABC:
+
+        started_waiting_at = time.time()
+
+        while True:
+
+            try:
+                client = cls(socket_path, authkey)
+                if client.get_rpc_status():
+                    return client
+            except:
+                pass
+
+            if time.time() >= (started_waiting_at + timeout_after_seconds):
+                break
+
+            time.sleep(wait_for_seconds)
+
+        raise TimeoutError("rpc client failed to start")
 
 
-class mp_server_handler_class:
-    def __init__(self):
+@typechecked
+class RpcServer(RpcServerABC):
+    """
+    RPC client
+    """
 
-        # cache for registered functions
-        self.__functions__ = {}
+    def __init__(self,
+        socket_path: Tuple[str, int],
+        authkey: str,
+        log: Union[LogABC, None] = None,
+        terminate_function: Union[Callable, None] = None,
+    ):
 
-        # Method for verifying server status
-        self.register_function(self.__get_handler_status__)
+        self._up = True
+        self._log = log
 
-    def __get_handler_status__(self):
+        if self._log is not None:
+            self._log.out("[rpc-server] STARTING ...")
+            self._log.out("[rpc-server] Log attached.")
 
-        return True
+        self._socket_path = socket_path
+        self._authkey = authkey.encode("utf-8")
+        self._terminate_function = terminate_function
 
-    def register_function(self, function_pointer, public_name=None):
+        self._server = None
+        self._t = None
 
-        # Is there a custom public name?
-        if public_name is not None:
-            function_name = public_name
-        else:
-            function_name = function_pointer.__name__
+        self._functions = {}
+        self.register_function(self.get_rpc_status)
 
-        # Register function in dict
-        self.__functions__[function_name] = function_pointer
+        if self._log is not None:
+            self._log.out("[rpc-server] STARTED.")
 
-    def handle_connection(self, connection_client):
+    def get_rpc_status(self) -> bool:
+        """
+        Called by RPC client
+        """
 
-        try:
+        return self._up
 
-            while True:
+    def register_function(self, function_pointer: Callable, public_name: Union[str, None] = None):
 
-                # Receive the incomming message
-                function_name, args, kwargs = connection_client.recv()
-
-                # Run the RPC and send a response
-                try:
-                    r = self.__functions__[function_name](*args, **kwargs)
-                    connection_client.send(r)
-                except Exception as e:
-                    connection_client.send(e)
-
-        except EOFError:
-
-            pass
-
-
-class mp_server_class(RpcServerABC):
-    def __init__(self, socket_path, authkey, log=None, terminate_function=None):
-
-        # Set log, likely None
-        self.log = log
-
-        # Status log
-        if self.log is not None:
-            self.log.out("[mp-server] STARTING ...")
-            self.log.out("[mp-server] Log attached.")
-
-        # Store parameters
-        self.up = True
-        self.socket_path = socket_path
-        self.authkey = authkey.encode("utf-8")
-
-        # Set terminate func - to be called on termination. Likely None.
-        self.terminate_function = terminate_function
-
-        # Set up handler
-        self.handler = mp_server_handler_class()
-
-        # Directly pass functions into handler
-        self.register_function = self.handler.register_function
-
-        # Status log
-        if self.log is not None:
-            self.log.out("[mp-server] STARTED.")
+        self._functions[function_pointer.__name__ if public_name is None else public_name] = function_pointer
 
     def terminate(self):
 
-        # Terminate only once
-        if not self.up:
+        if not self._up:
             return
 
-        # Status log
-        if self.log is not None:
-            self.log.out("[mp-server] TERMINATING ...")
+        self._up = False
 
-        # Stop the server by killing the loop
-        self.up = False
+        if self._log is not None:
+            self._log.out("[rpc-server] TERMINATING ...")
 
-        # Call terminate function if it exists
-        if self.terminate_function is not None:
-            self.terminate_function()
+        if self._terminate_function is not None:
+            self._terminate_function()
 
-        # Status log
-        if self.log is not None:
-            self.log.out("[mp-server] TERMINATED.")
+        if self._log is not None:
+            self._log.out("[rpc-server] TERMINATED.")
 
-        # Shut down socket. Must be last action, because this function is called through it!
-        self.server.close()
+        self._server.close()
 
     def serve_forever(self):
 
-        # Open socket
-        self.server = Listener(self.socket_path, authkey=self.authkey)
+        self._server = Listener(self._socket_path, authkey=self._authkey)
 
-        # Server while server is up
-        while self.up:
+        while self._up:
 
             try:
-
-                # Accept new client
-                client = self.server.accept()
-
-                # Handle incomming message in new thread
-                t = Thread(target=self.handler.handle_connection, args=(client,))
+                connection = self._server.accept()
+                t = Thread(target=self._handle_connection, args=(connection,))
                 t.daemon = True
                 t.start()
-
             except OSError:
-
-                # Status log
-                if self.log is not None:
-                    self.log.out("[mp-server] OSError: Socket likely closed.")
-
+                if self._log is not None:
+                    self._log.out("[rpc-server] OSError: Socket likely closed.")
             except:
-
-                # TODO just print traceback. Better solution?
                 traceback.print_exc()
 
-    def server_forever_in_thread(self, daemon=True):
+    def server_forever_in_thread(self, daemon: bool = True):
 
-        # Start the server in its own thread
-        t = Thread(target=self.serve_forever)
-        t.daemon = daemon
-        t.start()
+        if self._t is not None:
+            return
+
+        self._t = Thread(target=self.serve_forever)
+        self._t.daemon = daemon
+        self._t.start()
+
+    def _handle_connection(self, connection: _ConnectionBase):
+
+        try:
+            while True:
+                function_name, args, kwargs = connection.recv()
+                try:
+                    r = self._functions[function_name](*args, **kwargs)
+                    connection.send(r)
+                except Exception as e:
+                    connection.send(e)
+        except EOFError:
+            pass
