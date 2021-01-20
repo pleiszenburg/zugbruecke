@@ -37,6 +37,14 @@ from abc import ABC
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
+class CallbackClientABC(ABC):
+    pass
+
+
+class CallbackServerABC(ABC):
+    pass
+
+
 class ConfigABC(ABC):
     pass
 

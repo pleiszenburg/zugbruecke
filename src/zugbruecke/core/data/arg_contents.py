@@ -42,8 +42,8 @@ from ..const import (
     GROUP_STRUCT,
     GROUP_FUNCTION,
 )
-from ..callback_client import callback_translator_client_class
-from ..callback_server import callback_translator_server_class
+from ..callback_client import CallbackClient
+from ..callback_server import CallbackServer
 from ..errors import DataFlagError, DataGroupError
 from .memory import is_null_pointer
 
@@ -244,7 +244,7 @@ class arguments_contents_class:
             return func_name
 
         # Generate and store callback translator in cache
-        self.cache_dict["func_handle"][func_name] = callback_translator_client_class(
+        self.cache_dict["func_handle"][func_name] = CallbackClient(
             self,
             func_name,
             func_ptr,
@@ -474,7 +474,7 @@ class arguments_contents_class:
 
         # Generate, decorate and store callback translator in cache
         self.cache_dict["func_handle"][func_name] = func_def_dict["_factory_type_"](
-            callback_translator_server_class(
+            CallbackServer(
                 self,
                 func_name,
                 getattr(self.callback_client, func_name),
