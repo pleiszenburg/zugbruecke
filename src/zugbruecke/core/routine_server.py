@@ -75,25 +75,19 @@ class RoutineServer(RoutineServerABC):
         self._restype_d = None
         self._memsync_d = None
 
-        # Export call and configration directly
-        rpc_server.register_function(
-            self,
-            "{HASH_ID:s}_{NAME:s}_handle_call".format(
-                HASH_ID=hash_id,
-                NAME=str(name),
-            ),
-        )
-        rpc_server.register_function(
-            self._configure,
-            "{HASH_ID:s}_{NAME:s}_configure".format(
-                HASH_ID=hash_id,
-                NAME=str(name),
-            ),
-        )
+        for name in (
+            "call",
+            "configure",
+            "get_repr",
+        ):
+            rpc_server.register_function(
+                getattr(self, name),
+                "{HASH_ID:s}_{NAME:s}".format(HASH_ID=hash_id, NAME=name),
+            )
 
-    def __call__(self, arg_message_list: List, arg_memory_list: List) -> Dict:
+    def call(self, arg_message_list: List, arg_memory_list: List) -> Dict:
         """
-        TODO: Optimize for speed!
+        Called by routine client
         """
 
         self._log.out(
@@ -177,7 +171,10 @@ class RoutineServer(RoutineServerABC):
 
             raise e
 
-    def _configure(self, argtypes_d: List, restype_d: Dict, memsync_d: List):
+    def configure(self, argtypes_d: List, restype_d: Dict, memsync_d: List):
+        """
+        Called by routine client
+        """
 
         # Store argtype definition dict
         self._argtypes_d = argtypes_d
@@ -211,3 +208,10 @@ class RoutineServer(RoutineServerABC):
         self._log.out(" argtypes_d: \n%s" % pf(self._argtypes_d))
         self._log.out(" restype: \n%s" % pf(self._handler.restype))
         self._log.out(" restype_d: \n%s" % pf(self._restype_d))
+
+    def get_repr(self) -> str:
+        """
+        Called by routine client
+        """
+
+        return repr(self._handler)
