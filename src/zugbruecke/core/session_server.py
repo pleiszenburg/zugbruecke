@@ -41,7 +41,7 @@ from .data import data_class
 from .dll_server import DllServer
 from .log import Log
 from .path import PathStyles
-from .rpc import mp_client_safe_connect, mp_server_class
+from .rpc import RpcClient, RpcServer
 from .typeguard import typechecked
 
 
@@ -74,7 +74,7 @@ class SessionServer(SessionServerABC):
         self._up = True
         self._dlls = {}
 
-        self._rpc_client = mp_client_safe_connect(
+        self._rpc_client = RpcClient.from_safe_connect(
             socket_path=("localhost", self._p["port_socket_unix"]),
             authkey="zugbruecke_unix",
             timeout_after_seconds=self._p["timeout_start"],
@@ -91,7 +91,7 @@ class SessionServer(SessionServerABC):
         self.path_unix_to_wine = path.unix_to_wine
         self.path_wine_to_unix = path.wine_to_unix
 
-        self._rpc_server = mp_server_class(
+        self._rpc_server = RpcServer(
             ("localhost", self._p["port_socket_wine"]),
             "zugbruecke_wine",
             log=self._log,

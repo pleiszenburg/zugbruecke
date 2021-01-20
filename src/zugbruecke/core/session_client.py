@@ -51,7 +51,7 @@ from .dll_client import DllClient
 from .interpreter import Interpreter
 from .lib import get_free_port, get_hash_of_string
 from .log import Log
-from .rpc import mp_client_safe_connect, mp_server_class
+from .rpc import RpcClient, RpcServer
 from .typeguard import typechecked
 from .wenv import Env
 
@@ -80,7 +80,7 @@ class SessionClient(SessionClientABC):
 
         # Start RPC server for callback routines
         self._p["port_socket_unix"] = get_free_port()
-        self._rpc_server = mp_server_class(
+        self._rpc_server = RpcServer(
             ("localhost", self._p["port_socket_unix"]), "zugbruecke_unix"
         )  # Log is added later
         self._rpc_server.register_function(self.set_server_status, "set_server_status")
@@ -124,7 +124,7 @@ class SessionClient(SessionClientABC):
         self._wait_for_server_status_change(target_status=True)
 
         # Fire up RPC client
-        self._rpc_client = mp_client_safe_connect(
+        self._rpc_client = RpcClient.from_safe_connect(
             socket_path=("localhost", self._p["port_socket_wine"]),
             authkey="zugbruecke_wine",
             timeout_after_seconds=self._p["timeout_start"],
