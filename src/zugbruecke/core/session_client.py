@@ -137,8 +137,13 @@ class SessionClient(SessionClientABC):
             "WinError",
             "find_msvcrt",
             "find_library",
+            "path_unix_to_wine",
+            "path_wine_to_unix",
         ):
             setattr(self, name, getattr(self._rpc_client, name))
+
+        for name in ("load_library", "set_parameter", "terminate"):
+            setattr(self, "_{NAME:s}_on_server".format(NAME = name), getattr(self._rpc_client, name))
 
         self._log.out("[session-client] STARTED.")
 
@@ -197,7 +202,7 @@ class SessionClient(SessionClientABC):
         hash_id = get_hash_of_string(name)
 
         try:
-            self._rpc_client.load_library(
+            self._load_library_on_server(
                 name,
                 hash_id,
                 convention,
@@ -222,20 +227,6 @@ class SessionClient(SessionClientABC):
 
         return self._dlls[name]
 
-    def path_unix_to_wine(self, in_path: str) -> str:
-
-        if not isinstance(in_path, str):
-            raise TypeError("in_path must by of type str")
-
-        return self._rpc_client.path_unix_to_wine(in_path)
-
-    def path_wine_to_unix(self, in_path: str) -> str:
-
-        if not isinstance(in_path, str):
-            raise TypeError("in_path must by of type str")
-
-        return self._rpc_client.path_wine_to_unix(in_path)
-
     def get_parameter(self, key: str) -> Any:
 
         return self._p[key]
@@ -243,7 +234,7 @@ class SessionClient(SessionClientABC):
     def set_parameter(self, key: str, value: Any):
 
         self._p[key] = value
-        self._rpc_client.set_parameter(key, value)
+        self._set_parameter_on_server(key, value)
 
     def set_server_status(self, status: bool):
         """
@@ -266,7 +257,7 @@ class SessionClient(SessionClientABC):
         self._log.out("[session-client] TERMINATING ...")
 
         try:
-            self._rpc_client.terminate()
+            self._terminate_on_server()
         except EOFError:  # EOFError is raised if server socket is closed - ignore it
             self._log.out("[session-client] Remote socket closed.")
 
