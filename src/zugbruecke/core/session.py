@@ -37,7 +37,7 @@ from typing import Union
 # IMPORT: Original ctypes
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-import ctypes as __ctypes__
+import ctypes as _ctypes
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -246,9 +246,9 @@ class CtypesSession(CtypesSessionABC):
 # more static components from ctypes
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-_ctypes_veryprivate_ = ["__version__"]
+_ctypes_veryprivate = ["__version__"]
 
-__ctypes_private__ = [
+_ctypes_private = [
     "_CFuncPtr",
     "_FUNCFLAG_PYTHONAPI",
     "_FUNCFLAG_USE_ERRNO",
@@ -272,7 +272,7 @@ __ctypes_private__ = [
     "_wstring_at_addr",
 ]
 
-__ctypes_public__ = [
+_ctypes_public = [
     "ARRAY",  # Python 3.6: Deprecated XXX
     "ArgumentError",
     "Array",
@@ -337,8 +337,8 @@ __ctypes_public__ = [
     "wstring_at",
 ]
 
-for __ctypes_item__ in _ctypes_veryprivate_ + __ctypes_private__ + __ctypes_public__:
-    __ctypes_attr__ = getattr(__ctypes__, __ctypes_item__)
-    if hasattr(__ctypes_attr__, "__call__"):
-        __ctypes_attr__ = staticmethod(__ctypes_attr__)
-    setattr(CtypesSession, __ctypes_item__, __ctypes_attr__)
+for _ctypes_item in _ctypes_veryprivate + _ctypes_private + _ctypes_public:
+    _ctypes_attr = getattr(_ctypes, _ctypes_item)
+    if hasattr(_ctypes_attr, "__call__"):
+        _ctypes_attr = staticmethod(_ctypes_attr)
+    setattr(CtypesSession, _ctypes_item, _ctypes_attr)

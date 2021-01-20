@@ -33,7 +33,7 @@ specific language governing rights and limitations under the License.
 
 from ..core.session import (
     CtypesSession as _CtypesSession,
-    _ctypes_veryprivate_ as _ctypes_veryprivate,
+    _ctypes_veryprivate,
 )
 
 
