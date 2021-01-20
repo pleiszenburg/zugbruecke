@@ -116,6 +116,9 @@ class Config(ConfigABC):
 
     def __setitem__(self, key: str, value: Any):
 
+        if key in ("id", "platform", "arch", "pythonversion"):
+            raise ValueError("This field must not be changed at run-time!")
+
         self._data[key] = value
 
     def keys(self) -> KeysView:
