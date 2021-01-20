@@ -96,23 +96,23 @@ class CtypesSession(CtypesSessionABC):
         # Routines only availabe on Wine / Windows - accessed via server
         # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-        self.FormatError = self._zb_current_session.ctypes_FormatError
+        self.FormatError = self._zb_current_session.FormatError
 
-        self.get_last_error = self._zb_current_session.ctypes_get_last_error
+        self.get_last_error = self._zb_current_session.get_last_error
 
-        self.GetLastError = self._zb_current_session.ctypes_GetLastError
+        self.GetLastError = self._zb_current_session.GetLastError
 
-        self.set_last_error = self._zb_current_session.ctypes_set_last_error
+        self.set_last_error = self._zb_current_session.set_last_error
 
-        self.WinError = self._zb_current_session.ctypes_WinError
+        self.WinError = self._zb_current_session.WinError
 
         # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         # Routines from ctypes.util
         # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
         class _util:
-            find_msvcrt = staticmethod(self._zb_current_session.ctypes_find_msvcrt)
-            find_library = staticmethod(self._zb_current_session.ctypes_find_library)
+            find_msvcrt = staticmethod(self._zb_current_session.find_msvcrt)
+            find_library = staticmethod(self._zb_current_session.find_library)
 
         self._util = _util
 
@@ -121,8 +121,8 @@ class CtypesSession(CtypesSessionABC):
         # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
         # CFUNCTYPE and WINFUNCTYPE function pointer factories
-        self.CFUNCTYPE = self._zb_current_session.ctypes_CFUNCTYPE
-        self.WINFUNCTYPE = self._zb_current_session.ctypes_WINFUNCTYPE
+        self.CFUNCTYPE = self._zb_current_session.CFUNCTYPE
+        self.WINFUNCTYPE = self._zb_current_session.WINFUNCTYPE
 
         # Used as cache by CFUNCTYPE and WINFUNCTYPE
         self._c_functype_cache = self._zb_current_session.data.cache_dict["func_type"][
@@ -153,12 +153,16 @@ class CtypesSession(CtypesSessionABC):
     # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
     @property
-    def _zb_id(self):
+    def _zb_id(self) -> str:
         return self._zb_current_session.id
 
     @property
-    def _zb_up(self):
-        return self._zb_current_session.up
+    def _zb_client_up(self) -> bool:
+        return self._zb_current_session.client_up
+
+    @property
+    def _zb_server_up(self) -> bool:
+        return self._zb_current_session.server_up
 
     # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     # Routines only availabe on Wine / Windows, currently stubbed in zugbruecke
