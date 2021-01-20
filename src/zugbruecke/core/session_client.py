@@ -37,10 +37,12 @@ from ctypes import (
     _FUNCFLAG_USE_ERRNO,
     _FUNCFLAG_USE_LASTERROR,
     DEFAULT_MODE,
+    _CFuncPtr,
 )
 import signal
 import time
-from typing import Union
+from types import FrameType
+from typing import Any, Dict, Union
 
 from .abc import ConfigABC, DataABC, SessionClientABC
 from .const import _FUNCFLAG_STDCALL, CONVENTIONS
@@ -120,7 +122,7 @@ class SessionClient(SessionClientABC):
         # Wait for server to appear
         self._wait_for_server_status_change(target_status=True)
 
-        # Fire up xmlrpc client
+        # Fire up RPC client
         self._rpc_client = mp_client_safe_connect(
             socket_path=("localhost", self._p["port_socket_wine"]),
             authkey="zugbruecke_wine",
@@ -141,7 +143,9 @@ class SessionClient(SessionClientABC):
 
         self._log.out("[session-client] STARTED.")
 
-    def ctypes_CFUNCTYPE(self, restype, *argtypes, **kw):
+    def ctypes_CFUNCTYPE(
+        self, restype: Any, *argtypes: Any, **kw: Dict[str, bool]
+    ) -> _CFuncPtr:  # EXPORT
 
         flags = _FUNCFLAG_CDECL
 
@@ -154,7 +158,9 @@ class SessionClient(SessionClientABC):
 
         return self._data.generate_callback_decorator(flags, restype, *argtypes)
 
-    def ctypes_WINFUNCTYPE(self, restype, *argtypes, **kw):  # EXPORT
+    def ctypes_WINFUNCTYPE(
+        self, restype: Any, *argtypes: Any, **kw: Dict[str, bool]
+    ) -> _CFuncPtr:  # EXPORT
 
         flags = _FUNCFLAG_STDCALL
 
@@ -220,78 +226,71 @@ class SessionClient(SessionClientABC):
 
         return self._dlls[name]
 
-    def path_unix_to_wine(self, in_path):
+    def path_unix_to_wine(self, in_path: str) -> str:
 
         if not isinstance(in_path, str):
             raise TypeError("in_path must by of type str")
 
         return self._rpc_client.path_unix_to_wine(in_path)
 
-    def path_wine_to_unix(self, in_path):
+    def path_wine_to_unix(self, in_path: str) -> str:
 
         if not isinstance(in_path, str):
             raise TypeError("in_path must by of type str")
 
         return self._rpc_client.path_wine_to_unix(in_path)
 
-    def get_parameter(self, key):
+    def get_parameter(self, key: str) -> Any:
 
         return self._p[key]
 
-    def set_parameter(self, key, value):
+    def set_parameter(self, key: str, value: Any):
 
         self._p[key] = value
+        self._rpc_client.set_parameter(key, value)
 
-        self._rpc_client.set_parameter({key: value})
+    def terminate(
+        self,
+        signum: Union[int, None] = None,  # unsused, but required for signal handling
+        frame: Union[
+            FrameType, None
+        ] = None,  # unsused, but required for signal handling
+    ):
 
-    def terminate(self, signum=None, frame=None):
-
-        # Run only if session is still up
         if not self._client_up:
             return
 
-        # Log status
         self._log.out("[session-client] TERMINATING ...")
 
         try:
-
-            # Tell server via message to terminate
             self._rpc_client.terminate()
-
-        except EOFError:
-
-            # EOFError is raised if server socket is closed - ignore it
+        except EOFError:  # EOFError is raised if server socket is closed - ignore it
             self._log.out("[session-client] Remote socket closed.")
 
-        # Wait for server to appear
-        self._wait_for_server_status_change(target_status=False)
+        self._wait_for_server_status_change(
+            target_status=False
+        )  # Wait for server to appear
 
-        # Destruct interpreter session
         self._interpreter.terminate()
-
-        # Terminate callback server
         self._rpc_server.terminate()
 
-        # Log status
         self._log.out("[session-client] TERMINATED.")
-
-        # Terminate log
         self._log.terminate()
 
-        # Session down
         self._client_up = False
 
     @property
-    def data(self) -> DataABC:
+    def data(self) -> DataABC:  # Accessed by CtypesSession
 
         return self._data
 
-    def _set_server_status(self, status):
+    def _set_server_status(
+        self, status: bool
+    ):  # Interface for session server through RPC
 
-        # Interface for session server through RPC
         self._server_up = status
 
-    def _wait_for_server_status_change(self, target_status):
+    def _wait_for_server_status_change(self, target_status: bool):
 
         # Does the status have to change?
         if target_status == self._server_up:
@@ -299,21 +298,16 @@ class SessionClient(SessionClientABC):
             # No, so get out of here
             return
 
-        # Debug strings
-        STATUS_DICT = {True: "up", False: "down"}
-        # Config keys for timeouts
-        CONFIG_DICT = {True: "timeout_start", False: "timeout_stop"}
-
-        # Log status
         self._log.out(
-            "[session-client] Waiting for session-server to be %s ..."
-            % STATUS_DICT[target_status]
+            "[session-client] Waiting for session-server to be {STATUS:s} ...".format(
+                STATUS="up" if target_status else "down",
+            )
         )
 
-        # Time-step
-        wait_for_seconds = 0.01
         # Timeout
-        timeout_after_seconds = self._p[CONFIG_DICT[target_status]]
+        timeout_after_seconds = self._p[
+            "timeout_start" if target_status else "timeout_stop"
+        ]
         # Already waited for ...
         started_waiting_at = time.time()
 
@@ -321,7 +315,7 @@ class SessionClient(SessionClientABC):
         while target_status != self._server_up:
 
             # Wait before trying again
-            time.sleep(wait_for_seconds)
+            time.sleep(0.01)
 
             # Time out
             if time.time() >= (started_waiting_at + timeout_after_seconds):
@@ -330,10 +324,10 @@ class SessionClient(SessionClientABC):
         # Handle timeout
         if target_status != self._server_up:
 
-            # Log status
             self._log.out(
-                "[session-client] ... wait timed out (after %0.2f seconds)."
-                % (time.time() - started_waiting_at)
+                "[session-client] ... wait timed out (after {TIME:0.2f} seconds).".format(
+                    TIME=time.time() - started_waiting_at,
+                )
             )
 
             if target_status:
@@ -341,8 +335,9 @@ class SessionClient(SessionClientABC):
             else:
                 raise TimeoutError("session server could not be stopped")
 
-        # Log status
         self._log.out(
-            "[session-client] ... session server is %s (after %0.2f seconds)."
-            % (STATUS_DICT[target_status], time.time() - started_waiting_at)
+            "[session-client] ... session server is {STATUS:s} (after {TIME:0.2f} seconds).".format(
+                STATUS="up" if target_status else "down",
+                TIME=time.time() - started_waiting_at,
+            )
         )
