@@ -174,9 +174,7 @@ class Config(ConfigABC):
         try:
             cnt_dict = json.loads(cnt)
         except:
-            raise ConfigParserError(
-                'Config file could not be parsed: "%s"' % try_path
-            )
+            raise ConfigParserError('Config file could not be parsed: "%s"' % try_path)
 
         # Ensure that config has the right format
         if not isinstance(cnt_dict, dict):
