@@ -84,17 +84,17 @@ class RoutineClient(RoutineClientABC):
         self._restype = ctypes.c_int
         self._restype_d = None
 
-        for name in (
+        for attr in (
             "call",
             "configure",
             "get_repr",
         ):
             setattr(
                 self,
-                "_{NAME:s}_on_server".format(NAME=name),
+                "_{ATTR:s}_on_server".format(ATTR=attr),
                 getattr(
                     rpc_client,
-                    "{HASH_ID:s}_{NAME:s}".format(HASH_ID=hash_id, NAME=name),
+                    "{HASH_ID:s}_{NAME:s}_{ATTR:s}".format(HASH_ID=hash_id, NAME=str(self._name), ATTR=attr),
                 ),
             )
 
@@ -123,7 +123,7 @@ class RoutineClient(RoutineClientABC):
         mem_package_list = self._data.client_pack_memory_list(args, self._memsync_d)
 
         # Actually call routine in DLL! TODO Handle kw ...
-        return_dict = self._call_routine_on_server(
+        return_dict = self._call_on_server(
             self._data.arg_list_pack(args, self._argtypes_d, self._convention),
             mem_package_list,
         )
@@ -204,7 +204,7 @@ class RoutineClient(RoutineClientABC):
         self._log.out("<restype_d>", self._restype_d, "</restype_d>")
 
         # Pass argument and return value types as strings ...
-        _ = self._configure_routine_on_server(
+        _ = self._configure_on_server(
             self._argtypes_d, self._restype_d, memsync_d_packed
         )
 

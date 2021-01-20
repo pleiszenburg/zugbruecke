@@ -75,14 +75,14 @@ class RoutineServer(RoutineServerABC):
         self._restype_d = None
         self._memsync_d = None
 
-        for name in (
+        for attr in (
             "call",
             "configure",
             "get_repr",
         ):
             rpc_server.register_function(
-                getattr(self, name),
-                "{HASH_ID:s}_{NAME:s}".format(HASH_ID=hash_id, NAME=name),
+                getattr(self, attr),
+                "{HASH_ID:s}_{NAME:s}_{ATTR:s}".format(HASH_ID=hash_id, NAME=str(self._name), ATTR=attr),
             )
 
     def call(self, arg_message_list: List, arg_memory_list: List) -> Dict:
