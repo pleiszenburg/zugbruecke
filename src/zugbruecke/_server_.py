@@ -35,7 +35,7 @@ specific language governing rights and limitations under the License.
 import argparse
 
 from .core.config import Config
-from .core.session_server import session_server_class
+from .core.session_server import SessionServer
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -69,7 +69,7 @@ def run():
     }
 
     # Fire up wine server session with parsed parameters
-    _ = session_server_class(parameter["id"], Config(**parameter))
+    _ = SessionServer(parameter["id"], Config(**parameter))
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

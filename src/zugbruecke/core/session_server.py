@@ -36,6 +36,7 @@ import ctypes.util
 import traceback
 from typing import Any
 
+from .abc import SessionServerABC
 from .data import data_class
 from .dll_server import DllServer
 from .log import Log
@@ -48,7 +49,11 @@ from .rpc import mp_client_safe_connect, mp_server_class
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
-class session_server_class:
+class SessionServer(SessionServerABC):
+    """
+    Managing a zugbruecke session
+    """
+
     def __init__(self, session_id, parameter):
 
         # Store session id and parameter
