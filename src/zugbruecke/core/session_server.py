@@ -45,6 +45,17 @@ from .rpc import mp_client_safe_connect, mp_server_class
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# WRAPPER
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+CONVENTIONS = {
+    "cdll": ctypes.CDLL,
+    "windll": ctypes.WinDLL,
+    "oledll": ctypes.OleDLL,
+}
+
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # SESSION SERVER CLASS
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -56,85 +67,36 @@ class SessionServer(SessionServerABC):
 
     def __init__(self, config: ConfigABC):
 
-        self.p = config
-        self.id = self.p["id"]
+        self._p = config
+        self._id = self._p["id"]
+        self._up = True
+        self._dlls = {}
 
-        # Connect to Unix side
-        self.rpc_client = mp_client_safe_connect(
-            socket_path=("localhost", self.p["port_socket_unix"]),
+        self._rpc_client = mp_client_safe_connect(
+            socket_path=("localhost", self._p["port_socket_unix"]),
             authkey="zugbruecke_unix",
-            timeout_after_seconds=self.p["timeout_start"],
+            timeout_after_seconds=self._p["timeout_start"],
         )
 
-        # Start logging session and connect it with log on unix side
-        self.log = Log(self.id, self.p, rpc_client=self.rpc_client)
+        self._log = Log(self._id, self._p, rpc_client=self._rpc_client)
+        self._log.out("[session-server] STARTING ...")
 
-        # Status log
-        self.log.out("[session-server] STARTING ...")
+        self._data = data_class(
+            self._log, is_server=True, callback_client=self._rpc_client
+        )
 
-        # Mark session as up
-        self.up = True
-
-        # Offer methods for converting paths
         path = PathStyles()
         self.path_unix_to_wine = path.unix_to_wine
         self.path_wine_to_unix = path.wine_to_unix
 
-        # Start dict for dll files and routines
-        self.dll_dict = {}
-
-        # Organize all DLL types
-        self._conventions = {
-            "cdll": ctypes.CDLL,
-            "windll": ctypes.WinDLL,
-            "oledll": ctypes.OleDLL,
-        }
-
-        # Set data cache and parser
-        self.data = data_class(
-            self.log, is_server=True, callback_client=self.rpc_client
-        )
-
-        # Create server
-        self.rpc_server = mp_server_class(
-            ("localhost", self.p["port_socket_wine"]),
+        self._rpc_server = mp_server_class(
+            ("localhost", self._p["port_socket_wine"]),
             "zugbruecke_wine",
-            log=self.log,
-            terminate_function=self.__terminate__,
+            log=self._log,
+            terminate_function=self._terminate,
         )
 
-        # Register call: Accessing a dll
-        self.rpc_server.register_function(self._load_library, "load_library")
-        # Expose routine for updating parameters
-        self.rpc_server.register_function(self.__set_parameter__, "set_parameter")
-        # Register destructur: Call goes into xmlrpc-server first, which then terminates parent
-        self.rpc_server.register_function(self.rpc_server.terminate, "terminate")
-        # Convert path: Unix to Wine
-        self.rpc_server.register_function(self.path_unix_to_wine, "path_unix_to_wine")
-        # Convert path: Wine to Unix
-        self.rpc_server.register_function(self.path_wine_to_unix, "path_wine_to_unix")
-
-        # Expose ctypes stuff
-        self.__expose_ctypes_routines__()
-
-        # Status log
-        self.log.out(
-            "[session-server] ctypes server is listening on port %d."
-            % self.p["port_socket_wine"]
-        )
-        self.log.out("[session-server] STARTED.")
-        self.log.out("[session-server] Serve forever ...")
-
-        # Run server ...
-        self.rpc_server.server_forever_in_thread(daemon=False)
-
-        # Indicate to session client that the server is up
-        self.rpc_client.set_server_status(True)
-
-    def __expose_ctypes_routines__(self):
-
-        # As-is exported platform-specific routines from ctypes
-        for mod, routine in [
+        for source, name in [
             (ctypes, "FormatError"),
             (ctypes, "get_last_error"),
             (ctypes, "GetLastError"),
@@ -142,13 +104,30 @@ class SessionServer(SessionServerABC):
             (ctypes, "set_last_error"),
             (ctypes.util, "find_msvcrt"),
             (ctypes.util, "find_library"),
+            (self, "load_library"),
+            (self, "set_parameter"),
+            (self._rpc_server, "terminate"),
+            (self, "path_unix_to_wine"),
+            (self, "path_wine_to_unix"),
         ]:
-
-            self.rpc_server.register_function(
-                getattr(mod, routine), "ctypes_" + routine
+            self._rpc_server.register_function(
+                getattr(source, name), name
             )
 
-    def _load_library(
+        self._log.out(
+            "[session-server] ctypes server is listening on port %d."
+            % self._p["port_socket_wine"]
+        )
+        self._log.out("[session-server] STARTED.")
+        self._log.out("[session-server] Serve forever ...")
+
+        # Run server ...
+        self._rpc_server.server_forever_in_thread(daemon=False)
+
+        # Indicate to session client that the server is up
+        self._rpc_client.set_server_status(True)
+
+    def load_library(
         self,
         name: str,
         hash_id: str,
@@ -161,10 +140,10 @@ class SessionServer(SessionServerABC):
         Exposed interface, called by session client
         """
 
-        if name in self.dll_dict.keys():
+        if name in self._dlls.keys():
             return
 
-        self.log.out(
+        self._log.out(
             '[session-server] Attaching to DLL file "{FN:s}" with calling convention "{CONVENTION:s}" ...'.format(
                 FN=name,
                 CONVENTION=convention,
@@ -172,7 +151,7 @@ class SessionServer(SessionServerABC):
         )
 
         try:
-            handler = self._conventions[convention](
+            handler = CONVENTIONS[convention](
                 name,
                 mode=mode,
                 handle=None,
@@ -180,48 +159,51 @@ class SessionServer(SessionServerABC):
                 use_last_error=use_last_error,
             )
         except OSError as e:
-            self.log.out("[session-server] ... failed!")
+            self._log.out("[session-server] ... failed!")
             raise e
         except Exception as e:
-            self.log.err(traceback.format_exc())
+            self._log.err(traceback.format_exc())
             raise e
 
-        self.dll_dict[name] = DllServer(
+        self._dlls[name] = DllServer(
             name,
             hash_id,
             convention,
             handler,
-            self.log,
-            self.rpc_server,
-            self.data,
+            self._log,
+            self._rpc_server,
+            self._data,
         )
 
-        self.log.out("[session-server] ... attached.")
+        self._log.out("[session-server] ... attached.")
 
-    def __set_parameter__(self, key: str, value: Any):
+    def set_parameter(self, key: str, value: Any):
+        """
+        Exposed interface
+        """
 
-        self.p[key] = value
+        self._p[key] = value
 
-    def __terminate__(self):
+    def _terminate(self):
         """
         Exposed interface
         """
 
         # Run only if session still up
-        if not self.up:
+        if not self._up:
             return
 
         # Status log
-        self.log.out("[session-server] TERMINATING ...")
+        self._log.out("[session-server] TERMINATING ...")
 
         # Terminate log
-        self.log.terminate()
+        self._log.terminate()
 
         # Session down
-        self.up = False
+        self._up = False
 
         # Status log
-        self.log.out("[session-server] TERMINATED.")
+        self._log.out("[session-server] TERMINATED.")
 
         # Indicate to session client that server was terminated
-        self.rpc_client.set_server_status(False)
+        self._rpc_client.set_server_status(False)
