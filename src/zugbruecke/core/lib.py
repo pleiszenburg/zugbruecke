@@ -63,10 +63,12 @@ def get_hash_of_string(in_str: str) -> str:
 @typechecked
 def get_randhashstr(digits: int) -> str:
 
-    return "{{NUMBER:0{DIGITS:d}x}}".format(DIGITS = digits).format(NUMBER = random.randrange(16 ** digits))
+    return "{{NUMBER:0{DIGITS:d}x}}".format(DIGITS=digits).format(
+        NUMBER=random.randrange(16 ** digits)
+    )
 
 
 @typechecked
 def generate_session_id() -> str:
 
-    return get_randhashstr(8) # 8 digit hash string by default
+    return get_randhashstr(8)  # 8 digit hash string by default
