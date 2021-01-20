@@ -42,6 +42,7 @@ from .dll_server import DllServer
 from .log import Log
 from .path import PathStyles
 from .rpc import mp_client_safe_connect, mp_server_class
+from .typeguard import typechecked
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -60,6 +61,7 @@ CONVENTIONS = {
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
+@typechecked
 class SessionServer(SessionServerABC):
     """
     Managing a zugbruecke session

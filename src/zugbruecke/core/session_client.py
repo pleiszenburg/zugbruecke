@@ -37,12 +37,11 @@ from ctypes import (
     _FUNCFLAG_USE_ERRNO,
     _FUNCFLAG_USE_LASTERROR,
     DEFAULT_MODE,
-    _CFuncPtr,
 )
 import signal
 import time
 from types import FrameType
-from typing import Any, Dict, Union
+from typing import Any, Dict, Type, Union
 
 from .abc import ConfigABC, DataABC, SessionClientABC
 from .const import _FUNCFLAG_STDCALL, CONVENTIONS
@@ -53,6 +52,7 @@ from .interpreter import Interpreter
 from .lib import get_free_port, get_hash_of_string
 from .log import Log
 from .rpc import mp_client_safe_connect, mp_server_class
+from .typeguard import typechecked
 from .wenv import Env
 
 
@@ -61,6 +61,7 @@ from .wenv import Env
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
+@typechecked
 class SessionClient(SessionClientABC):
     """
     Managing a zugbruecke session
@@ -149,7 +150,7 @@ class SessionClient(SessionClientABC):
 
     def CFUNCTYPE(
         self, restype: Any, *argtypes: Any, **kw: Dict[str, bool]
-    ) -> _CFuncPtr:
+    ) -> Type:
 
         flags = _FUNCFLAG_CDECL
 
@@ -164,7 +165,7 @@ class SessionClient(SessionClientABC):
 
     def WINFUNCTYPE(
         self, restype: Any, *argtypes: Any, **kw: Dict[str, bool]
-    ) -> _CFuncPtr:
+    ) -> Type:
 
         flags = _FUNCFLAG_STDCALL
 
