@@ -71,51 +71,28 @@ class CallbackClient(CallbackClientABC):
 
         rpc_server.register_function(self, public_name=name)
 
-    def __call__(self, arg_message_list, arg_memory_list):
+    def __call__(self, arg_message_list: List, arg_memory_list: List) -> Dict:
 
-        # Log status
         self._log.out(
-            '[callback-client] Trying to call callback routine "%s" ...' % self._name
+            '[callback-client] Trying to call callback routine "{NAME:s}" ...'.format(NAME = self._name)
         )
 
         try:
-
-            # Unpack arguments
             args_list = self._data.arg_list_unpack(arg_message_list, self._argtypes_d)
-
-            # Unpack pointer data
             self._data.server_unpack_memory_list(
                 args_list, arg_memory_list, self._memsync_d
             )
-
-            # Default return value
             return_value = None
-
         except Exception as e:
-
-            # Log status
             self._log.out("[callback-client] ... call preparation failed!")
-
-            # Push traceback to log
             self._log.err(traceback.format_exc())
-
             raise e
 
-        # This is risky
         try:
-
-            # Call actual callback function (ctypes function pointer)
-            return_value = self._handler(*tuple(args_list))
-
+            return_value = self._handler(*args_list)
         except Exception as e:
-
-            # Log status
             self._log.out("[callback-client] ... call failed!")
-
-            # Push traceback to log
             self._log.err(traceback.format_exc())
-
-            # Pack return package and return it
             return {
                 "args": arg_message_list,
                 "return_value": return_value,
@@ -125,22 +102,12 @@ class CallbackClient(CallbackClientABC):
             }
 
         try:
-
-            # Pack memory for return
             self._data.server_pack_memory_list(
                 args_list, return_value, arg_memory_list, self._memsync_d
             )
-
-            # Get new arg message list
             arg_message_list = self._data.arg_list_pack(args_list, self._argtypes_d)
-
-            # Pack return value
             return_message = self._data.return_msg_pack(return_value, self._restype_d)
-
-            # Log status
             self._log.out("[callback-client] ... done.")
-
-            # Ship data back to Wine side
             return {
                 "args": arg_message_list,
                 "return_value": return_message,
@@ -148,13 +115,7 @@ class CallbackClient(CallbackClientABC):
                 "success": True,
                 "exception": None,
             }
-
         except Exception as e:
-
-            # Log status
             self._log.out("[callback-client] ... call post-processing failed!")
-
-            # Push traceback to log
             self._log.err(traceback.format_exc())
-
             raise e

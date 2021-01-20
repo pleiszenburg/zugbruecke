@@ -31,8 +31,9 @@ specific language governing rights and limitations under the License.
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+from pprint import pformat as pf
 import traceback
-from typing import Dict, List
+from typing import Any, Dict, List
 
 from .abc import CallbackServerABC, DataABC, LogABC, RpcClientABC
 from .typeguard import typechecked
@@ -68,92 +69,55 @@ class CallbackServer(CallbackServerABC):
         self._restype_d = restype_d
         self._memsync_d = memsync_d
 
-    def __call__(self, *args):
+    def __call__(self, *args: Any) -> Any:
 
-        # Log status
         self._log.out(
-            '[callback-server] Trying to call callback routine "%s" ...' % self._name
+            '[callback-server] Trying to call callback routine "{NAME:s}" ...'.format(NAME = self._name)
         )
-
-        # Log status
         self._log.out(
-            '[callback-server] ... parameters are "%r". Packing and pushing to client ...'
-            % (args,)
+            '[callback-server] ... parameters are "{ARGS:s}". Packing and pushing to client ...'.format(ARGS = pf(args))
         )
 
         try:
-
-            # Handle memory
             mem_package_list = self._data.client_pack_memory_list(args, self._memsync_d)
-
         except Exception as e:
-
-            # Log status
             self._log.out("[callback-server] ... memory packing failed!")
-
-            # Push traceback to log
             self._log.err(traceback.format_exc())
-
             raise e
 
         try:
-
-            # Pack arguments and call RPC callback function (packed arguments are shipped to Unix side)
             return_dict = self._handler(
                 self._data.arg_list_pack(args, self._argtypes_d), mem_package_list
             )
-
         except Exception as e:
-
-            # Log status
             self._log.out("[callback-server] ... call failed!")
-
-            # Push traceback to log
             self._log.err(traceback.format_exc())
-
             raise e
 
         try:
-
-            # Log status
             self._log.out(
                 "[callback-server] ... received feedback from client, unpacking ..."
             )
-
-            # Unpack return dict (for pointers and structs)
             self._data.arg_list_sync(
                 args,
                 self._data.arg_list_unpack(return_dict["args"], self._argtypes_d),
                 self._argtypes_d,
             )
-
-            # Unpack return value
             return_value = self._data.return_msg_unpack(
                 return_dict["return_value"], self._restype_d
             )
-
-            # Unpack memory (call may have failed partially only)
             self._data.client_unpack_memory_list(
                 args, return_value, return_dict["memory"], self._memsync_d
             )
-
         except Exception as e:
-
-            # Log status
             self._log.out("[callback-server] ... unpacking failed!")
-
-            # Push traceback to log
             self._log.err(traceback.format_exc())
-
             raise e
 
-        # Raise the original error if call was not a success
         if not return_dict["success"]:
             self._log.out("[callback-server] ... call raised an error.")
             raise return_dict["exception"]
 
-        # Log status
         self._log.out("[callback-server] ... unpacked, return.")
 
-        # Return data directly to DLL routine
         return return_value
