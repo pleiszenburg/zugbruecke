@@ -57,6 +57,10 @@ class DataABC(ABC):
     pass
 
 
+class DefinitionABC(ABC):
+    pass
+
+
 class DllClientABC(ABC):
     pass
 
@@ -70,6 +74,10 @@ class InterpreterABC(ABC):
 
 
 class LogABC(ABC):
+    pass
+
+
+class MemsyncABC(ABC):
     pass
 
 
