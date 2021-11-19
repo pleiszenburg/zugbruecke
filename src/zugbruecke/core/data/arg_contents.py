@@ -59,7 +59,7 @@ class arguments_contents_class:
         # Everything is normal
         if len(args_tuple) == len(argtypes_list):
             return [
-                (d["n"], self.__pack_item__(a, d))
+                self.__pack_item__(a, d)
                 for a, d in zip(args_tuple, argtypes_list)
             ]
 
@@ -73,7 +73,7 @@ class arguments_contents_class:
             and conv == "cdll"
         ):
             return [
-                (d["n"], self.__pack_item__(a, d))
+                self.__pack_item__(a, d)
                 for a, d in zip(args_tuple[: len(argtypes_list)], argtypes_list)
             ] + list(args_tuple[len(argtypes_list) :])
 
@@ -86,7 +86,7 @@ class arguments_contents_class:
         # Everything is normal
         if len(args_package_list) == len(argtypes_list):
             return [
-                self.__unpack_item__(a[1], d)
+                self.__unpack_item__(a, d)
                 for a, d in zip(args_package_list, argtypes_list)
             ]
 
@@ -100,7 +100,7 @@ class arguments_contents_class:
             and conv == "cdll"
         ):
             return [
-                self.__unpack_item__(a[1], d)
+                self.__unpack_item__(a, d)
                 for a, d in zip(args_package_list[: len(argtypes_list)], argtypes_list)
             ] + args_package_list[len(argtypes_list) :]
 

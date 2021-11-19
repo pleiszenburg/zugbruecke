@@ -152,29 +152,24 @@ class SessionClient(SessionClientABC):
 
         self._log.out("[session-client] STARTED.")
 
-    def CFUNCTYPE(self, restype: Any, *argtypes: Any, **kw: Dict[str, bool]) -> Type:
+    def CFUNCTYPE(self, restype: Any, *argtypes: Any, use_errno: bool = False, use_last_error: bool = False) -> Type:
 
         flags = _FUNCFLAG_CDECL
-
-        if kw.pop("use_errno", False):
+        if use_errno:
             flags |= _FUNCFLAG_USE_ERRNO
-        if kw.pop("use_last_error", False):
+        if use_last_error:
             flags |= _FUNCFLAG_USE_LASTERROR
-        if kw:
-            raise ValueError("unexpected keyword argument(s) %s" % kw.keys())
 
         return self._data.generate_callback_decorator(flags, restype, *argtypes)
 
-    def WINFUNCTYPE(self, restype: Any, *argtypes: Any, **kw: Dict[str, bool]) -> Type:
+    def WINFUNCTYPE(self, restype: Any, *argtypes: Any, use_errno: bool = False, use_last_error: bool = False) -> Type:
 
         flags = _FUNCFLAG_STDCALL
 
-        if kw.pop("use_errno", False):
+        if use_errno:
             flags |= _FUNCFLAG_USE_ERRNO
-        if kw.pop("use_last_error", False):
+        if use_last_error:
             flags |= _FUNCFLAG_USE_LASTERROR
-        if kw:
-            raise ValueError("unexpected keyword argument(s) %s" % kw.keys())
 
         return self._data.generate_callback_decorator(flags, restype, *argtypes)
 
