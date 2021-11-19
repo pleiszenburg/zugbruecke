@@ -74,7 +74,7 @@ def test_memsync_on_routine_not_list(arch, conv, ctypes, dll_handle):
         [platform.startswith(os_name) for os_name in ["linux", "darwin", "freebsd"]]
     ):
         with pytest.raises(
-            DataMemsyncsyntaxError, match="memsync attribute must be a list"
+            (DataMemsyncsyntaxError, TypeError),
         ):
             sub_ints.memsync = {}
     elif platform.startswith("win"):
@@ -108,7 +108,7 @@ def test_memsync_on_callback_not_list(arch, conv, ctypes, dll_handle):
         [platform.startswith(os_name) for os_name in ["linux", "darwin", "freebsd"]]
     ):
         with pytest.raises(
-            DataMemsyncsyntaxError, match="memsync attribute must be a list"
+            (DataMemsyncsyntaxError, TypeError), match="memsync attribute must be a list"
         ):
             ctypes._zb_current_session.data.pack_definition_memsync(
                 conveyor_belt.memsync
