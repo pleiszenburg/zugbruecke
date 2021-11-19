@@ -44,7 +44,7 @@ release_clean:
 # dll: # TODO move to example folder
 # 	@(cd demo_dll; make clean; make; make install)
 
-docu:
+docs:
 	@(cd docs; make clean; make html)
 
 release:
@@ -73,7 +73,7 @@ install:
 	WENV_ARCH=win64 wenv init_coverage
 
 test:
-	make docu
+	make docs
 	make test_quick
 
 test_quick:
