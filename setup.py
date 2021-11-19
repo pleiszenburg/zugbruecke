@@ -45,8 +45,8 @@ _version_ = "0.1.0"
 
 
 # List all versions of Python which are supported
-python_minor_min = 4
-python_minor_max = 9
+python_minor_min = 6
+python_minor_max = 10
 confirmed_python_versions = [
     "Programming Language :: Python :: 3.{MINOR:d}".format(MINOR=minor)
     for minor in range(python_minor_min, python_minor_max + 1)
@@ -70,13 +70,6 @@ if platform.startswith("win"):
     raise SystemExit("You are already running Windows. No need for this package!")
 
 
-# Python 3.4 dependency / CI fix
-pls = "python-language-server"
-assert version_info.major == 3
-if version_info.minor <= 4:
-    pls += "<0.32.0"
-
-
 setup(
     name="zugbruecke",
     packages=find_packages("src"),
@@ -97,7 +90,7 @@ setup(
     install_requires=["wenv"],
     extras_require={
         "dev": requirements_test
-        + ["Jinja2", pls, "setuptools", "Sphinx", "sphinx_rtd_theme", "twine", "wheel"],
+        + ["Jinja2", "python-lsp-server", "setuptools", "Sphinx", "sphinx_rtd_theme", "twine", "wheel"],
         "certifi": ["certifi"],
     },
     zip_safe=False,
