@@ -90,7 +90,11 @@ setup(
     install_requires=["wenv"],
     extras_require={
         "dev": requirements_test
-        + ["Jinja2", "python-lsp-server", "setuptools", "Sphinx", "sphinx_rtd_theme", "twine", "wheel"],
+        + [
+        "Jinja2", "python-lsp-server", "setuptools",
+        "Sphinx", "sphinx_rtd_theme", "sphinx-autodoc-typehints", "myst-parser",
+        "twine", "wheel",
+        ],
         "certifi": ["certifi"],
     },
     zip_safe=False,

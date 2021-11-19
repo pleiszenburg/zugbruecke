@@ -62,7 +62,13 @@ def fetch_version_string():
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = []
+extensions = [
+    'sphinx.ext.autodoc',
+    'sphinx.ext.napoleon',
+    'sphinx_autodoc_typehints',
+    'sphinx_rtd_theme',
+    'myst_parser',
+]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -78,8 +84,8 @@ master_doc = "index"
 
 # General information about the project.
 project = "zugbruecke"
-copyright = "2017-2021 Sebastian M. Ernst"
 author = "Sebastian M. Ernst"
+copyright = f"2017-2021 {author:s}"
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -123,6 +129,20 @@ html_theme = "sphinx_rtd_theme"
 #
 # html_theme_options = {}
 
+# Values to pass into the template engine's context for all pages.
+html_context = {
+    'sidebar_external_links_caption': 'Links',
+    'sidebar_external_links': [
+        # ('<i class="fa fa-rss fa-fw"></i> Blog', 'https://www.000'),
+        ('<i class="fa fa-github fa-fw"></i> Source Code', 'https://github.com/pleiszenburg/zugbruecke'),
+        ('<i class="fa fa-bug fa-fw"></i> Issue Tracker', 'https://github.com/pleiszenburg/zugbruecke/issues'),
+        ### ('<i class="fa fa-envelope fa-fw"></i> Mailing List', 'https://groups.io/g/zugbruecke-dev'),
+        ### ('<i class="fa fa-comments fa-fw"></i> Chat', 'https://matrix.to/#/#zugbruecke:matrix.org'),
+        # ('<i class="fa fa-file-text fa-fw"></i> Citation', 'https://doi.org/000'),
+        ('<i class="fa fa-info-circle fa-fw"></i> pleiszenburg.de', 'http://www.pleiszenburg.de/'),
+    ],
+}
+
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
@@ -147,7 +167,7 @@ html_sidebars = {
 # -- Options for HTMLHelp output ------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = "zugbrueckedoc"
+htmlhelp_basename = f"{project}edoc"
 
 
 # -- Options for LaTeX output ---------------------------------------------
@@ -173,9 +193,9 @@ latex_elements = {
 latex_documents = [
     (
         master_doc,
-        "zugbruecke.tex",
-        "zugbruecke Documentation",
-        "Sebastian M. Ernst",
+        f"{project:s}.tex",
+        f"{project:s} Documentation",
+        author,
         "manual",
     ),
 ]
@@ -185,7 +205,7 @@ latex_documents = [
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [(master_doc, "zugbruecke", "zugbruecke Documentation", [author], 1)]
+man_pages = [(master_doc, project, f"{project:s} Documentation", [author], 1)]
 
 
 # -- Options for Texinfo output -------------------------------------------
@@ -196,10 +216,10 @@ man_pages = [(master_doc, "zugbruecke", "zugbruecke Documentation", [author], 1)
 texinfo_documents = [
     (
         master_doc,
-        "zugbruecke",
-        "zugbruecke Documentation",
+        project,
+        f"{project:s} Documentation",
         author,
-        "zugbruecke",
+        project,
         "One line description of project.",
         "Miscellaneous",
     ),
