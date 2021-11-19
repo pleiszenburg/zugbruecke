@@ -1,7 +1,7 @@
 :github_url:
 
 .. image:: http://www.pleiszenburg.de/zugbruecke_logo.png
-	:alt: zugbruecke
+    :alt: zugbruecke
 
 Calling routines in Windows DLLs from Python scripts running under Linux, MacOS or BSD.
 
@@ -16,20 +16,31 @@ Please read the latter first if you have never called foreign functions with *ct
 .. _ctypes documentation: https://docs.python.org/3/library/ctypes.html?highlight=ctypes#module-ctypes
 
 .. toctree::
-   :maxdepth: 2
+    :maxdepth: 2
+    :caption: Getting started
 
-   introduction
-   installation
-   examples
-   session
-   memsync
-   configuration
-   interoperability
-   wineenv
-   benchmarks
-   security
-   bugs
-   faq
+    introduction
+    installation
+    examples
+
+.. toctree::
+    :maxdepth: 2
+    :caption: Reference
+
+    session
+    memsync
+    configuration
+
+.. toctree::
+    :maxdepth: 2
+    :caption: Advanced
+
+    interoperability
+    wineenv
+    benchmarks
+    security
+    bugs
+    faq
 
 `Interested in contributing?`_
 
