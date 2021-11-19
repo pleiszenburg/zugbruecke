@@ -7,8 +7,8 @@
 	single: implementation
 	single: use cases
 
-Introduction
-============
+About ``zugbruecke``
+====================
 
 .. _synopsis:
 

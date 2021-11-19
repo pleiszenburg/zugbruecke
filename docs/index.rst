@@ -17,7 +17,7 @@ Please read the latter first if you have never called foreign functions with *ct
 
 .. toctree::
     :maxdepth: 2
-    :caption: Getting started
+    :caption: Introduction
 
     introduction
     installation
