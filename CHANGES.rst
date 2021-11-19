@@ -50,8 +50,10 @@ On older versions of Linux such as *Ubuntu 14.04* alias *Trusty Tahr* (released 
 * FEATURE: Introduced new exception types specific to *zugbruecke*. Meaningful exception are now raised throughout the package.
 * FEATURE: Timeouts for start and stop of the server component can be configured.
 * FEATURE: Both code and branch coverage of *zugbruecke* can now be analyzed with ``coverage``.
+* FEATURE: Dropped official support for CPython <= 3.5.
 * FEATURE: Added official support for CPython 3.8, see #56.
 * FEATURE: Added official support for CPython 3.9, see #74.
+* FEATURE: Added official support for CPython 3.10.
 * FEATURE: *Wine Python* can be based on beta versions and release candidates of *CPython*.
 * FEATURE: All code is tested for both, 32bit and 64bit DLLs (previously only 32bit DLLs received regular testing), see #58.
 * FEATURE: All code is tested for both, the cdll/cdecl and windll/stdcall calling conventions (previously only windll/stdcall received regular testing), see #60.
@@ -68,6 +70,7 @@ On older versions of Linux such as *Ubuntu 14.04* alias *Trusty Tahr* (released 
 * FIX: If a struct type was used in a function call with memsync first (before use in a function call without memsync), configuring (and calling) the function failed, see #63.
 * FIX: Path conversion would fail for Wine 5.13 and later.
 * FIX: Memory leak: Sessions would collect all log data for as long as they were running, see #76.
+* FIX: Development dependency switch from unmaintained ``python-language-server`` to ``python-lsp-server``.
 * The configuration module was refactored and made clearer and faster, allowing to implement new options.
 
 0.0.15 (2020-07-10)
