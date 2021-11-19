@@ -12,14 +12,39 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+      - name: Install Wine
+        run: |
+          sudo dpkg --add-architecture i386
+          wget https://dl.winehq.org/wine-builds/Release.key
+          sudo apt-key add Release.key
+          wget https://dl.winehq.org/wine-builds/winehq.key
+          sudo apt-key add winehq.key
+          sudo apt-add-repository 'https://dl.winehq.org/wine-builds/ubuntu/'
+          sudo apt-get -qq update
+          sudo apt-get install -y wine-staging
+          export PATH=/opt/wine-staging/bin:$PATH
+      - name: Install compiler
+        run: |
+          sudo apt-get install -y gcc-mingw-w64-i686
+          sudo apt-get install -y gcc-mingw-w64-x86-64
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Install Python stuff
+      - name: Install Python
         run: |
           python -m pip install --upgrade pip
           make install
+      - name: Pre-check
+        run: |
+          wine --version
+          wine64 --version
+          i686-w64-mingw32-gcc --version
+          x86_64-w64-mingw32-gcc --version
+          python --version
+          pytest --version
+          uname -a
+          lsb_release -a
       - name: Build docs and run pytest
         run: |
-          make test
+          ZUGBRUECKE_LOG_LEVEL=100 make test
