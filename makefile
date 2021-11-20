@@ -41,8 +41,8 @@ release_clean:
 	make clean
 	-rm -r src/*.egg-info
 
-# dll: # TODO move to example folder
-# 	@(cd demo_dll; make clean; make; make install)
+# examples:
+# 	@(cd examples; make clean; make; make install)
 
 docs:
 	@(cd docs; make clean; make html)
