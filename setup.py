@@ -91,7 +91,7 @@ setup(
     extras_require={
         "dev": requirements_test
         + [
-        "Jinja2", "python-lsp-server", "setuptools",
+        "Jinja2", "python-lsp-server[all]", "setuptools",
         "Sphinx", "sphinx_rtd_theme", "sphinx-autodoc-typehints", "myst-parser",
         "twine", "wheel",
         ],
