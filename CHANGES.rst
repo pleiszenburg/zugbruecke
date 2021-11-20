@@ -71,6 +71,7 @@ On older versions of Linux such as *Ubuntu 14.04* alias *Trusty Tahr* (released 
 * FIX: Path conversion would fail for Wine 5.13 and later.
 * FIX: Memory leak: Sessions would collect all log data for as long as they were running, see #76.
 * FIX: Development dependency switch from unmaintained ``python-language-server`` to ``python-lsp-server``.
+* API: New makefile structure for developers.
 * The configuration module was refactored and made clearer and faster, allowing to implement new options.
 
 0.0.15 (2020-07-10)
