@@ -1,7 +1,7 @@
 Changes
 =======
 
-0.1.0 (2020-XX-XX)
+0.1.0 (2021-XX-XX)
 ------------------
 
 **CAUTION: MODULE LAYOUT CHANGE BREAKING BACKWARDS COMPATIBILITY!**
@@ -57,6 +57,7 @@ On older versions of Linux such as *Ubuntu 14.04* alias *Trusty Tahr* (released 
 * FEATURE: *Wine Python* can be based on beta versions and release candidates of *CPython*.
 * FEATURE: All code is tested for both, 32bit and 64bit DLLs (previously only 32bit DLLs received regular testing), see #58.
 * FEATURE: All code is tested for both, the cdll/cdecl and windll/stdcall calling conventions (previously only windll/stdcall received regular testing), see #60.
+* FEATURE: The configuration module was refactored and made clearer and faster, allowing to implement new options.
 * FIX: *zugbruecke* did not capture and forward data coming from Windows DLLs and binaries through ``stdout`` and ``stderr``(running with Wine) most of the time.
 * FIX: ``wine-pip`` previously would, on every launch, download ``get-pip.py`` and try to install it first before running - even if ``pip`` was already installed. ``wenv pip`` does not show this behavior anymore.
 * FIX: ``wine-python``, ``wine-pip`` and ``wenv pytest`` implicitly depended on ``bash``. This dependency has been removed in their successor ``wenv``, see #48.
@@ -71,8 +72,8 @@ On older versions of Linux such as *Ubuntu 14.04* alias *Trusty Tahr* (released 
 * FIX: Path conversion would fail for Wine 5.13 and later.
 * FIX: Memory leak: Sessions would collect all log data for as long as they were running, see #76.
 * FIX: Development dependency switch from unmaintained ``python-language-server`` to ``python-lsp-server``.
-* API: New makefile structure for developers.
-* The configuration module was refactored and made clearer and faster, allowing to implement new options.
+* DOCS: Project mailing list and chat room.
+* DEV: New makefile structure for developers.
 
 0.0.15 (2020-07-10)
 -------------------
