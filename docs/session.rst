@@ -6,7 +6,7 @@
 	single: zugbruecke.ctypes
 	single: zugbruecke.ctypes_session
 
-The session model
+The Session Model
 =================
 
 *zugbruecke* operates based on a session model. Every session represents a separate *Windows* *Python* interpreter process running on *Wine*. *zugbruecke* starts a default session during the import of ``zugbruecke.ctypes``, but the user can start more sessions if required. Sessions are identified by a unique (hash) ID string. Sessions have a life-cycle and require termination routines to run before they can be dropped or deleted. By default, sessions terminate themselves automatically when the *Python* interpreter quits.

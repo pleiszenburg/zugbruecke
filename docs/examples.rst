@@ -9,8 +9,8 @@
 	pair: memsync; example
 	single: demo_dll
 
-Examples
-========
+Getting Started
+===============
 
 A lot of code, which was written with ``ctypes``' ``cdll``, ``windll`` or ``oledll``
 in mind and which runs under *Windows*, should run just fine with *zugbruecke*

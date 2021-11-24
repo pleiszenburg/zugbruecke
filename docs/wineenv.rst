@@ -10,7 +10,7 @@
 	triple: wine; python; environment
 	module: zugbruecke.wenv
 
-Wine Python environment
+Wine Python Environment
 =======================
 
 *zugbruecke* offers a useful helper script named ``wenv`` which allows to work with *Python* on *Wine* more easily. It is also used for *zugbruecke*'s internal operations and development tests.

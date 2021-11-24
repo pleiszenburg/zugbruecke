@@ -8,7 +8,7 @@
 	statement: zugbruecke.ctypes._zb_path_unix_to_wine
 	statement: zugbruecke.ctypes._zb_path_wine_to_unix
 
-Platform interoperability
+Platform Interoperability
 =========================
 
 Leveraging the features of *Wine*, *zugbruecke* tries to make things as easy as possible for the user. Some issues remain, though, which must be handled manually by the user. *zugbruecke* offers special APIs for this purpose.

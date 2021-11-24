@@ -5,7 +5,7 @@
 .. index::
 	single: pointer
 
-Handling pointers
+Handling Pointers
 =================
 
 The memory synchronization protocol
