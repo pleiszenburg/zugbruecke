@@ -19,7 +19,7 @@ exclude = '''
   | buck-out
   | demo_dll
   | dist
-  | env??
+  | env[0-9]{2}
   | env
 )/
 '''
