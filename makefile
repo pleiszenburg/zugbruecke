@@ -93,3 +93,5 @@ test:
 	make _clean_py
 	pytest --cov=zugbruecke --cov-config=setup.cfg --hypothesis-show-statistics # --capture=no
 	mv .coverage .coverage.e9.0 ; coverage combine ; coverage html # TODO fix!
+
+.PHONY: docs
