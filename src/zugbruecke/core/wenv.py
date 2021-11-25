@@ -30,6 +30,7 @@ specific language governing rights and limitations under the License.
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+import importlib
 import os
 import shutil
 
@@ -65,11 +66,17 @@ class Env(_Env):
 
     def setup_zugbruecke(self):
 
+        self._setup_package(name = "zugbruecke")
+        self._setup_package(name = "wenv")
+
+    def _setup_package(self, name: str):
+
         # Package path in unix-python site-packages
-        unix_pkg_path = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+        unix_pkg_path = os.path.abspath(os.path.dirname(importlib.util.find_spec(name).origin))
+
         # Package path in wine-python site-packages
         wine_pkg_path = os.path.abspath(
-            os.path.join(self._path_dict["sitepackages"], "zugbruecke")
+            os.path.join(self._path_dict["sitepackages"], name)
         )
 
         if not self._p["_issues_50_workaround"]:
@@ -82,11 +89,11 @@ class Env(_Env):
 
         # Egg path in unix-python site-packages
         unix_egg_path = os.path.abspath(
-            os.path.join(os.path.dirname(__file__), "..", "..", "zugbruecke.egg-info")
+            os.path.join(unix_pkg_path, "..", f"{name:s}.egg-info")
         )
         # Egg path in wine-python site-packages
         wine_egg_path = os.path.abspath(
-            os.path.join(self._path_dict["sitepackages"], "zugbruecke.egg-info")
+            os.path.join(self._path_dict["sitepackages"], f"{name:s}.egg-info")
         )
 
         if not self._p["_issues_50_workaround"]:
