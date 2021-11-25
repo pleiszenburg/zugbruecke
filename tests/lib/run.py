@@ -107,7 +107,7 @@ def _run_tests_unix():
             # '--capture=no',
         ],
         env = {
-            # 'WENV_DEBUG': '1',
+            'WENV_DEBUG': '1',
             'ZUGBRUECKE_DEBUG': '1',
             'ZUGBRUECKE_LOG_LEVEL': '100',
         },
