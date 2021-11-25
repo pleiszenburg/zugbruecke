@@ -186,14 +186,11 @@ class Interpreter(InterpreterABC):
     def _set_env_dict(self):
 
         # Prepare environment for interpreter - inherit from settings of current session!
-        self._p["server_env"] = {
-            k: os.environ[k] for k in os.environ.keys()
-        }  # HACK Required for Travis CI
-        envvar_update_dict = dict(
-            WENV_ARCH=self._p["arch"],  # Architecture
-            WENV_PYTHONVERSION=self._p["pythonversion"],  # Version of Wine Python
-        )
-        self._p["server_env"].update(envvar_update_dict)
+        self._p["server_env"] = os.environ.copy()
+        self._p["server_env"].update({
+            "WENV_ARCH": self._p["arch"],  # Architecture
+            "WENV_PYTHONVERSION": str(self._p["pythonversion"]),  # Version of Wine Python
+        })
 
     def _python_start(self):
 
