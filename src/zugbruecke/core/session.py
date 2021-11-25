@@ -149,6 +149,17 @@ class CtypesSession(CtypesSessionABC):
         self.oledll = LibraryLoader(self.OleDLL)
 
     # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    # repr
+    # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+    def __repr__(self):
+
+        return '<CtypesSession arch={ARCH:s} build={BUILD:s}>'.format(
+            ARCH = self._zb_current_session.config['arch'],
+            BUILD = str(self._zb_current_session.config['pythonversion']),
+        )
+
+    # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     # Allow readonly access to session states
     # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
