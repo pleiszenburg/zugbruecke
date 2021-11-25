@@ -88,6 +88,8 @@ def _get_latest_python_builds() -> Dict[str, List[PythonVersion]]:
 
 def _install_env(arch: str, build: PythonVersion):
 
+    print(f'<INSTALLING WENV PYTHON {str(build).upper()} ON {arch.upper():s}>')
+
     envvars = os.environ.copy()
     envvars.update({
         'WENV_DEBUG': '1',
