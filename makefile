@@ -64,12 +64,7 @@ docs:
 
 install:
 	pip install -U -e .[dev]
-	WENV_ARCH=win32 wenv init
-	WENV_ARCH=win32 wenv pip install -r requirements_test.txt
-	WENV_ARCH=win32 wenv init_coverage
-	WENV_ARCH=win64 wenv init
-	WENV_ARCH=win64 wenv pip install -r requirements_test.txt
-	WENV_ARCH=win64 wenv init_coverage
+	python -m tests.lib.install
 
 release:
 	make clean
@@ -87,11 +82,11 @@ test:
 	make clean
 	python -m tests.lib.build
 	make _clean_py
-	ZUGBRUECKE_DEBUG=1 WENV_DEBUG=1 WENV_ARCH=win32 wenv pytest --hypothesis-show-statistics
+	WENV_DEBUG=1 WENV_ARCH=win32 wenv pytest --hypothesis-show-statistics
 	make _clean_py
-	ZUGBRUECKE_DEBUG=1 WENV_DEBUG=1 WENV_ARCH=win64 wenv pytest --hypothesis-show-statistics
+	WENV_DEBUG=1 WENV_ARCH=win64 wenv pytest --hypothesis-show-statistics
 	make _clean_py
-	pytest --cov=zugbruecke --cov-config=setup.cfg --hypothesis-show-statistics # --capture=no
+	ZUGBRUECKE_DEBUG=1 WENV_DEBUG=1 pytest --cov=zugbruecke --cov-config=setup.cfg --hypothesis-show-statistics # --capture=no
 	mv .coverage .coverage.e9.0 ; coverage combine ; coverage html # TODO fix!
 
 .PHONY: docs

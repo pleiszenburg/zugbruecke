@@ -84,3 +84,8 @@ CFLAGS = {
 LDFLAGS = [
     "-lm",
 ]
+
+PYTHONBUILDS_FN = 'pythonbuilds.json'
+
+PYTHON_MINOR_MIN = 6
+PYTHON_MINOR_MAX = 10
