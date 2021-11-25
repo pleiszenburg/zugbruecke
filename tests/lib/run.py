@@ -92,7 +92,7 @@ def _run_tests_wine():
 
 def _run_tests_unix():
     """
-    Does a single run of pytest. WENV_ARCH and WENV_PYTHONVERSION are parameterized within pytest.
+    Does a single run of pytest. ARCH and PYTHONVERSION are parameterized within pytest.
     """
 
     _run(
