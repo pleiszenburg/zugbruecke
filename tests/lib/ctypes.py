@@ -55,7 +55,9 @@ elif platform.startswith("win"):
     from ctypes import util
 
     ctypes._util = util
-    CTYPES = {arch: ctypes for arch in ARCHS}
+    CTYPES = {
+        arch: ctypes for arch in ARCHS if arch[3:] == ARCHITECTURE
+    }
     PLATFORM = "wine"
 else:
     raise SystemError("unsopported platform")
