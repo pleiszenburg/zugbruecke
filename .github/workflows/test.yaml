@@ -59,4 +59,4 @@ jobs:
           make docs
       - name: Run tests
         run: |
-          WENV_DEBUG=1 ZUGBRUECKE_LOG_LEVEL=100 make test
+          ZUGBRUECKE_LOG_LEVEL=100 make test
