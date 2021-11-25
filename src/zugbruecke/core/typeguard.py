@@ -27,10 +27,14 @@ specific language governing rights and limitations under the License.
 """
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# IMPORT
+# WRAPPER
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-try:
+import os
+import warnings
+
+if os.environ.get('ZUGBRUECKE_DEBUG', '0') == '1':
     from typeguard import typechecked
-except ModuleNotFoundError:
+    warnings.warn("zugbruecke running in debug mode with activated run-time type checks", RuntimeWarning)
+else:
     typechecked = lambda x: x
