@@ -34,6 +34,8 @@ import os
 from subprocess import Popen
 from typing import Dict, List
 
+from zugbruecke.core.wenv import Env
+
 from wenv import (
     EnvConfig,
     PythonVersion,
@@ -105,6 +107,9 @@ def _install_env(arch: str, build: PythonVersion):
         proc.wait()
         if proc.returncode != 0:
             raise SystemError('wenv setup command failed', arch, build, cmd)
+
+    env = Env(**EnvConfig(arch = arch, pythonversion=build).export_dict())
+    env.setup_zugbruecke() # link packages to wenv python environment
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
