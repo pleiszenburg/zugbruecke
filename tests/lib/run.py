@@ -52,27 +52,28 @@ def run_tests():
     Dispatcher: Wine/Unix
     """
 
-    cfg = EnvConfig()
-    builds = _read_python_builds(fn = os.path.join(cfg['prefix'], PYTHONBUILDS_FN))
-
     if len(sys.argv) != 2:
         raise SystemError('expected 2 arguments, got other', len(sys.argv))
 
     target = sys.argv[1]
+
     if target == 'wine':
-        _run_tests_wine(builds)
+        _run_tests_wine()
     elif target == 'unix':
-        _run_tests_unix(builds)
+        _run_tests_unix()
     else:
         raise SystemError('unknown test target', target)
 
 
-def _run_tests_wine(builds: Dict[str, List[PythonVersion]]):
+def _run_tests_wine():
     """
     Runs test suite on Wine as if it was running on Windows,
     i.e. testing & verifying against original ctypes.
     No coverage recorded.
     """
+
+    cfg = EnvConfig()
+    builds = _read_python_builds(fn = os.path.join(cfg['prefix'], PYTHONBUILDS_FN))
 
     for arch, _builds in builds.items():
         for build in _builds:
@@ -81,13 +82,30 @@ def _run_tests_wine(builds: Dict[str, List[PythonVersion]]):
             )
             _run(
                 cmd = ['wenv', 'pytest', '--hypothesis-show-statistics'],
-                env = {'WENV_DEBUG': '1', 'WENV_ARCH': arch, 'WENV_PYTHONVERSION': str(build)},
+                env = {
+                    'WENV_DEBUG': '1',
+                    'WENV_ARCH': arch,
+                    'WENV_PYTHONVERSION': str(build),
+                },
             )
 
 
-def _run_tests_unix(builds: Dict[str, List[PythonVersion]]):
+def _run_tests_unix():
+    """
+    Does a single run of pytest. WENV_ARCH and WENV_PYTHONVERSION are parameterized within pytest.
+    """
 
-    pass
+    _run(
+        cmd = ['make', '_clean_py'],
+    )
+    _run(
+        cmd = ['pytest', '--cov=zugbruecke', '--cov-config=setup.cfg', '--hypothesis-show-statistics'],  # --capture=no
+        env = {
+            # 'WENV_DEBUG': '1',
+            'ZUGBRUECKE_DEBUG': '1',
+            'ZUGBRUECKE_LOG_LEVEL': '100',
+        },
+    )
 
 
 def _run(cmd: List[str], env: Optional[Dict[str, str]] = None):

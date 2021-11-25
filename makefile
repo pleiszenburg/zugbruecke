@@ -82,16 +82,7 @@ test:
 	make clean
 	python -m tests.lib.build
 	python -m tests.lib.run wine
-
-	# make _clean_py
-	# WENV_DEBUG=1 WENV_ARCH=win32 wenv pytest --hypothesis-show-statistics # no coverage
-
-	# make _clean_py
-	# WENV_DEBUG=1 WENV_ARCH=win64 wenv pytest --hypothesis-show-statistics # no coverage
-
-	# make _clean_py
-	# ZUGBRUECKE_DEBUG=1 ZUGBRUECKE_LOG_LEVEL=100 WENV_DEBUG=1 pytest --cov=zugbruecke --cov-config=setup.cfg --hypothesis-show-statistics # --capture=no
-
+	python -m tests.lib.run unix
 	# mv .coverage .coverage.e9.0 ; coverage combine ; coverage html # TODO fix!
 
 .PHONY: docs
