@@ -30,18 +30,15 @@ specific language governing rights and limitations under the License.
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-from json import loads
 import os
 from subprocess import Popen
 import sys
 from typing import Dict, List, Optional
 
-from wenv import (
-    EnvConfig,
-    PythonVersion,
-)
+from wenv import EnvConfig
 
 from .const import PYTHONBUILDS_FN
+from .pythonversion import read_python_builds
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # ROUTINES
@@ -73,7 +70,7 @@ def _run_tests_wine():
     """
 
     cfg = EnvConfig()
-    builds = _read_python_builds(fn = os.path.join(cfg['prefix'], PYTHONBUILDS_FN))
+    builds = read_python_builds(fn = os.path.join(cfg['prefix'], PYTHONBUILDS_FN))
 
     for arch, _builds in builds.items():
         for build in _builds:
@@ -125,16 +122,6 @@ def _run(cmd: List[str], env: Optional[Dict[str, str]] = None):
     if proc.returncode != 0:
         raise SystemError('test command failed', cmd, env)
 
-
-def _read_python_builds(fn: str) -> Dict[str, List[PythonVersion]]:
-
-    with open(fn, mode = "r", encoding="utf-8") as f:
-        raw = f.read()
-
-    return {
-        arch: [PythonVersion.from_config(arch, build) for build in builds]
-        for arch, builds in loads(raw).items()
-    }
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # MODULE ENTRY POINT

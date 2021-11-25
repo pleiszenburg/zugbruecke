@@ -48,6 +48,7 @@ from .const import (
     PYTHON_MINOR_MAX,
     PYTHON_MINOR_MIN,
 )
+from .pythonversion import write_python_builds
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # ROUTINES
@@ -58,7 +59,7 @@ def install():
     cfg = EnvConfig()
     builds = _get_latest_python_builds()
 
-    _write_python_builds(fn = os.path.join(cfg['prefix'], PYTHONBUILDS_FN), builds = builds)
+    write_python_builds(fn = os.path.join(cfg['prefix'], PYTHONBUILDS_FN), builds = builds)
 
     for arch in ARCHS:
         for build in builds[arch]:
@@ -104,15 +105,6 @@ def _install_env(arch: str, build: PythonVersion):
         if proc.returncode != 0:
             raise SystemError('wenv setup command failed', arch, build, cmd)
 
-
-def _write_python_builds(fn: str, builds: Dict[str, List[PythonVersion]]):
-
-    with open(fn, mode = "w", encoding="utf-8") as f:
-        f.write(dumps({
-            arch: [
-                build.as_config() for build in _builds
-            ] for arch, _builds in builds.items()
-        }))
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # MODULE ENTRY POINT
