@@ -99,7 +99,13 @@ def _run_tests_unix():
         cmd = ['make', '_clean_py'],
     )
     _run(
-        cmd = ['pytest', '--cov=zugbruecke', '--cov-config=setup.cfg', '--hypothesis-show-statistics'],  # --capture=no
+        cmd = [
+            'pytest',
+            '--cov=zugbruecke',
+            '--cov-config=setup.cfg',
+            '--hypothesis-show-statistics',
+            # '--capture=no',
+        ],
         env = {
             # 'WENV_DEBUG': '1',
             'ZUGBRUECKE_DEBUG': '1',
