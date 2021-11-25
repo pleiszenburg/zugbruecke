@@ -41,9 +41,9 @@ from ctypes import (
 import signal
 import time
 from types import FrameType
-from typing import Any, Dict, Type, Union
+from typing import Any, Optional, Type, Union
 
-from .abc import ConfigABC, DataABC, SessionClientABC
+from .abc import DataABC, SessionClientABC
 from .const import _FUNCFLAG_STDCALL, CONVENTIONS
 from .config import Config
 from .data import data_class
@@ -67,7 +67,7 @@ class SessionClient(SessionClientABC):
     Managing a zugbruecke session
     """
 
-    def __init__(self, config: Union[ConfigABC, None] = None):
+    def __init__(self, config: Optional[Config] = None):
 
         self._p = Config() if config is None else config
         self._id = self._p["id"]
@@ -268,6 +268,11 @@ class SessionClient(SessionClientABC):
         self._log.terminate()
 
         self._client_up = False
+
+    @property
+    def config(self) -> Config:
+
+        return self._p
 
     @property
     def id(self) -> str:
