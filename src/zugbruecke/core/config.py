@@ -153,7 +153,7 @@ class Config(dict, ConfigABC):
 
         raise KeyError("not a valid configuration key", key)
 
-    def export_dict(self) -> Dict[str, str]:
+    def export_dict(self) -> Dict[str, Any]:
         """
         Exports a dictionary.
         """
