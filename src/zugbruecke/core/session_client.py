@@ -92,7 +92,7 @@ class SessionClient(SessionClientABC):
         self._log.out("[session-client] STARTING ...")
         self._log.out(
             "[session-client] Configured Wine-Python version is {PYTHONVERSION:s} for {ARCH:s}.".format(
-                PYTHONVERSION=self._p["pythonversion"],
+                PYTHONVERSION=str(self._p["pythonversion"]),
                 ARCH=self._p["arch"],
             )
         )
@@ -113,7 +113,7 @@ class SessionClient(SessionClientABC):
         signal.signal(signal.SIGTERM, self.terminate)
 
         # Ensure a working Wine-Python environment
-        env = Env(**self._p.as_dict())
+        env = Env(**self._p.export_dict())
         env.ensure()
         env.setup_zugbruecke()
 
