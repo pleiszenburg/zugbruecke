@@ -31,18 +31,17 @@ specific language governing rights and limitations under the License.
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-from setuptools import find_packages, setup
 import os
-from sys import platform, version_info
 
+from setuptools import find_packages, setup
+
+from docs.version import get_version
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # SETUP
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-
-_version_ = "0.1.0"
-
+__version__ = get_version()
 
 # List all versions of Python which are supported
 python_minor_min = 6
@@ -52,11 +51,9 @@ confirmed_python_versions = [
     for minor in range(python_minor_min, python_minor_max + 1)
 ]
 
-
 # Fetch readme file
 with open(os.path.join(os.path.dirname(__file__), "README.rst")) as f:
     long_description = f.read()
-
 
 # Fetch test requirements
 with open(os.path.join(os.path.dirname(__file__), "requirements_test.txt")) as f:
@@ -64,24 +61,18 @@ with open(os.path.join(os.path.dirname(__file__), "requirements_test.txt")) as f
         rq.strip() for rq in f.read().split("\n") if len(rq.strip()) > 0
     ]
 
-
-# Just in case someone is actually running this on Windows ...
-if platform.startswith("win"):
-    raise SystemExit("You are already running Windows. No need for this package!")
-
-
 setup(
     name="zugbruecke",
     packages=find_packages("src"),
     package_dir={"": "src"},
-    version=_version_,
+    version=__version__,
     description="Calling routines in Windows DLLs from Python scripts running under Linux, MacOS or BSD",
     long_description=long_description,
     author="Sebastian M. Ernst",
     author_email="ernst@pleiszenburg.de",
     url="https://github.com/pleiszenburg/zugbruecke",
     download_url="https://github.com/pleiszenburg/zugbruecke/archive/v%s.tar.gz"
-    % _version_,
+    % __version__,
     license="LGPLv2",
     keywords=["ctypes", "wine"],
     scripts=[],
