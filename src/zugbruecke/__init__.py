@@ -39,3 +39,4 @@ del _sys
 
 from .core.config import Config
 from .core.errors import *
+from .core.wenv import Env

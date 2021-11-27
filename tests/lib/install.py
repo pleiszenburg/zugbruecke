@@ -34,7 +34,7 @@ import os
 from subprocess import Popen
 from typing import Dict, List
 
-from zugbruecke.core.wenv import Env
+from zugbruecke import Env
 
 from wenv import (
     EnvConfig,
