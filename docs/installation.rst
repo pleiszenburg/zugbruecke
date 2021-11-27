@@ -25,9 +25,7 @@ there are different ways of doing that.
 .. _Installation instructions for Mac OS X: https://wiki.winehq.org/MacOS
 .. _Installation instructions for FreeBSD: https://wiki.winehq.org/FreeBSD
 
-Currently, Wine >= 4.x is supported (tested). If you are limited to an older version of Wine such as 2.x or 3.x, you have two options: Try `an older version of this package`_ or try to set the ``pythonversion`` configuration parameter to ``3.5.4``.
-
-.. _an older version of this package: https://github.com/pleiszenburg/zugbruecke/releases/tag/v0.0.14
+Currently, Wine >= 6.x is supported (tested).
 
 Getting *zugbruecke*
 --------------------
@@ -56,15 +54,6 @@ While running ``wenv init``, the command may terminate with a ``SystemExit`` exc
 In most cases, a **clean solution** is to install ``certifi`` with pip: ``pip install -U certifi``. The ``-U`` option forces ``pip`` to update ``certifi`` if it is already installed. Once you have installed or updated ``certifi``, you can run ``wenv init`` again.
 
 On known problematic systems, you may also choose to install ``zugbruecke`` directly with ``certifi`` included: ``pip install zugbruecke[certifi]``. Notice that this may have undesired security implications.
-
-Possible problem: ``OSError: [WinError 6] Invalid handle``
-----------------------------------------------------------
-
-On older versions of Linux such as *Ubuntu 14.04* alias *Trusty Tahr* (released 2014), you may observe errors when running ``wenv python``. Most commonly, they will present themselves as ``OSError: [WinError 6] Invalid handle: 'z:\\...`` triggered by calling ``os.listdir`` in ``pip`` or ``importlib`` on folders related to ``zugbruecke``. You can easily test whether you are affected by this issue or not by running ``wenv python -c "import zugbruecke; print(dir(zugbruecke))"``. If you see the described ``OSError`` instead of meaningful output, you are affected.
-
-A **clean solution** is to upgrade to a younger version of Linux. E.g. *Ubuntu 16.04* alias *Xenial Xerus* (released 2016) is known to work.
-
-If upgrading Linux is not an option, there is a **less clean workaround**. Before running ``wenv init``, you can set the configuration option ``_issues_50_workaround`` to ``True``, see chapter on :ref:`configuration <configuration>`. If you have already initialized your *Wine Python environment* with ``wenv init``, you must remove it with ``wenv clean`` and then re-initialize it with ``wenv init``. Notice that - if you are using this workaround - removing your *Wine Python environment* with ``wenv clean`` and re-initializing it with ``wenv init`` is necessary after every update of ``zugbruecke``.
 
 Installing *zugbruecke* in development mode
 -------------------------------------------

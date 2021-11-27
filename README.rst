@@ -73,7 +73,7 @@ Prerequisites
 
 +--------------------+-------------------------------------------------------------------------------------------------------------+
 | for usage          + - `CPython`_ 3.x (tested with 3.{6,7,8,9,10})                                                                +
-|                    + - `Wine`_ 4.x (tested with regular & `staging`_) - expected to be in the user's `PATH`_                     +
+|                    + - `Wine`_ 6.x (tested with regular & `staging`_) - expected to be in the user's `PATH`_                     +
 +--------------------+-------------------------------------------------------------------------------------------------------------+
 | for tests          + - `mingw cross-compiler`_ - for building DLLs against which examples and tests can be run                   +
 +--------------------+-------------------------------------------------------------------------------------------------------------+
@@ -83,10 +83,6 @@ Prerequisites
 .. _staging: https://wine-staging.com/
 .. _PATH: https://en.wikipedia.org/wiki/PATH_(variable)
 .. _mingw cross-compiler: http://mxe.cc
-
-If you are limited to an older version of Wine such as 2.x or 3.x, see ``zugbruecke``'s `installation instructions`_ for details and workarounds.
-
-.. _installation instructions: https://zugbruecke.readthedocs.io/en/latest/installation.html
 
 Installation
 ============

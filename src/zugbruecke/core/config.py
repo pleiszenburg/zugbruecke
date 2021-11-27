@@ -148,8 +148,6 @@ class Config(dict, ConfigABC):
             return 30  # Timeout for waiting on Wine-Python start
         if key == "timeout_stop":
             return 30  # Timeout for waiting on Wine-Python stop
-        if key == "_issues_50_workaround":
-            return False  # Workaround for zugbruecke issue #50 (symlinks ...)
 
         raise KeyError("not a valid configuration key", key)
 
