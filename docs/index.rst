@@ -40,6 +40,7 @@ Please read the latter first if you have never called foreign functions with *ct
     benchmarks
     security
     bugs
+    changes
     faq
 
 `Interested in contributing?`_
