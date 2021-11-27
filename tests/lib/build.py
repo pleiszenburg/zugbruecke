@@ -34,7 +34,6 @@ import multiprocessing
 import os
 import shutil
 import subprocess
-import sys
 import tempfile
 
 from jinja2 import Template
