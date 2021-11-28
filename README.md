@@ -7,14 +7,6 @@
 	:target: http://zugbruecke.readthedocs.io/en/latest/?badge=latest
 	:alt: Documentation Status: master / release
 
-.. |build_develop| image:: https://img.shields.io/travis/pleiszenburg/zugbruecke/develop.svg?style=flat-square
-	:target: https://travis-ci.org/pleiszenburg/zugbruecke
-	:alt: Build Status: development branch
-
-.. |docs_develop| image:: https://readthedocs.org/projects/zugbruecke/badge/?version=develop&style=flat-square
-	:target: http://zugbruecke.readthedocs.io/en/develop/?badge=develop
-	:alt: Documentation Status: development branch
-
 .. |license| image:: https://img.shields.io/pypi/l/zugbruecke.svg?style=flat-square
 	:target: https://github.com/pleiszenburg/zugbruecke/blob/master/LICENSE
 	:alt: Project License: LGPLv2
