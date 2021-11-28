@@ -23,8 +23,6 @@ About Wine (from [winehq.org](https://www.winehq.org/)): *Wine (originally an ac
 
 **This project is NEITHER associated NOR affiliated in any way or form with the Wine project.**
 
-.. _winehq.org: https://www.winehq.org/
-
 ## Prerequisites
 
 | type | prerequisite | version |
