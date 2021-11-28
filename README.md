@@ -7,7 +7,7 @@
 */ˈt͡suːkˌbʁʏkə/ ([German, noun, feminine: drawbridge](https://dict.leo.org/englisch-deutsch/zugbrücke))*
 
 [![build_master](https://github.com/pleiszenburg/zugbruecke/actions/workflows/test.yaml/badge.svg?branch=master "Build Status: master / release")](https://github.com/pleiszenburg/zugbruecke/actions/workflows/test.yaml)
-[![docs_master](https://readthedocs.org/projects/zugbruecke/badge/?version=latest&style=flat-square "Documentation Status: master / release")](http://zugbruecke.readthedocs.io/en/latest/?badge=latest)
+[![docs_master](https://readthedocs.org/projects/zugbruecke/badge/?version=latest&style=flat-square "Documentation Status: master / release")](https://zugbruecke.readthedocs.io/en/latest/?badge=latest)
 [![license](https://img.shields.io/pypi/l/zugbruecke.svg?style=flat-square "Project License: LGPLv2")](https://github.com/pleiszenburg/zugbruecke/blob/master/LICENSE)
 [![status](https://img.shields.io/pypi/status/zugbruecke.svg?style=flat-square "Project Development Status")](https://github.com/pleiszenburg/zugbruecke/milestone/1)
 [![pypi_version](https://img.shields.io/pypi/v/zugbruecke.svg?style=flat-square "Available on PyPi - the Python Package Index")](https://pypi.python.org/pypi/zugbruecke)
@@ -29,7 +29,7 @@ About Wine (from [winehq.org](https://www.winehq.org/)): *Wine (originally an ac
 | --- | --- | --- |
 | user | [CPython](https://www.python.org/) | 3.x (tested with 3.{6,7,8,9,10}) |
 | user | [Wine](https://www.winehq.org/) | >= 6.x (tested with regular & [staging](https://wine-staging.com/)) - expected to be in the user's [`PATH`](https://en.wikipedia.org/wiki/PATH_(variable)) |
-| developer | [mingw cross-compiler](http://mxe.cc) | For building DLLs against which examples and tests can be run. Latest stable release. |
+| developer | [mingw cross-compiler](https://mxe.cc) | For building DLLs against which examples and tests can be run. Latest stable release. |
 
 ## Installation
 
@@ -56,20 +56,20 @@ You have just witnessed `msvcrt.dll`, Microsoft's C standard library (or Wine's 
 
 ### Interested in more?
 
-- Check the [examples](http://zugbruecke.readthedocs.io/en/stable/examples.html) in `zugbruecke`'s documentation,
+- Check the [examples](https://zugbruecke.readthedocs.io/en/stable/examples.html) in `zugbruecke`'s documentation,
 - Read [ctypes' documentation](https://docs.python.org/3/library/ctypes.html),
-- Beyond `ctypes` syntax, learn about [memory synchronization](http://zugbruecke.readthedocs.io/en/latest/memsync.html) with the `memsync` routine attribute (or)
+- Beyond `ctypes` syntax, learn about [memory synchronization](https://zugbruecke.readthedocs.io/en/latest/memsync.html) with the `memsync` routine attribute (or)
 - Have a look at `zugbruecke`'s [test suite](https://github.com/pleiszenburg/zugbruecke/tree/master/tests) showcasing its entire range of capabilities.
 
-A lot of code, which was written with `ctypes`' `cdll`, `windll` or `oledll` in mind and which runs under Windows, should run just fine with `zugbruecke` on Unix (assuming it does not use Windows features not supported by Wine). For more complex calls, [memory synchronization](http://zugbruecke.readthedocs.io/en/latest/memsync.html) is potentially necessary.
+A lot of code, which was written with `ctypes`' `cdll`, `windll` or `oledll` in mind and which runs under Windows, should run just fine with `zugbruecke` on Unix (assuming it does not use Windows features not supported by Wine). For more complex calls, [memory synchronization](https://zugbruecke.readthedocs.io/en/latest/memsync.html) is potentially necessary.
 
 ## Speed
 
-`zugbruecke` performs reasonably well given its complexity with **less than 0.2 µs overhead per call** in average on modern hardware. It is not (yet) optimized for speed. Check the latest [benchmarks](http://zugbruecke.readthedocs.io/en/stable/benchmarks.html) for more details.
+`zugbruecke` performs reasonably well given its complexity with **less than 0.2 µs overhead per call** in average on modern hardware. It is not (yet) optimized for speed. Check the latest [benchmarks](https://zugbruecke.readthedocs.io/en/stable/benchmarks.html) for more details.
 
 ## Security
 
-`zugbruecke` is **notoriously insecure**. Never, ever, run it with root / super users privileges! Do not use it where security matters! For details, check the section on [security](http://zugbruecke.readthedocs.io/en/stable/security.html) in the documentation.
+`zugbruecke` is **notoriously insecure**. Never, ever, run it with root / super users privileges! Do not use it where security matters! For details, check the section on [security](https://zugbruecke.readthedocs.io/en/stable/security.html) in the documentation.
 
 ## Need help?
 
@@ -77,18 +77,18 @@ See section on [Getting Help](https://zugbruecke.readthedocs.io/en/latest/suppor
 
 ## Bugs & Issues
 
-See section on [Bugs and Issues](http://zugbruecke.readthedocs.io/en/stable/bugs.html) on `zugbruecke`'s documentation.
+See section on [Bugs and Issues](https://zugbruecke.readthedocs.io/en/stable/bugs.html) on `zugbruecke`'s documentation.
 
 ## Miscellaneous
 
 - Full project documentation
-  - at [Read the Docs](http://zugbruecke.readthedocs.io/en/latest/)
+  - at [Read the Docs](https://zugbruecke.readthedocs.io/en/latest/)
   - at [`zugbruecke` repository](https://github.com/pleiszenburg/zugbruecke/blob/master/docs/index.rst)
 - [Authors](https://github.com/pleiszenburg/zugbruecke/blob/master/AUTHORS.rst)
 - [Change log (current)](https://github.com/pleiszenburg/zugbruecke/blob/develop/CHANGES.md) (changes in development branch since last release)
 - [Change log (past)](https://github.com/pleiszenburg/zugbruecke/blob/master/CHANGES.md) (release history)
 - [Contributing](https://github.com/pleiszenburg/zugbruecke/blob/master/CONTRIBUTING.rst) (**Contributions are highly welcomed!**)
-- [FAQ](http://zugbruecke.readthedocs.io/en/stable/faq.html)
+- [FAQ](https://zugbruecke.readthedocs.io/en/stable/faq.html)
 - [License](https://github.com/pleiszenburg/zugbruecke/blob/master/LICENSE) (**LGPL v2.1**)
 - [Long-term ideas](https://github.com/pleiszenburg/zugbruecke/milestone/2)
 - [Missing features](https://github.com/pleiszenburg/zugbruecke/issues?q=is%3Aissue+is%3Aopen+label%3A%22missing+ctypes+feature%22) (for full ctypes compatibility)
