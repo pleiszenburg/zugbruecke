@@ -52,7 +52,7 @@ confirmed_python_versions = [
 ]
 
 # Fetch readme file
-with open(os.path.join(os.path.dirname(__file__), "README.rst")) as f:
+with open(os.path.join(os.path.dirname(__file__), "README.md")) as f:
     long_description = f.read()
 
 # Fetch test requirements
@@ -68,6 +68,7 @@ setup(
     version=__version__,
     description="Calling routines in Windows DLLs from Python scripts running under Linux, MacOS or BSD",
     long_description=long_description,
+    long_description_content_type="text/markdown",
     author="Sebastian M. Ernst",
     author_email="ernst@pleiszenburg.de",
     url="https://github.com/pleiszenburg/zugbruecke",
