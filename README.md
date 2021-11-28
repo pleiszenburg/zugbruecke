@@ -8,8 +8,7 @@
 
 [![build_master](https://github.com/pleiszenburg/zugbruecke/actions/workflows/test.yaml/badge.svg?branch=master "Build Status: master / release")](https://github.com/pleiszenburg/zugbruecke/actions/workflows/test.yaml)
 [![docs_master](https://readthedocs.org/projects/zugbruecke/badge/?version=latest&style=flat-square "Documentation Status: master / release")](http://zugbruecke.readthedocs.io/en/latest/?badge=latest)
-[![license]( "")]()
-[![](https://img.shields.io/pypi/l/zugbruecke.svg?style=flat-square "Project License: LGPLv2")](https://github.com/pleiszenburg/zugbruecke/blob/master/LICENSE)
+[![license](https://img.shields.io/pypi/l/zugbruecke.svg?style=flat-square "Project License: LGPLv2")](https://github.com/pleiszenburg/zugbruecke/blob/master/LICENSE)
 [![status](https://img.shields.io/pypi/status/zugbruecke.svg?style=flat-square "Project Development Status")](https://github.com/pleiszenburg/zugbruecke/milestone/1)
 [![pypi_version](https://img.shields.io/pypi/v/zugbruecke.svg?style=flat-square "Available on PyPi - the Python Package Index")](https://pypi.python.org/pypi/zugbruecke)
 [![pypi_versions](https://img.shields.io/pypi/pyversions/zugbruecke.svg?style=flat-square "Available on PyPi - the Python Package Index")](https://pypi.python.org/pypi/zugbruecke)
