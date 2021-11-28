@@ -8,6 +8,10 @@ zugbruecke
 
 **Calling routines in Windows DLLs from Python scripts running under Linux, MacOS or BSD**
 
+*/ˈt͡suːkˌbʁʏkə/* - German, noun, feminine: `drawbridge`_
+
+.. _drawbridge: https://dict.leo.org/englisch-deutsch/zugbrücke
+
 .. |build_master| image:: https://github.com/pleiszenburg/zugbruecke/actions/workflows/test.yaml/badge.svg?branch=master
 	:target: https://github.com/pleiszenburg/zugbruecke/actions/workflows/test.yaml
 	:alt: Test Status: master / release
