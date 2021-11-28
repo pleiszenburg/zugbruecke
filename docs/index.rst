@@ -42,6 +42,7 @@ Please read the latter first if you have never called foreign functions with *ct
     bugs
     changes
     faq
+    support
 
 `Interested in contributing?`_
 
