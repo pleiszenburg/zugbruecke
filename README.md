@@ -1,3 +1,10 @@
+![zugbruecke](http://www.pleiszenburg.de/zugbruecke_logo.png)
+
+# zugbruecke
+
+**Calling routines in Windows DLLs from Python scripts running under Linux, MacOS or BSD**
+
+*/ˈt͡suːkˌbʁʏkə/ ([German, noun, feminine: drawbridge](https://dict.leo.org/englisch-deutsch/zugbrücke))*
 
 .. |build_master| image:: https://img.shields.io/travis/pleiszenburg/zugbruecke/master.svg?style=flat-square
 	:target: https://travis-ci.org/pleiszenburg/zugbruecke
@@ -23,45 +30,23 @@
 	:target: https://pypi.python.org/pypi/zugbruecke
 	:alt: Available on PyPi - the Python Package Index
 
-.. |zugbruecke_logo| image:: http://www.pleiszenburg.de/zugbruecke_logo.png
+.. |zugbruecke_logo| image::
 	:target: https://github.com/pleiszenburg/zugbruecke
 	:alt: zugbruecke repository
 
 |build_master| |docs_master| |build_develop| |docs_develop| |license| |status| |pypi_version| |pypi_versions|
 
-|zugbruecke_logo|
+## Synopsis
 
-Synopsis
-========
+**zugbruecke** is an EXPERIMENTAL **Python package** (currently in development **status 3/alpha**). It allows to **call routines in Windows DLLs from Python code running on Unices / Unix-like systems** such as Linux, MacOS or BSD. zugbruecke is designed as a **drop-in replacement for Python's standard library's ctypes module**. zugbruecke is **built on top of Wine**. A stand-alone Windows Python interpreter launched in the background is used to execute the called DLL routines. Communication between the Unix-side and the Windows/Wine-side is based on Python's build-in multiprocessing connection capability. zugbruecke has (limited) support for pointers, struct types and call-back functions. zugbruecke comes with extensive logging features allowing to debug problems associated with both itself and with Wine. zugbruecke is written using **Python 3 syntax** and primarily targets the **CPython** implementation of Python.
 
-**zugbruecke** is an EXPERIMENTAL **Python package** (currently in development **status 3/alpha**).
-It allows to **call routines in Windows DLLs from Python code running on
-Unices / Unix-like systems** such as Linux, MacOS or BSD.
-zugbruecke is designed as a **drop-in replacement for Python's standard library's ctypes module**.
-zugbruecke is **built on top of Wine**. A stand-alone Windows Python interpreter
-launched in the background is used to execute the called DLL routines.
-Communication between the Unix-side and the Windows/Wine-side is based on Python's
-build-in multiprocessing connection capability.
-zugbruecke has (limited) support for pointers, struct types and call-back functions.
-zugbruecke comes with extensive logging features allowing to debug problems
-associated with both itself and with Wine.
-zugbruecke is written using **Python 3 syntax** and primarily targets the
-**CPython** implementation of Python.
-
-About Wine (from `winehq.org`_): *Wine (originally an acronym
-for "Wine Is Not an Emulator") is a compatibility layer
-capable of running Windows applications on several POSIX-compliant operating systems,
-such as Linux, MacOS and BSD. Instead of simulating internal Windows logic like a
-virtual machine or emulator, Wine translates Windows API calls into POSIX calls
-on-the-fly, eliminating the performance and memory penalties of other methods and
-allowing you to cleanly integrate Windows applications into your desktop.*
+About Wine (from `winehq.org`_): *Wine (originally an acronym for "Wine Is Not an Emulator") is a compatibility layer capable of running Windows applications on several POSIX-compliant operating systems, such as Linux, MacOS and BSD. Instead of simulating internal Windows logic like a virtual machine or emulator, Wine translates Windows API calls into POSIX calls on-the-fly, eliminating the performance and memory penalties of other methods and allowing you to cleanly integrate Windows applications into your desktop.*
 
 **This project is NEITHER associated NOR affiliated in any way or form with the Wine project.**
 
 .. _winehq.org: https://www.winehq.org/
 
-Prerequisites
-=============
+## Prerequisites
 
 +--------------------+-------------------------------------------------------------------------------------------------------------+
 | for usage          + - `CPython`_ 3.x (tested with 3.{6,7,8,9,10})                                                                +
@@ -76,8 +61,7 @@ Prerequisites
 .. _PATH: https://en.wikipedia.org/wiki/PATH_(variable)
 .. _mingw cross-compiler: http://mxe.cc
 
-Installation
-============
+## Installation
 
 +--------------------+--------------------+-----------------------------------------------------------------------------+--------------------+
 | *branch*           + *status*           + *installation*                                                              + *documentation*    +
@@ -89,8 +73,7 @@ Installation
 
 After installing the package with ``pip``, you may choose to manually initialize the "Wine Python environment" by running ``wenv init``. If you choose not to do this, ``zugbruecke`` will take care of it during its first use.
 
-Examples
-========
+## Example
 
 Start an interactive Python session on your favorite Unix(-like) operating system and try the following:
 
@@ -104,7 +87,7 @@ Start an interactive Python session on your favorite Unix(-like) operating syste
 
 You have just witnessed ``msvcrt.dll``, Microsoft's C standard library (or Wine's implementation of it), in action on Unix.
 
-**Interested in more?**
+### Interested in more?
 
 - Check the `examples`_ in zugbruecke's documentation,
 - Read `ctypes' documentation`_,
@@ -121,8 +104,7 @@ For more complex calls, `memory synchronization`_ is potentially necessary.
 .. _test suite: https://github.com/pleiszenburg/zugbruecke/tree/master/tests
 .. _memory synchronization: http://zugbruecke.readthedocs.io/en/latest/memsync.html
 
-Speed
-=====
+## Speed
 
 zugbruecke performs reasonably well given its complexity with **less than 0.2 µs
 overhead per call** in average on modern hardware. It is not (yet) optimized for
@@ -130,8 +112,7 @@ speed. Check the latest `benchmarks`_ for more details.
 
 .. _benchmarks: http://zugbruecke.readthedocs.io/en/stable/benchmarks.html
 
-Security
-========
+## Security
 
 zugbruecke is **notoriously insecure**. Never, ever, run it with
 root / super users privileges! Do not use it where security matters!
@@ -139,15 +120,13 @@ For details, check the section on `security`_ in the documentation.
 
 .. _security: http://zugbruecke.readthedocs.io/en/stable/security.html
 
-Need help?
-==========
+## Need help?
 
 Feel free to post questions in the `GitHub issue tracker`_ of this project.
 
 .. _question: https://github.com/pleiszenburg/zugbruecke/labels/question
 
-Bugs & issues
-=============
+## Bugs & issues
 
 - Report bugs in zugbruecke here: `GitHub issue tracker`_
 - Report bugs in ctypes here: `Python tracker`_
@@ -160,8 +139,7 @@ Make sure you have read the chapter on `bugs`_ in zugbruecke's documentation.
 .. _WineHQ Bug Tracking System: https://bugs.winehq.org/
 .. _bugs: http://zugbruecke.readthedocs.io/en/stable/bugs.html
 
-Miscellaneous
-=============
+## Miscellaneous
 
 - Full project documentation
 
@@ -190,8 +168,7 @@ Miscellaneous
 .. _Long-term ideas: https://github.com/pleiszenburg/zugbruecke/milestone/2
 .. _Upstream issues: https://github.com/pleiszenburg/zugbruecke/issues?q=is%3Aissue+is%3Aopen+label%3Aupstream
 
-For production environments
-===========================
+## For production environments
 
 **DO NOT run this code (as-is) in production environments unless you feel that you really know what you are doing or unless you are absolutely desperate! Being experimental in nature and of alpha quality, it is prone to fail in a number of unpredictable ways, some of which might not be obvious or might not even show any (intermediately) recognizable symptoms at all! You might end up with plain wrong, nonsensical results without noticing it!**
 
