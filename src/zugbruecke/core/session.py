@@ -139,6 +139,7 @@ class CtypesSession(CtypesSessionABC):
         self._cdll = LibraryLoader(self.CDLL)
         self._windll = LibraryLoader(self.WinDLL)
         self._oledll = LibraryLoader(self.OleDLL)
+        self._pydll = LibraryLoader(self.PyDLL)
 
         # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         # CFUNCTYPE & WINFUNCTYPE
@@ -532,6 +533,14 @@ class CtypesSession(CtypesSessionABC):
 
         return self._oledll
 
+    @property
+    def pydll(self) -> LibraryLoader:
+        """
+        ``zugbruecke`` drop-in replacement for LibraryLoader(PyDLL)
+        """
+
+        return self._pydll
+
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # more static components from ctypes
@@ -618,7 +627,6 @@ _ctypes_public = [
     "memset",
     "pointer",
     "py_object",
-    "pydll",
     "pythonapi",
     "resize",
     "set_errno",
