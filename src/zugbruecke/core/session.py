@@ -30,7 +30,8 @@ specific language governing rights and limitations under the License.
 # IMPORT: Standard library
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-from typing import Any, Callable, Optional
+from types import TracebackType
+from typing import Any, Callable, Optional, Type, Union
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -202,6 +203,34 @@ class CtypesSession(CtypesSessionABC):
             ARCH = self._zb_current_session.config['arch'],
             BUILD = str(self._zb_current_session.config['pythonversion']),
         )
+
+    # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    # context
+    # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+    def __enter__(self) -> CtypesSessionABC:
+        """
+        Context manager entry point.
+        """
+
+        return self
+
+    def __exit__(
+        self,
+        exc_type: Union[Type, None],
+        exc_value: Union[Exception, None],
+        traceback: Union[TracebackType, None],
+    ):
+        """
+        Context manager exit point.
+
+        Args:
+            exc_type : Type of exception
+            exc_value : Actual exception object
+            traceback : Related traceback object
+        """
+
+        self._zb_terminate()
 
     # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     # Allow readonly access to session states
