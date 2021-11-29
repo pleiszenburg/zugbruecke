@@ -87,7 +87,6 @@ setup(
         "Sphinx", "sphinx_rtd_theme", "sphinx-autodoc-typehints", "myst-parser",
         "twine", "wheel",
         ],
-        "certifi": ["certifi"],
     },
     zip_safe=False,
     entry_points={},
