@@ -324,14 +324,21 @@ class CtypesSession(CtypesSessionABC):
 
     def CDLL(
         self,
-        name,
-        mode=DEFAULT_MODE,
-        handle=None,  # TODO ignored, see #54
-        use_errno=False,
-        use_last_error=False,
+        name: str,
+        mode: int = DEFAULT_MODE,
+        handle: Any = None,  # TODO ignored, see #54
+        use_errno: bool = False,
+        use_last_error: bool = False,
     ):
         """
         Drop-in replacement for ``ctypes.CDLL``
+
+        args:
+            name : Pathname of the shared library (DLL file)
+            mode : Ignored on Windows, therefore ignored by ``zugbruecke``
+            handle : Ignored by ``zugbruecke``, see issue #54
+            use_errno : Enables a ``ctypes`` mechanism that allows accessing the system errno error number in a safe way.
+            use_last_error : Enables the same mechanism for the Windows error code which is managed by the ``GetLastError()`` and ``SetLastError()`` Windows API functions.
         """
 
         return self._zb_current_session.load_library(
@@ -342,17 +349,23 @@ class CtypesSession(CtypesSessionABC):
             use_last_error=use_last_error,
         )
 
-    # Wrapper for WinDLL class
     def WinDLL(
         self,
-        name,
-        mode=DEFAULT_MODE,
-        handle=None,  # TODO ignored, see #54
-        use_errno=False,
-        use_last_error=False,
+        name: str,
+        mode: int = DEFAULT_MODE,
+        handle: Any = None,  # TODO ignored, see #54
+        use_errno: bool = False,
+        use_last_error: bool = False,
     ):
         """
         Drop-in replacement for ``ctypes.WinDLL``
+
+        args:
+            name : Pathname of the shared library (DLL file)
+            mode : Ignored on Windows, therefore ignored by ``zugbruecke``
+            handle : Ignored by ``zugbruecke``, see issue #54
+            use_errno : Enables a ``ctypes`` mechanism that allows accessing the system errno error number in a safe way.
+            use_last_error : Enables the same mechanism for the Windows error code which is managed by the ``GetLastError()`` and ``SetLastError()`` Windows API functions.
         """
 
         return self._zb_current_session.load_library(
@@ -363,17 +376,23 @@ class CtypesSession(CtypesSessionABC):
             use_last_error=use_last_error,
         )
 
-    # Wrapper for OleDLL class
     def OleDLL(
         self,
-        name,
-        mode=DEFAULT_MODE,
-        handle=None,  # TODO ignored, see #54
-        use_errno=False,
-        use_last_error=False,
+        name: str,
+        mode: int = DEFAULT_MODE,
+        handle: Any = None,  # TODO ignored, see #54
+        use_errno: bool = False,
+        use_last_error: bool = False,
     ):
         """
-        Drop-in replacement for ``ctypes.OleDLL``
+        Drop-in replacement for ``ctypes.CDLL``
+
+        args:
+            name : Pathname of the shared library (DLL file)
+            mode : Ignored on Windows, therefore ignored by ``zugbruecke``
+            handle : Ignored by ``zugbruecke``, see issue #54
+            use_errno : Enables a ``ctypes`` mechanism that allows accessing the system errno error number in a safe way.
+            use_last_error : Enables the same mechanism for the Windows error code which is managed by the ``GetLastError()`` and ``SetLastError()`` Windows API functions.
         """
 
         return self._zb_current_session.load_library(
