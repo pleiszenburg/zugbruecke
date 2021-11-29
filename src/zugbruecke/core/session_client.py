@@ -41,7 +41,7 @@ from ctypes import (
 import signal
 import time
 from types import FrameType
-from typing import Any, Optional, Type, Union
+from typing import Any, Optional, Type
 
 from .abc import DataABC, SessionClientABC
 from .const import _FUNCFLAG_STDCALL, CONVENTIONS
@@ -229,6 +229,9 @@ class SessionClient(SessionClientABC):
 
     def set_parameter(self, key: str, value: Any):
 
+        if key == "id":
+            raise ValueError("session id can not be changed")
+
         self._p[key] = value
         self._set_parameter_on_server(key, value)
 
@@ -241,10 +244,8 @@ class SessionClient(SessionClientABC):
 
     def terminate(
         self,
-        signum: Union[int, None] = None,  # unsused, but required for signal handling
-        frame: Union[
-            FrameType, None
-        ] = None,  # unsused, but required for signal handling
+        signum: Optional[int] = None,  # Only required for for signal handling.
+        frame: Optional[FrameType] = None,  # Only required for for signal handling.
     ):
 
         if not self._client_up:
