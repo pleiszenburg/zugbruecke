@@ -320,6 +320,10 @@ class CtypesSession(CtypesSessionABC):
     class HRESULT:  # EXPORT
         """
         Stub, not implemented. Required for COM. Special form of ``ctypes.c_long`` (32 bit).
+
+        args:
+            args : positional arguments
+            kwargs : keyword arguments
         """
 
         def __init__(self, *args: Any, **kwargs: Any):
@@ -342,7 +346,11 @@ class CtypesSession(CtypesSessionABC):
         """
         ``zugbruecke`` wrapper for ``ctypes.FormatError``, untested.
 
-        Returns a textual description of the error code code. If no error code is specified, the last error code is used by calling the Windows api function GetLastError.
+        args:
+            args : positional arguments
+            kwargs : keyword arguments
+        returns:
+            A textual description of the error code code. If no error code is specified, the last error code is used by calling the Windows api function GetLastError.
         """
 
         return self._current_session.FormatError(*args, **kwargs)
@@ -351,7 +359,11 @@ class CtypesSession(CtypesSessionABC):
         """
         ``zugbruecke`` wrapper for ``ctypes.get_last_error``, untested.
 
-        Returns the current value of the ctypes-private copy of the system ``LastError`` variable in the calling thread.
+        args:
+            args : positional arguments
+            kwargs : keyword arguments
+        returns:
+            The current value of the ctypes-private copy of the system ``LastError`` variable in the calling thread.
         """
 
         return self._current_session.get_last_error(*args, **kwargs)
@@ -360,7 +372,11 @@ class CtypesSession(CtypesSessionABC):
         """
         ``zugbruecke`` wrapper for ``ctypes.GetLastError``, untested.
 
-        Returns the last error code set by Windows in the calling thread. This function calls the Windows ``GetLastError()`` function directly, it does not return the ctypes-private copy of the error code.
+        args:
+            args : positional arguments
+            kwargs : keyword arguments
+        returns:
+            The last error code set by Windows in the calling thread. This function calls the Windows ``GetLastError()`` function directly, it does not return the ctypes-private copy of the error code.
         """
 
         return self._current_session.GetLastError(*args, **kwargs)
@@ -369,7 +385,13 @@ class CtypesSession(CtypesSessionABC):
         """
         ``zugbruecke`` wrapper for ``ctypes.set_last_error``, untested.
 
-        Set the current value of the ctypes-private copy of the system ``LastError`` variable in the calling thread to value and return the previous value.
+        Set the current value of the ctypes-private copy of the system ``LastError`` variable in the calling thread to valueself.
+
+        args:
+            args : positional arguments
+            kwargs : keyword arguments
+        returns:
+            The previous value.
         """
 
         return self._current_session.set_last_error(*args, **kwargs)
@@ -378,7 +400,13 @@ class CtypesSession(CtypesSessionABC):
         """
         ``zugbruecke`` wrapper for ``ctypes.WinError``, untested.
 
-        This function is probably the worst-named thing in ctypes. It creates an instance of ``OSError``.
+        This function is probably the worst-named thing in ctypes.
+
+        args:
+            args : positional arguments
+            kwargs : keyword arguments
+        returns:
+            An instance of ``OSError``.
         """
 
         return self._current_session.WinError(*args, **kwargs)
@@ -391,10 +419,11 @@ class CtypesSession(CtypesSessionABC):
         """
         ``zugbruecke`` drop-in replacement for ``ctypes.CFUNCTYPE``
 
-        restype : ctypes type of return value
-        argtypes : ctypes types of arguments
-        use_errno : If true, the ctypes private copy of the system errno variable is exchanged with the real errno value before and after the call.
-        use_last_error : Does the same for the Windows error code.
+        args:
+            restype : ctypes type of return value
+            argtypes : ctypes types of arguments
+            use_errno : If true, the ctypes private copy of the system errno variable is exchanged with the real errno value before and after the call.
+            use_last_error : Does the same for the Windows error code.
         """
 
         return self._current_session.CFUNCTYPE(restype, *argtypes, use_errno = use_errno, use_last_error = use_last_error)
@@ -403,10 +432,11 @@ class CtypesSession(CtypesSessionABC):
         """
         ``zugbruecke`` drop-in replacement for ``ctypes.WINFUNCTYPE``
 
-        restype : ctypes type of return value
-        argtypes : ctypes types of arguments
-        use_errno : If true, the ctypes private copy of the system errno variable is exchanged with the real errno value before and after the call.
-        use_last_error : Does the same for the Windows error code.
+        args:
+            restype : ctypes type of return value
+            argtypes : ctypes types of arguments
+            use_errno : If true, the ctypes private copy of the system errno variable is exchanged with the real errno value before and after the call.
+            use_last_error : Does the same for the Windows error code.
         """
 
         return self._current_session.WINFUNCTYPE(restype, *argtypes, use_errno = use_errno, use_last_error = use_last_error)
