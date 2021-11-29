@@ -53,7 +53,7 @@ During every import of ``zugbruecke.ctypes``, *zugbruecke* starts the *Windows* 
 
 .. _usecases:
 
-Use cases
+Use Cases
 ---------
 
 - Quickly calling routines in proprietary DLLs.
