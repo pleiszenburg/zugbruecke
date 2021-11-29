@@ -141,14 +141,6 @@ class CtypesSession(CtypesSessionABC):
         self._oledll = LibraryLoader(self.OleDLL)
         self._pydll = LibraryLoader(self.PyDLL)
 
-        # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-        # CFUNCTYPE & WINFUNCTYPE
-        # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-        # CFUNCTYPE and WINFUNCTYPE function pointer factories
-        self.CFUNCTYPE = self._current_session.CFUNCTYPE
-        self.WINFUNCTYPE = self._current_session.WINFUNCTYPE
-
         # Used as cache by CFUNCTYPE and WINFUNCTYPE
         self._c_functype_cache = self._current_session.data.cache_dict["func_type"][
             _FUNCFLAG_CDECL
@@ -392,6 +384,34 @@ class CtypesSession(CtypesSessionABC):
         return self._current_session.WinError(*args, **kwargs)
 
     # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    # CFUNCTYPE & WINFUNCTYPE
+    # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+    def CFUNCTYPE(self, restype: Any, *argtypes: Any, use_errno: bool = False, use_last_error: bool = False) -> Type:
+        """
+        ``zugbruecke`` drop-in replacement for ``ctypes.CFUNCTYPE``
+
+        restype : ctypes type of return value
+        argtypes : ctypes types of arguments
+        use_errno : If true, the ctypes private copy of the system errno variable is exchanged with the real errno value before and after the call.
+        use_last_error : Does the same for the Windows error code.
+        """
+
+        return self._current_session.CFUNCTYPE(restype, *argtypes, use_errno = use_errno, use_last_error = use_last_error)
+
+    def WINFUNCTYPE(self, restype: Any, *argtypes: Any, use_errno: bool = False, use_last_error: bool = False) -> Type:
+        """
+        ``zugbruecke`` drop-in replacement for ``ctypes.WINFUNCTYPE``
+
+        restype : ctypes type of return value
+        argtypes : ctypes types of arguments
+        use_errno : If true, the ctypes private copy of the system errno variable is exchanged with the real errno value before and after the call.
+        use_last_error : Does the same for the Windows error code.
+        """
+
+        return self._current_session.WINFUNCTYPE(restype, *argtypes, use_errno = use_errno, use_last_error = use_last_error)
+
+    # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     # Wrapper around DLL / shared object interface classes
     # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -512,7 +532,7 @@ class CtypesSession(CtypesSessionABC):
     @property
     def cdll(self) -> LibraryLoader:
         """
-        ``zugbruecke`` drop-in replacement for LibraryLoader(CDLL)
+        ``zugbruecke`` drop-in replacement for ``LibraryLoader(CDLL)`` aka ``ctypes.cdll``
         """
 
         return self._cdll
@@ -520,7 +540,7 @@ class CtypesSession(CtypesSessionABC):
     @property
     def windll(self) -> LibraryLoader:
         """
-        ``zugbruecke`` drop-in replacement for LibraryLoader(WinDLL)
+        ``zugbruecke`` drop-in replacement for ``LibraryLoader(WinDLL)`` aka ``ctypes.windll``
         """
 
         return self._windll
@@ -528,7 +548,7 @@ class CtypesSession(CtypesSessionABC):
     @property
     def oledll(self) -> LibraryLoader:
         """
-        ``zugbruecke`` drop-in replacement for LibraryLoader(OleDLL)
+        ``zugbruecke`` drop-in replacement for ``LibraryLoader(OleDLL)`` aka ``ctypes.oledll``
         """
 
         return self._oledll
@@ -536,7 +556,7 @@ class CtypesSession(CtypesSessionABC):
     @property
     def pydll(self) -> LibraryLoader:
         """
-        ``zugbruecke`` drop-in replacement for LibraryLoader(PyDLL)
+        ``zugbruecke`` drop-in replacement for ``LibraryLoader(PyDLL)`` aka ``ctypes.pydll``
         """
 
         return self._pydll
