@@ -42,7 +42,11 @@ zugbruecke
 User's guide
 ------------
 
-*zugbruecke* is a drop-in replacement for *ctypes* with minimal, *ctypes*-compatible syntax extensions. This manual describes what makes *zugbruecke* special and how it differs from *ctypes*. It does NOT substitute the `ctypes documentation`_. Please read the latter first if you have never called foreign functions with *ctypes* from *Python* scripts.
+*zugbruecke* is a drop-in replacement for *ctypes* with minimal, *ctypes*-compatible syntax extensions.
+
+.. warning::
+
+    This manual describes what makes *zugbruecke* special and how it differs from *ctypes*. It does **NOT** substitute the `ctypes documentation`_. Please read the latter first if you have never called foreign functions with *ctypes* from *Python* scripts.
 
 .. _ctypes documentation: https://docs.python.org/3/library/ctypes.html?highlight=ctypes#module-ctypes
 
