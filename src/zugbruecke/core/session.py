@@ -196,7 +196,10 @@ class CtypesSession(CtypesSessionABC):
     # repr
     # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-    def __repr__(self):
+    def __repr__(self) -> str:
+        """
+        String representation for interactive use
+        """
 
         return '<CtypesSession id={ID:s} arch={ARCH:s} build={BUILD:s} client_up={CLIENT_UP:s} client_up={SERVER_UP:s}>'.format(
             ID = self._zb_current_session.id,
@@ -243,6 +246,9 @@ class CtypesSession(CtypesSessionABC):
         """
         Regular ``ctypes`` has a submodule named ``ctypes.util``. In ``zugbruecke``, this functionality is bound to a session.
         On a per-session level, it is exposed via this attribute.
+
+        returns:
+            Drop-in replacement for ``ctypes.util``
         """
 
         return self._util
@@ -253,14 +259,26 @@ class CtypesSession(CtypesSessionABC):
 
     @property
     def _zb_id(self) -> str:
+        """
+        Session ID string
+        """
+
         return self._zb_current_session.id
 
     @property
     def _zb_client_up(self) -> bool:
+        """
+        Client status
+        """
+
         return self._zb_current_session.client_up
 
     @property
     def _zb_server_up(self) -> bool:
+        """
+        Server status
+        """
+
         return self._zb_current_session.server_up
 
     # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -269,24 +287,41 @@ class CtypesSession(CtypesSessionABC):
 
     @staticmethod
     def DllCanUnloadNow():  # EXPORT
-        pass  # TODO stub - required for COM
+        """
+        Stub, not implemented. Required for COM.
+        """
+
+        raise NotImplementedError()
 
     @staticmethod
     def DllGetClassObject(rclsid, riid, ppv):  # EXPORT
-        pass  # TODO stub - required for COM
+        """
+        Stub, not implemented. Required for COM.
+        """
+
+        raise NotImplementedError()
 
     class HRESULT:  # EXPORT
-        pass  # TODO stub - special form of c_long, will require changes to argument parser
+        """
+        Stub, not implemented. Required for COM. Special form of ``ctypes.c_long`` (32 bit).
+        """
+
+        def __init__(self, *args: Any, **kwargs: Any):
+
+            raise NotImplementedError() # NOTE will require changes to argument parser
 
     @staticmethod
     def _check_HRESULT(result):  # EXPORT
-        pass  # TODO stub - method for HRESULT, checks error bit, raises error if true. Needs reimplementation.
+        """
+        Stub, not implemented. Required for COM. Method for HRESULT, checks error bit, raises error if true.
+        """
+
+        raise NotImplementedError() # NOTE needs reimplementation
 
     # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     # Wrapper around DLL / shared object interface classes
     # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-    # Wrapper for CDLL class
     def CDLL(
         self,
         name,
@@ -295,6 +330,9 @@ class CtypesSession(CtypesSessionABC):
         use_errno=False,
         use_last_error=False,
     ):
+        """
+        Drop-in replacement for ``ctypes.CDLL``
+        """
 
         return self._zb_current_session.load_library(
             name=name,
@@ -313,6 +351,9 @@ class CtypesSession(CtypesSessionABC):
         use_errno=False,
         use_last_error=False,
     ):
+        """
+        Drop-in replacement for ``ctypes.WinDLL``
+        """
 
         return self._zb_current_session.load_library(
             name=name,
@@ -331,6 +372,9 @@ class CtypesSession(CtypesSessionABC):
         use_errno=False,
         use_last_error=False,
     ):
+        """
+        Drop-in replacement for ``ctypes.OleDLL``
+        """
 
         return self._zb_current_session.load_library(
             name=name,
