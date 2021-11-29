@@ -135,6 +135,11 @@ class CtypesSession(CtypesSessionABC):
             find_msvcrt=self._current_session.find_msvcrt,
         )
 
+        # Library loader objects
+        self._cdll = LibraryLoader(self.CDLL)
+        self._windll = LibraryLoader(self.WinDLL)
+        self._oledll = LibraryLoader(self.OleDLL)
+
         # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         # CFUNCTYPE & WINFUNCTYPE
         # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -151,14 +156,6 @@ class CtypesSession(CtypesSessionABC):
             "func_type"
         ][_FUNCFLAG_STDCALL]
 
-        # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-        # Set up and expose dll library loader objects
-        # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-        # Set up and expose dll library loader objects
-        self.cdll = LibraryLoader(self.CDLL)
-        self.windll = LibraryLoader(self.WinDLL)
-        self.oledll = LibraryLoader(self.OleDLL)
 
     # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     # repr
@@ -506,6 +503,35 @@ class CtypesSession(CtypesSessionABC):
         """
 
         raise NotImplementedError()
+
+    # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    # Library loader objects
+    # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+    @property
+    def cdll(self) -> LibraryLoader:
+        """
+        ``zugbruecke`` drop-in replacement for LibraryLoader(CDLL)
+        """
+
+        return self._cdll
+
+    @property
+    def windll(self) -> LibraryLoader:
+        """
+        ``zugbruecke`` drop-in replacement for LibraryLoader(WinDLL)
+        """
+
+        return self._windll
+
+    @property
+    def oledll(self) -> LibraryLoader:
+        """
+        ``zugbruecke`` drop-in replacement for LibraryLoader(OleDLL)
+        """
+
+        return self._oledll
+
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # more static components from ctypes
