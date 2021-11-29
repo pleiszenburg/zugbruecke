@@ -125,40 +125,14 @@ class CtypesSession(CtypesSessionABC):
 
     def __init__(self, config: Optional[Config] = None):
 
-        # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-        # zugbruecke session client and session interface
-        # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
         # Start new zugbruecke session
-        self._zb_current_session = SessionClient(config=config)
+        self._current_session = SessionClient(config=config)
 
-        # Offer access to session internals
-        self._zb_get_parameter = self._zb_current_session.get_parameter
-        self._zb_set_parameter = self._zb_current_session.set_parameter
-        self._zb_terminate = self._zb_current_session.terminate
-
-        # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-        # Routines only availabe on Wine / Windows - accessed via server
-        # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-        self.FormatError = self._zb_current_session.FormatError
-
-        self.get_last_error = self._zb_current_session.get_last_error
-
-        self.GetLastError = self._zb_current_session.GetLastError
-
-        self.set_last_error = self._zb_current_session.set_last_error
-
-        self.WinError = self._zb_current_session.WinError
-
-        # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         # Routines from ctypes.util
-        # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
         self._util = _util(
-            session_id=self._zb_current_session.id,
-            find_library=self._zb_current_session.find_library,
-            find_msvcrt=self._zb_current_session.find_msvcrt,
+            session_id=self._current_session.id,
+            find_library=self._current_session.find_library,
+            find_msvcrt=self._current_session.find_msvcrt,
         )
 
         # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -166,23 +140,16 @@ class CtypesSession(CtypesSessionABC):
         # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
         # CFUNCTYPE and WINFUNCTYPE function pointer factories
-        self.CFUNCTYPE = self._zb_current_session.CFUNCTYPE
-        self.WINFUNCTYPE = self._zb_current_session.WINFUNCTYPE
+        self.CFUNCTYPE = self._current_session.CFUNCTYPE
+        self.WINFUNCTYPE = self._current_session.WINFUNCTYPE
 
         # Used as cache by CFUNCTYPE and WINFUNCTYPE
-        self._c_functype_cache = self._zb_current_session.data.cache_dict["func_type"][
+        self._c_functype_cache = self._current_session.data.cache_dict["func_type"][
             _FUNCFLAG_CDECL
         ]
-        self._win_functype_cache = self._zb_current_session.data.cache_dict[
+        self._win_functype_cache = self._current_session.data.cache_dict[
             "func_type"
         ][_FUNCFLAG_STDCALL]
-
-        # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-        # Wine-related stuff
-        # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-        self._zb_path_unix_to_wine = self._zb_current_session.path_unix_to_wine
-        self._zb_path_wine_to_unix = self._zb_current_session.path_wine_to_unix
 
         # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         # Set up and expose dll library loader objects
@@ -203,11 +170,11 @@ class CtypesSession(CtypesSessionABC):
         """
 
         return '<CtypesSession id={ID:s} arch={ARCH:s} build={BUILD:s} client_up={CLIENT_UP:s} client_up={SERVER_UP:s}>'.format(
-            ID = self._zb_current_session.id,
-            ARCH = self._zb_current_session.config['arch'],
-            BUILD = str(self._zb_current_session.config['pythonversion']),
-            CLIENT_UP = str(self._zb_current_session.client_up),
-            SERVER_UP = str(self._zb_current_session.server_up),
+            ID = self._current_session.id,
+            ARCH = self._current_session.config['arch'],
+            BUILD = str(self._current_session.config['pythonversion']),
+            CLIENT_UP = str(self._current_session.client_up),
+            SERVER_UP = str(self._current_session.server_up),
         )
 
     # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -236,7 +203,7 @@ class CtypesSession(CtypesSessionABC):
             traceback : Related traceback object
         """
 
-        self._zb_terminate()
+        self.zb_terminate()
 
     # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     # Allow readonly access to session states
@@ -249,7 +216,7 @@ class CtypesSession(CtypesSessionABC):
         On a per-session level, it is exposed via this attribute.
 
         returns:
-            Drop-in replacement for ``ctypes.util``
+            Drop-in replacement for ``ctypes.util``. Offers ``zugbruecke`` wrappers for ``find_library`` and ``find_msvcrt``.
         """
 
         return self._util
@@ -258,29 +225,87 @@ class CtypesSession(CtypesSessionABC):
     # Allow readonly access to session states
     # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+    def zb_get_parameter(self, key: str) -> Any:
+        """
+        Reads configuration parameter of this session
+
+        args:
+            key : Name of configuration parameter
+        returns:
+            Value for configuration parameter
+        """
+
+        return self._current_session.get_parameter(key = key)
+
+    def zb_set_parameter(self, key: str, value: Any):
+        """
+        Changes configuration parameter of this session (both on Unix/client and Wine/server side)
+
+        args:
+            key : Name of configuration parameter
+            value : New value for configuration parameter
+        """
+
+        self._current_session.set_parameter(key = key, value = value)
+
+    def zb_terminate(self):
+        """
+        This method can be used to manually terminate a session. It will quit the *Windows* *Python* interpreter running in the background. Once terminated, a session can not be re-started. Any handles on DLLs and their routines derived from this session will become useless.
+        """
+
+        self._current_session.terminate()
+
     @property
-    def _zb_id(self) -> str:
+    def zb_id(self) -> str:
         """
         Session ID string
         """
 
-        return self._zb_current_session.id
+        return self._current_session.id
 
     @property
-    def _zb_client_up(self) -> bool:
+    def zb_client_up(self) -> bool:
         """
         Client status
         """
 
-        return self._zb_current_session.client_up
+        return self._current_session.client_up
 
     @property
-    def _zb_server_up(self) -> bool:
+    def zb_server_up(self) -> bool:
         """
         Server status
         """
 
-        return self._zb_current_session.server_up
+        return self._current_session.server_up
+
+    # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    # Windows vs. Unix paths
+    # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+    def zb_path_unix_to_wine(self, path: str) -> str:
+        """
+        Path conversion, Unix to Windows/Wine
+
+        args:
+            path : Unix path
+        returns:
+            Windows/Wine path
+        """
+
+        return self._current_session.path_unix_to_wine(path)
+
+    def zb_path_wine_to_unix(self, path: str) -> str:
+        """
+        Path conversion, Windows/Wine to Unix
+
+        args:
+            path : Windows/Wine path
+        returns:
+            Unix path
+        """
+
+        self._current_session.path_wine_to_unix(path)
 
     # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     # Routines only availabe on Wine / Windows, currently stubbed in zugbruecke
@@ -320,6 +345,55 @@ class CtypesSession(CtypesSessionABC):
         raise NotImplementedError() # NOTE needs reimplementation
 
     # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    # Routines only availabe on Wine / Windows - accessed via server
+    # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+    def FormatError(self, *args: Any, **kwargs: Any) -> Any:
+        """
+        ``zugbruecke`` wrapper for ``ctypes.FormatError``, untested.
+
+        Returns a textual description of the error code code. If no error code is specified, the last error code is used by calling the Windows api function GetLastError.
+        """
+
+        return self._current_session.FormatError(*args, **kwargs)
+
+    def get_last_error(self, *args: Any, **kwargs: Any) -> Any:
+        """
+        ``zugbruecke`` wrapper for ``ctypes.get_last_error``, untested.
+
+        Returns the current value of the ctypes-private copy of the system ``LastError`` variable in the calling thread.
+        """
+
+        return self._current_session.get_last_error(*args, **kwargs)
+
+    def GetLastError(self, *args: Any, **kwargs: Any) -> Any:
+        """
+        ``zugbruecke`` wrapper for ``ctypes.GetLastError``, untested.
+
+        Returns the last error code set by Windows in the calling thread. This function calls the Windows ``GetLastError()`` function directly, it does not return the ctypes-private copy of the error code.
+        """
+
+        return self._current_session.GetLastError(*args, **kwargs)
+
+    def set_last_error(self, *args: Any, **kwargs: Any) -> Any:
+        """
+        ``zugbruecke`` wrapper for ``ctypes.set_last_error``, untested.
+
+        Set the current value of the ctypes-private copy of the system ``LastError`` variable in the calling thread to value and return the previous value.
+        """
+
+        return self._current_session.set_last_error(*args, **kwargs)
+
+    def WinError(self, *args: Any, **kwargs: Any) -> Any:
+        """
+        ``zugbruecke`` wrapper for ``ctypes.WinError``, untested.
+
+        This function is probably the worst-named thing in ctypes. It creates an instance of ``OSError``.
+        """
+
+        return self._current_session.WinError(*args, **kwargs)
+
+    # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     # Wrapper around DLL / shared object interface classes
     # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -344,7 +418,7 @@ class CtypesSession(CtypesSessionABC):
             winmode : Ignored by ``zugbruecke``. Used on Windows to specify how the library is loaded (since mode is ignored)
         """
 
-        return self._zb_current_session.load_library(
+        return self._current_session.load_library(
             name=name,
             convention="cdll",
             mode=mode,
@@ -373,7 +447,7 @@ class CtypesSession(CtypesSessionABC):
             winmode : Ignored by ``zugbruecke``. Used on Windows to specify how the library is loaded (since mode is ignored)
         """
 
-        return self._zb_current_session.load_library(
+        return self._current_session.load_library(
             name=name,
             convention="windll",
             mode=mode,
@@ -402,7 +476,7 @@ class CtypesSession(CtypesSessionABC):
             winmode : Ignored by ``zugbruecke``. Used on Windows to specify how the library is loaded (since mode is ignored)
         """
 
-        return self._zb_current_session.load_library(
+        return self._current_session.load_library(
             name=name,
             convention="oledll",
             mode=mode,
