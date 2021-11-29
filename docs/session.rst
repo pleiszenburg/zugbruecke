@@ -24,8 +24,15 @@ You may choose to run more than one session at a time for more advanced problems
 
 .. _sessionclass:
 
-Class: ``zugbruecke.ctypes_session``
+Class: ``zugbruecke.CtypesSession``
 ------------------------------------
+
+
+
+.. autoclass:: zugbruecke.CtypesSession
+    :members:
+
+
 
 By creating an instance of this class, a new session can be started. The number of instances/sessions is only (theoretically) limited by the amount of available memory and by the number of available network ports on the host system (two ports per instance are required). The :ref:`constructor can be configured <configconstructor>`. The following example illustrates the life cycle of a session object:
 
