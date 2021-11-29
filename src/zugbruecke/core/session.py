@@ -198,7 +198,7 @@ class CtypesSession(CtypesSessionABC):
 
     def __repr__(self) -> str:
         """
-        String representation for interactive use
+        ``zugbruecke`` session string representation for interactive use
         """
 
         return '<CtypesSession id={ID:s} arch={ARCH:s} build={BUILD:s} client_up={CLIENT_UP:s} client_up={SERVER_UP:s}>'.format(
@@ -215,7 +215,7 @@ class CtypesSession(CtypesSessionABC):
 
     def __enter__(self) -> CtypesSessionABC:
         """
-        Context manager entry point.
+        Context manager entry point for ``zugbruecke`` session.
         """
 
         return self
@@ -227,7 +227,7 @@ class CtypesSession(CtypesSessionABC):
         traceback: Union[TracebackType, None],
     ):
         """
-        Context manager exit point.
+        Context manager exit point for ``zugbruecke`` session.
 
         Args:
             exc_type : Type of exception
@@ -332,7 +332,7 @@ class CtypesSession(CtypesSessionABC):
         winmode: Optional[int] = None,
     ):
         """
-        Drop-in replacement for ``ctypes.CDLL``
+        ``zugbruecke`` drop-in replacement for ``ctypes.CDLL``
 
         args:
             name : Pathname of the shared library (DLL file)
@@ -361,7 +361,7 @@ class CtypesSession(CtypesSessionABC):
         winmode: Optional[int] = None,
     ):
         """
-        Drop-in replacement for ``ctypes.WinDLL``
+        ``zugbruecke`` drop-in replacement for ``ctypes.WinDLL``
 
         args:
             name : Pathname of the shared library (DLL file)
@@ -390,7 +390,7 @@ class CtypesSession(CtypesSessionABC):
         winmode: Optional[int] = None,
     ):
         """
-        Drop-in replacement for ``ctypes.CDLL``
+        ``zugbruecke`` drop-in replacement for ``ctypes.CDLL``
 
         args:
             name : Pathname of the shared library (DLL file)
@@ -419,7 +419,7 @@ class CtypesSession(CtypesSessionABC):
         winmode: Optional[int] = None,
     ):
         """
-        Stub, not implemented. Drop-in replacement for ``ctypes.PyDLL``
+        Stub, not implemented. ``zugbruecke`` drop-in replacement for ``ctypes.PyDLL``
 
         args:
             name : Pathname of the shared library (DLL file)
