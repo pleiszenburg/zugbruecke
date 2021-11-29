@@ -70,7 +70,6 @@ class Config(dict, ConfigABC):
         "dir",
         "timeout_start",
         "timeout_stop",
-        "_issues_50_workaround",
     )
 
     def __init__(self, **override: Any):
