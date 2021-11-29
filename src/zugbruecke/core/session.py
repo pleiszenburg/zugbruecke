@@ -198,10 +198,12 @@ class CtypesSession(CtypesSessionABC):
 
     def __repr__(self):
 
-        return '<CtypesSession id={ID:s} arch={ARCH:s} build={BUILD:s}>'.format(
+        return '<CtypesSession id={ID:s} arch={ARCH:s} build={BUILD:s} client_up={CLIENT_UP:s} client_up={SERVER_UP:s}>'.format(
             ID = self._zb_current_session.id,
             ARCH = self._zb_current_session.config['arch'],
             BUILD = str(self._zb_current_session.config['pythonversion']),
+            CLIENT_UP = str(self._zb_current_session.client_up),
+            SERVER_UP = str(self._zb_current_session.server_up),
         )
 
     # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
