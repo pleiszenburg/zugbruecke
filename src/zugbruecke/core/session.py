@@ -52,8 +52,9 @@ from ctypes import _FUNCFLAG_CDECL, DEFAULT_MODE, LibraryLoader
 # IMPORT: zugbruecke core and missing ctypes flags
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-from .abc import ConfigABC, CtypesSessionABC
+from .abc import CtypesSessionABC
 from .session_client import SessionClient
+from .config import Config
 from .const import _FUNCFLAG_STDCALL  # EXPORT
 from .typeguard import typechecked
 
@@ -122,7 +123,7 @@ class CtypesSession(CtypesSessionABC):
     # constructor
     # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-    def __init__(self, config: Optional[ConfigABC] = None):
+    def __init__(self, config: Optional[Config] = None):
 
         # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         # zugbruecke session client and session interface
