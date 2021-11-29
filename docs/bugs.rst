@@ -8,8 +8,8 @@
 	single: ctypes
 	single: wine
 
-Bugs
-====
+Bugs & Known Issues
+===================
 
 Please report bugs in *zugbruecke* in *zugbruecke*'s `GitHub issue tracker`_.
 
