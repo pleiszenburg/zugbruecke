@@ -32,6 +32,7 @@ Significant changes were mandatory for allowing to **cleanup a lot of old code**
 - FEATURE: Dropped support for CPython <= 3.5.
 - FEATURE: Added support for Wine >= 6.0.
 - FEATURE: Dropped support for Wine <= 5, most prominently Wine 4.
+- FEATURE: `zugbruecke.CtypesSession` objects can be managed by context manager statements (`with`).
 - FIX: `zugbruecke` did not capture and forward data coming from Windows DLLs and binaries through `stdout` and `stderr`(running with Wine) most of the time.
 - FIX: A proper `TimeoutError` is raised (instead of a `SyntaxError`) if `zugbruecke`'s server component does not start.
 - FIX: `zugbruecke` did not actually check properly if its server component had terminated when a session was terminated. The reliability of relevant termination code has been significantly improved.
