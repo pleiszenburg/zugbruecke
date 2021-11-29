@@ -96,6 +96,10 @@ class Config(dict, ConfigABC):
         if "id" not in self.keys():
             self["id"] = generate_session_id()  # Generate unique session id
 
+    def __repr__(self) -> str:
+
+        return f"<Config {super().__repr__():s}>"
+
     def __getitem__(self, key: str) -> Any:
         """
         Returns values from the following sources in the following order:
