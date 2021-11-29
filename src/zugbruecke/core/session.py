@@ -305,7 +305,7 @@ class CtypesSession(CtypesSessionABC):
             Unix path
         """
 
-        self._current_session.path_wine_to_unix(path)
+        return self._current_session.path_wine_to_unix(path)
 
     # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     # Routines only availabe on Wine / Windows, currently stubbed in zugbruecke
