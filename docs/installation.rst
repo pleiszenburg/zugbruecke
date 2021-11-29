@@ -51,7 +51,7 @@ After installing the package with ``pip``, you may choose to manually :ref:`init
 
 If you are encountering any problems, see :ref:`section on bugs and known issues <bugs>`.
 
-Installing *zugbruecke* in development mode
+Installing *zugbruecke* in Development Mode
 -------------------------------------------
 
 If you are interested in contributing to *zugbruecke*, you might want to install it in development mode. You can find the latest instructions on how to do this in the `CONTRIBUTING file`_ of this project on *Github*.
