@@ -49,20 +49,20 @@ def run_tests():
     Dispatcher: Wine/Unix
     """
 
-    if len(sys.argv) != 2:
-        raise SystemError('expected 2 arguments, got other', len(sys.argv))
+    if len(sys.argv) < 2:
+        raise SystemError('expected at least 2 arguments, got other', len(sys.argv))
 
     target = sys.argv[1]
 
     if target == 'wine':
-        _run_tests_wine()
+        _run_tests_wine(*sys.argv[2:])
     elif target == 'unix':
-        _run_tests_unix()
+        _run_tests_unix(*sys.argv[2:])
     else:
         raise SystemError('unknown test target', target)
 
 
-def _run_tests_wine():
+def _run_tests_wine(*args: str):
     """
     Runs test suite on Wine as if it was running on Windows,
     i.e. testing & verifying against original ctypes.
@@ -78,7 +78,7 @@ def _run_tests_wine():
                 cmd = ['make', '_clean_py'],
             )
             _run(
-                cmd = ['wenv', 'pytest', '--hypothesis-show-statistics'],
+                cmd = ['wenv', 'pytest', '--hypothesis-show-statistics', *args],
                 env = {
                     'WENV_DEBUG': '1',
                     'WENV_ARCH': arch,
@@ -87,7 +87,7 @@ def _run_tests_wine():
             )
 
 
-def _run_tests_unix():
+def _run_tests_unix(*args: str):
     """
     Does a single run of pytest. ARCH and PYTHONVERSION are parameterized within pytest.
     """
@@ -102,6 +102,7 @@ def _run_tests_unix():
             '--cov-config=setup.cfg',
             '--hypothesis-show-statistics',
             # '--capture=no',
+            *args,
         ],
         env = {
             'WENV_DEBUG': '1',
