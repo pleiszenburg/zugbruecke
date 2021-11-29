@@ -75,6 +75,28 @@ Because of the drop-in replacement design of *zugbruecke*, it is therefore possi
 	else:
 		raise SystemError('unsupported platform')
 
+Shared Objects and DLLs
+-----------------------
+
+There is no harm in calling into both Shared Object files and DLLs from the same code base. Be aware that you have to deal with two versions of ``ctypes``:
+
+.. code:: python
+
+	import zugbruecke.ctypes as ctypes_windows # for DLLs
+	import ctypes as ctypes_unix # for shared objects
+
+32 bit and 64 bit DLLs
+----------------------
+
+Thanks to Wine, which can run both in 32 bit and in 64 bit mode, it is perfectly possible to call into both 32 bit and 64 bit DLLs - even side by side. For this and similar use cases, *zugbruecke* allows to start :ref:`multiple sessions <session>` simultaneously, each with its own separate :ref:`configuration <configuration>`. Instead of importing ``zugbruecke.ctypes``, you must create instances from the :class:`zugbruecke.CtypesSession` class. Consider the following example:
+
+.. code:: python
+
+	from zugbruecke import CtypesSession, Config
+
+	ctypes_windows32 = CtypesSession(Config(arch = 'win32'))
+	ctypes_windows64 = CtypesSession(Config(arch = 'win64'))
+
 Further Examples
 ----------------
 
