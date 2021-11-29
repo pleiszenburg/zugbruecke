@@ -65,13 +65,13 @@ User's guide
     session
     memsync
     configuration
+    interoperability
+    wineenv
 
 .. toctree::
     :maxdepth: 2
     :caption: Advanced
 
-    interoperability
-    wineenv
     benchmarks
     security
     bugs
