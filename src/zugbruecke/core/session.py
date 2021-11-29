@@ -30,7 +30,7 @@ specific language governing rights and limitations under the License.
 # IMPORT: Standard library
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-from typing import Optional
+from typing import Any, Callable, Optional
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -58,12 +58,55 @@ from .typeguard import typechecked
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# UTILS-DROP-IN-REPLACEMENT CLASS, BOUND TO SESSION
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+@typechecked
+class _util:
+    """
+    Session-bound wrapper for ``ctypes.util``. Immutable.
+    """
+
+    def __init__(self, session_id: str, find_library: Callable, find_msvcrt: Callable):
+
+        self._id = session_id
+        self._find_library = find_library
+        self._find_msvcrt = find_msvcrt
+
+    def __repr__(self) -> str:
+
+        return f'<CtypesSession.util id={self._id:s}>'
+
+    def find_library(self, *args: Any, **kwargs: Any) -> Any:
+
+        return self._find_library(*args, **kwargs)
+
+    def find_msvcrt(self, *args: Any, **kwargs: Any) -> Any:
+
+        return self._find_msvcrt(*args, **kwargs)
+
+    @property
+    def zb_id(self) -> str:
+        "id of bound CtypesSession instance"
+
+        return self._id
+
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # SESSION CTYPES-DROP-IN-REPLACEMENT CLASS
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
 @typechecked
 class CtypesSession(CtypesSessionABC):
+    """
+    Represents one "ctypes session", i.e. one Wine Python process, related infrastructure
+    and its independent configuration. Mutliple sessions can run simultaneously. Mutable.
+
+    args:
+        config : Session's configuration. If not provided, settings will be read from configuration files and environment variables, see :class:`zugbruecke.Config`.
+    """
 
     # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     # static components
@@ -110,11 +153,11 @@ class CtypesSession(CtypesSessionABC):
         # Routines from ctypes.util
         # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-        class _util:
-            find_msvcrt = staticmethod(self._zb_current_session.find_msvcrt)
-            find_library = staticmethod(self._zb_current_session.find_library)
-
-        self._util = _util
+        self._util = _util(
+            session_id=self._zb_current_session.id,
+            find_library=self._zb_current_session.find_library,
+            find_msvcrt=self._zb_current_session.find_msvcrt,
+        )
 
         # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         # CFUNCTYPE & WINFUNCTYPE
@@ -154,10 +197,24 @@ class CtypesSession(CtypesSessionABC):
 
     def __repr__(self):
 
-        return '<CtypesSession arch={ARCH:s} build={BUILD:s}>'.format(
+        return '<CtypesSession id={ID:s} arch={ARCH:s} build={BUILD:s}>'.format(
+            ID = self._zb_current_session.id,
             ARCH = self._zb_current_session.config['arch'],
             BUILD = str(self._zb_current_session.config['pythonversion']),
         )
+
+    # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    # Allow readonly access to session states
+    # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+    @property
+    def util(self) -> _util:
+        """
+        Regular ``ctypes`` has a submodule named ``ctypes.util``. In ``zugbruecke``, this functionality is bound to a session.
+        On a per-session level, it is exposed via this attribute.
+        """
+
+        return self._util
 
     # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     # Allow readonly access to session states

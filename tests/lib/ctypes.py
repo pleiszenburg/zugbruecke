@@ -65,7 +65,7 @@ elif platform.startswith("win"):
     import ctypes as _ctypes
     from ctypes import util
 
-    _ctypes._util = util
+    _ctypes.util = util
 
     CTYPES = {
         arch: [_ctypes]
