@@ -329,6 +329,7 @@ class CtypesSession(CtypesSessionABC):
         handle: Any = None,  # TODO ignored, see #54
         use_errno: bool = False,
         use_last_error: bool = False,
+        winmode: Optional[int] = None,
     ):
         """
         Drop-in replacement for ``ctypes.CDLL``
@@ -339,6 +340,7 @@ class CtypesSession(CtypesSessionABC):
             handle : Ignored by ``zugbruecke``, see issue #54
             use_errno : Enables a ``ctypes`` mechanism that allows accessing the system errno error number in a safe way.
             use_last_error : Enables the same mechanism for the Windows error code which is managed by the ``GetLastError()`` and ``SetLastError()`` Windows API functions.
+            winmode : Ignored by ``zugbruecke``. Used on Windows to specify how the library is loaded (since mode is ignored)
         """
 
         return self._zb_current_session.load_library(
@@ -356,6 +358,7 @@ class CtypesSession(CtypesSessionABC):
         handle: Any = None,  # TODO ignored, see #54
         use_errno: bool = False,
         use_last_error: bool = False,
+        winmode: Optional[int] = None,
     ):
         """
         Drop-in replacement for ``ctypes.WinDLL``
@@ -366,6 +369,7 @@ class CtypesSession(CtypesSessionABC):
             handle : Ignored by ``zugbruecke``, see issue #54
             use_errno : Enables a ``ctypes`` mechanism that allows accessing the system errno error number in a safe way.
             use_last_error : Enables the same mechanism for the Windows error code which is managed by the ``GetLastError()`` and ``SetLastError()`` Windows API functions.
+            winmode : Ignored by ``zugbruecke``. Used on Windows to specify how the library is loaded (since mode is ignored)
         """
 
         return self._zb_current_session.load_library(
@@ -383,6 +387,7 @@ class CtypesSession(CtypesSessionABC):
         handle: Any = None,  # TODO ignored, see #54
         use_errno: bool = False,
         use_last_error: bool = False,
+        winmode: Optional[int] = None,
     ):
         """
         Drop-in replacement for ``ctypes.CDLL``
@@ -393,6 +398,7 @@ class CtypesSession(CtypesSessionABC):
             handle : Ignored by ``zugbruecke``, see issue #54
             use_errno : Enables a ``ctypes`` mechanism that allows accessing the system errno error number in a safe way.
             use_last_error : Enables the same mechanism for the Windows error code which is managed by the ``GetLastError()`` and ``SetLastError()`` Windows API functions.
+            winmode : Ignored by ``zugbruecke``. Used on Windows to specify how the library is loaded (since mode is ignored)
         """
 
         return self._zb_current_session.load_library(
@@ -410,6 +416,7 @@ class CtypesSession(CtypesSessionABC):
         handle: Any = None,  # TODO ignored, see #54
         use_errno: bool = False,
         use_last_error: bool = False,
+        winmode: Optional[int] = None,
     ):
         """
         Stub, not implemented. Drop-in replacement for ``ctypes.PyDLL``
@@ -420,6 +427,7 @@ class CtypesSession(CtypesSessionABC):
             handle : Ignored by ``zugbruecke``, see issue #54
             use_errno : Enables a ``ctypes`` mechanism that allows accessing the system errno error number in a safe way.
             use_last_error : Enables the same mechanism for the Windows error code which is managed by the ``GetLastError()`` and ``SetLastError()`` Windows API functions.
+            winmode : Ignored by ``zugbruecke``. Used on Windows to specify how the library is loaded (since mode is ignored)
         """
 
         raise NotImplementedError()
