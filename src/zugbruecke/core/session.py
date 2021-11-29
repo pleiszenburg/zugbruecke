@@ -30,7 +30,7 @@ specific language governing rights and limitations under the License.
 # IMPORT: Standard library
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-from typing import Union
+from typing import Optional
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -78,7 +78,7 @@ class CtypesSession(CtypesSessionABC):
     # constructor
     # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-    def __init__(self, config: Union[ConfigABC, None] = None):
+    def __init__(self, config: Optional[ConfigABC] = None):
 
         # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         # zugbruecke session client and session interface
