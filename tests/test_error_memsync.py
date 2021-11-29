@@ -110,6 +110,6 @@ def test_memsync_on_callback_not_list(arch, conv, ctypes, dll_handle):
         with pytest.raises(
             (DataMemsyncsyntaxError, TypeError), match="memsync attribute must be a list"
         ):
-            ctypes._zb_current_session.data.pack_definition_memsync(
+            ctypes._current_session.data.pack_definition_memsync(
                 conveyor_belt.memsync
             )
