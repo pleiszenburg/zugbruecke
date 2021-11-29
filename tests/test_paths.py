@@ -49,7 +49,7 @@ if PLATFORM == "unix":
 def test_path_unix_to_wine_abs(arch, conv, ctypes, dll_path):
 
     PATH_A = ("/foo/bar", "Z:\\foo\\bar")
-    assert ctypes._zb_path_unix_to_wine(PATH_A[0]) == PATH_A[1]
+    assert ctypes.zb_path_unix_to_wine(PATH_A[0]) == PATH_A[1]
 
 
 @pytest.mark.skipif(PLATFORM != "unix", reason="only relevant for unix side")
@@ -59,7 +59,7 @@ def test_path_unix_to_wine_abs(arch, conv, ctypes, dll_path):
 def test_path_unix_to_wine_rel(arch, conv, ctypes, dll_path):
 
     PATH_A = ("foo/bar", "foo\\bar")
-    path_out = ctypes._zb_path_unix_to_wine(PATH_A[0])
+    path_out = ctypes.zb_path_unix_to_wine(PATH_A[0])
     assert path_out[:3] == "Z:\\"
     assert path_out.endswith(PATH_A[1])
     assert len(path_out) > len(PATH_A[1]) + len("Z:\\")
@@ -72,7 +72,7 @@ def test_path_unix_to_wine_rel(arch, conv, ctypes, dll_path):
 def test_path_wine_to_unix_abs(arch, conv, ctypes, dll_path):
 
     PATH_A = "C:\\"
-    path_out = ctypes._zb_path_wine_to_unix(PATH_A)
+    path_out = ctypes.zb_path_wine_to_unix(PATH_A)
     assert path_out.startswith("/")
     assert path_out.endswith("/c:/")
     assert len(path_out) > len("/") + len("/c:/")
@@ -86,4 +86,4 @@ def test_path_wine_to_unix_fail(arch, conv, ctypes, dll_path):
 
     PATH_A = "a" * 270
     with pytest.raises(WineError):
-        path_out = ctypes._zb_path_wine_to_unix(PATH_A)
+        _ = ctypes.zb_path_wine_to_unix(PATH_A)
