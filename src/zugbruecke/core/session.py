@@ -403,6 +403,26 @@ class CtypesSession(CtypesSessionABC):
             use_last_error=use_last_error,
         )
 
+    def PyDLL(
+        self,
+        name: str,
+        mode: int = DEFAULT_MODE,
+        handle: Any = None,  # TODO ignored, see #54
+        use_errno: bool = False,
+        use_last_error: bool = False,
+    ):
+        """
+        Stub, not implemented. Drop-in replacement for ``ctypes.PyDLL``
+
+        args:
+            name : Pathname of the shared library (DLL file)
+            mode : Ignored on Windows, therefore ignored by ``zugbruecke``
+            handle : Ignored by ``zugbruecke``, see issue #54
+            use_errno : Enables a ``ctypes`` mechanism that allows accessing the system errno error number in a safe way.
+            use_last_error : Enables the same mechanism for the Windows error code which is managed by the ``GetLastError()`` and ``SetLastError()`` Windows API functions.
+        """
+
+        raise NotImplementedError()
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # more static components from ctypes
@@ -442,7 +462,6 @@ _ctypes_public = [
     "LittleEndianStructure",
     "POINTER",
     "PYFUNCTYPE",
-    "PyDLL",
     "RTLD_GLOBAL",
     "RTLD_LOCAL",
     "SetPointerType",  # Python 3.6: Deprecated XXX
