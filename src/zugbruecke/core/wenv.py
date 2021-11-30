@@ -61,10 +61,23 @@ def _symlink(src, dest):
 
 class Env(_Env):
     """
-    Wine Python environment
+    Represents one Wine Python environment. Derived from ``wenv.Env``. Mutable.
+
+    args:
+        kwargs : An arbitrary number of keyword arguments matching valid ``wenv`` configuration options.
     """
 
     def setup_zugbruecke(self):
+        """
+        Creates symlinks from ``site-packages`` folder in the *Unix Python* environment
+        into the ``site-packages`` folder in the *Windows Python* environment for the following packages:
+
+        - ``zugbruecke``
+        - ``wenv``
+
+        Should any of the above packages be updated on the Unix side,
+        the update automatically becomes available on the Wine side.
+        """
 
         self._setup_package(name = "zugbruecke")
         self._setup_package(name = "wenv")
