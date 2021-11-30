@@ -158,7 +158,7 @@ Let's assume you are confronted with a regular *Python* (3) string. With the hel
 
 	some_string = 'zategahuba'
 
-The DLL function's definition looks like this:
+The DLL function is defined as follows:
 
 .. code:: C
 
