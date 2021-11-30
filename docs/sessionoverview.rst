@@ -167,7 +167,14 @@ If you are using functions or classes, which are bound to a session, always use 
 Configuring Sessions
 --------------------
 
-Session configuration parameters can be altered in multiple ways. For details on configuration options, see :ref:`chapter on configuration <configuration>`. First, a session can be configured at the time of its creation by passing a :class:`zugbruecke.Config` object with custom options into it:
+Session configuration parameters can be altered in multiple ways. For details on configuration options, see :ref:`chapter on configuration <configuration>`.
+
+.. _configconstructor:
+
+At Time of Creation
+^^^^^^^^^^^^^^^^^^^
+
+First, a session can be configured at the time of its creation by passing a :class:`zugbruecke.Config` object with custom options into it:
 
 .. code:: python
 
@@ -175,6 +182,11 @@ Session configuration parameters can be altered in multiple ways. For details on
 
 	ctypes_32bit = CtypesSession(Config(arch = "win32")) # for 32 bit DLLs
 	ctypes_64bit = CtypesSession(Config(arch = "win64")) # for 64 bit DLLs
+
+.. _reconfiguration:
+
+At Run-Time
+^^^^^^^^^^^
 
 Second, a session can be reconfigured during run-time.
 
