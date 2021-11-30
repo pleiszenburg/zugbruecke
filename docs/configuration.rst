@@ -15,7 +15,7 @@ Configuration
 
 *zugbruecke* can automatically configure itself or can be configured manually. The configuration allows you to fine-tune its verbosity, architecture and other relevant parameters on a per-session basis. By importing ``zugbruecke.ctypes``, a default session is started and configured automatically. Alternatively, you can create and configure your own sessions manually by creating instances of :class:`zugbruecke.CtypesSession`. See the :ref:`chapter on the session model <session>` for details. Sessions can be configured :ref:`at the time of their creation <configconstructor>` as well as :ref:`at run-time <reconfiguration>`.
 
-Configuration files
+Configuration Files
 -------------------
 
 *zugbruecke* uses ``JSON`` configuration files named ``.zugbruecke.json``. They are expected in the following locations (in that order):
@@ -29,7 +29,7 @@ There are two optional additions to the above rules: ``/etc/zugbruecke`` and the
 
 Parameters passed directly into the *zugbruecke* session constructor will always be given priority. Beyond that, missing parameters are being looked for location after location in the above listed places. If, after checking for configuration files in all those locations, there are still parameters left undefined, *zugbruecke* will fill them with its defaults. A parameter found in a location higher in the list will always be given priority over a the same parameter with different content found in a location further down the list.
 
-Configuration environment variables
+Configuration Environment Variables
 -----------------------------------
 
 Independently of the ``ZUGBRUECKE`` environment variable, all configurable parameters of ``zugbruecke`` can directly be overridden with environment variables. All values coming from configuration files as well as re-configurations at run-time will then be ignored for this particular parameter. Take the name of any configurable parameter, convert it to upper case and prefix it with ``ZUGBRUECKE``. Example: The ``arch`` parameter can be overridden by declaring the ``ZUGBRUECKE_ARCH`` environment variable.
