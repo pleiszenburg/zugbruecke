@@ -74,14 +74,6 @@ Configuration Parameters
       - ``str``
       - Version / build of *Windows Python*, >= 3.6.
       - ``3.7.4``
-    * - dir
-      - ``str``
-      - Location of *Wine* profile folder (``WINEPREFIX``)
-      - ``{sys.prefix}/shared/wenv/{arch}``
-    * - pythonprefix
-      - ``str``
-      - Location for the *Wine Python environment*
-      - ``{dir}/{pythonversion}``
     * - timeout_start
       - ``int``
       - Wait seconds for *Windows Python* to show up.
@@ -100,18 +92,6 @@ Configuration Parameters
 	Please note that 3.5 and earlier are not supported. Note that you can only specify versions for which an "Windows embeddable zip file" is available, see `python.org`_.
 
 .. _python.org: https://www.python.org/downloads/windows/
-
-
-``wineprefix`` (str)
-^^^^^^^^^^^^^^^^^^^^
-
-This parameter can be used to point to a custom ``WINEPREFIX`` outside of ``dir`` if desired.
-
-``winedebug`` (str)
-^^^^^^^^^^^^^^^^^^^
-
-*Wine* allows to control the level of debugging output through the ``WINEDEBUG`` environment variable. *zugbruecke* will by default disable all output by setting it to ``-all``. A custom value can be specified in the ``winedebug`` configuration parameter.
-
 
 The ``zugbruecke.Config`` class
 -------------------------------

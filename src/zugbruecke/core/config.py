@@ -67,7 +67,6 @@ class Config(dict, ConfigABC):
         "log_level",
         "arch",
         "pythonversion",
-        "dir",
         "timeout_start",
         "timeout_stop",
     )
@@ -145,8 +144,6 @@ class Config(dict, ConfigABC):
             return "win32"  # Define Wine & Wine-Python architecture
         if key == "pythonversion":
             return "3.7.4"  # Define Wine-Python version
-        if key == "dir":
-            return self._get_default_config_directory()  # Default config directory
         if key == "timeout_start":
             return 30  # Timeout for waiting on Wine-Python start
         if key == "timeout_stop":
