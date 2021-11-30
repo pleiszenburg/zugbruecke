@@ -29,11 +29,11 @@ Bound, Stable Functions and Classes
 
 The following notable ``ctypes`` functions and classes and their functionality are bound to individual sessions and therefore depend on their internal state:
 
-- ``CDLL`` and ``cdll``
-- ``WinDLL`` and ``windll``
-- ``CFUNCTYPE`` and ``WINFUNCTYPE``
+- :meth:`zugbruecke.CtypesSession.CDLL` and :meth:`zugbruecke.CtypesSession.cdll`
+- :meth:`zugbruecke.CtypesSession.WinDLL` and :meth:`zugbruecke.CtypesSession.windll`
+- :meth:`zugbruecke.CtypesSession.CFUNCTYPE` and :meth:`zugbruecke.CtypesSession.WINFUNCTYPE`
 
-In addition, the functions from ``ctypes.util`` are also bound to individual sessions:
+In addition, the functions from :attr:`zugbruecke.CtypesSession.util` are also bound to individual sessions:
 
 - ``find_library``
 - ``find_msvcrt``
