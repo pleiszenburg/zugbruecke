@@ -1,8 +1,7 @@
 The ``memsync`` attribute
 =========================
 
-``memsync`` is a list of dictionaries. Every dictionary represents one memory
-section, which must be kept in sync. It has the following keys:
+``memsync`` must be of type ``list[dict]``, i.e. a list of dictionaries. Each dictionary represents one memory section, which must be kept in sync. It can have the following keys:
 
 * ``p`` (:ref:`path to pointer <pathpointer>`)
 * ``l`` (:ref:`path to length <pathlength>`, optional)
@@ -12,88 +11,90 @@ section, which must be kept in sync. It has the following keys:
 * ``f`` (:ref:`custom length function <length function>`, optional)
 * ``_c`` (:ref:`custom data type <customtype>`, optional)
 
-.. _pathpointer:
+Paths
+-----
 
-Key: ``p``, path to pointer (list of int and/or str)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-This parameter describes where in the arguments or return value
-(along the lines of ``argtypes`` and ``restype``)
-*zugbruecke*'s parser can find the pointer, which it is expected to handle.
-Consider the following example:
+``memsync`` describes items within function arguments and return values based on "paths". Consider the following example:
 
 .. code:: python
 
-	# arg nr:    0        1        2
+	# arg index: 0        1        2
 	some_routine(param_a, param_b, param_c)
 
-If ``param_b`` was the pointer, ``p`` would be ``[1]`` (a list with a single int),
-referring to the second argument of ``some_routine`` (counted from zero).
+If ``param_b`` was the item in question, its path would be ``[1]``, a list with a single integer, referring to the second argument of ``some_routine`` counted from zero.
 
-The following more complex example illustrates why ``p`` is a list actually
-representing something like a "path":
+The following more complex example illustrates why the list is actually representing something like a "path":
 
 .. code:: python
 
 	class some_struct(Structure):
 		_fields_ = [
 			('field_a', POINTER(c_float)),
-			('field_b', c_int)
-			]
+			('field_b', c_int),
+		]
 
-	# arg nr:          0        1        2        3
+	# arg index:       0        1        2        3
 	some_other_routine(param_a, param_b, param_c, param_d)
 
-Let's assume that ``param_a`` is of type ``some_struct`` and ``field_a`` contains
-the pointer. ``p`` would look like this: ``[0, 'field_a']``. The pointer is found
-in ``field_a`` of the first parameter of ``some_other_routine``, ``param_a``.
+Let's assume that ``param_a`` is of type ``some_struct`` and ``field_a`` contains the target item. The path would look as follows: ``[0, 'field_a']``. The target item is found in ``field_a`` of the first parameter of ``some_other_routine`` counted from zero, ``param_a``.
 
-Return values or elements within can be targeted by setting the first element
-of a path to ``'r'`` (instead of an integer targeting an argument).
+Return values or elements within can be targeted by setting the first element of a path to ``'r'``, instead of an integer targeting an argument.
+
+.. _pathpointer:
+
+Key: ``p``, path to pointer
+---------------------------
+
+- Type: ``list[str | int]``
+
+This parameter describes where *zugbruecke*'s parser can find the pointer, which it is expected to handle.
 
 .. _pathlength:
 
-Key: ``l``, path to length (list of int and/or str OR tuple of lists of int and/or str) (optional)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Key: ``l``, path to length
+--------------------------
 
-This parameter works just like the :ref:`path to pointer <pathpointer>` parameter.
-It is expected to tell the parser, where it can find a number (int) which represents
-the length of the memory block or, alternatively, arguments for a custom length function.
+- Type: ``list[str | int] | tuple[list[str | int]]``
+- Optional, if alternatives are provided.
 
-It is expected to be either a single path list like ``[0, 'field_a']`` or a tuple
-of multiple (or even zero) path lists, if the optional ``f`` key (custom length function) is defined.
+This parameter describes where *zugbruecke*'s parser can find a number (integer) which represents the length of the memory block or, alternatively, arguments for a custom length function.
+
+It is expected to be either a single path list like ``[0, 'field_a']`` or a tuple of multiple (or even zero) path lists, if the optional ``f`` key (custom length function) is defined.
 
 .. _nullstring:
 
-Key: ``n``, NULL-terminated string flag (optional)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Key: ``n``, NULL-terminated string flag
+---------------------------------------
 
-Can be set to ``True`` if a NULL-terminated string is passed as an argument.
-``memsync`` will automatically determine the length of the string, so no
-extra information on its length (through ``l`` is required).
+- Type: ``bool``
+- Default: ``False``
+- Optional
+
+Can be set to ``True`` if a NULL-terminated string is passed as an argument. ``memsync`` will automatically determine the length of the string, so no extra information on its length is required. ``l`` can be omitted.
 
 .. _unicodechar:
 
-Key: ``w``, Unicode character flag (optional)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Key: ``w``, Unicode character flag
+----------------------------------
 
-If a Unicode string (buffer) is passed into a function, this parameter must be
-set to ``True``. If not specified, it will default to ``False``.
+- Type: ``bool``
+- Default: ``False``
+- Optional
+
+If a Unicode string (buffer) is passed into a function, this parameter must be set to ``True``. Only relevant if ``n`` is also set to ``True``.
 
 .. _pointertype:
 
-Key: ``t``, data type of pointer (PyCSimpleType or PyCStructType) (optional)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Key: ``t``, data type of pointer
+--------------------------------
 
-This field expects a string representing the name of a ctypes datatype.
-If you want to specify a custom structure type, you simply specify its class name as a string instead.
+- Type: ``str`` (name of a PyCSimpleType or PyCStructType type)
+- Default: ``'c_ubyte'``
+- Optional
 
-This parameter will be used by ``ctypes.sizeof`` for determining the datatype's size in bytes.
-The result is then multiplied with the ``length`` to get an actual size of the
-memory block in bytes. If it is not explicitly defined, it defaults to ``'c_ubyte'``.
+This field expects a string representing the name of a *ctypes* datatype. If you want to specify a custom structure type, you simply specify its class name as a string instead. This parameter will be used by ``ctypes.sizeof`` for determining the datatype's size in bytes. The result is then multiplied with the ``length`` to get an actual size of the memory block in bytes.
 
-For details on ``sizeof``, consult the `Python documentation on sizeof`_.
-It will accept `fundamental types`_ as well as `structure types`_.
+For details on ``sizeof``, consult the `Python documentation on sizeof`_. It will accept `fundamental types`_ as well as `structure types`_.
 
 .. _Python documentation on sizeof: https://docs.python.org/3/library/ctypes.html?highlight=ctypes#ctypes.sizeof
 .. _fundamental types: https://docs.python.org/3/library/ctypes.html?highlight=ctypes#fundamental-data-types
@@ -101,19 +102,20 @@ It will accept `fundamental types`_ as well as `structure types`_.
 
 .. _length function:
 
-Key: ``f``, custom function for computing the length of the memory segment (optional)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Key: ``f``, custom function for computing the length of the memory segment
+--------------------------------------------------------------------------
 
-This field can be used to plug in a string, which can be parsed into a function or
-lambda expression for computing the ``length`` of the memory section from multiple parameters.
-The function is expected to accept a number of arguments equal to the number of elements
-of the tuple of length paths defined in ``l``.
+- Type: ``str`` (code of self-contained lambda or Python function)
+- Optional
+
+This field can be used to provide in a string, which can be parsed into a function or lambda expression for computing the ``length`` of the memory section from multiple parameters. If provided, the function receives the data gathered via the path(s) provided in ``l`` as arguments.
 
 .. _customtype:
 
-Key: ``_c``, custom data type (optional)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Key: ``_c``, custom data type
+-----------------------------
 
-If you are using a custom non-*ctypes* datatype, which offers a ``from_param`` method,
-you must specify it here. This applies when you construct your own array types
-or use *numpy* types for instance.
+- Type: ``type``
+- Optional
+
+If you are using a custom non-*ctypes* datatype, which offers a ``from_param`` method, you must specify it here. This applies if you are constructing your own array types or use *numpy* types for instance.
