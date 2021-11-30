@@ -53,7 +53,7 @@ Alternatively, you can drop a configuration file named ``.zugbruecke.json`` into
 
 The higher the log level, the more output you will get. Default is 0 for no logs. The on-screen log is color-coded for readability. The log can also, in addition, be written to disk, where every log item with plenty of meta data is represented as a one-line JSON object for easy parsing and analysis of larger log files. For more configuration options check the :ref:`chapter on configuration <configuration>`.
 
-As a last resort, you can activate additional debugging features intended for developers by setting the ``ZUGBRUECKE_DEBUG`` environment variable to ``1``. For this to work, the `typeguard package`_ must be present on your system.
+As a last resort, you can activate additional debugging features intended for developers by setting the ``ZUGBRUECKE_DEBUG`` environment variable to ``1`` before importing ``zugbruecke`` or any component of it. For this to work, the `typeguard package`_ must be present on your system.
 
 .. _typeguard package: https://typeguard.readthedocs.io/
 
