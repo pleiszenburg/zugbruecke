@@ -43,22 +43,22 @@ Untested, Bound Functions and Classes
 
 The following functions are bound to sessions and implemented, but untested and provided on a best-effort basis:
 
-- ``OleDLL`` and ``oledll``
-- ``FormatError``
-- ``get_last_error``
-- ``GetLastError``
-- ``set_last_error``
-- ``WinError``
+- :meth:`zugbruecke.CtypesSession.OleDLL` and :meth:`zugbruecke.CtypesSession.oledll`
+- :meth:`zugbruecke.CtypesSession.FormatError`
+- :meth:`zugbruecke.CtypesSession.get_last_error`
+- :meth:`zugbruecke.CtypesSession.GetLastError`
+- :meth:`zugbruecke.CtypesSession.set_last_error`
+- :meth:`zugbruecke.CtypesSession.WinError`
 
 Bound Stubs and Unimplemented Functionality
 -------------------------------------------
 
 *zugbruecke* currently does not support every *ctypes* feature. The following noteworthy functions and classes are only provided as stubs and raise ``NotImplementedError`` if called:
 
-- ``PyDLL`` and ``pydll``
-- ``DllCanUnloadNow``
-- ``DllGetClassObject``
-- ``HRESULT``
+- :meth:`zugbruecke.CtypesSession.PyDLL` and :meth:`zugbruecke.CtypesSession.pydll`
+- :meth:`zugbruecke.CtypesSession.DllCanUnloadNow`
+- :meth:`zugbruecke.CtypesSession.DllGetClassObject`
+- :class:`zugbruecke.CtypesSession.HRESULT`
 
 Special APIs
 ------------
