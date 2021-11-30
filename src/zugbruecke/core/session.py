@@ -275,10 +275,11 @@ class CtypesSession(CtypesSessionABC):
 
     def zb_path_unix_to_wine(self, path: str) -> str:
         """
-        Path conversion, Unix to Windows/Wine
+        Path conversion, Unix to Windows/Wine.
+        It uses *Wine*'s internal implementation for path conversions. It does not check, whether the path actually exists or not.
 
         args:
-            path : Unix path
+            path : Unix path. Path can be absolute or relative.
         returns:
             Windows/Wine path
         """
@@ -287,10 +288,11 @@ class CtypesSession(CtypesSessionABC):
 
     def zb_path_wine_to_unix(self, path: str) -> str:
         """
-        Path conversion, Windows/Wine to Unix
+        Path conversion, Windows/Wine to Unix.
+        It uses *Wine*'s internal implementation for path conversions. It does not check, whether the path actually exists or not.
 
         args:
-            path : Windows/Wine path
+            path : Windows/Wine path. Path can be absolute or relative.
         returns:
             Unix path
         """
