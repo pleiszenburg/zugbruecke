@@ -80,7 +80,11 @@ Every *zugbruecke* session offers a number of special APIs for session managemen
 Session Lifecycle
 -----------------
 
-Every *zugbruecke* session or, to be more precise, every *Windows Python* process on top of *Wine*, has a lifecycle and needs to be terminated. By default, sessions are automatically terminated when the *Unix Python* process quits.
+Every *zugbruecke* session or, to be more precise, every *Windows Python* process on top of *Wine*, has a lifecycle and needs to be terminated.
+
+.. note::
+
+	By default, sessions are automatically terminated when the *Unix Python* process quits.
 
 Sessions are started by creating an instance of :class:`zugbruecke.CtypesSession`. The following example illustrates the life cycle of a session object:
 
@@ -135,7 +139,11 @@ Both, ``zb_client_up`` and ``zb_server_up``, are supposed to be ``True`` if the 
 Parallel Sessions
 -----------------
 
-You may choose to run more than one session at a time for more advanced problems. For example, accessing 32 bit and 64 bit DLLs simultaneously requires different session configurations for ``win32`` and ``win64`` architectures. Anther use case may be multithreading, where you might want to operate one session per thread. The number of sessions is only (theoretically) limited by the amount of available memory and by the number of available network ports on the host system (two ports per instance are required).
+You may choose to run more than one session at a time for more advanced problems. For example, accessing 32 bit and 64 bit DLLs simultaneously requires different session configurations for ``win32`` and ``win64`` architectures. Anther use case may be multithreading, where you might want to operate one session per thread.
+
+.. note::
+
+	The number of sessions is only (theoretically) limited by the amount of available memory and by the number of available network ports on the host system (two ports per instance are required).
 
 If you are using functions or classes, which are bound to a session, always use those connected to the relevant session, e.g.
 
