@@ -28,6 +28,10 @@ For using *zugbruecke*, you need to install **Wine** first. Depending on your pl
 
 	Currently, Wine >= 6.x is supported (tested).
 
+.. warning::
+
+	Support for Mac OS X and FreeBSD is provided on a best-effort basis. *zugbruecke* currently does not receive regular testing on those platforms.
+
 Getting *zugbruecke*
 --------------------
 
