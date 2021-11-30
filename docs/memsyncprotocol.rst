@@ -4,7 +4,7 @@ The Memory Synchronization Protocol
 A Simple Example
 ----------------
 
-This first examples walks through how to handle an array of floating point numbers of arbitrary length. Consider the following example routine written in C and compiled into a DLL:
+This first example walks through how to handle an array of floating point numbers of arbitrary length. Consider the following example routine written in C and compiled into a DLL:
 
 .. code:: C
 
@@ -65,8 +65,8 @@ For running the same code with *zugbruecke* on *Unix*, you need to add informati
 	_bubblesort.argtypes = (POINTER(c_float), c_int)
 	_bubblesort.memsync = [
 		{
-			'p': [0],
-			'l': [1],
+			'p': [0], # pointer argument
+			'l': [1], # length argument
 			't': 'c_float'
 		}
 	]
@@ -100,8 +100,8 @@ Because the ``memsync`` attribute will be ignored by *ctypes*, you can make the 
 	_bubblesort.argtypes = (POINTER(c_float), c_int)
 	_bubblesort.memsync = [
 		{
-			'p': [0],
-			'l': [1],
+			'p': [0], # pointer argument
+			'l': [1], # length argument
 			't': 'c_float'
 		}
 	]
@@ -116,41 +116,36 @@ Because the ``memsync`` attribute will be ignored by *ctypes*, you can make the 
 	test_vector = [5.74, 3.72, 6.28, 8.6, 9.34, 6.47, 2.05, 9.09, 4.39, 4.75]
 	bubblesort(test_vector)
 
-A more complex example: Computing the size of the memory from multiple arguments
---------------------------------------------------------------------------------
+A Complex Example
+-----------------
 
-There are plenty of cases where you will encounter function (or structure)
-definitions like the following:
+This second example walks through how to compute the size of the memory from multiple arguments. There are plenty of cases where you will encounter function (or structure) definitions like the following:
 
 .. code:: C
 
-	void __stdcall __declspec(dllimport) process_image(
+	void
+	__stdcall __declspec(dllimport)
+	process_image(
 		float *image_data,
 		int image_width,
 		int image_height
-		);
+	);
 
-The ``image_data`` parameter is a flattened 1D array representing a 2D image.
-Its length is defined by its width and its height. So the length of the array equals
-``image_width * image_height``. For cases like this, ``memsync`` has the ability
-to dynamically compute the length of the memory through custom functions.
-Let's have a look at how the above function would be configured in *Python*:
+The ``image_data`` parameter is a flattened 1D array representing a 2D image. Its length is defined as the product of its width and its height. So the length of the array equals ``image_width * image_height``. For cases like this, ``memsync`` has the ability to dynamically compute the length of the memory through custom functions. Let's have a look at how the above function would be configured in *Python*:
 
 .. code:: python
 
 	process_image.argtypes = (ctypes.POINTER(ctypes.c_float), ctypes.c_int, ctypes.c_int)
 	process_image.memsync = [
 		{
-			'p': [0],
-			'l': ([1], [2]),
-			'f': 'lambda x, y: x * y',
+			'p': [0], # pointer argument
+			'l': ([1], [2]), # length arguments
+			'f': 'lambda x, y: x * y', # function for computing length
 			't': 'c_float'
-			}
-		]
+		}
+	]
 
-The above definition will extract the values of the ``image_width`` and
-``image_height`` parameters for every function call and feed them into the
-specified lambda function.
+The above definition will extract the values of the ``image_width`` and ``image_height`` parameters for every function call and feed them into the specified lambda function.
 
 Using string buffers, null-terminated strings and Unicode
 ---------------------------------------------------------
