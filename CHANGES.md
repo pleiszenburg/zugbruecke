@@ -78,7 +78,7 @@ Significant changes were mandatory for allowing to **cleanup a lot of old code**
 ## 0.0.11 (2018-04-10)
 
 **CAUTION**: This release features a significant re-implementation (with additional, new functionality) of the memory synchronization protocol, ``memsync``.
-As a part of it, overcoming old limitations, its syntax changed - effectively **BREAKING BACKWARDS COMPATIBILITY** in almost call cases.
+As a part of it, overcoming old limitations, its syntax changed - effectively **BREAKING BACKWARDS COMPATIBILITY** in almost all cases.
 Please check the updated documentation, examples and tests for details.
 
 - API: `memsync` syntax for custom length functions has been changed. `_f` becomes obsolete. `f` expects a string, which can be parsed into a function.
