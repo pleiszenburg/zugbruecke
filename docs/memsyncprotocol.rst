@@ -231,10 +231,10 @@ One key aspect has changed: ``memsync`` contains another field, ``w``. It must b
 	replace_letter_w(unicode_buffer, 'a', 'e')
 	print(unicode_buffer.value)
 
-Applying memory synchronization to callback functions (function pointers)
--------------------------------------------------------------------------
+Callbacks / Function Pointers
+-----------------------------
 
-Let's assume that you're dealing with structures of the following kind:
+Function pointers themselves do not necessarily require memory synchronization. However, their arguments and/or return values might require memory synchronization just like the arguments and return values of other functions. Let's assume that you are dealing with structures of the following kind:
 
 .. code:: python
 
@@ -242,36 +242,29 @@ Let's assume that you're dealing with structures of the following kind:
 		_fields_ = [
 			('data', ctypes.POINTER(ctypes.c_int16)),
 			('width', ctypes.c_int16),
-			('height', ctypes.c_int16)
-			]
+			('height', ctypes.c_int16),
+		]
 
-2D monochrome image data is represented as a flattened 1D array, field ``data``,
-with size information attached to it in the fields ``width`` and ``height``.
-You furthermore have a function prototype which accepts an ``image_data`` structure
-as an argument:
+2D monochrome image data is represented as a flattened 1D array, field ``data``, with size information attached to it in the fields ``width`` and ``height``. You furthermore have a function prototype which accepts an ``image_data`` structure as an argument:
 
 .. code:: python
 
 	filter_func_type = ctypes.WINFUNCTYPE(ctypes.c_int16, ctypes.POINTER(image_data))
 
-Before you actually decorate a *Python* function with it, all you have to do is
-to change the contents of the ``memsync`` attribute of the function prototype,
-``filter_func_type``:
+Before you actually decorate a *Python* function with it, all you have to do is to change the contents of the ``memsync`` attribute of the function prototype, ``filter_func_type``:
 
 .. code:: python
 
 	filter_func_type.memsync = [
 		{
-			'p': [0, 'data'],
-			'l': ([0, 'width'], [0, 'height']),
-			'f': 'lambda x, y: x * y',
-			't': 'c_int16'
-			}
-		]
+			'p': [0, 'data'], # pointer argument
+			'l': ([0, 'width'], [0, 'height']), # length arguments
+			'f': 'lambda x, y: x * y', # function for computing length
+			't': 'c_int16', # array element type
+		}
+	]
 
-The above syntax also does not interfere with ``ctypes`` on *Windows*, i.e.
-the code remains perfectly platform-independent. Once the function prototype
-has been configured through ``memsync``, it can be applied to a *Python* function:
+The above syntax also does not interfere with ``ctypes`` on *Windows*, i.e. the code remains perfectly platform-independent. Once the function prototype has been configured through ``memsync``, it can be applied to a *Python* function:
 
 .. code:: python
 
