@@ -1,3 +1,5 @@
+.. _memsyncprotocol:
+
 The Memory Synchronization Protocol
 ===================================
 
