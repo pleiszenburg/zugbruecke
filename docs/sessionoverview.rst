@@ -65,17 +65,17 @@ Special APIs
 
 Every *zugbruecke* session offers a number of special APIs for session management, prefixed with ``zb_``:
 
-- ``__repr__``
-- ``__enter__``
-- ``__exit__``
-- ``zb_get_parameter``
-- ``zb_set_parameter``
-- ``zb_terminate``
-- ``zb_id``
-- ``zb_client_up``
-- ``zb_server_up``
-- ``zb_path_unix_to_wine``
-- ``zb_path_wine_to_unix``
+- :meth:`zugbruecke.CtypesSession.__repr__`
+- :meth:`zugbruecke.CtypesSession.__enter__`
+- :meth:`zugbruecke.CtypesSession.__exit__`
+- :meth:`zugbruecke.CtypesSession.zb_get_parameter`
+- :meth:`zugbruecke.CtypesSession.zb_set_parameter`
+- :meth:`zugbruecke.CtypesSession.zb_terminate`
+- :attr:`zugbruecke.CtypesSession.zb_id`
+- :attr:`zugbruecke.CtypesSession.zb_client_up`
+- :attr:`zugbruecke.CtypesSession.zb_server_up`
+- :meth:`zugbruecke.CtypesSession.zb_path_unix_to_wine`
+- :meth:`zugbruecke.CtypesSession.zb_path_wine_to_unix`
 
 Session Lifecycle
 -----------------
@@ -168,7 +168,13 @@ Session configuration parameters can be altered in multiple ways. For details on
 	ctypes_32bit = CtypesSession(Config(arch = "win32")) # for 32 bit DLLs
 	ctypes_64bit = CtypesSession(Config(arch = "win64")) # for 64 bit DLLs
 
-Second, a session can be reconfigured during run-time. However, very few parameters can actually be changed once a session has been created. Consider the following example:
+Second, a session can be reconfigured during run-time.
+
+.. warning::
+
+	Only very few parameters can actually be changed once a session has been created.
+
+Consider the following example:
 
 .. code:: python
 
