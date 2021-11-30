@@ -67,7 +67,7 @@ For running the same code with *zugbruecke* on *Unix*, you need to add informati
 		{
 			'p': [0], # pointer argument
 			'l': [1], # length argument
-			't': 'c_float'
+			't': 'c_float', # array element type
 		}
 	]
 
@@ -102,7 +102,7 @@ Because the ``memsync`` attribute will be ignored by *ctypes*, you can make the 
 		{
 			'p': [0], # pointer argument
 			'l': [1], # length argument
-			't': 'c_float'
+			't': 'c_float', # array element type
 		}
 	]
 
@@ -141,17 +141,16 @@ The ``image_data`` parameter is a flattened 1D array representing a 2D image. It
 			'p': [0], # pointer argument
 			'l': ([1], [2]), # length arguments
 			'f': 'lambda x, y: x * y', # function for computing length
-			't': 'c_float'
+			't': 'c_float', # array element type
 		}
 	]
 
 The above definition will extract the values of the ``image_width`` and ``image_height`` parameters for every function call and feed them into the specified lambda function.
 
-Using string buffers, null-terminated strings and Unicode
----------------------------------------------------------
+String Buffers, Null-Terminated Strings and Unicode
+---------------------------------------------------
 
-Let's assume you are confronted with a regular *Python* (3) string. With the help of a
-DLL function, you want to replace all occurrences of a letter with another letter.
+Let's assume you are confronted with a regular *Python* (3) string. With the help of a DLL function, you want to replace all occurrences of a letter with another letter.
 
 .. code:: python
 
@@ -161,11 +160,13 @@ The DLL function's definition looks like this:
 
 .. code:: C
 
-	void __stdcall __declspec(dllimport) replace_letter(
+	void
+	__stdcall __declspec(dllimport)
+	replace_letter(
 		char *in_string,
 		char old_letter,
 		char new_letter
-		);
+	);
 
 In *Python*, it can be configured as follows:
 
@@ -174,23 +175,18 @@ In *Python*, it can be configured as follows:
 	replace_letter.argtypes = (
 		ctypes.POINTER(ctypes.c_char),
 		ctypes.c_char,
-		ctypes.c_char
+		ctypes.c_char,
 		)
 	replace_letter.memsync = [
 		{
-			'p': [0],
-			'n': True
-			}
-		]
+			'p': [0], # pointer argument
+			'n': True, # null-terminated string flag
+		}
+	]
 
-The above configuration indicates that the first argument of the function is a
-pointer to a NULL-terminated string.
+The above configuration indicates that the first argument of the function is a pointer to a NULL-terminated string.
 
-While *Python* (3) strings are actually Unicode strings, the function accepts an
-array of type ``char`` - a bytes array in *Python* terms. I.e. you have to encode the
-string before it is copied into a string buffer. The following example illustrates
-how the function ``replace_letter`` can be called on the string ``some_string``,
-exchanging all letters ``a`` with ``e``. Subsequently, the result is printed.
+While *Python* (3) strings are actually Unicode strings, the function accepts an array of type ``char`` - a bytes array in *Python* terms. I.e. you have to encode the string before it is copied into a string buffer. The following example illustrates how the function ``replace_letter`` can be called on the string ``some_string``, exchanging all letters ``a`` with ``e``. Subsequently, the result is printed.
 
 .. code:: python
 
@@ -198,8 +194,7 @@ exchanging all letters ``a`` with ``e``. Subsequently, the result is printed.
 	replace_letter(string_buffer, 'a'.encode('utf-8'), 'e'.encode('utf-8'))
 	print(string_buffer.value.decode('utf-8'))
 
-The process differs if the DLL function accepts Unicode strings. Let's assume
-the DLL function is defined as follows:
+The process differs if the DLL function accepts Unicode strings. Let's assume the DLL function is defined as follows:
 
 .. code:: C
 
@@ -216,26 +211,23 @@ In Python, it can be configured like this:
 	replace_letter_w.argtypes = (
 		ctypes.POINTER(ctypes.c_wchar),
 		ctypes.c_wchar,
-		ctypes.c_wchar
+		ctypes.c_wchar,
 		)
 	replace_letter_w.memsync = [
 		{
-			'p': [0],
-			'n': True,
-			'w': True
-			}
-		]
+			'p': [0], # pointer argument
+			'n': True, # null-terminated string flag
+			'w': True, # Unicode flag
+		}
+	]
 
-One key aspect has changed: ``memsync`` contains another field, ``w``.
-It must be set to ``True``, indicating that the argument is a Unicode string.
-Now you can call the function as follows:
+One key aspect has changed: ``memsync`` contains another field, ``w``. It must be set to ``True``, indicating that the argument is a Unicode string. Now you can call the function as follows:
 
 .. code:: python
 
 	unicode_buffer = ctypes.create_unicode_buffer(some_string)
 	replace_letter_w(unicode_buffer, 'a', 'e')
 	print(unicode_buffer.value)
-
 
 Applying memory synchronization to callback functions (function pointers)
 -------------------------------------------------------------------------
