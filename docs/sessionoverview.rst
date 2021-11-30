@@ -174,14 +174,14 @@ Session configuration parameters can be altered in multiple ways. For details on
 At Time of Creation
 ^^^^^^^^^^^^^^^^^^^
 
-First, a session can be configured at the time of its creation by passing a :class:`zugbruecke.Config` object with custom options into it:
+First, a session can be configured at the time of its creation by passing valid :ref:`configuration parameters <configparameter>` as keyword arguments into it:
 
 .. code:: python
 
-	from zugbruecke import CtypesSession, Config
+	from zugbruecke import CtypesSession
 
-	ctypes_32bit = CtypesSession(Config(arch = "win32")) # for 32 bit DLLs
-	ctypes_64bit = CtypesSession(Config(arch = "win64")) # for 64 bit DLLs
+	ctypes_32bit = CtypesSession(arch = "win32") # for 32 bit DLLs
+	ctypes_64bit = CtypesSession(arch = "win64") # for 64 bit DLLs
 
 .. _reconfiguration:
 

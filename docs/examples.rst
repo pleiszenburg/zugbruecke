@@ -92,10 +92,10 @@ Thanks to Wine, which can run both in 32 bit and in 64 bit mode, it is perfectly
 
 .. code:: python
 
-	from zugbruecke import CtypesSession, Config
+	from zugbruecke import CtypesSession
 
-	ctypes_windows32 = CtypesSession(Config(arch = 'win32'))
-	ctypes_windows64 = CtypesSession(Config(arch = 'win64'))
+	ctypes_windows32 = CtypesSession(arch = 'win32')
+	ctypes_windows64 = CtypesSession(arch = 'win64')
 
 Further Examples
 ----------------
