@@ -54,7 +54,7 @@ if any([platform.startswith(os_name) for os_name in ["linux", "darwin", "freebsd
 
     CTYPES = {
         arch: [
-            zugbruecke.CtypesSession(zugbruecke.Config(arch=arch, pythonversion=build))
+            zugbruecke.CtypesSession(arch=arch, pythonversion=build)
             for build in builds[arch]
         ] for arch in ARCHS
     }

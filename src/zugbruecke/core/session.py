@@ -107,7 +107,7 @@ class CtypesSession(CtypesSessionABC):
     and its independent configuration. Mutliple sessions can run simultaneously. Mutable.
 
     args:
-        config : Session's configuration. If not provided, settings will be read from configuration files and environment variables, see :class:`zugbruecke.Config`.
+        kwargs : An arbitrary number of keyword arguments matching valid :ref:`configuration parameters <configparameter>`
     """
 
     # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -123,10 +123,10 @@ class CtypesSession(CtypesSessionABC):
     # constructor
     # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-    def __init__(self, config: Optional[Config] = None):
+    def __init__(self, **kwargs: Any):
 
         # Start new zugbruecke session
-        self._current_session = SessionClient(config=config)
+        self._current_session = SessionClient(config=Config(**kwargs))
 
         # Routines from ctypes.util
         self._util = _util(
