@@ -63,8 +63,8 @@ User's guide
     :caption: Reference
 
     session
-    memsync
     configuration
+    memsync
     interoperability
     wineenv
 
