@@ -34,30 +34,29 @@ If you want to increase the log level during run-time, you can do the following:
 .. code:: python
 
 	import zugbruecke.ctypes as ctypes
-	# work with zugbruecke
-	ctypes._zb_set_parameter({'log_level': 10})
+	ctypes.zb_set_parameter('log_level', 100)
 	# proceed as usual - with a lot more verbosity
 
 A custom session can be manipulated in a similar way:
 
 .. code:: python
 
-	from zugbruecke import ctypes_session
-	a = ctypes_session()
-	# work with zugbruecke through session "a"
-	a._zb_set_parameter({'log_level': 10})
+	from zugbruecke import CtypesSession
+	ctypes = CtypesSession(log_level = 100)
 	# proceed as usual - with a lot more verbosity
 
 Alternatively, you can drop a configuration file named ``.zugbruecke.json`` into your current working directory or *zugbruecke*'s configuration directory (likely ``~/.zugbruecke``) and add configuration parameters to it, for example:
 
-.. code:: javascript
+.. code:: json
 
-	{"log_level": 10, "log_write": true}
+	{"log_level": 100, "log_write": true}
 
-The higher the log level, the more output you will get. Default is 0 for no logs. The on-screen log is color-coded for readability. The log can also, in addition, be written to disk, where every log item with plenty of meta data is represented as a one-line JSON object for easy parsing and analysis of larger log files.
+The higher the log level, the more output you will get. Default is 0 for no logs. The on-screen log is color-coded for readability. The log can also, in addition, be written to disk, where every log item with plenty of meta data is represented as a one-line JSON object for easy parsing and analysis of larger log files. For more configuration options check the :ref:`chapter on configuration <configuration>`.
 
-For more configuration options check the :ref:`chapter on configuration <configuration>`.
+As a last resort, you can activate additional debugging features intended for developers by setting the ``ZUGBRUECKE_DEBUG`` environment variable to ``1``. For this to work, the `typeguard package`_ must be present on your system.
 
-As an alternative approach, you can also check what happens if you run your code directly in a *Windows* *Python* interpreter with *ctypes*. Consult the :ref:`chapter on the Wine Python environment <wineenv>` for details. It is easy to get *ctypes* syntax wrong, so this is a good approach for getting it right.
+.. _typeguard package: https://typeguard.readthedocs.io/
+
+As an alternative approach, you can also check what happens if you run your code directly in a *Windows Python* interpreter with *ctypes*. Consult the :ref:`chapter on the Wine Python environment <wineenv>` for details. It is easy to get *ctypes* syntax wrong, so this is a good approach for getting it right.
 
 If in doubt, please also test your code with *ctypes* on an actual Windows system - it might be a bug in this module as well.
