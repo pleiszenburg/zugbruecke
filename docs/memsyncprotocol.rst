@@ -1,17 +1,19 @@
 The Memory Synchronization Protocol
 ===================================
 
-A simple example: An array of floating point numbers of variable length
------------------------------------------------------------------------
+A Simple Example
+----------------
 
-Consider the following example DLL routine in C:
+This first examples walks through how to handle an array of floating point numbers of arbitrary length. Consider the following example routine written in C and compiled into a DLL:
 
 .. code:: C
 
-	void __stdcall __declspec(dllimport) bubblesort(
+	void
+	__stdcall __declspec(dllimport)
+	bubblesort(
 		float *a,
 		int n
-		)
+	)
 	{
 		int i, j;
 		for (i = 0; i < n - 1; ++i)
@@ -28,108 +30,91 @@ Consider the following example DLL routine in C:
 		}
 	}
 
-It is a simple implementation of the "bubblesort" algorithm, which accepts
-a pointer to an array of floats of arbitrary length and an integer with length information.
-The array is being sorted within its own memory, so the caller expects a sorted
-array at the passed pointer after the call.
+It is a simple implementation of the "bubblesort" algorithm, which accepts a pointer to an array of floats of arbitrary length and an integer with length information. The array is being sorted within its own memory, so the caller expects a sorted array at the passed pointer after the call.
 
-With *ctypes* on *Windows*, you could call it like this:
+With *ctypes* on *Windows*, you could call the function as follows:
 
 .. code:: python
 
 	from ctypes import windll, cast, pointer, POINTER, c_float, c_int
+	from typing import List
 
-	__dll__ = windll.LoadLibrary('demo_dll.dll')
-	__bubblesort__ = __dll__.bubblesort
-	__bubblesort__.argtypes = (POINTER(c_float), c_int)
+	_dll = windll.LoadLibrary('demo.dll')
+	_bubblesort = _dll.bubblesort
+	_bubblesort.argtypes = (POINTER(c_float), c_int)
 
-	def bubblesort(values):
+	def bubblesort(values: List[float]):
 
-		ctypes_float_values = ((c_float)*len(values))(*values)
-		ctypes_float_pointer_firstelement = cast(
-			pointer(ctypes_float_values), POINTER(c_float)
-			)
-		__bubblesort__(ctypes_float_pointer_firstelement, len(values))
-		values[:] = ctypes_float_values[:]
+		float_array = ((c_float)*len(values))(*values)
+		pointer_firstelement = cast(pointer(float_array), POINTER(c_float))
+		_bubblesort(pointer_firstelement, len(values)) # call into DLL
+		values[:] = float_array[:]
 
 	test_vector = [5.74, 3.72, 6.28, 8.6, 9.34, 6.47, 2.05, 9.09, 4.39, 4.75]
 	bubblesort(test_vector)
 
-For running the same code with *zugbruecke* on *Unix*, you need to add
-information on the memory segment representing the array. This is done by
-adding another attribute, ``memsync``, to the ``__bubblesort__`` function handle
-(just like you usually specify ``argtypes`` and/or ``restype``). The following
-example demonstrates how you must modify the above example so it works with
-*zugbruecke*:
+For running the same code with *zugbruecke* on *Unix*, you need to add information on the memory segment representing the array. This is done by adding another attribute, ``memsync``, to the ``_bubblesort`` function handle (just like you usually specify ``argtypes`` and/or ``restype``). The following example demonstrates how you must modify the above example so it works with *zugbruecke*:
 
 .. code:: python
 
+	from typing import List
 	from zugbruecke.ctypes import windll, cast, pointer, POINTER, c_float, c_int
 
-	__dll__ = windll.LoadLibrary('demo_dll.dll')
-	__bubblesort__ = __dll__.bubblesort
-	__bubblesort__.argtypes = (POINTER(c_float), c_int)
-	__bubblesort__.memsync = [
+	_dll = windll.LoadLibrary('demo.dll')
+	_bubblesort = _dll.bubblesort
+	_bubblesort.argtypes = (POINTER(c_float), c_int)
+	_bubblesort.memsync = [
 		{
 			'p': [0],
 			'l': [1],
 			't': 'c_float'
-			}
-		]
+		}
+	]
 
-	def bubblesort(values):
+	def bubblesort(values: List[float]):
 
-		ctypes_float_values = ((c_float)*len(values))(*values)
-		ctypes_float_pointer_firstelement = cast(
-			pointer(ctypes_float_values), POINTER(c_float)
-			)
-		__bubblesort__(ctypes_float_pointer_firstelement, len(values))
-		values[:] = ctypes_float_values[:]
+		float_array = ((c_float)*len(values))(*values)
+		pointer_firstelement = cast(pointer(float_array), POINTER(c_float))
+		_bubblesort(pointer_firstelement, len(values)) # call into DLL
+		values[:] = float_array[:]
 
 	test_vector = [5.74, 3.72, 6.28, 8.6, 9.34, 6.47, 2.05, 9.09, 4.39, 4.75]
 	bubblesort(test_vector)
 
-Two things have changed. First, the import statement turned from *ctypes* to
-*zugbruecke*, although the exact same types, routines and objects were imported.
-Second, ``__bubblesort__`` received an additional ``memsync`` attribute.
+Two things have changed. First, the import statement turned from *ctypes* to *zugbruecke*, although the exact same types, routines and objects were imported. Second, the ``_bubblesort`` function handle received an additional ``memsync`` attribute.
 
-Because the ``memsync`` attribute will be ignored by *ctypes*, you can make the
-above piece of code platform-independent by adjusting the import statement only.
-The complete example, which will run on *Unix* and on *Windows* looks just like this:
+Because the ``memsync`` attribute will be ignored by *ctypes*, you can make the above piece of code platform-independent by adjusting the import statement only. The complete example, which will run on *Unix* and on *Windows* looks just like this:
 
 .. code:: python
 
 	from sys import platform
-	if any([platform.startswith(os_name) for os_name in ['linux', 'darwin', 'freebsd']]):
-		from zugbruecke.ctypes import windll, cast, pointer, POINTER, c_float, c_int
+	if any(platform.startswith(os_name) for os_name in ('linux', 'darwin', 'freebsd')):
+		from zugbruecke.ctypes import windll, cast, pointer, POINTER, c_float, c_int # Unix
 	elif platform.startswith('win'):
-		from ctypes import windll, cast, pointer, POINTER, c_float, c_int
+		from ctypes import windll, cast, pointer, POINTER, c_float, c_int # Windows
 	else:
-		raise # handle other platforms here
+		raise SystemError('unsupported platform')
 
-	__dll__ = windll.LoadLibrary('demo_dll.dll')
-	__bubblesort__ = __dll__.bubblesort
-	__bubblesort__.argtypes = (POINTER(c_float), c_int)
-	__bubblesort__.memsync = [
+	_dll = windll.LoadLibrary('demo.dll')
+	_bubblesort = _dll.bubblesort
+	_bubblesort.argtypes = (POINTER(c_float), c_int)
+	_bubblesort.memsync = [
 		{
 			'p': [0],
 			'l': [1],
 			't': 'c_float'
-			}
-		]
+		}
+	]
 
-	def bubblesort(values):
+	def bubblesort(values: List[float]):
 
-		ctypes_float_values = ((c_float)*len(values))(*values)
-		ctypes_float_pointer_firstelement = cast(
-			pointer(ctypes_float_values), POINTER(c_float)
-			)
-		__bubblesort__(ctypes_float_pointer_firstelement, len(values))
-		values[:] = ctypes_float_values[:]
+		float_array = ((c_float)*len(values))(*values)
+		pointer_firstelement = cast(pointer(float_array), POINTER(c_float))
+		_bubblesort(pointer_firstelement, len(values)) # call into DLL
+		values[:] = float_array[:]
 
 	test_vector = [5.74, 3.72, 6.28, 8.6, 9.34, 6.47, 2.05, 9.09, 4.39, 4.75]
 	bubblesort(test_vector)
-
 
 A more complex example: Computing the size of the memory from multiple arguments
 --------------------------------------------------------------------------------
