@@ -85,7 +85,11 @@ For running the same code with *zugbruecke* on *Unix*, you need to add informati
 
 Two things have changed. First, the import statement turned from *ctypes* to *zugbruecke*, although the exact same types, routines and objects were imported. Second, the ``_bubblesort`` function handle received an additional ``memsync`` attribute.
 
-Because the ``memsync`` attribute will be ignored by *ctypes*, you can make the above piece of code platform-independent by adjusting the import statement only. The complete example, which will run on *Unix* and on *Windows* looks just like this:
+.. note::
+
+	Because the ``memsync`` attribute will be ignored by *ctypes*, you can make the above piece of code platform-independent by adjusting the import statement only.
+
+The complete example, which will run on *Unix* and on *Windows* looks just like this:
 
 .. code:: python
 
@@ -234,7 +238,11 @@ One key aspect has changed: ``memsync`` contains another field, ``w``. It must b
 Callbacks / Function Pointers
 -----------------------------
 
-Function pointers themselves do not necessarily require memory synchronization. However, their arguments and/or return values might require memory synchronization just like the arguments and return values of other functions. Let's assume that you are dealing with structures of the following kind:
+.. note::
+
+	Function pointers themselves do not require memory synchronization.
+
+Arguments and/or return values of function pointers might require memory synchronization just like the arguments and return values of other functions. Let's assume that you are dealing with structures of the following kind:
 
 .. code:: python
 
@@ -264,7 +272,11 @@ Before you actually decorate a *Python* function with it, all you have to do is 
 		}
 	]
 
-The above syntax also does not interfere with ``ctypes`` on *Windows*, i.e. the code remains perfectly platform-independent. Once the function prototype has been configured through ``memsync``, it can be applied to a *Python* function:
+.. note::
+
+	The above syntax also does not interfere with ``ctypes`` on *Windows*, i.e. the code remains perfectly platform-independent.
+
+Once the function prototype has been configured through ``memsync``, it can be applied to a *Python* function:
 
 .. code:: python
 
