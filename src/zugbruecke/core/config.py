@@ -182,11 +182,9 @@ class Config(dict, ConfigABC):
             os.path.join("/etc", CONFIG_FN), # TODO deprecated
             os.path.join("/etc", CONFIG_FN[1:]),
             os.path.join(os.path.expanduser("~"), CONFIG_FN),
-            os.environ.get("ZUGBRUECKE"),
-            os.path.join(os.environ.get("ZUGBRUECKE"), CONFIG_FN)
-            if os.environ.get("ZUGBRUECKE") is not None
-            else None,
             os.path.join(os.getcwd(), CONFIG_FN),
+            os.path.join(os.environ.get("ZUGBRUECKE"), CONFIG_FN) if os.environ.get("ZUGBRUECKE") is not None else None,
+            os.environ.get("ZUGBRUECKE"),
         ]:
 
             cnt = self._load_config_from_file(fn)
