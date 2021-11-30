@@ -97,6 +97,11 @@ Thanks to Wine, which can run both in 32 bit and in 64 bit mode, it is perfectly
 	ctypes_windows32 = CtypesSession(arch = 'win32')
 	ctypes_windows64 = CtypesSession(arch = 'win64')
 
+Memory Synchronization
+----------------------
+
+Because *zugbruecke* executes DLL routines in a separate *Windows Python* process on top of *Wine*, it must keep memory between the *Unix Python* and the *Windows Python* processes in sync, especially for pointers (or the memory pointers are pointing to). *zugbruecke* can handle this task partially automatically but does require special directives in certain cases. A good set of introductory examples is provided in the :ref:`chapter covering the memory synchronization protocol <memsyncprotocol>`.
+
 Further Examples
 ----------------
 
