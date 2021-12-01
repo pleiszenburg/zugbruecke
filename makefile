@@ -20,35 +20,55 @@
 # specific language governing rights and limitations under the License.
 # </LICENSE_BLOCK>
 
-black:
-	black .
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# LIB
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-clean:
-	-rm -r build/*
-	-rm -r dist/*
+_clean_coverage:
 	coverage erase
-	make clean_py
-	make clean_dll
-clean_py:
+
+_clean_dll:
+	find src/ tests/ -name '*.dll' -exec rm -f {} +
+
+_clean_egg:
+	-rm -r src/*.egg-info
+
+_clean_py:
 	find src/ tests/ -name '*.pyc' -exec rm -f {} +
 	find src/ tests/ -name '*.pyo' -exec rm -f {} +
 	find src/ tests/ -name '*~' -exec rm -f {} +
 	find src/ tests/ -name '__pycache__' -exec rm -fr {} +
-clean_dll:
-	find src/ tests/ -name '*.dll' -exec rm -f {} +
 
-release_clean:
-	make clean
-	-rm -r src/*.egg-info
+_clean_release:
+	-rm -r build/*
+	-rm -r dist/*
 
-# dll: # TODO move to example folder
-# 	@(cd demo_dll; make clean; make; make install)
+# examples:
+# 	@(cd examples; make clean; make; make install)
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# ENTRY POINTS
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+black:
+	black .
+
+clean:
+	make _clean_release
+	make _clean_coverage
+	make _clean_py
+	make _clean_dll
 
 docs:
 	@(cd docs; make clean; make html)
 
+install:
+	pip install -U -e .[dev]
+	python -m tests.lib.install
+
 release:
-	make release_clean
+	make clean
+	make _clean_egg
 	python setup.py sdist bdist_wheel
 	gpg --detach-sign -a dist/zugbruecke*.whl
 	gpg --detach-sign -a dist/zugbruecke*.tar.gz
@@ -58,31 +78,11 @@ upload:
 		twine upload $$filename $$filename.asc ; \
 	done
 
-upload_test:
-	for filename in $$(ls dist/*.tar.gz dist/*.whl) ; do \
-		twine upload $$filename $$filename.asc -r pypitest ; \
-	done
-
-install:
-	pip install -U -e .[dev]
-	WENV_ARCH=win32 wenv init
-	WENV_ARCH=win32 wenv pip install -r requirements_test.txt
-	WENV_ARCH=win32 wenv init_coverage
-	WENV_ARCH=win64 wenv init
-	WENV_ARCH=win64 wenv pip install -r requirements_test.txt
-	WENV_ARCH=win64 wenv init_coverage
-
 test:
-	make docs
-	make test_quick
-
-test_quick:
 	make clean
 	python -m tests.lib.build
-	make clean_py
-	WENV_ARCH=win32 wenv pytest --hypothesis-show-statistics
-	make clean_py
-	WENV_ARCH=win64 wenv pytest --hypothesis-show-statistics
-	make clean_py
-	pytest --cov=zugbruecke --cov-config=setup.cfg --hypothesis-show-statistics # --capture=no
-	mv .coverage .coverage.e9.0 ; coverage combine ; coverage html # TODO fix!
+	python -m tests.lib.run wine
+	python -m tests.lib.run unix
+	# mv .coverage .coverage.e9.0 ; coverage combine ; coverage html # TODO fix!
+
+.PHONY: docs

@@ -6,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-    src/zugbruecke/__init__.py: Package init file
+    tests/lib/pythonversion.py: IO for wenv's PythonVersion class
 
     Required to run on platform / side: [UNIX, WINE]
 
@@ -27,21 +27,34 @@ specific language governing rights and limitations under the License.
 """
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# CONST
+# IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-__version__ = "0.1.0"
+from json import dumps, loads
+from typing import Dict, List
+
+from wenv import PythonVersion
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# EXPORT: zugbruecke core
+# ROUTINES
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-import sys as _sys
+def read_python_builds(fn: str) -> Dict[str, List[PythonVersion]]:
 
-if not _sys.platform.startswith("win"):
-    from .core.session import CtypesSession
-del _sys
+    with open(fn, mode = "r", encoding="utf-8") as f:
+        raw = f.read()
 
-from .core.config import Config
-from .core.errors import *
-from .core.wenv import Env
+    return {
+        arch: [PythonVersion.from_config(arch, build) for build in builds]
+        for arch, builds in loads(raw).items()
+    }
+
+
+def write_python_builds(fn: str, builds: Dict[str, List[PythonVersion]]):
+
+    with open(fn, mode = "w", encoding="utf-8") as f:
+        f.write(dumps({
+            arch: [
+                build.as_config() for build in _builds
+            ] for arch, _builds in builds.items()
+        }))

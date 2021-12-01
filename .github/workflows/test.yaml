@@ -1,6 +1,9 @@
 name: zugbruecke test suite
 
-on: [push]
+on:
+    push: {}
+    schedule:
+        - cron: '30 9 7 * *'
 
 jobs:
   build:
@@ -37,7 +40,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -U setuptools
-      - name: Update Python infrastructure
+      - name: Install zugbruecke package
         run: |
           make install
       - name: Pre-check
@@ -50,6 +53,10 @@ jobs:
           pytest --version
           uname -a
           lsb_release -a
-      - name: Build docs and run tests
+          wenv --version
+      - name: Build docs
+        run: |
+          make docs
+      - name: Run tests
         run: |
           ZUGBRUECKE_LOG_LEVEL=100 make test

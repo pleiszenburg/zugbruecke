@@ -36,13 +36,14 @@ from queue import Queue, Empty
 import signal
 import subprocess
 import time
-from typing import BinaryIO, Callable, Tuple
+from typing import BinaryIO, Callable, Dict, Tuple
 from threading import Thread
+
+from wenv import EnvConfig
 
 from .abc import ConfigABC, InterpreterABC, LogABC
 from .lib import get_free_port
 from .typeguard import typechecked
-
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # WINE PYTHON INTERPRETER CLASS
@@ -183,22 +184,20 @@ class Interpreter(InterpreterABC):
             str(int(self._p["timeout_start"])),
         ]
 
-    def _set_env_dict(self):
+    def _get_env(self) -> Dict[str, str]:
+        """
+        Prepare environment for interpreter - inherit from settings of current session!
+        """
 
-        # Prepare environment for interpreter - inherit from settings of current session!
-        self._p["server_env"] = {
-            k: os.environ[k] for k in os.environ.keys()
-        }  # HACK Required for Travis CI
-        envvar_update_dict = dict(
-            WENV_ARCH=self._p["arch"],  # Architecture
-            WENV_PYTHONVERSION=self._p["pythonversion"],  # Version of Wine Python
-        )
-        self._p["server_env"].update(envvar_update_dict)
+        env = os.environ.copy()
+        env.update(EnvConfig(**self._p.export_dict()).export_envvar_dict())
+
+        return env
 
     def _python_start(self):
 
         self._set_cli_params()
-        self._set_env_dict()
+        env = self._get_env()
 
         # Log status
         self._log.out(
@@ -206,7 +205,7 @@ class Interpreter(InterpreterABC):
         )
 
         # Log status
-        self._log.out("[interpreter] Environment: " + str(self._p["server_env"]))
+        self._log.out("[interpreter] Environment: " + str(env))
 
         # Fire up Wine-Python process
         self._proc_winepython = subprocess.Popen(
@@ -216,7 +215,7 @@ class Interpreter(InterpreterABC):
             shell=False,
             start_new_session=True,
             close_fds=True,
-            env=self._p["server_env"],
+            env=env,
         )
 
         # Status log

@@ -6,11 +6,11 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-    src/zugbruecke/core/typeguard.py: Wrapper around typeguard (optional)
+	docs/__init__.py: Docs root
 
-    Required to run on platform / side: [UNIX, WINE]
+	Required to run on platform / side: [UNIX]
 
-    Copyright (C) 2017-2021 Sebastian M. Ernst <ernst@pleiszenburg.de>
+	Copyright (C) 2017-2021 Sebastian M. Ernst <ernst@pleiszenburg.de>
 
 <LICENSE_BLOCK>
 The contents of this file are subject to the GNU Lesser General Public License
@@ -25,16 +25,3 @@ specific language governing rights and limitations under the License.
 </LICENSE_BLOCK>
 
 """
-
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# WRAPPER
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-import os
-import warnings
-
-if os.environ.get('ZUGBRUECKE_DEBUG', '0') == '1':
-    from typeguard import typechecked
-    warnings.warn("zugbruecke running in debug mode with activated run-time type checks", RuntimeWarning)
-else:
-    typechecked = lambda x: x

@@ -31,7 +31,7 @@ specific language governing rights and limitations under the License.
 # IMPORT: zugbruecke core
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-from . import _util
+from . import util as _util
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

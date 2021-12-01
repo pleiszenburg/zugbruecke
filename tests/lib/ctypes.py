@@ -34,8 +34,11 @@ import os
 from sys import platform
 from platform import architecture
 
-from .const import ARCHS, CONVENTIONS
+from wenv import EnvConfig
+
+from .const import ARCHS, CONVENTIONS, PYTHONBUILDS_FN
 from .names import get_dll_path
+from .pythonversion import read_python_builds
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # IMPORT / PLATFORM
@@ -44,20 +47,34 @@ from .names import get_dll_path
 ARCHITECTURE = architecture()[0][:2]
 
 if any([platform.startswith(os_name) for os_name in ["linux", "darwin", "freebsd"]]):
+
     import zugbruecke
+    cfg = EnvConfig()
+    builds = read_python_builds(fn = os.path.join(cfg['prefix'], PYTHONBUILDS_FN))
 
     CTYPES = {
-        arch: zugbruecke.CtypesSession(zugbruecke.Config(arch=arch)) for arch in ARCHS
+        arch: [
+            zugbruecke.CtypesSession(arch=arch, pythonversion=build)
+            for build in builds[arch]
+        ] for arch in ARCHS
     }
     PLATFORM = "unix"
+
 elif platform.startswith("win"):
-    import ctypes
+
+    import ctypes as _ctypes
     from ctypes import util
 
-    ctypes._util = util
-    CTYPES = {arch: ctypes for arch in ARCHS}
+    _ctypes.util = util
+
+    CTYPES = {
+        arch: [_ctypes]
+        for arch in ARCHS if arch[3:] == ARCHITECTURE
+    }
     PLATFORM = "wine"
+
 else:
+
     raise SystemError("unsopported platform")
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -65,11 +82,11 @@ else:
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
-def get_dll_handle(arch, convention, test_fn):
+def get_dll_handle(arch, ctypes_build, convention, test_fn):
     "get handle to dll for given arch and convention"
 
     try:
-        return getattr(CTYPES[arch], convention).LoadLibrary(
+        return getattr(ctypes_build, convention).LoadLibrary(
             get_dll_path(
                 arch, convention, test_fn
             )  # TODO this will parse setup.cfg on EVERY call
@@ -85,7 +102,7 @@ def get_dll_handle(arch, convention, test_fn):
         )
 
 
-def get_context(test_path, handle=True):
+def get_context(test_path: str, handle: bool = True):
     """all archs and conventions,
     either test dll handle or path is provided
     """
@@ -94,18 +111,19 @@ def get_context(test_path, handle=True):
 
     for convention in CONVENTIONS:
         for arch in ARCHS:
-            if PLATFORM == "unix" or arch[3:] == ARCHITECTURE:
-                if handle:
-                    yield (
-                        arch,
-                        convention,
-                        CTYPES[arch],
-                        get_dll_handle(arch, convention, test_fn),
-                    )
-                else:
-                    yield (
-                        arch,
-                        convention,
-                        CTYPES[arch],
-                        get_dll_path(arch, convention, test_fn),
-                    )
+            for ctypes_build in CTYPES.get(arch, tuple()):
+                if PLATFORM == "unix" or arch[3:] == ARCHITECTURE:
+                    if handle:
+                        yield (
+                            arch,
+                            convention,
+                            ctypes_build,
+                            get_dll_handle(arch, ctypes_build, convention, test_fn),
+                        )
+                    else:
+                        yield (
+                            arch,
+                            convention,
+                            ctypes_build,
+                            get_dll_path(arch, convention, test_fn),
+                        )

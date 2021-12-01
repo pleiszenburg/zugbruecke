@@ -46,7 +46,7 @@ import pytest
 def test_find_library(arch, conv, ctypes, dll_path):
 
     assert (
-        ctypes._util.find_library("kernel32") == "C:\\windows\\system32\\kernel32.dll"
+        ctypes.util.find_library("kernel32") == "C:\\windows\\system32\\kernel32.dll"
     )
 
 
@@ -55,4 +55,4 @@ def test_find_library(arch, conv, ctypes, dll_path):
 )
 def test_find_msvcrt(arch, conv, ctypes, dll_path):
 
-    assert ctypes._util.find_msvcrt() == None
+    assert ctypes.util.find_msvcrt() == None

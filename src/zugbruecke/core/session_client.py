@@ -41,9 +41,9 @@ from ctypes import (
 import signal
 import time
 from types import FrameType
-from typing import Any, Dict, Type, Union
+from typing import Any, Optional, Type
 
-from .abc import ConfigABC, DataABC, SessionClientABC
+from .abc import DataABC, SessionClientABC
 from .const import _FUNCFLAG_STDCALL, CONVENTIONS
 from .config import Config
 from .data import data_class
@@ -67,7 +67,7 @@ class SessionClient(SessionClientABC):
     Managing a zugbruecke session
     """
 
-    def __init__(self, config: Union[ConfigABC, None] = None):
+    def __init__(self, config: Optional[Config] = None):
 
         self._p = Config() if config is None else config
         self._id = self._p["id"]
@@ -92,7 +92,7 @@ class SessionClient(SessionClientABC):
         self._log.out("[session-client] STARTING ...")
         self._log.out(
             "[session-client] Configured Wine-Python version is {PYTHONVERSION:s} for {ARCH:s}.".format(
-                PYTHONVERSION=self._p["pythonversion"],
+                PYTHONVERSION=str(self._p["pythonversion"]),
                 ARCH=self._p["arch"],
             )
         )
@@ -113,7 +113,7 @@ class SessionClient(SessionClientABC):
         signal.signal(signal.SIGTERM, self.terminate)
 
         # Ensure a working Wine-Python environment
-        env = Env(**self._p.as_dict())
+        env = Env(**self._p.export_dict())
         env.ensure()
         env.setup_zugbruecke()
 
@@ -229,6 +229,9 @@ class SessionClient(SessionClientABC):
 
     def set_parameter(self, key: str, value: Any):
 
+        if key == "id":
+            raise ValueError("session id can not be changed")
+
         self._p[key] = value
         self._set_parameter_on_server(key, value)
 
@@ -241,10 +244,8 @@ class SessionClient(SessionClientABC):
 
     def terminate(
         self,
-        signum: Union[int, None] = None,  # unsused, but required for signal handling
-        frame: Union[
-            FrameType, None
-        ] = None,  # unsused, but required for signal handling
+        signum: Optional[int] = None,  # Only required for for signal handling.
+        frame: Optional[FrameType] = None,  # Only required for for signal handling.
     ):
 
         if not self._client_up:
@@ -268,6 +269,11 @@ class SessionClient(SessionClientABC):
         self._log.terminate()
 
         self._client_up = False
+
+    @property
+    def config(self) -> Config:
+
+        return self._p
 
     @property
     def id(self) -> str:
