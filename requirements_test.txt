@@ -1,5 +1,0 @@
-hypothesis
-pytest
-coverage[toml]
-pytest-cov
-typeguard
