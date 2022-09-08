@@ -31,5 +31,5 @@ parallel = true
 [tool.coverage.paths]
 source = [
   "src",
-  "c:\*\site-packages",
+  "c:\\*\\site-packages",
 ]
