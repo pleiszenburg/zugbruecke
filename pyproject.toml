@@ -23,3 +23,13 @@ exclude = '''
   | env
 )/
 '''
+
+[tool.coverage.run]
+branch = true
+parallel = true
+
+[tool.coverage.paths]
+source = [
+  "src",
+  "c:\*\site-packages",
+]

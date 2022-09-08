@@ -1,5 +1,5 @@
 hypothesis
 pytest
-coverage
+coverage[toml]
 pytest-cov
 typeguard
