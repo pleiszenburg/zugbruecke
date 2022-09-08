@@ -1,5 +1,4 @@
-zugbruecke authors
-==================
+# *zugbruecke* authors
 
 Core developer:
 
