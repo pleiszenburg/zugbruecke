@@ -34,6 +34,8 @@ import os
 from subprocess import Popen
 from typing import Dict, List
 
+from toml import loads
+
 from zugbruecke import Env
 
 from wenv import (
@@ -98,9 +100,12 @@ def _install_env(arch: str, build: PythonVersion):
         'WENV_PYTHONVERSION': str(build),
     })
 
+    with open('pyproject.toml', mode = 'r', encoding = 'utf-8') as f:
+        pyproject = loads(f.read())
+
     for cmd in (
         ['wenv', 'init'],
-        ['wenv', 'pip', 'install', '-r', 'requirements_test.txt'],
+        ['wenv', 'pip', 'install'] + pyproject['project']['optional-dependencies']['test'],
         ['wenv', 'init_coverage'],
     ):
         proc = Popen(cmd, env = envvars)

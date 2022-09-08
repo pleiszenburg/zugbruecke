@@ -30,9 +30,6 @@ _clean_coverage:
 _clean_dll:
 	find src/ tests/ -name '*.dll' -exec rm -f {} +
 
-_clean_egg:
-	-rm -r src/*.egg-info
-
 _clean_py:
 	find src/ tests/ -name '*.pyc' -exec rm -f {} +
 	find src/ tests/ -name '*.pyo' -exec rm -f {} +
@@ -63,13 +60,12 @@ docs:
 	@(cd docs; make clean; make html)
 
 install:
-	pip install -U -e .[dev]
+	pip install -U -e .[dev,test]
 	python -m tests.lib.install
 
 release:
 	make clean
-	make _clean_egg
-	python setup.py sdist bdist_wheel
+	flit build
 	gpg --detach-sign -a dist/zugbruecke*.whl
 	gpg --detach-sign -a dist/zugbruecke*.tar.gz
 

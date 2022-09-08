@@ -1,5 +1,62 @@
 [build-system]
-requires = ["setuptools", "wheel"]
+requires = ["flit_core >=3.2,<4"]
+build-backend = "flit_core.buildapi"
+
+[project]
+name = "zugbruecke"
+description = "Calling routines in Windows DLLs from Python scripts running under Linux, MacOS or BSD"
+authors = [{name = "Sebastian M. Ernst", email = "ernst@pleiszenburg.de"}]
+maintainers = [{name = "Sebastian M. Ernst", email = "ernst@pleiszenburg.de"}]
+keywords = ["ctypes", "wine"]
+readme = "README.md"
+license = {file = "LICENSE"}
+requires-python = ">=3.7"
+dependencies = ["wenv >=0.4.0,<0.5.0"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Information Technology",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: System Administrators",
+    "License :: OSI Approved :: GNU Lesser General Public License v2 (LGPLv2)",
+    "Operating System :: MacOS",
+    "Operating System :: POSIX :: BSD",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Software Development",
+    "Topic :: System :: Operating System",
+    "Topic :: System :: Operating System Kernels",
+    "Topic :: Utilities",
+]
+dynamic = ["version"]
+
+[project.optional-dependencies]
+dev = [
+    "flit",
+    "Jinja2",
+    "python-lsp-server[all]",
+    "Sphinx",
+    "sphinx_rtd_theme",
+    "sphinx-autodoc-typehints",
+    "myst-parser",
+    "toml",
+    "twine",
+]
+test = [
+    "hypothesis",
+    "pytest",
+    "coverage[toml]",
+    "pytest-cov",
+    "typeguard",
+]
+
+[project.urls]
+Home = "https://github.com/pleiszenburg/zugbruecke"
+Documentation = "https://zugbruecke.readthedocs.io/en/latest/"
+Source = "https://github.com/pleiszenburg/zugbruecke"
 
 [tool.black]
 target-version = ['py37']
@@ -33,3 +90,6 @@ source = [
   "src",
   "c:\\*\\site-packages",
 ]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
