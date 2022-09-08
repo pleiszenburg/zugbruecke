@@ -87,7 +87,7 @@ See section on [Bugs and Issues](https://zugbruecke.readthedocs.io/en/stable/bug
 - [Authors](https://github.com/pleiszenburg/zugbruecke/blob/master/AUTHORS.rst)
 - [Change log (current)](https://github.com/pleiszenburg/zugbruecke/blob/develop/CHANGES.md) (changes in development branch since last release)
 - [Change log (past)](https://github.com/pleiszenburg/zugbruecke/blob/master/CHANGES.md) (release history)
-- [Contributing](https://github.com/pleiszenburg/zugbruecke/blob/master/CONTRIBUTING.rst) (**Contributions are highly welcomed!**)
+- [Contributing](https://github.com/pleiszenburg/zugbruecke/blob/master/CONTRIBUTING.md) (**Contributions are highly welcomed!**)
 - [FAQ](https://zugbruecke.readthedocs.io/en/stable/faq.html)
 - [License](https://github.com/pleiszenburg/zugbruecke/blob/master/LICENSE) (**LGPL v2.1**)
 - [Long-term ideas](https://github.com/pleiszenburg/zugbruecke/milestone/2)
