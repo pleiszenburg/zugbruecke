@@ -34,7 +34,8 @@ import importlib
 import os
 import shutil
 
-from wenv import Env as _Env
+import zugbruecke
+from wenv import Env as _Env, __version__ as wenv_version
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # HELPER
@@ -79,10 +80,10 @@ class Env(_Env):
         the update automatically becomes available on the Wine side.
         """
 
-        self._setup_package(name = "zugbruecke")
-        self._setup_package(name = "wenv")
+        self._setup_package(name = "zugbruecke", version = zugbruecke.__version__)
+        self._setup_package(name = "wenv", version = wenv_version)
 
-    def _setup_package(self, name: str):
+    def _setup_package(self, name: str, version: str):
 
         # Package path in unix-python site-packages
         unix_pkg_path = os.path.abspath(os.path.dirname(importlib.util.find_spec(name).origin))
@@ -100,19 +101,19 @@ class Env(_Env):
                 # Copy zugbruecke package into wine-python site-packages
                 shutil.copytree(unix_pkg_path, wine_pkg_path)
 
-        # Egg path in unix-python site-packages
-        unix_egg_path = os.path.abspath(
-            os.path.join(unix_pkg_path, "..", f"{name:s}.egg-info")
+        # Dist path in unix-python site-packages
+        unix_dist_path = os.path.abspath(
+            os.path.join(unix_pkg_path, "..", f"{name:s}-{version:s}.dist-info")
         )
-        # Egg path in wine-python site-packages
-        wine_egg_path = os.path.abspath(
-            os.path.join(self._path_dict["sitepackages"], f"{name:s}.egg-info")
+        # Dist path in wine-python site-packages
+        wine_dist_path = os.path.abspath(
+            os.path.join(self._path_dict["sitepackages"], f"{name:s}-{version:s}.dist-info")
         )
 
         if not self._p["_issues_50_workaround"]:
-            # Link zugbruecke egg into wine-python site-packages
-            _symlink(unix_egg_path, wine_egg_path)
+            # Link zugbruecke dist into wine-python site-packages
+            _symlink(unix_dist_path, wine_dist_path)
         else:
-            if not os.path.exists(wine_egg_path):
-                # Copy zugbruecke egg into wine-python site-packages
-                shutil.copytree(unix_egg_path, wine_egg_path)
+            if not os.path.exists(wine_dist_path):
+                # Copy zugbruecke dist into wine-python site-packages
+                shutil.copytree(unix_dist_path, wine_dist_path)
