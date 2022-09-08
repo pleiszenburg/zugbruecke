@@ -30,12 +30,15 @@ specific language governing rights and limitations under the License.
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+
 import importlib
 import os
 import shutil
+import site
 
 import zugbruecke
 from wenv import Env as _Env, __version__ as wenv_version
+
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # HELPER
@@ -101,13 +104,23 @@ class Env(_Env):
                 # Copy zugbruecke package into wine-python site-packages
                 shutil.copytree(unix_pkg_path, wine_pkg_path)
 
+        dist_name = f"{name:s}-{version:s}.dist-info"
+
         # Dist path in unix-python site-packages
-        unix_dist_path = os.path.abspath(
-            os.path.join(unix_pkg_path, "..", f"{name:s}-{version:s}.dist-info")
-        )
+        unix_dist_path = None
+        for sitepackages in site.getsitepackages():
+            if dist_name.lower() not in [item.lower() for item in os.listdir(sitepackages)]:
+                continue
+            unix_dist_path = os.path.abspath(
+                os.path.join(sitepackages, dist_name)
+            )
+            break
+        if unix_dist_path is None:
+            raise ValueError('dist-info for package could not be found', name)
+
         # Dist path in wine-python site-packages
         wine_dist_path = os.path.abspath(
-            os.path.join(self._path_dict["sitepackages"], f"{name:s}-{version:s}.dist-info")
+            os.path.join(self._path_dict["sitepackages"], dist_name)
         )
 
         if not self._p["_issues_50_workaround"]:
