@@ -44,7 +44,7 @@ from docs.version import get_version
 __version__ = get_version()
 
 # List all versions of Python which are supported
-python_minor_min = 6
+python_minor_min = 7
 python_minor_max = 10
 confirmed_python_versions = [
     "Programming Language :: Python :: 3.{MINOR:d}".format(MINOR=minor)

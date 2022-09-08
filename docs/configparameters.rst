@@ -81,7 +81,7 @@ The following parameters can be configured:
       - ``win32``
     * - pythonversion
       - ``str``
-      - Version / build of *Windows Python*, >= 3.6.
+      - Version / build of *Windows Python*, >= 3.7.
       - ``3.7.4``
     * - timeout_start
       - ``int``
@@ -98,7 +98,7 @@ The following parameters can be configured:
 
 .. note::
 
-    ``pythonversion`` also accepts ``wenv.PythonVersion`` objects, see `relevant section of wenv documentation`_. Version 3.5 and earlier are not supported. You can only specify versions / builds for which an "Windows embeddable zip file" is available, see `python.org`_.
+    ``pythonversion`` also accepts ``wenv.PythonVersion`` objects, see `relevant section of wenv documentation`_. Version 3.6 and earlier are not supported. You can only specify versions / builds for which an "Windows embeddable zip file" is available, see `python.org`_.
 
 .. note::
 

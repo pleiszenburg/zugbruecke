@@ -30,7 +30,7 @@ Significant changes were mandatory for allowing to **cleanup a lot of old code**
 - FEATURE: Added support for CPython 3.10.
 - FEATURE: Added support for CPython 3.9, see #74.
 - FEATURE: Added support for CPython 3.8, see #56.
-- FEATURE: Dropped support for CPython <= 3.5.
+- FEATURE: Dropped support for CPython <= 3.6.
 - FEATURE: Added support for Wine >= 6.0.
 - FEATURE: Dropped support for Wine <= 5, most prominently Wine 4.
 - FEATURE: `zugbruecke.CtypesSession` objects can be managed by context manager statements (`with`).

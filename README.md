@@ -27,7 +27,7 @@ About Wine (from [winehq.org](https://www.winehq.org/)): *Wine (originally an ac
 
 | type | prerequisite | version |
 | --- | --- | --- |
-| user | [CPython](https://www.python.org/) | 3.x (tested with 3.{6,7,8,9,10}) |
+| user | [CPython](https://www.python.org/) | 3.x (tested with 3.{7,8,9,10}) |
 | user | [Wine](https://www.winehq.org/) | >= 6.x (tested with regular & [staging](https://wine-staging.com/)) - expected to be in the user's [`PATH`](https://en.wikipedia.org/wiki/PATH_(variable)) |
 | developer | [mingw cross-compiler](https://mxe.cc) | For building DLLs against which examples and tests can be run. Latest stable release. |
 
