@@ -126,7 +126,7 @@ html_context = {
         ('<i class="fa fa-envelope fa-fw"></i> Mailing List', 'https://groups.io/g/zugbruecke-dev'),
         ('<i class="fa fa-comments fa-fw"></i> Chat', 'https://matrix.to/#/#zugbruecke:matrix.org'),
         # ('<i class="fa fa-file-text fa-fw"></i> Citation', 'https://doi.org/000'),
-        ('<i class="fa fa-info-circle fa-fw"></i> pleiszenburg.de', 'http://www.pleiszenburg.de/'),
+        ('<i class="fa fa-info-circle fa-fw"></i> pleiszenburg.de', 'https://www.pleiszenburg.de/'),
     ],
 }
 

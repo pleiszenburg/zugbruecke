@@ -33,4 +33,4 @@ Paid Support
 
 In addition to the previous options, paid support is available from `pleiszenburg.de - Independent Scientific Services`_.
 
-.. _pleiszenburg.de - Independent Scientific Services: http://www.pleiszenburg.de
+.. _pleiszenburg.de - Independent Scientific Services: https://www.pleiszenburg.de
