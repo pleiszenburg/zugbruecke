@@ -35,9 +35,9 @@ specific language governing rights and limitations under the License.
 import os
 import sys
 # sys.path.insert(0, os.path.abspath('.'))
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
-from docs.version import get_version
+from docs.source.version import get_version
 
 
 # -- General configuration ------------------------------------------------

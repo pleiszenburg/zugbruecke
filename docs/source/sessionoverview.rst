@@ -139,7 +139,7 @@ Both, ``zb_client_up`` and ``zb_server_up``, are supposed to be ``True`` if the 
 Parallel Sessions
 -----------------
 
-You may choose to run more than one session at a time for more advanced problems. For example, accessing 32 bit and 64 bit DLLs simultaneously requires different session configurations for ``win32`` and ``win64`` architectures. Anther use case may be multithreading, where you might want to operate one session per thread.
+You may choose to run more than one session at a time for more advanced problems. For example, accessing 32 bit and 64 bit DLLs simultaneously requires different session configurations for ``win32`` and ``win64`` architectures. Another use case may be multithreading, where you might want to operate one session per thread.
 
 .. note::
 

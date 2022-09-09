@@ -83,7 +83,7 @@ See section on [Bugs and Issues](https://zugbruecke.readthedocs.io/en/stable/bug
 
 - Full project documentation
   - at [Read the Docs](https://zugbruecke.readthedocs.io/en/latest/)
-  - at [`zugbruecke` repository](https://github.com/pleiszenburg/zugbruecke/blob/master/docs/index.rst)
+  - at [`zugbruecke` repository](https://github.com/pleiszenburg/zugbruecke/blob/master/docs/source/index.rst)
 - [Authors](https://github.com/pleiszenburg/zugbruecke/blob/master/AUTHORS.md)
 - [Change log (current)](https://github.com/pleiszenburg/zugbruecke/blob/develop/CHANGES.md) (changes in development branch since last release)
 - [Change log (past)](https://github.com/pleiszenburg/zugbruecke/blob/master/CHANGES.md) (release history)

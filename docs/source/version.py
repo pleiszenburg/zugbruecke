@@ -59,7 +59,7 @@ def parse_version(code: str) -> str:
 def get_version() -> str:
 
     path = os.path.join(
-        os.path.dirname(__file__), '..', SRC_DIR, "zugbruecke", "__init__.py",
+        os.path.dirname(__file__), '..', '..', SRC_DIR, "zugbruecke", "__init__.py",
         )
 
     with open(path, "r", encoding="utf-8") as f:
