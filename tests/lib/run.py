@@ -99,7 +99,7 @@ def _run_tests_unix(*args: str):
         cmd = [
             'pytest',
             '--cov=zugbruecke',
-            '--cov-config=setup.cfg',
+            # '--cov-config=setup.cfg',
             '--hypothesis-show-statistics',
             # '--capture=no',
             *args,
