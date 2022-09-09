@@ -114,7 +114,7 @@ SOURCE = """
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-from .lib.ctypes import get_context
+from .lib.ctypes import get_context, PLATFORM
 
 import pytest
 
@@ -126,9 +126,18 @@ import pytest
 @pytest.mark.parametrize("arch,conv,ctypes,dll_handle", get_context(__file__))
 def test_error_callargs_unconfigured_too_many_args(arch, conv, ctypes, dll_handle):
 
+    if PLATFORM == 'unix':
+        version_info = ctypes.zb_get_parameter('pythonversion')
+        assert version_info.major == 3  # Python 4!
+        not_too_many_check = version_info.minor >= 8
+    else:  # wine
+        import sys
+        assert sys.version_info.major == 3  # Python 4!
+        not_too_many_check = sys.version_info.minor >= 8
+
     square_int = dll_handle.square_int
 
-    if arch == "win64" or conv == "cdll":
+    if arch == "win64" or conv == "cdll" or not_too_many_check:
         a = square_int(1, 2, 3)  # ctypes will ignore this case
     else:
         with pytest.raises(ValueError):
@@ -138,9 +147,18 @@ def test_error_callargs_unconfigured_too_many_args(arch, conv, ctypes, dll_handl
 @pytest.mark.parametrize("arch,conv,ctypes,dll_handle", get_context(__file__))
 def test_error_callargs_unconfigured_too_few_args(arch, conv, ctypes, dll_handle):
 
+    if PLATFORM == 'unix':
+        version_info = ctypes.zb_get_parameter('pythonversion')
+        assert version_info.major == 3  # Python 4!
+        not_too_few_check = version_info.minor >= 8
+    else:  # wine
+        import sys
+        assert sys.version_info.major == 3  # Python 4!
+        not_too_few_check = sys.version_info.minor >= 8
+
     mul_ints = dll_handle.mul_ints
 
-    if arch == "win64" or conv == "cdll":
+    if arch == "win64" or conv == "cdll" or not_too_few_check:
         a = mul_ints(7)  # ctypes will ignore this case
     else:
         with pytest.raises(ValueError):
