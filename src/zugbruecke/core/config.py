@@ -143,7 +143,7 @@ class Config(dict, ConfigABC):
         if key == "arch":
             return "win32"  # Define Wine & Wine-Python architecture
         if key == "pythonversion":
-            return "3.7.4"  # Define Wine-Python version
+            return PythonVersion(self['arch'], 3, 7, 4, 'stable')  # Define Wine-Python version
         if key == "timeout_start":
             return 30  # Timeout for waiting on Wine-Python start
         if key == "timeout_stop":
