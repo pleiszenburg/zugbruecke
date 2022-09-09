@@ -12,11 +12,11 @@ make test
 
 4. Push branch `develop` to GitHub.
 
-5. Wait for feedback from Travis CI.
+5. Wait for feedback from CI.
 
 6. Change to branch `master`.
 
-7. Merge branch `develop` into branch `master` (comment `"%s release"  % version`).
+7. Merge branch `develop` into branch `master` (comment `f"{version:s} release"`).
 
 8. Push branch `master` to GitHub.
 
@@ -38,24 +38,18 @@ git push origin --tags
 make release
 ```
 
-12. Upload package to `pypitest` and review result.
-
-```bash
-make upload_test
-```
-
-13. Upload package to `pypi`.
+12. Upload package to `pypi`.
 
 ```bash
 make upload
 ```
 
-14. Change to branch `develop`.
+13. Change to branch `develop`.
 
-15. In branch `develop`, bump the package version in `src/zugbruecke/__init__.py` by changing the `__version__` string.
+14. In branch `develop`, bump the package version in `src/zugbruecke/__init__.py` by changing the `__version__` string.
 
-16. In `CHANGES.md`, indicate that a new development cycle has started.
+15. In `CHANGES.md`, indicate that a new development cycle has started.
 
-17. Commit to branch `develop`.
+16. Commit to branch `develop`.
 
-18. Push branch `develop` to GitHub.
+17. Push branch `develop` to GitHub.
