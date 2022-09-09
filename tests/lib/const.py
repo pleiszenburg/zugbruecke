@@ -40,6 +40,7 @@ DLL_HEADER = """
 #include <stdio.h>
 #include <windows.h>
 #include <stdint.h>
+#include <limits.h>
 #include <math.h>
 
 typedef int32_t bool;
