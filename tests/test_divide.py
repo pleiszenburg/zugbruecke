@@ -32,27 +32,30 @@ specific language governing rights and limitations under the License.
 
 HEADER = """
 {{ PREFIX }} int {{ SUFFIX }} divide_int(
-	int a,
-	int b,
-	int *remainder
-	);
+    int a,
+    int b,
+    int *remainder
+    );
 """
 
 SOURCE = """
 {{ PREFIX }} int {{ SUFFIX }} divide_int(
-	int a,
-	int b,
-	int *remainder
-	)
+    int a,
+    int b,
+    int *remainder
+    )
 {
-	if (b == 0)
-	{
-		*remainder = 0;
-		return 0;
-	}
-	int quot = a / b;
-	*remainder = a % b;
-	return quot;
+    if (b == 0)
+    {
+        *remainder = 0;
+        return 0;
+    }
+    if (a == INT_MIN && b == -1) {
+        return INT_MAX;
+    }
+    int quot = a / b;
+    *remainder = a % b;
+    return quot;
 }
 """
 
@@ -91,7 +94,11 @@ def test_divide(x, y, arch, conv, ctypes, dll_handle):
     quot = divide_int(x, y, rem_)
     rem = rem_.value
 
-    if y != 0:
+    if x == -1 * 2 ** 31 and y == -1:
+
+        assert (2 ** 31 - 1, 0) == (quot, rem)
+
+    elif y != 0:
 
         v_quot = x // y
         v_rem = abs(x) % abs(y) * (1, -1)[x < 0]  # HACK C99

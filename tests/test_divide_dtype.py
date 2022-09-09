@@ -31,37 +31,46 @@ specific language governing rights and limitations under the License.
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 HEADER = """
-{% for DTYPE in DTYPES %}
-	{{ PREFIX }} {{ DTYPE }} {{ SUFFIX }} test_divide_{{ DTYPE }}(
-		{{ DTYPE }} a,
-		{{ DTYPE }} b,
-		{{ DTYPE }} *remainder
-		);
+{% for DTYPE, _, _ in DTYPES %}
+    {{ PREFIX }} {{ DTYPE }} {{ SUFFIX }} test_divide_{{ DTYPE }}(
+        {{ DTYPE }} a,
+        {{ DTYPE }} b,
+        {{ DTYPE }} *remainder
+        );
 {% endfor %}
 """
 
 SOURCE = """
-{% for DTYPE in DTYPES %}
-	{{ PREFIX }} {{ DTYPE }} {{ SUFFIX }} test_divide_{{ DTYPE }}(
-		{{ DTYPE }} a,
-		{{ DTYPE }} b,
-		{{ DTYPE }} *remainder
-		)
-	{
-		if (b == 0)
-		{
-			*remainder = 0;
-			return 0;
-		}
-		{{ DTYPE }} quot = a / b;
-		*remainder = a % b;
-		return quot;
-	}
+{% for DTYPE, IMIN, IMAX in DTYPES %}
+    {{ PREFIX }} {{ DTYPE }} {{ SUFFIX }} test_divide_{{ DTYPE }}(
+        {{ DTYPE }} a,
+        {{ DTYPE }} b,
+        {{ DTYPE }} *remainder
+        )
+    {
+        if (b == 0)
+        {
+            *remainder = 0;
+            return 0;
+        }
+        if (a == {{ IMIN }} && b == -1) {
+            *remainder = 0;
+            return {{ IMAX }};
+        }
+        {{ DTYPE }} quot = a / b;
+        *remainder = a % b;
+        return quot;
+    }
 {% endfor %}
 """
 
 EXTRA = {
-    "DTYPES": ["int", "int8_t", "int16_t", "int32_t"]  # TODO: 'int64_t' only on win64
+    "DTYPES": [
+        ("int", "INT_MIN", "INT_MAX"),
+        ("int8_t", "INT_LEAST8_MIN", "INT_LEAST8_MAX"),
+        ("int16_t", "INT_LEAST16_MIN", "INT_LEAST16_MAX"),
+        ("int32_t", "INT_LEAST32_MIN", "INT_LEAST32_MAX"),
+    ]  # TODO: 'int64_t' only on win64
 }
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -106,7 +115,11 @@ def test_divide_dtype(data, bits, arch, conv, ctypes, dll_handle):
     quot = divide_int(x, y, rem_)
     rem = rem_.value
 
-    if y != 0:
+    if x == int_limits['min_value'] and y == -1:
+
+        assert (int_limits['max_value'], 0) == (quot, rem)
+
+    elif y != 0:
 
         v_quot = force_int_overflow(x // y, bits, True)
         v_rem = force_int_overflow(
