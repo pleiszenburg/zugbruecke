@@ -60,4 +60,4 @@ Installing *zugbruecke* in Development Mode
 
 If you are interested in contributing to *zugbruecke*, you might want to install it in development mode. You can find the latest instructions on how to do this in the `CONTRIBUTING file`_ of this project on *Github*.
 
-.. _`CONTRIBUTING file`: https://github.com/pleiszenburg/zugbruecke/blob/develop/CONTRIBUTING.rst
+.. _`CONTRIBUTING file`: https://github.com/pleiszenburg/zugbruecke/blob/develop/CONTRIBUTING.md
