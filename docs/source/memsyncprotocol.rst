@@ -55,7 +55,7 @@ With *ctypes* on *Windows*, you could call the function as follows:
     test_vector = [5.74, 3.72, 6.28, 8.6, 9.34, 6.47, 2.05, 9.09, 4.39, 4.75]
     bubblesort(test_vector)
 
-For running the same code with *zugbruecke* on *Unix*, you need to add information on the memory segment representing the array. This is done by adding another attribute, ``memsync``, to the ``_bubblesort`` function handle (just like you usually specify ``argtypes`` and/or ``restype``). The following example demonstrates how you must modify the above example so it works with *zugbruecke*:
+For running the same code with *zugbruecke* on *Unix*, you need to add information on the memory segment representing the array. This is done by adding another attribute, ``memsync``, to the ``_bubblesort`` function handle (just like you usually specify ``argtypes`` and/or ``restype``). The following example demonstrates how the above example must be modified for it to work with *zugbruecke*:
 
 .. code:: python
 
@@ -125,7 +125,7 @@ The complete example, which will run on *Unix* and on *Windows* looks just like 
 A Complex Example
 -----------------
 
-This second example walks through how to compute the size of the memory from multiple arguments. There are plenty of cases where you will encounter function (or structure) definitions like the following:
+This second example walks through how to compute the size of the memory from multiple arguments. There are plenty of cases where you will encounter function (or structure) definitions as follows:
 
 .. code:: C
 
