@@ -6,7 +6,7 @@ Working with Sessions
 Overview
 --------
 
-One session wraps a exactly one *Windows Python* process on top of *Wine*. The session essentially manages the process and takes care of communication between it and the "host" *Unix Python* process. ``ctypes`` API calls are routed from the *Unix Python* process into the *Windows Python* process and executed there. Where applicable, memory content is being kept in sync between both processes, either automatically or via :ref:`user defined directives <memsync>`.
+One session wraps exactly one *Windows Python* process on top of *Wine*. The session essentially manages the process and takes care of communication between it and the "host" *Unix Python* process. ``ctypes`` API calls are routed from the *Unix Python* process into the *Windows Python* process and executed there. Where applicable, memory content is being kept in sync between both processes, either automatically or via :ref:`user defined directives <memsync>`.
 
 *zugbruecke* offers two primary ways of working with sessions. If ``zugbruecke.ctypes`` is being imported, it can be used directly as if regular ``ctypes`` was imported instead. A *default session* is being created and configured automatically in the background. This also applies to importing ``zugbruecke.ctypes.util``. Alternatively, *ctypes sessions*, instances of :class:`zugbruecke.CtypesSession`, can also be created and :ref:`configured <configuration>` on demand as needed.
 
