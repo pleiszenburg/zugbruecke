@@ -1,4 +1,4 @@
-![zugbruecke](http://www.pleiszenburg.de/zugbruecke_logo.png)
+![zugbruecke](docs/source/_static/logo.png "bewegung logo")
 
 # zugbruecke
 
