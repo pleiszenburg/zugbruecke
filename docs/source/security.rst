@@ -14,6 +14,7 @@ Security
 - **DO NOT** run untrusted code (or DLLs)!
 - **DO NOT** use *zugbruecke* for any security related tasks such as encryption, decryption,
   authentication and handling of keys or passwords!
+- **DO NOT** drive any physical hardware with it unless you keep it under constant supervision!
 - **DO NOT** run it with root / super users privileges!
 
 The following problems also directly apply to *zugbruecke*:
