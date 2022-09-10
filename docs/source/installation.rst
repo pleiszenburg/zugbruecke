@@ -30,6 +30,10 @@ For using *zugbruecke*, you need to install **Wine** first. Depending on your pl
 
 .. warning::
 
+    Calling into 32 bit DLLs requires a 32 bit version of *Wine*. As most Linux distributions have started to drop 32 bit support, 32 bit versions of *Wine* are now rarely shipped by default. On some Linux distributions, e.g. Ubuntu and derivatives, the installation of 32 bit packages must be explicitly activated before one can even attempt to install *Wine* for 32 bit. Please read related instructions for your Linux distribution carefully before proceeding.
+
+.. warning::
+
 	Support for Mac OS X and FreeBSD is provided on a best-effort basis. *zugbruecke* currently does not receive regular testing on those platforms.
 
 Getting *zugbruecke*
