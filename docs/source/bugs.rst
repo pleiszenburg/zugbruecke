@@ -21,13 +21,13 @@ Make sure to separate between *zugbruecke*-related, *ctypes*-related and
 *Wine*-related bugs.
 
 .. _GitHub issue tracker: https://github.com/pleiszenburg/zugbruecke/issues
-.. _Python tracker: https://bugs.python.org/
+.. _Python tracker: https://github.com/python/cpython/issues
 .. _WineHQ Bug Tracking System: https://bugs.winehq.org/
 
 How to bisect issues
 --------------------
 
-*zugbruecke* is based on a :ref:`session model <session>`. Each session can be launched with parameters, which can either be passed into or picked up from a configuration file by the session constructor. It is also possible to change parameters during run-time.
+*zugbruecke* is based on a :ref:`session model <session>`. Each session can be launched with parameters, which can either be passed into or picked up by the session constructor from a configuration file. It is also possible to change parameters during run-time.
 
 If you want to increase the log level during run-time, you can do the following:
 
@@ -59,4 +59,4 @@ As a last resort, you can activate additional debugging features intended for de
 
 As an alternative approach, you can also check what happens if you run your code directly in a *Windows Python* interpreter with *ctypes*. Consult the :ref:`chapter on the Wine Python environment <wineenv>` for details. It is easy to get *ctypes* syntax wrong, so this is a good approach for getting it right.
 
-If in doubt, please also test your code with *ctypes* on an actual Windows system - it might be a bug in this module as well.
+If in doubt, please also test your code with *ctypes* on an actual *Windows* system - it might be a bug in this module or *Wine* as well.
