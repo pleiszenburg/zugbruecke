@@ -58,5 +58,6 @@ Use Cases
 
 - Quickly calling routines in proprietary DLLs.
 - Reading legacy file formats and running mission critical legacy plugins for legacy ERP software in a modern environment comes to mind.
+- Driving aged laboratory equipment via old Windows drivers from modern Linux machines.
 - Calling routines in DLLs which come, for some odd reason like "developer suddenly disappeared with source code", without source code. DLLs found in company-internal software and R&D projects come to mind.
 - More common than one might think, calling routines in DLLs, of which the source code is available but can not be (re-)compiled (on another platform) or understood or ported for similarly odd reasons like "developer retired and nobody knows how to do this" or "developer 'went on' and nobody manages to understand the undocumented code". The latter is especially prevalent in academic environments, where what is left of years or even decades of hard work might only be a single "binary blob" - a copy of an old DLL file. All sorts of complicated and highly specialized numerical computations come to mind.
