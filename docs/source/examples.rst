@@ -105,8 +105,6 @@ Because *zugbruecke* executes DLL routines in a separate *Windows Python* proces
 Further Examples
 ----------------
 
-For more examples check the `examples directory`_ of this project. For an overview over its entire range of capabilities have a look at zugbruecke's `test suite`_. For the full demo DLL source code check the `demo_dll directory`_ of this project.
+For an overview over its entire range of capabilities have a look at zugbruecke's `test suite`_.
 
-.. _examples directory: https://github.com/pleiszenburg/zugbruecke/tree/master/examples
 .. _test suite: https://github.com/pleiszenburg/zugbruecke/tree/master/tests
-.. _demo_dll directory: https://github.com/pleiszenburg/zugbruecke/tree/master/demo_dll
