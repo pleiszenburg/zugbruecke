@@ -80,7 +80,7 @@ The following parameters can be configured:
       - *Windows Python* architecture, ``win32`` or ``win64``.
       - ``win32``
     * - pythonversion
-      - ``str``
+      - ``PythonVersion``
       - Version / build of *Windows Python*, >= 3.7.
       - ``3.7.4``
     * - timeout_start
@@ -98,7 +98,7 @@ The following parameters can be configured:
 
 .. note::
 
-    ``pythonversion`` also accepts ``wenv.PythonVersion`` objects, see `relevant section of wenv documentation`_. Version 3.6 and earlier are not supported. You can only specify versions / builds for which an "Windows embeddable zip file" is available, see `python.org`_.
+    ``pythonversion`` accepts ``wenv.PythonVersion`` objects, see `relevant section of wenv documentation`_. Version 3.6 and earlier are not supported. You can only specify versions / builds for which an "Windows embeddable zip file" is available, see `python.org`_ for details. ``wenv.get_available_python_builds`` (`see here`_) and ``wenv.get_latest_python_build`` (`also see here`_) can be used to automatically query available builds.
 
 .. note::
 
@@ -107,3 +107,5 @@ The following parameters can be configured:
 .. _relevant section of wenv documentation: https://wenv.readthedocs.io/en/latest/pythonversion.html#wenv.PythonVersion
 .. _relevant chapter of wenv documentation: https://wenv.readthedocs.io/en/latest/configuration.html#parameters
 .. _python.org: https://www.python.org/downloads/windows/
+.. _see here: https://wenv.readthedocs.io/en/latest/pythonversion.html#wenv.get_available_python_builds
+.. _also see here: https://wenv.readthedocs.io/en/latest/pythonversion.html#wenv.get_latest_python_build
