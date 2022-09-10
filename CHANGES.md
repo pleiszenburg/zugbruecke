@@ -40,7 +40,7 @@ Significant changes were mandatory for allowing to **cleanup a lot of old code**
 - FIX: Methods from `zugbruecke.ctypes.util` (previously `zugbruecke.util`) are faster and a lot less error-prone, see #52.
 - FIX: `zugbruecke.ctypes.CDLL` does no longer fall back to Unix libraries if no corresponding DLL file could be found. For attaching to Unix libraries please use the original `ctypes` module instead, see #53.
 - FIX: Different structure types from different name spaces BUT identical names caused crashes, see #61.
-- FIX: `zugbruecke` raised `TypeError` if too many arguments were given too a configured `cdll` function (`ctypes` does not), see #62.
+- FIX: `zugbruecke` raised `TypeError` if too many arguments were given to a configured `cdll` function (`ctypes` does not), see #62.
 - FIX: If a struct type was used in a function call with `memsync` first (before use in a function call without `memsync`), configuring (and calling) the function failed, see #63.
 - FIX: Path conversion would fail for Wine 5.13 and later.
 - FIX: Memory leak - sessions would collect all log data for as long as they were running, see #76.
