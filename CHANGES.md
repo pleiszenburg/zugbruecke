@@ -55,6 +55,8 @@ Significant changes were mandatory for allowing to **cleanup a lot of old code**
 - DEV: Development dependency switch from unmaintained `python-language-server` to `python-lsp-server`.
 - DEV: Both code and branch coverage of `zugbruecke` can now be analyzed with `coverage`.
 - DEV: Moved from `setuptools` for packaging to `pyproject.toml` via `flit`.
+- DEV: Cleanup of `docs` folder structure.
+- DEV: Include logo in repo.
 
 ## 0.0.15 (2020-07-10)
 
