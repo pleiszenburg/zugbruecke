@@ -37,4 +37,4 @@ Benchmarks were performed with an *i7* 3740QM CPU, *Linux* kernel 4.4.72, *Wine*
 For the corresponding DLL source code (written in C) check the `demo_dll directory`_ of this project. For the corresponding Python code check the `examples directory`_ of this project.
 
 .. _examples directory: https://github.com/pleiszenburg/zugbruecke/tree/master/examples
-.. _demo_dll directory: https://github.com/pleiszenburg/zugbruecke/tree/master/demo_dll
+.. _demo_dll directory: https://github.com/pleiszenburg/zugbruecke/tree/master/examples/demo_dll
