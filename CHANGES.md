@@ -1,6 +1,6 @@
 # Changes
 
-## 0.1.0 (2021-XX-XX)
+## 0.1.0 (2022-XX-XX)
 
 **CAUTION**: The module layout changed, effectively **BREAKING BACKWARDS COMPATIBILITY** for all use-cases!
 
