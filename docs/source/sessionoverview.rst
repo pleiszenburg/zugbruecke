@@ -90,49 +90,49 @@ Sessions are started by creating an instance of :class:`zugbruecke.CtypesSession
 
 .. code:: python
 
-	from zugbruecke import CtypesSession
-	ctypes = CtypesSession() # session creation
+    from zugbruecke import CtypesSession
+    ctypes = CtypesSession() # session creation
 
-	kernel32 = ctypes.cdll.kernel32
-	# do stuff with "kernel32" ...
+    kernel32 = ctypes.cdll.kernel32
+    # do stuff with "kernel32" ...
 
-	ctypes.zb_terminate() # session termination
+    ctypes.zb_terminate() # session termination
 
 Sessions can also be conveniently managed via Python's context managers:
 
 .. code:: python
 
-	from zugbruecke import CtypesSession
+    from zugbruecke import CtypesSession
 
-	with CtypesSession() as ctypes: # session creation AND termination
-		kernel32 = ctypes.cdll.kernel32
-		# do stuff with "kernel32" ...
+    with CtypesSession() as ctypes: # session creation AND termination
+        kernel32 = ctypes.cdll.kernel32
+        # do stuff with "kernel32" ...
 
 The *default session* can of cause also be terminated:
 
 .. code:: python
 
-	from zugbruecke import ctypes # session creation
+    from zugbruecke import ctypes # session creation
 
-	kernel32 = ctypes.cdll.kernel32
-	# do stuff with "kernel32" ...
+    kernel32 = ctypes.cdll.kernel32
+    # do stuff with "kernel32" ...
 
-	ctypes.zb_terminate() # session termination
+    ctypes.zb_terminate() # session termination
 
 A session's "health status" can be inspected via two of its properties:
 
 .. code:: python
 
-	from zugbruecke import CtypesSession
-	ctypes = CtypesSession() # session creation
+    from zugbruecke import CtypesSession
+    ctypes = CtypesSession() # session creation
 
-	assert ctypes.zb_client_up
-	assert ctypes.zb_server_up
+    assert ctypes.zb_client_up
+    assert ctypes.zb_server_up
 
-	ctypes.zb_terminate() # session termination
+    ctypes.zb_terminate() # session termination
 
-	assert not ctypes.zb_client_up
-	assert not ctypes.zb_server_up
+    assert not ctypes.zb_client_up
+    assert not ctypes.zb_server_up
 
 Both, ``zb_client_up`` and ``zb_server_up``, are supposed to be ``True`` if the session is up and running and should both be ``False`` is the session has been correctly terminated.
 
@@ -149,20 +149,20 @@ If you are using functions or classes, which are bound to a session, always use 
 
 .. code:: python
 
-	from zugbruecke import CtypesSession
+    from zugbruecke import CtypesSession
 
-	ctypes_a = CtypesSession() # session creation
-	ctypes_b = CtypesSession() # session creation
+    ctypes_a = CtypesSession() # session creation
+    ctypes_b = CtypesSession() # session creation
 
-	assert ctypes_a.zb_id != ctypes_b.zb_id
+    assert ctypes_a.zb_id != ctypes_b.zb_id
 
-	kernel32 = ctypes_a.cdll.kernel32
-	msvcrt = ctypes_b.cdll.msvcrt
-	# do stuff with "kernel32" through "ctypes_a"
-	# do stuff with "msvcrt" through "ctypes_b"
+    kernel32 = ctypes_a.cdll.kernel32
+    msvcrt = ctypes_b.cdll.msvcrt
+    # do stuff with "kernel32" through "ctypes_a"
+    # do stuff with "msvcrt" through "ctypes_b"
 
-	ctypes_a.zb_terminate() # session termination
-	ctypes_b.zb_terminate() # session termination
+    ctypes_a.zb_terminate() # session termination
+    ctypes_b.zb_terminate() # session termination
 
 Configuring Sessions
 --------------------
@@ -178,10 +178,10 @@ First, a session can be configured at the time of its creation by passing valid 
 
 .. code:: python
 
-	from zugbruecke import CtypesSession
+    from zugbruecke import CtypesSession
 
-	ctypes_32bit = CtypesSession(arch = "win32") # for 32 bit DLLs
-	ctypes_64bit = CtypesSession(arch = "win64") # for 64 bit DLLs
+    ctypes_32bit = CtypesSession(arch = "win32") # for 32 bit DLLs
+    ctypes_64bit = CtypesSession(arch = "win64") # for 64 bit DLLs
 
 .. _reconfiguration:
 
@@ -198,10 +198,10 @@ Consider the following example:
 
 .. code:: python
 
-	from zugbruecke import CtypesSession
+    from zugbruecke import CtypesSession
 
-	ctypes = CtypesSession()
+    ctypes = CtypesSession()
 
-	assert ctypes.zb_get_parameter('log_level') == 0
-	ctypes.zb_set_parameter('log_level', 100)
-	assert ctypes.zb_get_parameter('log_level') == 100
+    assert ctypes.zb_get_parameter('log_level') == 0
+    ctypes.zb_set_parameter('log_level', 100)
+    assert ctypes.zb_get_parameter('log_level') == 100
