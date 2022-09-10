@@ -1,4 +1,4 @@
-![zugbruecke](docs/source/_static/logo.png "bewegung logo")
+![zugbruecke](docs/source/_static/logo.png "zugbruecke logo")
 
 # zugbruecke
 
