@@ -56,7 +56,7 @@ You have just witnessed `msvcrt.dll`, Microsoft's C standard library (or Wine's 
 
 ### Interested in more?
 
-- Check the [examples](https://zugbruecke.readthedocs.io/en/stable/examples.html) in `zugbruecke`'s documentation,
+- Check the [Getting Started](https://zugbruecke.readthedocs.io/en/stable/examples.html) section in `zugbruecke`'s documentation,
 - Read [ctypes' documentation](https://docs.python.org/3/library/ctypes.html),
 - Beyond `ctypes` syntax, learn about [memory synchronization](https://zugbruecke.readthedocs.io/en/latest/memsync.html) with the `memsync` routine attribute (or)
 - Have a look at `zugbruecke`'s [test suite](https://github.com/pleiszenburg/zugbruecke/tree/master/tests) showcasing its entire range of capabilities.
