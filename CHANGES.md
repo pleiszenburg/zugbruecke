@@ -27,7 +27,7 @@ Significant changes were mandatory for allowing to **cleanup a lot of old code**
 - FEATURE: All configuration parameters can be overridden with individual environment variables.
 - FEATURE: Introduced new exception types specific to `zugbruecke`. Meaningful exception are now raised throughout the package.
 - FEATURE: Timeouts for start and stop of the server component can be configured.
-- FEATURE: Added support for CPython 3.10.
+- FEATURE: Added support for CPython 3.10, see #75.
 - FEATURE: Added support for CPython 3.9, see #74.
 - FEATURE: Added support for CPython 3.8, see #56.
 - FEATURE: Dropped support for CPython <= 3.6.
