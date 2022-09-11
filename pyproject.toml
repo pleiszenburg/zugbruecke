@@ -88,11 +88,13 @@ exclude = '''
 [tool.coverage.run]
 branch = true
 parallel = true
+relative_files = true
+source_pkgs = ["zugbruecke"]
 
 [tool.coverage.paths]
 source = [
-  "src",
-  "c:\\*\\site-packages",
+    "src/",
+    "C:\\*\\Lib\\site-packages\\",
 ]
 
 [tool.pytest.ini_options]

@@ -192,6 +192,9 @@ class Interpreter(InterpreterABC):
         env = os.environ.copy()
         env.update(EnvConfig(**self._p.export_dict()).export_envvar_dict())
 
+        if os.environ.get('ZUGBRUECKE_DEBUG', '0') == '1':
+            env['COVERAGE_PROCESS_START'] = 'pyproject.toml'
+
         return env
 
     def _python_start(self):

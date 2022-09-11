@@ -79,6 +79,6 @@ test:
 	python -m tests.lib.build
 	python -m tests.lib.run wine
 	python -m tests.lib.run unix
-	# mv .coverage .coverage.e9.0 ; coverage combine ; coverage html # TODO fix!
+	mv .coverage .coverage.00 ; coverage combine ; coverage html -i
 
 .PHONY: docs
