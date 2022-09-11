@@ -108,7 +108,7 @@ class Env(_Env):
 
         # Dist path in unix-python site-packages
         unix_dist_path = None
-        for sitepackages in site.getsitepackages():
+        for sitepackages in site.getsitepackages() + [site.getusersitepackages()]:
             if dist_name.lower() not in [item.lower() for item in os.listdir(sitepackages)]:
                 continue
             unix_dist_path = os.path.abspath(
