@@ -1,5 +1,9 @@
 # Changes
 
+## 0.1.1 (2022-XX-XX)
+
+- (TBD)
+
 ## 0.1.0 (2022-09-11)
 
 **CAUTION**: The module layout changed, effectively **BREAKING BACKWARDS COMPATIBILITY** for all use-cases!
