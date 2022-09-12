@@ -2,7 +2,7 @@
 
 ## 0.1.1 (2022-XX-XX)
 
-- (TBD)
+- FIX: If `zugbruecke` (and `wenv`) were installed into user site-packages, the installation would break, see #88.
 
 ## 0.1.0 (2022-09-11)
 
