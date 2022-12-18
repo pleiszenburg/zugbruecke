@@ -142,12 +142,8 @@ class CtypesSession(CtypesSessionABC):
         self._pydll = LibraryLoader(self.PyDLL)
 
         # Used as cache by CFUNCTYPE and WINFUNCTYPE
-        self._c_functype_cache = self._current_session.data.cache_dict["func_type"][
-            _FUNCFLAG_CDECL
-        ]
-        self._win_functype_cache = self._current_session.data.cache_dict[
-            "func_type"
-        ][_FUNCFLAG_STDCALL]
+        self._c_functype_cache = self._current_session.data.cache.by_flag(_FUNCFLAG_CDECL)
+        self._win_functype_cache = self._current_session.data.cache.by_flag(_FUNCFLAG_STDCALL)
 
 
     # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

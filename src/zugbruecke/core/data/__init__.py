@@ -38,8 +38,10 @@ from .arg_definition import arguments_definition_class
 from .mem_contents import memory_contents_class
 from .mem_definition import memory_definition_class
 
-from ..abc import DataABC
+from ..abc import CacheABC, DataABC
 from ..const import _FUNCFLAG_STDCALL
+
+from .cache import Cache
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -55,12 +57,6 @@ class Data(
     memory_definition_class,
 ):
 
-    cache_dict = {
-        "func_type": {_FUNCFLAG_CDECL: {}, _FUNCFLAG_STDCALL: {}},
-        "func_handle": {},
-        "struct_type": {},
-    }
-
     def __init__(self, log, is_server, callback_client=None, callback_server=None):
 
         self.log = log
@@ -68,3 +64,10 @@ class Data(
 
         self.callback_client = callback_client
         self.callback_server = callback_server
+
+        self._cache = Cache()
+
+    @property
+    def cache(self) -> CacheABC:
+
+        return self._cache

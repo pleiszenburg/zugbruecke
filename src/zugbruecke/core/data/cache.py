@@ -49,37 +49,37 @@ class Cache(CacheABC):
 
     def __init__(self):
 
-        self._type_cdecl = {}
-        self._type_stdcall = {}
-        self._type_struct = {}
-        self._func_handle = {}
+        self._cdecl = {}
+        self._stdcall = {}
+        self._struct = {}
+        self._handle = {}
 
     @property
-    def type_cdecl(self) -> Dict:
+    def cdecl(self) -> Dict:
 
-        return self._type_cdecl
-
-    @property
-    def type_stdcall(self) -> Dict:
-
-        return self._type_stdcall
+        return self._cdecl
 
     @property
-    def type_struct(self) -> Dict:
+    def stdcall(self) -> Dict:
 
-        return self._type_struct
+        return self._stdcall
 
     @property
-    def func_handle(self) -> Dict:
+    def struct(self) -> Dict:
 
-        return self._func_handle
+        return self._struct
+
+    @property
+    def handle(self) -> Dict:
+
+        return self._handle
 
     def by_flag(self, flag: int) -> Dict:
 
         if flag == _FUNCFLAG_CDECL:
-            return self._type_cdecl
+            return self._cdecl
 
         if flag == _FUNCFLAG_STDCALL:
-            return self._type_stdcall
+            return self._stdcall
 
         raise ValueError(f'unknown flag "{flag}"')

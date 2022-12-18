@@ -93,7 +93,7 @@ class memory_definition_class:
         # Get actual type class - if it is not a ctypes member, try struct cache
         memsync_d["_t"] = getattr(ctypes, memsync_d["t"], None)
         if memsync_d["_t"] is None:
-            memsync_d["_t"] = self.cache_dict["struct_type"][memsync_d["t"]]
+            memsync_d["_t"] = self._cache.struct[memsync_d["t"]]
 
         # Compute the size of type '_t'
         memsync_d["s"] = ctypes.sizeof(memsync_d["_t"])

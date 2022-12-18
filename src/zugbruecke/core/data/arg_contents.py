@@ -238,13 +238,13 @@ class arguments_contents_class:
         func_name = "func_%x" % id(func_ptr)
 
         # Has callback translator been built before?
-        if func_name in self.cache_dict["func_handle"].keys():
+        if func_name in self._cache.handle.keys():
 
             # Just return its name
             return func_name
 
         # Generate and store callback in cache
-        self.cache_dict["func_handle"][func_name] = CallbackClient(
+        self._cache.handle[func_name] = CallbackClient(
             name = func_name,
             handler = func_ptr,
             rpc_server = self.callback_server,
@@ -446,7 +446,7 @@ class arguments_contents_class:
                 arg_type = getattr(ctypes, arg_def_dict["t"]) * flag
                 arg_in = arg_type(*arg_in)
             elif arg_def_dict["g"] == GROUP_STRUCT:
-                arg_type = self.cache_dict["struct_type"][arg_def_dict["t"]] * flag
+                arg_type = self._cache.struct[arg_def_dict["t"]] * flag
                 arg_in = arg_type(
                     *(self.__unpack_item_struct__(e, arg_def_dict) for e in arg_in)
                 )
@@ -464,13 +464,13 @@ class arguments_contents_class:
             return None
 
         # Has callback translator been built?
-        if func_name in self.cache_dict["func_handle"].keys():
+        if func_name in self._cache.handle.keys():
 
             # Just return handle
-            return self.cache_dict["func_handle"][func_name]
+            return self._cache.handle[func_name]
 
         # Generate, decorate and store callback translator in cache
-        self.cache_dict["func_handle"][func_name] = func_def_dict["_factory_type_"](
+        self._cache.handle[func_name] = func_def_dict["_factory_type_"](
             CallbackServer(
                 name = func_name,
                 rpc_client = self.callback_client,
@@ -483,12 +483,12 @@ class arguments_contents_class:
         )
 
         # Return name of callback entry
-        return self.cache_dict["func_handle"][func_name]
+        return self._cache.handle[func_name]
 
     def __unpack_item_struct__(self, args_list, struct_def_dict):
 
         # Generate new instance of struct datatype
-        struct_inst = self.cache_dict["struct_type"][struct_def_dict["t"]]()
+        struct_inst = self._cache.struct[struct_def_dict["t"]]()
 
         # Step through arguments
         for field_def_dict, field_arg in zip(struct_def_dict["_fields_"], args_list):

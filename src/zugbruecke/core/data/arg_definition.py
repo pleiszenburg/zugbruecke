@@ -56,14 +56,14 @@ class arguments_definition_class:
         _memsync_ = kwargs.pop("memsync", [])
 
         if not (flags & _FUNCFLAG_STDCALL):
-            func_type_key = _FUNCFLAG_CDECL
+            func_flag = _FUNCFLAG_CDECL
         else:
-            func_type_key = _FUNCFLAG_STDCALL
+            func_flag = _FUNCFLAG_STDCALL
 
         try:
 
             # There already is a matching function pointer type available
-            return self.cache_dict["func_type"][func_type_key][
+            return self._cache.by_flag(func_flag)[
                 (restype, argtypes, flags)
             ]
 
@@ -77,7 +77,7 @@ class arguments_definition_class:
                 _flags_ = flags
 
             # Store the new type and return
-            self.cache_dict["func_type"][func_type_key][
+            self._cache.by_flag(func_flag)[
                 (restype, argtypes, flags)
             ] = FunctionType
             return FunctionType
@@ -151,7 +151,7 @@ class arguments_definition_class:
                 fields.append((field["n"], ctypes.c_int))
 
         # Generate actual class
-        self.cache_dict["struct_type"][struct_d_dict["t"]] = type(
+        self._cache.struct[struct_d_dict["t"]] = type(
             struct_d_dict["t"],  # Potenial BUG: Ends up in __main__ scope, problematic?
             (ctypes.Structure,),
             {"_fields_": fields},
@@ -225,8 +225,8 @@ class arguments_definition_class:
             _type_name = type_name + "@" + str(id(datatype))
 
             # Keep track of datatype on client side
-            if _type_name not in self.cache_dict["struct_type"].keys():
-                self.cache_dict["struct_type"][_type_name] = datatype
+            if _type_name not in self._cache.struct.keys():
+                self._cache.struct[_type_name] = datatype
 
             # TODO: For speed, cache packed struct definitions for known structs
 
@@ -357,11 +357,11 @@ class arguments_definition_class:
     def __unpack_definition_struct_dict__(self, datatype_d_dict):
 
         # Generate struct class if it does not exist yet
-        if datatype_d_dict["t"] not in self.cache_dict["struct_type"].keys():
+        if datatype_d_dict["t"] not in self._cache.struct.keys():
             self.__generate_struct_from_definition__(datatype_d_dict)
 
         # Return type class or type pointer
         return self.__unpack_definition_flags__(
-            self.cache_dict["struct_type"][datatype_d_dict["t"]],  # struct class
+            self._cache.struct[datatype_d_dict["t"]],  # struct class
             datatype_d_dict["f"],  # flags
         )
