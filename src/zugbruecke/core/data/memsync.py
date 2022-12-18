@@ -30,7 +30,8 @@ specific language governing rights and limitations under the License.
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-from typing import Dict, List
+import ctypes
+from typing import Dict, List, Optional
 
 from ..abc import MemsyncABC
 from ..typeguard import typechecked
@@ -39,28 +40,69 @@ from ..typeguard import typechecked
 # CLASS
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+CACHE = {}  # TODO struct types by name
+
 @typechecked
 class Memsync(MemsyncABC):
 
-    def __init__(self):
+    def __init__(
+        self,
+        type: str = "c_ubyte",  # "t" - defaut type
+        null: bool = False,  # "n" - null-terminated string
+        unic: bool = False,  # "w" - handle unicode
+        func: Optional[str] = None,  # "f" - compile length function
+    ):
 
-        pass
+        self._type = type
+        self._null = null
+        self._unic = unic
+        self._func = func
+
+        if self._func is not None:
+            self._func_callable = eval(self._func)  # "_f" - HACK?
+
+        self._type_cls = getattr(ctypes, self._type, None)  # "_t"
+        if self._type_cls is None:
+            self._type_cls = CACHE[self._type]
+
+        self._size = ctypes.sizeof(self._type_cls)  # "s"
 
     def as_packed(self) -> Dict:
+        """
+        Pack as dict so it can be sent to other side
 
-        return {}
+        Counterpart to `from_packed`
+        """
+
+        return {
+            'type': self._type,
+            'null': self._null,
+            'unic': self._unic,
+            'func': self._func,
+        }
 
     @classmethod
-    def from_packed(cls, packed) -> MemsyncABC:
+    def from_packed(cls, packed: Dict) -> MemsyncABC:
+        """
+        Unpack from dict received from other side
 
-        return cls()
+        Counterpart to `as_packed`
+        """
+
+        return cls(**packed)
 
     @classmethod
     def from_dict(cls, definition: Dict) -> MemsyncABC:
+        """
+        Ingest definition given by user
+        """
 
-        return cls()
+        return cls(**definition)
 
     @classmethod
     def from_dicts(cls, definitions: List[Dict]) -> List[MemsyncABC]:
+        """
+        Ingest definitions given by user
+        """
 
         return [Memsync.from_dict(definition) for definition in definitions]
