@@ -33,14 +33,12 @@ specific language governing rights and limitations under the License.
 import ctypes
 from typing import Dict, List, Optional
 
-from ..abc import MemsyncABC
+from ..abc import CacheABC, MemsyncABC
 from ..typeguard import typechecked
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # CLASS
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-CACHE = {}  # TODO struct types by name
 
 @typechecked
 class Memsync(MemsyncABC):
@@ -50,6 +48,7 @@ class Memsync(MemsyncABC):
 
     def __init__(
         self,
+        cache: CacheABC,
         type: str = "c_ubyte",  # "t" - type
         null: bool = False,  # "n" - null-terminated string
         unic: bool = False,  # "w" - handle unicode
@@ -66,7 +65,7 @@ class Memsync(MemsyncABC):
 
         self._type_cls = getattr(ctypes, self._type, None)  # "_t"
         if self._type_cls is None:
-            self._type_cls = CACHE[self._type]
+            self._type_cls = cache.struct[self._type]
 
         self._size = ctypes.sizeof(self._type_cls)  # "s"
 
@@ -85,27 +84,27 @@ class Memsync(MemsyncABC):
         }
 
     @classmethod
-    def from_packed(cls, packed: Dict) -> MemsyncABC:
+    def from_packed(cls, packed: Dict, cache: CacheABC) -> MemsyncABC:
         """
         Unpack from dict received from other side
 
         Counterpart to `as_packed`
         """
 
-        return cls(**packed)
+        return cls(**packed, cache = cache)
 
     @classmethod
-    def from_definition(cls, definition: Dict) -> MemsyncABC:
+    def from_definition(cls, definition: Dict, cache: CacheABC) -> MemsyncABC:
         """
         Ingest definition given by user
         """
 
-        return cls(**definition)
+        return cls(**definition, cache = cache)
 
     @classmethod
-    def from_definitions(cls, definitions: List[Dict]) -> List[MemsyncABC]:
+    def from_definitions(cls, definitions: List[Dict], cache: CacheABC) -> List[MemsyncABC]:
         """
         Ingest definitions given by user
         """
 
-        return [Memsync.from_definition(definition) for definition in definitions]
+        return [Memsync.from_definition(definition, cache = cache) for definition in definitions]
