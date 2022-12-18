@@ -46,7 +46,7 @@ from typing import Any, Optional, Type
 from .abc import DataABC, SessionClientABC
 from .const import _FUNCFLAG_STDCALL, CONVENTIONS
 from .config import Config
-from .data import data_class
+from .data import Data
 from .dll_client import DllClient
 from .interpreter import Interpreter
 from .lib import get_free_port, get_hash_of_string
@@ -103,7 +103,7 @@ class SessionClient(SessionClientABC):
         )
 
         # Set data cache and parser
-        self._data = data_class(
+        self._data = Data(
             self._log, is_server=False, callback_server=self._rpc_server
         )
 

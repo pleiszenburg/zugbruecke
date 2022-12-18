@@ -37,7 +37,7 @@ import traceback
 from typing import Any
 
 from .abc import ConfigABC, SessionServerABC
-from .data import data_class
+from .data import Data
 from .dll_server import DllServer
 from .log import Log
 from .path import PathStyles
@@ -83,7 +83,7 @@ class SessionServer(SessionServerABC):
         self._log = Log(self._id, self._p, rpc_client=self._rpc_client)
         self._log.out("[session-server] STARTING ...")
 
-        self._data = data_class(
+        self._data = Data(
             self._log, is_server=True, callback_client=self._rpc_client
         )
 

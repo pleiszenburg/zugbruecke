@@ -47,7 +47,7 @@ from ..const import _FUNCFLAG_STDCALL
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
-class data_class(
+class Data(
     DataABC,
     arguments_contents_class,
     arguments_definition_class,
