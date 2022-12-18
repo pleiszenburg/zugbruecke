@@ -39,13 +39,13 @@ from ..typeguard import typechecked
 from . import definition_base as base
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# IMPORT
+# CLASS
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 @typechecked
 class DefinitionFunc(base.Definition):
 
-    group = "PyCFuncPtrType"
+    GROUP = "PyCFuncPtrType"
 
     def __init__(self,
         *args: Any,
