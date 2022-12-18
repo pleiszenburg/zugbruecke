@@ -69,6 +69,10 @@ class Memsync(MemsyncABC):
 
         self._size = ctypes.sizeof(self._type_cls)  # "s"
 
+    def __repr__(self) -> str:
+
+        return f'<Memsync type={self._type} null={self._null} unic={self._unic} func={self._func is not None}>'
+
     def as_packed(self) -> Dict:
         """
         Pack as dict so it can be sent to other side
