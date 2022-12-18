@@ -33,7 +33,7 @@ specific language governing rights and limitations under the License.
 import ctypes
 from typing import Any, Dict, List, Tuple, Union
 
-from ..abc import DefinitionABC
+from ..abc import CacheABC, DefinitionABC
 from ..const import FLAG_POINTER
 from ..errors import DataFlagError
 from ..typeguard import typechecked
@@ -41,6 +41,7 @@ from ..typeguard import typechecked
 from . import definition_simple as simple
 from . import definition_struct as struct
 from . import definition_func as func
+from . import memsync as ms
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # CLASS
@@ -155,7 +156,7 @@ class Definition(DefinitionABC):
         raise NotImplementedError()
 
     @classmethod
-    def from_packed(cls, packed: Dict) -> DefinitionABC:
+    def from_packed(cls, packed: Dict, cache: CacheABC) -> DefinitionABC:
         """
         Unpack from dict received from other side
 
@@ -168,20 +169,29 @@ class Definition(DefinitionABC):
             return simple.DefinitionSimple.from_packed(**packed)
 
         if group == struct.DefinitionStruct.GROUP:
-            return struct.DefinitionStruct.from_packed(**packed)
+            return struct.DefinitionStruct.from_packed(**packed, cache = cache)
 
         if group == func.DefinitionFunc.GROUP:
-            return func.DefinitionFunc.from_packed(**packed)
+            return func.DefinitionFunc.from_packed(**packed, cache = cache)
 
         raise ValueError(f'unknown group "{group}"')  # TODO new error type?
 
     @classmethod
-    def from_data_types(cls, data_types: List[DefinitionABC]) -> List[DefinitionABC]:
+    def from_data_types(
+        cls,
+        cache: CacheABC,
+        data_types: List[DefinitionABC],
+    ) -> List[DefinitionABC]:
 
-        return [cls.from_data_type(data_type) for data_type in data_types]
+        return [cls.from_data_type(data_type = data_type, cache = cache) for data_type in data_types]
 
     @classmethod
-    def from_data_type(cls, data_type: Any, field_name = None) -> DefinitionABC:
+    def from_data_type(
+        cls,
+        cache: CacheABC,
+        data_type: Any,
+        field_name: Union[str, int, None] = None,
+    ) -> DefinitionABC:
         """
         type_name: Name of datatype, such as c_int, if there is one, else None
         group: 'PyCSimpleType', 'PyCStructType', 'PyCArrayType' or 'PyCPointerType'
@@ -204,17 +214,25 @@ class Definition(DefinitionABC):
         if group == struct.DefinitionStruct.GROUP:
             return struct.DefinitionStruct(
                 **kwargs,
-                fields = [cls.from_data_type(field[1], field[0]) for field in base_type._fields_],
+                fields = [
+                    cls.from_data_type(
+                        data_type = field[1],
+                        field_name = field[0],
+                        cache = cache,
+                    ) for field in base_type._fields_
+                ],
+                cache = cache,
             )
 
         if group == func.DefinitionFunc.GROUP:
             kwargs["type_name"] = hash((base_type._restype_, base_type._argtypes_, base_type._flags_))
             return func.DefinitionFunc(
                 **kwargs,
-                argtypes_d = cls.from_data_types(base_type._argtypes_),
-                restype_d = cls.from_data_type(base_type._restype_),
-                memsync_d = Memsync.from_dicts(base_type.memsync),  # TODO
+                argtypes = cls.from_data_types(data_types = base_type._argtypes_, cache = cache),
+                restype = cls.from_data_type(data_type = base_type._restype_, cache = cache),
+                memsync = ms.Memsync.from_definitions(base_type.memsync, cache = cache),
                 func_flags = base_type._flags_,
+                cache = cache,
             )
 
         raise ValueError(f'unknown group "{group}"')  # TODO new error type?

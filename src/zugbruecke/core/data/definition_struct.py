@@ -33,7 +33,7 @@ specific language governing rights and limitations under the License.
 import ctypes
 from typing import Any, Dict, List, Union, Tuple
 
-from ..abc import DefinitionABC
+from ..abc import CacheABC, DefinitionABC
 from ..typeguard import typechecked
 
 from . import definition_base as base
@@ -64,7 +64,7 @@ class DefinitionStruct(base.Definition):
         """
 
         return {
-            "group": self.group,
+            "group": self.GROUP,
             "flags": self._flags,
             "field_name": self._field_name,
             "type_name": self._type_name,
@@ -77,6 +77,7 @@ class DefinitionStruct(base.Definition):
         field_name: Union[str, int, None], # n
         type_name: str, # t
         fields: List[Dict],
+        cache: CacheABC,
     ) -> DefinitionABC:
         """
         Unpack from dict received from other side
@@ -84,8 +85,13 @@ class DefinitionStruct(base.Definition):
         Counterpart to `as_packed`
         """
 
-        fields = [base.Definition.from_packed(field) for field in fields]
-        base_type, data_type = cls._assemble_datatype(type_name, flags, fields)
+        fields = [base.Definition.from_packed(field, cache = cache) for field in fields]
+
+        try:
+            base_type, data_type = cache.struct[type_name]
+        except KeyError:
+            base_type, data_type = cls._assemble_datatype(type_name, flags, fields)
+            cache.struct[type_name] = base_type, data_type
 
         return cls(
             flags = flags,

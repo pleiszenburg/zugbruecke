@@ -65,7 +65,7 @@ class Memsync(MemsyncABC):
 
         self._type_cls = getattr(ctypes, self._type, None)  # "_t"
         if self._type_cls is None:
-            self._type_cls = cache.struct[self._type]
+            _, self._type_cls = cache.struct[self._type]
 
         self._size = ctypes.sizeof(self._type_cls)  # "s"
 

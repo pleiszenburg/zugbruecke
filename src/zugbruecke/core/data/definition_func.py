@@ -31,13 +31,15 @@ specific language governing rights and limitations under the License.
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 import ctypes
+from ctypes import _FUNCFLAG_CDECL
 from typing import Any, Dict, List, Tuple, Union
 
-from ..abc import DefinitionABC, MemsyncABC
+from ..abc import CacheABC, DefinitionABC, MemsyncABC
+from ..const import _FUNCFLAG_STDCALL
 from ..typeguard import typechecked
 
 from . import definition_base as base
-from . import memsync
+from . import memsync as ms
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # CLASS
@@ -50,17 +52,17 @@ class DefinitionFunc(base.Definition):
 
     def __init__(self,
         *args: Any,
-        argtypes_d: List[DefinitionABC],
-        restype_d: DefinitionABC,
-        memsync_d: List[MemsyncABC],
+        argtypes: List[DefinitionABC],
+        restype: DefinitionABC,
+        memsync: List[MemsyncABC],
         func_flags: int,
         **kwargs: Any,
     ):
 
         super().__init__(*args, **kwargs)
-        self._argtypes_d = argtypes_d
-        self._restype_d = restype_d
-        self._memsync_d = memsync_d
+        self._argtypes = argtypes
+        self._restype = restype
+        self._memsync = memsync
         self._func_flags = func_flags
 
     def as_packed(self) -> Dict:
@@ -71,13 +73,13 @@ class DefinitionFunc(base.Definition):
         """
 
         return {
-            "group": self.group,
+            "group": self.GROUP,
             "flags": self._flags,
             "field_name": self._field_name,
             "type_name": self._type_name,
-            "argtypes_d": [argtype_d.as_packed() for argtype_d in self._argtypes_d],
-            "restype_d": self._restype_d.as_packed(),
-            "memsync_d": [item.as_packed() for item in self._memsync_d],
+            "argtypes": [argtype.as_packed() for argtype in self._argtypes],
+            "restype": self._restype.as_packed(),
+            "memsync": [item.as_packed() for item in self._memsync],
             "func_flags": self._func_flags
         }
 
@@ -86,10 +88,11 @@ class DefinitionFunc(base.Definition):
         flags: List[int], # f
         field_name: Union[str, int, None], # n
         type_name: str, # t
-        argtypes_d: List[Dict],
-        restype_d: Dict,
-        memsync_d: List[Dict],
+        argtypes: List[Dict],
+        restype: Dict,
+        memsync: List[Dict],
         func_flags: int,
+        cache: CacheABC,
     ) -> DefinitionABC:
         """
         Unpack from dict received from other side
@@ -97,10 +100,16 @@ class DefinitionFunc(base.Definition):
         Counterpart to `as_packed`
         """
 
-        argtypes_d = [base.Definition.from_packed(argtype_d) for argtype_d in argtypes_d]
-        restype_d = base.Definition.from_packed(restype_d)
-        memsync_d = [memsync.Memsync.from_packed(item) for item in memsync_d]
-        base_type, data_type = cls._assemble_datatype(type_name, flags, argtypes_d, restype_d, memsync_d, func_flags)
+        argtypes = [base.Definition.from_packed(argtype, cache = cache) for argtype in argtypes]
+        restype = base.Definition.from_packed(restype, cache = cache)
+        memsync = [ms.Memsync.from_packed(item, cache = cache) for item in memsync]
+
+        func_flag = _FUNCFLAG_STDCALL if (func_flags & _FUNCFLAG_STDCALL) else _FUNCFLAG_CDECL
+        try:
+            base_type, data_type = cache.by_flag(func_flag)[type_name]
+        except KeyError:
+            base_type, data_type = cls._assemble_datatype(type_name, flags, argtypes, restype, memsync, func_flags)
+            cache.by_flag(func_flag)[type_name] = base_type, data_type
 
         return cls(
             flags = flags,
@@ -108,16 +117,16 @@ class DefinitionFunc(base.Definition):
             type_name = type_name,
             data_type = data_type,
             base_type = base_type,
-            argtypes_d = argtypes_d,
-            restype_d = restype_d,
-            memsync_d = memsync_d,
+            argtypes = argtypes,
+            restype = restype,
+            memsync = memsync,
             func_flags = func_flags,
         )
 
     @classmethod
     def _assemble_datatype(cls,
         type_name: str, flags: List[int],
-        argtypes_d: List[DefinitionABC], restype_d: DefinitionABC, memsync_d: List[MemsyncABC],
+        argtypes: List[DefinitionABC], restype: DefinitionABC, memsync: List[MemsyncABC],
         func_flags: int,
     ) -> Tuple[Any, Any]:
         """
@@ -127,9 +136,9 @@ class DefinitionFunc(base.Definition):
         """
 
         class base_type(ctypes._CFuncPtr):
-            _argtypes_ = [argtype_d.data_type for argtype_d in argtypes_d]
-            _restype_ = restype_d.data_type
-            memsync = memsync_d
+            _argtypes_ = [argtype.data_type for argtype in argtypes]
+            _restype_ = restype.data_type
+            memsync = memsync
             _flags_ = func_flags
 
         data_type = cls._apply_flags(base_type, flags)

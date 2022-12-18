@@ -59,7 +59,7 @@ class DefinitionSimple(base.Definition):
         """
 
         return {
-            "group": self.group,
+            "group": self.GROUP,
             "flags": self._flags,
             "field_name": self._field_name,
             "type_name": self._type_name,
