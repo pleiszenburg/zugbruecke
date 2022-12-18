@@ -6,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-    src/zugbruecke/core/abc.py: Abstract base classes
+    src/zugbruecke/core/data/cache.py: Cached types and handles
 
     Required to run on platform / side: [UNIX, WINE]
 
@@ -30,83 +30,56 @@ specific language governing rights and limitations under the License.
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-from abc import ABC
+from ctypes import _FUNCFLAG_CDECL
+from typing import Dict
+
+from ..abc import CacheABC
+from ..const import _FUNCFLAG_STDCALL
+from ..typeguard import typechecked
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# CLASSES
+# CLASS
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-class CacheABC(ABC):
-    pass
+@typechecked
+class Cache(CacheABC):
+    """
+    Holding struct types, function types and function handles
+    """
 
+    def __init__(self):
 
-class CallbackClientABC(ABC):
-    pass
+        self._type_cdecl = {}
+        self._type_stdcall = {}
+        self._type_struct = {}
+        self._func_handle = {}
 
+    @property
+    def type_cdecl(self) -> Dict:
 
-class CallbackServerABC(ABC):
-    pass
+        return self._type_cdecl
 
+    @property
+    def type_stdcall(self) -> Dict:
 
-class ConfigABC(ABC):
-    pass
+        return self._type_stdcall
 
+    @property
+    def type_struct(self) -> Dict:
 
-class CtypesSessionABC(ABC):
-    pass
+        return self._type_struct
 
+    @property
+    def func_handle(self) -> Dict:
 
-class DataABC(ABC):
-    pass
+        return self._func_handle
 
+    def by_flag(self, flag: int) -> Dict:
 
-class DefinitionABC(ABC):
-    pass
+        if flag == _FUNCFLAG_CDECL:
+            return self._type_cdecl
 
+        if flag == _FUNCFLAG_STDCALL:
+            return self._type_stdcall
 
-class DllClientABC(ABC):
-    pass
-
-
-class DllServerABC(ABC):
-    pass
-
-
-class InterpreterABC(ABC):
-    pass
-
-
-class LogABC(ABC):
-    pass
-
-
-class MemsyncABC(ABC):
-    pass
-
-
-class MessageABC(ABC):
-    pass
-
-
-class RoutineClientABC(ABC):
-    pass
-
-
-class RoutineServerABC(ABC):
-    pass
-
-
-class RpcClientABC(ABC):
-    pass
-
-
-class RpcServerABC(ABC):
-    pass
-
-
-class SessionClientABC(ABC):
-    pass
-
-
-class SessionServerABC(ABC):
-    pass
+        raise ValueError(f'unknown flag "{flag}"')
