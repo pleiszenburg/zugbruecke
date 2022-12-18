@@ -37,6 +37,7 @@ from ..abc import DefinitionABC, MemsyncABC
 from ..typeguard import typechecked
 
 from . import definition_base as base
+from . import memsync
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # CLASS
@@ -51,7 +52,7 @@ class DefinitionFunc(base.Definition):
         *args: Any,
         argtypes_d: List[DefinitionABC],
         restype_d: DefinitionABC,
-        memsync_d: MemsyncABC,
+        memsync_d: List[MemsyncABC],
         func_flags: int,
         **kwargs: Any,
     ):
@@ -98,7 +99,7 @@ class DefinitionFunc(base.Definition):
 
         argtypes_d = [base.Definition.from_packed(argtype_d) for argtype_d in argtypes_d]
         restype_d = base.Definition.from_packed(restype_d)
-        memsync_d = [Memsync.from_packed(item) for item in memsync_d]  # TODO
+        memsync_d = [memsync.Memsync.from_packed(item) for item in memsync_d]
         base_type, data_type = cls._assemble_datatype(type_name, flags, argtypes_d, restype_d, memsync_d, func_flags)
 
         return cls(
