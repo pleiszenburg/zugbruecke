@@ -44,10 +44,13 @@ CACHE = {}  # TODO struct types by name
 
 @typechecked
 class Memsync(MemsyncABC):
+    """
+    Represent the definition of a block of memory to be kept in sync
+    """
 
     def __init__(
         self,
-        type: str = "c_ubyte",  # "t" - defaut type
+        type: str = "c_ubyte",  # "t" - type
         null: bool = False,  # "n" - null-terminated string
         unic: bool = False,  # "w" - handle unicode
         func: Optional[str] = None,  # "f" - compile length function
@@ -92,7 +95,7 @@ class Memsync(MemsyncABC):
         return cls(**packed)
 
     @classmethod
-    def from_dict(cls, definition: Dict) -> MemsyncABC:
+    def from_definition(cls, definition: Dict) -> MemsyncABC:
         """
         Ingest definition given by user
         """
@@ -100,9 +103,9 @@ class Memsync(MemsyncABC):
         return cls(**definition)
 
     @classmethod
-    def from_dicts(cls, definitions: List[Dict]) -> List[MemsyncABC]:
+    def from_definitions(cls, definitions: List[Dict]) -> List[MemsyncABC]:
         """
         Ingest definitions given by user
         """
 
-        return [Memsync.from_dict(definition) for definition in definitions]
+        return [Memsync.from_definition(definition) for definition in definitions]
