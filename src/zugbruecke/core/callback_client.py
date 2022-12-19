@@ -78,7 +78,7 @@ class CallbackClient(CallbackClientABC):
         )
 
         try:
-            args_list = self._data.arg_list_unpack(arg_message_list, self._argtypes_d)
+            args_list = self._data.unpack_args(arg_message_list, self._argtypes_d)
             self._data.server_unpack_memory_list(
                 args_list, arg_memory_list, self._memsync_d
             )
@@ -105,8 +105,8 @@ class CallbackClient(CallbackClientABC):
             self._data.server_pack_memory_list(
                 args_list, return_value, arg_memory_list, self._memsync_d
             )
-            arg_message_list = self._data.arg_list_pack(args_list, self._argtypes_d)
-            return_message = self._data.return_msg_pack(return_value, self._restype_d)
+            arg_message_list = self._data.pack_args(args_list, self._argtypes_d)
+            return_message = self._data.pack_retval(return_value, self._restype_d)
             self._log.out("[callback-client] ... done.")
             return {
                 "args": arg_message_list,

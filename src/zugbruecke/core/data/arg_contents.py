@@ -57,7 +57,7 @@ class ArgContents:
     MIXIN: Argument contents (without memory sync)
     """
 
-    def arg_list_pack(self, args: Tuple[Any], argtypes: List[Dict], conv: Optional[str] = None) -> List[Any]:
+    def pack_args(self, args: Tuple[Any], argtypes: List[Dict], conv: Optional[str] = None) -> List[Any]:
         """
         Args:
             - args: raw arguments
@@ -91,7 +91,7 @@ class ArgContents:
         # Number of arguments is just wrong
         raise TypeError  # Must be TypeError for ctypes compatibility
 
-    def arg_list_unpack(self, args: List[Any], argtypes: List[Dict], conv: Optional[str] = None) -> List[Any]:
+    def unpack_args(self, args: List[Any], argtypes: List[Dict], conv: Optional[str] = None) -> List[Any]:
         """
         Args:
             - args: packed list of arguments from shipping
@@ -123,9 +123,9 @@ class ArgContents:
             ] + args[len(argtypes):]
 
         # Number of arguments is just wrong
-        raise TypeError  # Highly unlikely case, arg_list_pack will fail instead
+        raise TypeError  # Highly unlikely case, pack_args will fail instead
 
-    def return_msg_pack(self, value: Any, restype: Dict) -> Any:
+    def pack_retval(self, value: Any, restype: Dict) -> Any:  # return_msg_pack
         """
         Args:
             - value: raw return value
@@ -139,7 +139,7 @@ class ArgContents:
 
         return self.__pack_item__(value, restype)
 
-    def return_msg_unpack(self, value: Any, restype: Dict) -> Any:
+    def unpack_retval(self, value: Any, restype: Dict) -> Any:  # return_msg_unpack
         """
         Args:
             - value: packed return value from shipping

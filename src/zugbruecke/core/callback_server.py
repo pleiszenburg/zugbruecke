@@ -87,7 +87,7 @@ class CallbackServer(CallbackServerABC):
 
         try:
             return_dict = self._handler(
-                self._data.arg_list_pack(args, self._argtypes_d), mem_package_list
+                self._data.pack_args(args, self._argtypes_d), mem_package_list
             )
         except Exception as e:
             self._log.out("[callback-server] ... call failed!")
@@ -100,10 +100,10 @@ class CallbackServer(CallbackServerABC):
             )
             self._data.arg_list_sync(
                 args,
-                self._data.arg_list_unpack(return_dict["args"], self._argtypes_d),
+                self._data.unpack_args(return_dict["args"], self._argtypes_d),
                 self._argtypes_d,
             )
-            return_value = self._data.return_msg_unpack(
+            return_value = self._data.unpack_retval(
                 return_dict["return_value"], self._restype_d
             )
             self._data.client_unpack_memory_list(

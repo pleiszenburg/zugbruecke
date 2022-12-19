@@ -126,7 +126,7 @@ class RoutineClient(RoutineClientABC):
 
         # Actually call routine in DLL! TODO Handle kw ...
         return_dict = self._call_on_server(
-            self._data.arg_list_pack(args, self._argtypes_d, self._convention),
+            self._data.pack_args(args, self._argtypes_d, self._convention),
             mem_package_list,
         )
 
@@ -137,7 +137,7 @@ class RoutineClient(RoutineClientABC):
         # Unpack return dict (call may have failed partially only)
         self._data.arg_list_sync(
             args,
-            self._data.arg_list_unpack(
+            self._data.unpack_args(
                 return_dict["args"],
                 self._argtypes_d,
                 self._convention,
@@ -148,7 +148,7 @@ class RoutineClient(RoutineClientABC):
         self._log.out("[routine-client] ... unpacking return value ...")
 
         # Unpack return value of routine
-        return_value = self._data.return_msg_unpack(
+        return_value = self._data.unpack_retval(
             return_dict["return_value"], self._restype_d
         )
 

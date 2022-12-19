@@ -102,7 +102,7 @@ class RoutineServer(RoutineServerABC):
         try:
 
             # Unpack passed arguments, handle pointers and structs ...
-            args_list = self._data.arg_list_unpack(
+            args_list = self._data.unpack_args(
                 arg_message_list, self._argtypes_d, self._convention
             )
 
@@ -148,12 +148,12 @@ class RoutineServer(RoutineServerABC):
             )
 
             # Get new arg message list
-            arg_message_list = self._data.arg_list_pack(
+            arg_message_list = self._data.pack_args(
                 args_list, self._argtypes_d, self._convention
             )
 
             # Get new return message list
-            return_message = self._data.return_msg_pack(return_value, self._restype_d)
+            return_message = self._data.pack_retval(return_value, self._restype_d)
 
             self._log.out("[routine-server] ... done.")
 
