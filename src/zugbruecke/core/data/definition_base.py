@@ -71,7 +71,7 @@ class Definition(DefinitionABC):
 
     def __repr__(self) -> str:
 
-        return f'<Definition field={self._field_name} type={self._type_name} flags={self._flags}>'  # TODO
+        return f'<Definition group={self.GROUP} field={self._field_name} type={self._type_name} flags={self._flags}>'  # TODO
 
     @property
     def data_type(self) -> Any:
