@@ -267,7 +267,7 @@ class arguments_definition_class:
                 "_flags_": datatype._flags_,
             }
 
-        # UNKNOWN stuff, likely pointers - handled without datatype
+        # UNKNOWN custom data types with "from_param" attribute
         else:
 
             return {
