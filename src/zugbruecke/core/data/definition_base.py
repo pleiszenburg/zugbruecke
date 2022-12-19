@@ -31,7 +31,7 @@ specific language governing rights and limitations under the License.
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 import ctypes
-from typing import Any, Dict, List, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 from ..abc import CacheABC, DefinitionABC
 from ..const import FLAG_POINTER
@@ -60,7 +60,7 @@ class Definition(DefinitionABC):
     def __init__(self,
         flags: List[int], # f
         field_name: Union[str, int, None], # n
-        type_name: str, # t
+        type_name: Optional[str], # t
         data_type: Any,
         base_type: Any,
     ):
@@ -71,13 +71,6 @@ class Definition(DefinitionABC):
 
         self._data_type = data_type
         self._base_type = base_type
-
-        # # HACK Different struct types from different name spaces can have identical names
-        # _type_name = "{TYPE_NAME:s}@{ID:d}".format(TYPE_NAME = type_name, ID = id(datatype))
-        #
-        # # Keep track of datatype on client side
-        # if _type_name not in DefinitionStruct.cache.keys():
-        #     DefinitionStruct.cache[_type_name] = datatype
 
         # # Store the depth of arrays (arrays within arrays etc; for speed)
         # array_depth = len([flag for flag in flags if flag > 0]) # d
@@ -145,7 +138,7 @@ class Definition(DefinitionABC):
             flags.append(FLAG_POINTER if group == "PyCPointerType" else base_type._length_)
 
             base_type = base_type._type_
-            type_name = base_type.__name__
+            type_name = getattr(base_type, "__name__", None)  # TODO Is there a case without a name?
             group = type(base_type).__name__
 
         return base_type, type_name, group, flags

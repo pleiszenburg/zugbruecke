@@ -32,7 +32,7 @@ specific language governing rights and limitations under the License.
 
 import ctypes
 from ctypes import _FUNCFLAG_CDECL
-from typing import Any, Dict, List, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 from ..abc import CacheABC, DefinitionABC, MemsyncABC
 from ..const import _FUNCFLAG_STDCALL
@@ -154,7 +154,7 @@ class DefinitionFunc(base.Definition):
         cls,
         flags: List[int], # f
         field_name: Union[str, int, None], # n
-        type_name: str, # t
+        type_name: Optional[str], # t
         data_type: Any,
         base_type: Any,
         cache: CacheABC,

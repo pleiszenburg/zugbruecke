@@ -31,7 +31,7 @@ specific language governing rights and limitations under the License.
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 import ctypes
-from typing import Any, Dict, List, Union, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 from ..abc import CacheABC, DefinitionABC
 from ..typeguard import typechecked
@@ -87,7 +87,6 @@ class DefinitionStruct(base.Definition):
 
         fields = [base.Definition.from_packed(field, cache = cache) for field in fields]
 
-        type_name = f'struct_{hash(tuple((field.field_name, field.data_type) for field in fields)):x}'
         try:
             base_type, data_type = cache.struct[type_name]
         except KeyError:
@@ -125,7 +124,7 @@ class DefinitionStruct(base.Definition):
         cls,
         flags: List[int], # f
         field_name: Union[str, int, None], # n
-        type_name: str, # t
+        type_name: Optional[str], # t
         data_type: Any,
         base_type: Any,
         cache: CacheABC,
@@ -134,18 +133,20 @@ class DefinitionStruct(base.Definition):
         Struct group-specific helper for from ctypes data type
         """
 
+        fields = [
+            cls.from_data_type(
+                data_type = field[1],
+                field_name = field[0],
+                cache = cache,
+            ) for field in base_type._fields_
+        ]
+
         return cls(
             flags = flags,
             field_name = field_name,
-            type_name = type_name,
+            type_name = f'struct_{hash(tuple((field.field_name, field.data_type) for field in fields)):x}',
             data_type = data_type,
             base_type = base_type,
-            fields = [
-                cls.from_data_type(
-                    data_type = field[1],
-                    field_name = field[0],
-                    cache = cache,
-                ) for field in base_type._fields_
-            ],
+            fields = fields,
             cache = cache,
         )
