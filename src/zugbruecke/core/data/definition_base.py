@@ -95,6 +95,11 @@ class Definition(DefinitionABC):
 
         return self._data_type
 
+    @property
+    def field_name(self) -> Union[str, int, None]:
+
+        return self._field_name
+
     @staticmethod
     def _apply_flags(data_type: Any, flags: List[int]) -> Any:
         """
