@@ -125,30 +125,44 @@ class ArgContents:
         # Number of arguments is just wrong
         raise TypeError  # Highly unlikely case, arg_list_pack will fail instead
 
-    def return_msg_pack(self, return_value, returntype_dict):
+    def return_msg_pack(self, value: Any, restype: Dict) -> Any:
+        """
+        Args:
+            - value: raw return value
+            - restype: zugbruecke restype definition
+        Returns:
+            Packed return value for shipping
+        """
 
-        if return_value is None:
+        if value is None:
             return None
 
-        return self.__pack_item__(return_value, returntype_dict)
+        return self.__pack_item__(value, restype)
 
-    def return_msg_unpack(self, return_msg, returntype_dict):
+    def return_msg_unpack(self, value: Any, restype: Dict) -> Any:
+        """
+        Args:
+            - value: packed return value from shipping
+            - restype: zugbruecke restype definitions
+        Returns:
+            Raw return value
+        """
 
-        if return_msg is None:
+        if value is None:
             return None
 
         # If this is not a fundamental datatype or if there is a pointer involved, just unpack
         if (
-            not returntype_dict["g"] == GROUP_FUNDAMENTAL
-            or FLAG_POINTER in returntype_dict["f"]
+            not restype["g"] == GROUP_FUNDAMENTAL
+            or FLAG_POINTER in restype["f"]
         ):
-            return self.__unpack_item__(return_msg, returntype_dict)
+            return self.__unpack_item__(value, restype)
 
         # The original ctypes strips away ctypes datatypes for fundamental
         # (non-pointer, non-struct) return values and returns plain Python
-        # data types instead - the unpack result requires stripping
+        # data types instead - the unpacked result requires stripping
         return self.__item_value_strip__(
-            self.__unpack_item__(return_msg, returntype_dict)
+            self.__unpack_item__(value, restype)
         )
 
     def arg_list_sync(self, old_arguments_list, new_arguments_list, argtypes_list):
