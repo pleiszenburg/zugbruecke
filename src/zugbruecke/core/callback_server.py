@@ -98,7 +98,7 @@ class CallbackServer(CallbackServerABC):
             self._log.out(
                 "[callback-server] ... received feedback from client, unpacking ..."
             )
-            self._data.arg_list_sync(
+            self._data.sync_args(
                 args,
                 self._data.unpack_args(return_dict["args"], self._argtypes_d),
                 self._argtypes_d,

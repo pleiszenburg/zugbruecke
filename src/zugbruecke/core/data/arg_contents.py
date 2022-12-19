@@ -165,13 +165,20 @@ class ArgContents:
             self.__unpack_item__(value, restype)
         )
 
-    def arg_list_sync(self, old_arguments_list, new_arguments_list, argtypes_list):
+    def sync_args(self, old_args: List[Any], new_args: List[Any], argtypes: List[Dict]):
+        """
+        Args:
+            - old_args: Raw arguments
+            - new_args: Raw arguments
+        Returns:
+            Nothing
+        """
 
         # Step through arguments
-        for old_arg, new_arg, arg_def_dict in zip(
-            old_arguments_list, new_arguments_list, argtypes_list
+        for old_arg, new_arg, argtype in zip(
+            old_args, new_args, argtypes
         ):
-            self.__sync_item__(old_arg, new_arg, arg_def_dict)
+            self.__sync_item__(old_arg, new_arg, argtype)
 
     def __item_pointer_strip__(self, arg_in):
 

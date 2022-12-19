@@ -135,7 +135,7 @@ class RoutineClient(RoutineClientABC):
         )
 
         # Unpack return dict (call may have failed partially only)
-        self._data.arg_list_sync(
+        self._data.sync_args(
             args,
             self._data.unpack_args(
                 return_dict["args"],
