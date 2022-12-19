@@ -135,12 +135,16 @@ class DefinitionFunc(base.Definition):
         Counterpart to `_disassemble_datatype`
         """
 
-        class base_type(ctypes._CFuncPtr):
-            _argtypes_ = [argtype.data_type for argtype in argtypes]
-            _restype_ = restype.data_type
-            memsync = memsync
-            _flags_ = func_flags
-
+        base_type = type(
+            type_name,  # Potenial BUG: in __main__ scope, problematic?
+            (ctypes._CFuncPtr,),
+            {
+                "_argtypes_": [argtype.data_type for argtype in argtypes],
+                "_restype_": restype.data_type,
+                "memsync": memsync,
+                "_flags_": func_flags,
+            },
+        )
         data_type = cls._apply_flags(base_type, flags)
 
         return base_type, data_type
@@ -162,7 +166,7 @@ class DefinitionFunc(base.Definition):
         return cls(
             flags = flags,
             field_name = field_name,
-            type_name = hash((base_type._restype_, base_type._argtypes_, base_type._flags_)),
+            type_name = f'func_{hash((base_type._restype_, base_type._argtypes_, base_type._flags_)):x}',
             data_type = data_type,
             base_type = base_type,
             argtypes = cls.from_data_types(data_types = base_type._argtypes_, cache = cache),
