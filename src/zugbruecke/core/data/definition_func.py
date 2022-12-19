@@ -144,3 +144,30 @@ class DefinitionFunc(base.Definition):
         data_type = cls._apply_flags(base_type, flags)
 
         return base_type, data_type
+
+    @classmethod
+    def _from_data_type(
+        cls,
+        flags: List[int], # f
+        field_name: Union[str, int, None], # n
+        type_name: str, # t
+        data_type: Any,
+        base_type: Any,
+        cache: CacheABC,
+    ):
+        """
+        Func group-specific helper for from ctypes data type
+        """
+
+        return cls(
+            flags = flags,
+            field_name = field_name,
+            type_name = hash((base_type._restype_, base_type._argtypes_, base_type._flags_)),
+            data_type = data_type,
+            base_type = base_type,
+            argtypes = cls.from_data_types(data_types = base_type._argtypes_, cache = cache),
+            restype = cls.from_data_type(data_type = base_type._restype_, cache = cache),
+            memsync = ms.Memsync.from_definitions(base_type.memsync, cache = cache),
+            func_flags = base_type._flags_,
+            cache = cache,
+        )

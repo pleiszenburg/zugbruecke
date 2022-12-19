@@ -117,3 +117,32 @@ class DefinitionStruct(base.Definition):
 
         return base_type, data_type
 
+    @classmethod
+    def _from_data_type(
+        cls,
+        flags: List[int], # f
+        field_name: Union[str, int, None], # n
+        type_name: str, # t
+        data_type: Any,
+        base_type: Any,
+        cache: CacheABC,
+    ):
+        """
+        Struct group-specific helper for from ctypes data type
+        """
+
+        return cls(
+            flags = flags,
+            field_name = field_name,
+            type_name = type_name,
+            data_type = data_type,
+            base_type = base_type,
+            fields = [
+                cls.from_data_type(
+                    data_type = field[1],
+                    field_name = field[0],
+                    cache = cache,
+                ) for field in base_type._fields_
+            ],
+            cache = cache,
+        )

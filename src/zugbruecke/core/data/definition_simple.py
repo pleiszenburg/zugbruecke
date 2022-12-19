@@ -33,7 +33,7 @@ specific language governing rights and limitations under the License.
 import ctypes
 from typing import Any, Dict, List, Tuple, Union
 
-from ..abc import DefinitionABC
+from ..abc import CacheABC, DefinitionABC
 from ..typeguard import typechecked
 
 from . import definition_base as base
@@ -99,3 +99,25 @@ class DefinitionSimple(base.Definition):
         data_type = cls._apply_flags(base_type, flags)
 
         return base_type, data_type
+
+    @classmethod
+    def _from_data_type(
+        cls,
+        flags: List[int], # f
+        field_name: Union[str, int, None], # n
+        type_name: str, # t
+        data_type: Any,
+        base_type: Any,
+        cache: CacheABC,
+    ):
+        """
+        Simple group-specific helper for from ctypes data type
+        """
+
+        return cls(
+            flags = flags,
+            field_name = field_name,
+            type_name = type_name,
+            data_type = data_type,
+            base_type = base_type,
+        )

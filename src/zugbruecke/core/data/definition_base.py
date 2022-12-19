@@ -41,7 +41,6 @@ from ..typeguard import typechecked
 from . import definition_simple as simple
 from . import definition_struct as struct
 from . import definition_func as func
-from . import memsync as ms
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # CLASS
@@ -146,6 +145,14 @@ class Definition(DefinitionABC):
 
         return base_type, type_name, group, flags
 
+    @classmethod
+    def _from_data_type(cls, **kwargs: Any):
+        """
+        Group-specific helper for from ctypes data type
+        """
+
+        raise NotImplementedError()
+
     def as_packed(self) -> Dict:
         """
         Pack as dict so it can be sent to other side
@@ -206,33 +213,16 @@ class Definition(DefinitionABC):
             type_name = type_name,
             flags = flags,
             field_name = field_name,
+            cache = cache,
         )
 
         if group == simple.DefinitionSimple.GROUP:
-            return simple.DefinitionSimple(**kwargs)
+            return simple.DefinitionSimple._from_data_type(**kwargs)
 
         if group == struct.DefinitionStruct.GROUP:
-            return struct.DefinitionStruct(
-                **kwargs,
-                fields = [
-                    cls.from_data_type(
-                        data_type = field[1],
-                        field_name = field[0],
-                        cache = cache,
-                    ) for field in base_type._fields_
-                ],
-                cache = cache,
-            )
+            return struct.DefinitionStruct._from_data_type(**kwargs)
 
         if group == func.DefinitionFunc.GROUP:
-            kwargs["type_name"] = hash((base_type._restype_, base_type._argtypes_, base_type._flags_))
-            return func.DefinitionFunc(
-                **kwargs,
-                argtypes = cls.from_data_types(data_types = base_type._argtypes_, cache = cache),
-                restype = cls.from_data_type(data_type = base_type._restype_, cache = cache),
-                memsync = ms.Memsync.from_definitions(base_type.memsync, cache = cache),
-                func_flags = base_type._flags_,
-                cache = cache,
-            )
+            return func.DefinitionFunc._from_data_type(**kwargs)
 
         raise ValueError(f'unknown group "{group}"')  # TODO new error type?
