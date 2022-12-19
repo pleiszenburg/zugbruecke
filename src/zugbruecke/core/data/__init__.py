@@ -32,14 +32,16 @@ specific language governing rights and limitations under the License.
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 from ctypes import _FUNCFLAG_CDECL
+from typing import Optional
 
 from .arg_contents import arguments_contents_class
 from .arg_definition import arguments_definition_class
 from .mem_contents import memory_contents_class
 from .mem_definition import memory_definition_class
 
-from ..abc import CacheABC, DataABC
+from ..abc import CacheABC, DataABC, LogABC, RpcClientABC, RpcServerABC
 from ..const import _FUNCFLAG_STDCALL
+from ..typeguard import typechecked
 
 from .cache import Cache
 
@@ -48,7 +50,7 @@ from .cache import Cache
 # CLASS: DATA
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-
+@typechecked
 class Data(
     DataABC,
     arguments_contents_class,
@@ -57,13 +59,19 @@ class Data(
     memory_definition_class,
 ):
 
-    def __init__(self, log, is_server, callback_client=None, callback_server=None):
+    def __init__(
+        self,
+        log: LogABC,
+        is_server: bool,
+        callback_client: Optional[RpcClientABC] = None,
+        callback_server: Optional[RpcServerABC] = None,
+    ):
 
-        self.log = log
-        self.is_server = is_server
+        self._log = log
+        self._is_server = is_server
 
-        self.callback_client = callback_client
-        self.callback_server = callback_server
+        self._callback_client = callback_client
+        self._callback_server = callback_server
 
         self._cache = Cache()
 

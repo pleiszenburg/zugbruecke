@@ -231,7 +231,7 @@ class arguments_contents_class:
     def __pack_item_function__(self, func_ptr, func_def_dict):
 
         # HACK if on server, just return None
-        if self.is_server:
+        if self._is_server:
             return None
 
         # Use memory address of function pointer as unique name/ID
@@ -247,9 +247,9 @@ class arguments_contents_class:
         self._cache.handle[func_name] = CallbackClient(
             name = func_name,
             handler = func_ptr,
-            rpc_server = self.callback_server,
+            rpc_server = self._callback_server,
             data = self,
-            log = self.log,
+            log = self._log,
             argtypes_d = func_def_dict["_argtypes_"],
             restype_d = func_def_dict["_restype_"],
             memsync_d = self.unpack_definition_memsync(func_def_dict["_memsync_"]),
@@ -460,7 +460,7 @@ class arguments_contents_class:
     def __unpack_item_function__(self, func_name, func_def_dict):
 
         # HACK if this function is called on the client, just return None
-        if not self.is_server:
+        if not self._is_server:
             return None
 
         # Has callback translator been built?
@@ -473,9 +473,9 @@ class arguments_contents_class:
         self._cache.handle[func_name] = func_def_dict["_factory_type_"](
             CallbackServer(
                 name = func_name,
-                rpc_client = self.callback_client,
+                rpc_client = self._callback_client,
                 data = self,
-                log = self.log,
+                log = self._log,
                 argtypes_d = func_def_dict["_argtypes_"],
                 restype_d = func_def_dict["_restype_"],
                 memsync_d = self.unpack_definition_memsync(func_def_dict["_memsync_"]),

@@ -193,7 +193,7 @@ class memory_contents_class:
             # TODO elements of arrays
             else:
 
-                self.log.err(path_element)
+                self._log.err(path_element)
                 raise NotImplementedError("array elements can yet not be addressed")
 
         return element
