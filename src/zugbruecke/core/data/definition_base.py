@@ -41,6 +41,7 @@ from ..typeguard import typechecked
 from . import definition_simple as simple
 from . import definition_struct as struct
 from . import definition_func as func
+from . import definition_custom as custom
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # CLASS
@@ -114,13 +115,10 @@ class Definition(DefinitionABC):
         return self.array_depth == 0
 
     @staticmethod
-    def _apply_flags(data_type: Any, flags: List[int], custom: bool = False) -> Any:
+    def _apply_flags(data_type: Any, flags: List[int]) -> Any:
         """
         Apply flags, i.e. pointer and array, to ctypes data type
         """
-
-        if custom:
-            return data_type  # flags can not be applied to custom data types
 
         for flag in reversed(flags):
             if flag > 0:  # array
@@ -245,5 +243,8 @@ class Definition(DefinitionABC):
 
         if group == func.DefinitionFunc.GROUP:
             return func.DefinitionFunc._from_data_type(**kwargs)
+
+        if hasattr(data_type, 'from_param'):
+            return custom.DefinitionCustom._from_data_type(**kwargs)
 
         raise ValueError(f'unknown group "{group}"')  # TODO new error type?
