@@ -166,7 +166,7 @@ class memory_contents_class:
 
                 # Pointer to pointer (in top-level arguments) for memory allocation by DLL
                 if path_element < 0:
-                    element = self.__item_pointer_strip__(element)
+                    element = self._strip_pointer(element)
 
                 # Dive into argument tuple
                 else:
@@ -188,7 +188,7 @@ class memory_contents_class:
             # Field name in struct
             elif isinstance(path_element, str) and element_index > 0:
 
-                element = getattr(self.__item_pointer_strip__(element), path_element)
+                element = getattr(self._strip_pointer(element), path_element)
 
             # TODO elements of arrays
             else:

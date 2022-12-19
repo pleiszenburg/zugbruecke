@@ -161,7 +161,7 @@ class ArgContents:
         # The original ctypes strips away ctypes datatypes for fundamental
         # (non-pointer, non-struct) return values and returns plain Python
         # data types instead - the unpacked result requires stripping
-        return self.__item_value_strip__(
+        return self._strip_simplecdata(
             self.__unpack_item__(value, restype)
         )
 
@@ -180,21 +180,36 @@ class ArgContents:
         ):
             self.__sync_item__(old_arg, new_arg, argtype)
 
-    def __item_pointer_strip__(self, arg_in):
+    @staticmethod
+    def _strip_pointer(item: Any) -> Any:  # _strip_pointer
+        """
+        Args:
+            - item: ctypes pointer object
+        Returns:
+            ctypes object, extracted from pointer
+        """
 
         # Handle pointer object
-        if hasattr(arg_in, "contents"):
-            return arg_in.contents
+        if hasattr(item, "contents"):
+            return item.contents
+
         # Handle reference (byref) 'light pointer'
-        elif hasattr(arg_in, "_obj"):
-            return arg_in._obj
+        if hasattr(item, "_obj"):
+            return item._obj
+
         # Object was likely not provided as a pointer
-        else:
-            return arg_in
+        return item
 
-    def __item_value_strip__(self, arg_in):
+    @staticmethod
+    def _strip_simplecdata(item: Any) -> Any:
+        """
+        Args:
+            - item: potentially some ctypes SimpleCData object
+        Returns:
+            Raw value, extracted from ctypes SimpleCData object
+        """
 
-        return getattr(arg_in, "value", arg_in)
+        return getattr(item, "value", item)
 
     def __pack_item__(self, arg_in, arg_def_dict):
 
@@ -210,12 +225,12 @@ class ArgContents:
             if is_null_pointer(arg_in):
                 # Just return None - will (hopefully) be overwritten by memsync
                 return None
-            arg_in = self.__item_pointer_strip__(arg_in)
+            arg_in = self._strip_pointer(arg_in)
 
         # Handle fundamental types
         if arg_def_dict["g"] == GROUP_FUNDAMENTAL:
             # Append argument to list ...
-            return self.__item_value_strip__(arg_in)
+            return self._strip_simplecdata(arg_in)
         # Handle structs
         elif arg_def_dict["g"] == GROUP_STRUCT:
             # Reclusively call this routine for packing structs
@@ -239,7 +254,7 @@ class ArgContents:
             # Handle pointers
             if flag == FLAG_POINTER:
 
-                arg_in = self.__item_pointer_strip__(arg_in)
+                arg_in = self._strip_pointer(arg_in)
 
             # Handle arrays
             elif flag > 0:
@@ -326,8 +341,8 @@ class ArgContents:
         for flag in arg_def_dict["f"]:
             if flag != FLAG_POINTER:
                 raise DataFlagError("unknown non-pointer flag for scalar")
-            old_arg = self.__item_pointer_strip__(old_arg)
-            new_arg = self.__item_pointer_strip__(new_arg)
+            old_arg = self._strip_pointer(old_arg)
+            new_arg = self._strip_pointer(new_arg)
 
         if arg_def_dict["g"] == GROUP_FUNDAMENTAL:
             if hasattr(old_arg, "value"):
@@ -351,8 +366,8 @@ class ArgContents:
             # Handle pointers
             if flag == FLAG_POINTER:
 
-                old_arg = self.__item_pointer_strip__(old_arg)
-                new_arg = self.__item_pointer_strip__(new_arg)
+                old_arg = self._strip_pointer(old_arg)
+                new_arg = self._strip_pointer(new_arg)
 
             # Handle arrays
             elif flag > 0:
