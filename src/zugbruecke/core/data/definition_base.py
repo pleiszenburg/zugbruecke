@@ -72,26 +72,49 @@ class Definition(DefinitionABC):
         self._data_type = data_type
         self._base_type = base_type
 
-        # # Store the depth of arrays (arrays within arrays etc; for speed)
-        # array_depth = len([flag for flag in flags if flag > 0]) # d
-        # # Flag pure scalars as, well, pure scalars (for speed)
-        # is_scalar = array_depth == 0 # s
-        # # Flag elements containing pointers
-        # contains_pointer = len([flag for flag in flags if flag == FLAG_POINTER]) != 0 # p
-
     def __repr__(self) -> str:
 
         return f'<Definition field={self._field_name} type={self._type_name} flags={self._flags}>'  # TODO
 
     @property
     def data_type(self) -> Any:
+        """
+        The actual ctypes data type (all flags applied)
+        """
 
         return self._data_type
 
     @property
     def field_name(self) -> Union[str, int, None]:
+        """
+        Relevant if definition is part of a struct
+        """
 
         return self._field_name
+
+    @property
+    def array_depth(self) -> int:  # "d"
+        """
+        Number of array flags (i.e. "dimensions")
+        """
+
+        return len([flag for flag in self._flags if flag > 0])
+
+    @property
+    def is_pointer(self) -> bool:  # "p"
+        """
+        Flags contain at least one pointer flag
+        """
+
+        return len([flag for flag in self._flags if flag == FLAG_POINTER]) > 0
+
+    @property
+    def is_scalar(self) -> bool:  # "s"
+        """
+        Flags do not contain array flag
+        """
+
+        return self.array_depth == 0
 
     @staticmethod
     def _apply_flags(data_type: Any, flags: List[int]) -> Any:
