@@ -87,6 +87,7 @@ class DefinitionStruct(base.Definition):
 
         fields = [base.Definition.from_packed(field, cache = cache) for field in fields]
 
+        type_name = f'struct_{hash(tuple((field.field_name, field.data_type) for field in fields)):x}'
         try:
             base_type, data_type = cache.struct[type_name]
         except KeyError:
@@ -110,9 +111,11 @@ class DefinitionStruct(base.Definition):
         Counterpart to `_disassemble_datatype`
         """
 
-        class base_type(ctypes.Structure):
-            _fields_ = [field.data_type for field in fields]
-
+        base_type = type(
+            type_name,  # Potenial BUG: in __main__ scope, problematic?
+            (ctypes.Structure,),
+            {"_fields_": [(field.field_name, field.data_type) for field in fields]},
+        )
         data_type = cls._apply_flags(base_type, flags)
 
         return base_type, data_type
