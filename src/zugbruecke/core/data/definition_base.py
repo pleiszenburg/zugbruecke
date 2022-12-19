@@ -52,7 +52,7 @@ class Definition(DefinitionABC):
     Represent the definition of a function argument or return type
     """
 
-    group = None
+    GROUP = None
 
     data_type_cache = {} # TODO
     base_type_cache = {} # TODO
