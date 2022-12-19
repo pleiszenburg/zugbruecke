@@ -34,7 +34,7 @@ specific language governing rights and limitations under the License.
 from ctypes import _FUNCFLAG_CDECL
 from typing import Optional
 
-from .arg_contents import arguments_contents_class
+from .arg_contents import ArgContents
 from .arg_definition import arguments_definition_class
 from .mem_contents import memory_contents_class
 from .mem_definition import memory_definition_class
@@ -53,11 +53,14 @@ from .cache import Cache
 @typechecked
 class Data(
     DataABC,
-    arguments_contents_class,
+    ArgContents,
     arguments_definition_class,
     memory_contents_class,
     memory_definition_class,
 ):
+    """
+    Handles argument definitions, contents and memory sync
+    """
 
     def __init__(
         self,

@@ -32,8 +32,7 @@ specific language governing rights and limitations under the License.
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 import ctypes
-from pprint import pformat as pf
-import traceback
+from typing import Any, Dict, List, Optional, Tuple
 
 from ..const import (
     FLAG_POINTER,
@@ -53,60 +52,78 @@ from .memory import is_null_pointer
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
-class arguments_contents_class:
-    def arg_list_pack(self, args_tuple, argtypes_list, conv=None):
+class ArgContents:
+    """
+    MIXIN: Argument contents (without memory sync)
+    """
+
+    def arg_list_pack(self, args: Tuple[Any], argtypes: List[Dict], conv: Optional[str] = None) -> List[Any]:
+        """
+        Args:
+            - args: raw arguments
+            - argtypes: zugbruecke argtype definitions
+            - conv: optional name of calling convention
+        Returns:
+            Packed list of arguments for shipping
+        """
 
         # Everything is normal
-        if len(args_tuple) == len(argtypes_list):
+        if len(args) == len(argtypes):
             return [
-                self.__pack_item__(a, d)
-                for a, d in zip(args_tuple, argtypes_list)
+                self.__pack_item__(arg, argtype)
+                for arg, argtype in zip(args, argtypes)
             ]
 
         # Function has likely not been configured but there are arguments
-        elif len(args_tuple) > 0 and len(argtypes_list) == 0:
-            return list(args_tuple)  # let's try ... TODO catch pickling errors
+        if len(args) > 0 and len(argtypes) == 0:
+            return list(args)  # let's try ... TODO catch pickling errors
 
-        elif (
-            len(args_tuple) > len(argtypes_list)
-            and len(argtypes_list) > 0
+        if (
+            len(args) > len(argtypes)
+            and len(argtypes) > 0
             and conv == "cdll"
         ):
             return [
-                self.__pack_item__(a, d)
-                for a, d in zip(args_tuple[: len(argtypes_list)], argtypes_list)
-            ] + list(args_tuple[len(argtypes_list) :])
+                self.__pack_item__(arg, argtype)
+                for arg, argtype in zip(args[:len(argtypes)], argtypes)
+            ] + list(args[len(argtypes):])  # let's try ... TODO catch pickling errors
 
         # Number of arguments is just wrong
-        else:
-            raise TypeError  # Must be TypeError for ctypes compatibility
+        raise TypeError  # Must be TypeError for ctypes compatibility
 
-    def arg_list_unpack(self, args_package_list, argtypes_list, conv=None):
+    def arg_list_unpack(self, args: List[Any], argtypes: List[Dict], conv: Optional[str] = None) -> List[Any]:
+        """
+        Args:
+            - args: packed list of arguments from shipping
+            - argtypes: zugbruecke argtype definitions
+            - conv: optional name of calling convention
+        Returns:
+            Raw arguments
+        """
 
         # Everything is normal
-        if len(args_package_list) == len(argtypes_list):
+        if len(args) == len(argtypes):
             return [
-                self.__unpack_item__(a, d)
-                for a, d in zip(args_package_list, argtypes_list)
+                self.__unpack_item__(arg, argtype)
+                for arg, argtype in zip(args, argtypes)
             ]
 
         # Function has likely not been configured but there are arguments
-        elif len(args_package_list) > 0 and len(argtypes_list) == 0:
-            return args_package_list
+        if len(args) > 0 and len(argtypes) == 0:
+            return args
 
-        elif (
-            len(args_package_list) > len(argtypes_list)
-            and len(argtypes_list) > 0
+        if (
+            len(args) > len(argtypes)
+            and len(argtypes) > 0
             and conv == "cdll"
         ):
             return [
-                self.__unpack_item__(a, d)
-                for a, d in zip(args_package_list[: len(argtypes_list)], argtypes_list)
-            ] + args_package_list[len(argtypes_list) :]
+                self.__unpack_item__(arg, argtype)
+                for arg, argtype in zip(args[:len(argtypes)], argtypes)
+            ] + args[len(argtypes):]
 
         # Number of arguments is just wrong
-        else:
-            raise TypeError  # Highly unlikely case, arg_list_pack will fail instead
+        raise TypeError  # Highly unlikely case, arg_list_pack will fail instead
 
     def return_msg_pack(self, return_value, returntype_dict):
 
