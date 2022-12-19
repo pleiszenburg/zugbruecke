@@ -54,9 +54,6 @@ class Definition(DefinitionABC):
 
     GROUP = None
 
-    data_type_cache = {} # TODO
-    base_type_cache = {} # TODO
-
     def __init__(self,
         flags: List[int], # f
         field_name: Union[str, int, None], # n
