@@ -114,18 +114,21 @@ class Definition(DefinitionABC):
         return self.array_depth == 0
 
     @staticmethod
-    def _apply_flags(data_type: Any, flags: List[int]) -> Any:
+    def _apply_flags(data_type: Any, flags: List[int], custom: bool = False) -> Any:
         """
         Apply flags, i.e. pointer and array, to ctypes data type
         """
+
+        if custom:
+            return data_type  # flags can not be applied to custom data types
 
         for flag in reversed(flags):
             if flag > 0:  # array
                 data_type = data_type * flag
             elif flag == FLAG_POINTER:
-                data_type = ctypes.POINTER(data_type) # TODO check for void pointer?
+                data_type = ctypes.POINTER(data_type)
             else:
-                raise DataFlagError("unknown non-pointer flag for array")
+                raise DataFlagError(f'unknown non-pointer flag for array "{flag:d}"')
 
         return data_type
 
