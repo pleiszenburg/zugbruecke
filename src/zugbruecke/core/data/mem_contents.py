@@ -120,9 +120,9 @@ class MemContents:
         for mempkg, memsync in zip(mempkgs, memsyncs):
 
             # If memory for pointer has been allocated by remote side
-            if mempkg["_a"] is None:
+            if mempkg["_addr"] is None:
                 # Unpack one memory section / item
-                self.__unpack_memory_item_data__(
+                self._unpack_memory(
                     mempkg, memsync, args, retval
                 )
 
@@ -148,7 +148,7 @@ class MemContents:
         for mempkg, memsync in zip(mempkgs, memsyncs):
 
             # If memory for pointer was allocated here on server side
-            if mempkg["a"] is None:
+            if mempkg["addr"] is None:
                 mempkg.update(
                     self._pack_memory(memsync, args, retval)
                 )
@@ -156,8 +156,8 @@ class MemContents:
             # If pointer pointed to data on client side
             else:
                 # Overwrite old data in package with new data from memory
-                mempkg["d"] = serialize_pointer_into_bytes(
-                    ctypes.c_void_p(mempkg["a"]), mempkg["l"]
+                mempkg["data"] = serialize_pointer_into_bytes(
+                    ctypes.c_void_p(mempkg["addr"]), mempkg["length"]
                 )
 
     def unpack_memory_on_server(self, args: List[Any], mempkgs: List[Dict], memsyncs: List[Dict],):
@@ -174,13 +174,13 @@ class MemContents:
         for mempkg, memsync in zip(mempkgs, memsyncs):
 
             # Is this a null pointer?
-            if mempkg["a"] is None:
+            if mempkg["addr"] is None:
                 # Insert new NULL pointer
                 self._unpack_memory_null(mempkg, memsync, args)
 
             else:
                 # Unpack one memory section / item
-                self.__unpack_memory_item_data__(mempkg, memsync, args)
+                self._unpack_memory(mempkg, memsync, args)
 
     def _adjust_wchar_length(self, mempkg: Dict):
         """
@@ -192,20 +192,20 @@ class MemContents:
             Nothing
         """
 
-        old_len = mempkg["w"]
+        old_len = mempkg["wchar"]
         new_len = WCHAR_BYTES
 
         if old_len == new_len:
             return
 
-        tmp = bytearray(mempkg["l"] * new_len // old_len)
+        tmp = bytearray(mempkg["length"] * new_len // old_len)
 
         for index in range(old_len if new_len > old_len else new_len):
-            tmp[index::new_len] = mempkg["d"][index::old_len]
+            tmp[index::new_len] = mempkg["data"][index::old_len]
 
-        mempkg["d"] = bytes(tmp)
-        mempkg["l"] = len(mempkg["d"])
-        mempkg["w"] = WCHAR_BYTES
+        mempkg["data"] = bytes(tmp)
+        mempkg["length"] = len(mempkg["data"])
+        mempkg["wchar"] = WCHAR_BYTES
 
     def _get_item_by_path(
         self, path: List[Union[int, str]], args: List[Any], retval: Optional[Any] = None,
@@ -377,7 +377,7 @@ class MemContents:
 
         # Check for NULL pointer
         if pointer is None or is_null_pointer(pointer):
-            return {"d": b"", "l": 0, "a": None, "_a": None, "w": w}
+            return {"data": b"", "l": 0, "addr": None, "_addr": None, "w": w}
 
         if memsync["n"]:
             # Get length of null-terminated string
@@ -390,15 +390,15 @@ class MemContents:
             )
 
         return {
-            "d": serialize_pointer_into_bytes(
+            "data": serialize_pointer_into_bytes(
                 pointer, length
             ),  # serialized data, '' if NULL pointer
-            "l": length,  # length of serialized data
-            "a": ctypes.cast(
+            "length": length,  # length of serialized data
+            "addr": ctypes.cast(
                 pointer, ctypes.c_void_p
             ).value,  # local pointer address as integer
-            "_a": None,  # remote pointer has not been initialized
-            "w": w,  # local length of Unicode wchar if required
+            "_addr": None,  # remote pointer has not been initialized
+            "wchar": w,  # local length of Unicode wchar if required
         }
 
     def _swap_addr(self, mempkg: Dict):
@@ -411,9 +411,9 @@ class MemContents:
             Nothing
         """
 
-        mempkg.update({"a": mempkg.get("_a", None), "_a": mempkg.get("a", None)})
+        mempkg.update({"addr": mempkg.get("_addr", None), "_addr": mempkg.get("addr", None)})
 
-    def __unpack_memory_item_data__(
+    def _unpack_memory(
         self, mempkg: Dict, memsync: Dict, args: List[Any], retval: Optional[Any] = None,
     ):
         """
@@ -437,7 +437,7 @@ class MemContents:
             self._adjust_wchar_length(mempkg)
 
         # Generate pointer to passed data
-        ptr = generate_pointer_from_bytes(mempkg["d"])
+        ptr = generate_pointer_from_bytes(mempkg["data"])
 
         # Search for pointer in passed arguments
         item = self._get_item_by_path(
@@ -478,7 +478,7 @@ class MemContents:
                 )
 
         # Store the server's memory address
-        mempkg["a"] = ptr.value
+        mempkg["addr"] = ptr.value
 
     def _unpack_memory_null(self, mempkg: Dict, memsync: Dict, args: List[Any]):
         """
@@ -542,4 +542,4 @@ class MemContents:
             self._adjust_wchar_length(mempkg)
 
         # Overwrite the local pointers with new data
-        overwrite_pointer_with_bytes(ctypes.c_void_p(mempkg["a"]), mempkg["d"])
+        overwrite_pointer_with_bytes(ctypes.c_void_p(mempkg["addr"]), mempkg["data"])
