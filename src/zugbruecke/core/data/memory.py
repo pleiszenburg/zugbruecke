@@ -30,7 +30,10 @@ specific language governing rights and limitations under the License.
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+from typing import Any
 import ctypes
+
+from ..typeguard import typechecked
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -70,3 +73,36 @@ def is_null_pointer(ctypes_pointer):
         return ctypes.cast(ctypes_pointer, ctypes.c_void_p).value is None
     except ctypes.ArgumentError:  # catch non-pointer arguments
         return False
+
+
+@typechecked
+def strip_pointer(item: Any) -> Any:
+    """
+    Args:
+        - item: ctypes pointer object
+    Returns:
+        ctypes object, extracted from pointer
+    """
+
+    # Handle pointer object
+    if hasattr(item, "contents"):
+        return item.contents
+
+    # Handle reference (byref) 'light pointer'
+    if hasattr(item, "_obj"):
+        return item._obj
+
+    # Object was likely not provided as a pointer
+    return item
+
+
+@typechecked
+def strip_simplecdata(item: Any) -> Any:
+    """
+    Args:
+        - item: potentially some ctypes SimpleCData object
+    Returns:
+        Raw value, extracted from ctypes SimpleCData object
+    """
+
+    return getattr(item, "value", item)

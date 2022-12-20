@@ -41,6 +41,7 @@ from .memory import (
     is_null_pointer,
     overwrite_pointer_with_bytes,
     serialize_pointer_into_bytes,
+    strip_pointer,
 )
 
 WCHAR_BYTES = ctypes.sizeof(ctypes.c_wchar)
@@ -182,7 +183,7 @@ class MemContents:
 
                 # Pointer to pointer (in top-level arguments) for memory allocation by DLL
                 if path_element < 0:
-                    element = self._strip_pointer(element)
+                    element = strip_pointer(element)
 
                 # Dive into argument tuple
                 else:
@@ -204,7 +205,7 @@ class MemContents:
             # Field name in struct
             elif isinstance(path_element, str) and element_index > 0:
 
-                element = getattr(self._strip_pointer(element), path_element)
+                element = getattr(strip_pointer(element), path_element)
 
             # TODO elements of arrays
             else:

@@ -44,7 +44,7 @@ from ..const import (
 from ..callback_client import CallbackClient
 from ..callback_server import CallbackServer
 from ..errors import DataFlagError, DataGroupError
-from .memory import is_null_pointer
+from .memory import is_null_pointer, strip_pointer, strip_simplecdata
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -161,7 +161,7 @@ class ArgContents:
         # The original ctypes strips away ctypes datatypes for fundamental
         # (non-pointer, non-struct) return values and returns plain Python
         # data types instead - the unpacked result requires stripping
-        return self._strip_simplecdata(
+        return strip_simplecdata(
             self._unpack_item(value, restype)
         )
 
@@ -179,37 +179,6 @@ class ArgContents:
             old_args, new_args, argtypes
         ):
             self._sync_arg(old_arg, new_arg, argtype)
-
-    @staticmethod
-    def _strip_pointer(item: Any) -> Any:  # _strip_pointer
-        """
-        Args:
-            - item: ctypes pointer object
-        Returns:
-            ctypes object, extracted from pointer
-        """
-
-        # Handle pointer object
-        if hasattr(item, "contents"):
-            return item.contents
-
-        # Handle reference (byref) 'light pointer'
-        if hasattr(item, "_obj"):
-            return item._obj
-
-        # Object was likely not provided as a pointer
-        return item
-
-    @staticmethod
-    def _strip_simplecdata(item: Any) -> Any:
-        """
-        Args:
-            - item: potentially some ctypes SimpleCData object
-        Returns:
-            Raw value, extracted from ctypes SimpleCData object
-        """
-
-        return getattr(item, "value", item)
 
     def _pack_item(self, item: Any, itemtype: Dict) -> Any:
         """
@@ -231,12 +200,12 @@ class ArgContents:
                 raise DataFlagError(f'unknown non-pointer flag for scalar "{flag:d}"')
             if is_null_pointer(item):
                 return None  # Just return None - will (hopefully) be overwritten by memsync
-            item = self._strip_pointer(item)
+            item = strip_pointer(item)
 
         # Handle fundamental types
         if itemtype["g"] == GROUP_FUNDAMENTAL:
             # Append argument to list ...
-            return self._strip_simplecdata(item)
+            return strip_simplecdata(item)
 
         # Handle structs
         if itemtype["g"] == GROUP_STRUCT:
@@ -268,7 +237,7 @@ class ArgContents:
             # Is pointer?
             if flag == FLAG_POINTER:
                 # Strip pointer
-                array = self._strip_pointer(array)
+                array = strip_pointer(array)
 
             # Is array dimension?
             elif flag > 0:
@@ -371,8 +340,8 @@ class ArgContents:
         for flag in argtype["f"]:
             if flag != FLAG_POINTER:
                 raise DataFlagError("unknown non-pointer flag for scalar")
-            old_arg = self._strip_pointer(old_arg)
-            new_arg = self._strip_pointer(new_arg)
+            old_arg = strip_pointer(old_arg)
+            new_arg = strip_pointer(new_arg)
 
         if argtype["g"] == GROUP_FUNDAMENTAL:
             if hasattr(old_arg, "value"):
@@ -407,8 +376,8 @@ class ArgContents:
 
             # Handle pointers
             if flag == FLAG_POINTER:
-                old_array = self._strip_pointer(old_array)
-                new_array = self._strip_pointer(new_array)
+                old_array = strip_pointer(old_array)
+                new_array = strip_pointer(new_array)
 
             # Handle arrays
             elif flag > 0:
