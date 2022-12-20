@@ -178,22 +178,30 @@ class MemContents:
                 # Unpack one memory section / item
                 self.__unpack_memory_item_data__(mempkg, memsync, args)
 
-    def __adjust_wchar_length__(self, memory_d):
+    def _adjust_wchar_length(self, mempkg: Dict):
+        """
+        Adjust number of bytes per unicode character
 
-        old_len = memory_d["w"]
+        Args:
+            - mempkg: Memory package for/from shipping
+        Returns:
+            Nothing
+        """
+
+        old_len = mempkg["w"]
         new_len = WCHAR_BYTES
 
         if old_len == new_len:
             return
 
-        tmp = bytearray(memory_d["l"] * new_len // old_len)
+        tmp = bytearray(mempkg["l"] * new_len // old_len)
 
         for index in range(old_len if new_len > old_len else new_len):
-            tmp[index::new_len] = memory_d["d"][index::old_len]
+            tmp[index::new_len] = mempkg["d"][index::old_len]
 
-        memory_d["d"] = bytes(tmp)
-        memory_d["l"] = len(memory_d["d"])
-        memory_d["w"] = WCHAR_BYTES
+        mempkg["d"] = bytes(tmp)
+        mempkg["l"] = len(mempkg["d"])
+        mempkg["w"] = WCHAR_BYTES
 
     def __get_argument_by_memsync_path__(
         self, memsync_path, args_tuple, return_value=None
@@ -370,7 +378,7 @@ class MemContents:
 
         # Adjust Unicode wchar length
         if memsync_d["w"]:
-            self.__adjust_wchar_length__(memory_d)
+            self._adjust_wchar_length(memory_d)
 
         # Generate pointer to passed data
         pointer = generate_pointer_from_bytes(memory_d["d"])
@@ -450,7 +458,7 @@ class MemContents:
 
         # Adjust Unicode wchar length
         if memsync_d["w"]:
-            self.__adjust_wchar_length__(memory_d)
+            self._adjust_wchar_length(memory_d)
 
         # Overwrite the local pointers with new data
         overwrite_pointer_with_bytes(ctypes.c_void_p(memory_d["a"]), memory_d["d"])
