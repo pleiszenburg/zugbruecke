@@ -294,6 +294,13 @@ class ArgContents:
         return array
 
     def _pack_func(self, func: Callable, functype: Dict) -> str:
+        """
+        Args:
+            - func: callable
+            - functype: zugbruecke argtype / restype definition
+        Returns:
+            (Generated) name of func for cache retrieval
+        """
 
         # HACK if on server, just return None
         if self._is_server:
