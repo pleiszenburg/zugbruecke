@@ -104,7 +104,7 @@ class ArgContents:
         # Everything is normal
         if len(args) == len(argtypes):
             return [
-                self.__unpack_item__(arg, argtype)
+                self._unpack_item(arg, argtype)
                 for arg, argtype in zip(args, argtypes)
             ]
 
@@ -118,7 +118,7 @@ class ArgContents:
             and conv == "cdll"
         ):
             return [
-                self.__unpack_item__(arg, argtype)
+                self._unpack_item(arg, argtype)
                 for arg, argtype in zip(args[:len(argtypes)], argtypes)
             ] + args[len(argtypes):]
 
@@ -156,13 +156,13 @@ class ArgContents:
             not restype["g"] == GROUP_FUNDAMENTAL
             or FLAG_POINTER in restype["f"]
         ):
-            return self.__unpack_item__(value, restype)
+            return self._unpack_item(value, restype)
 
         # The original ctypes strips away ctypes datatypes for fundamental
         # (non-pointer, non-struct) return values and returns plain Python
         # data types instead - the unpacked result requires stripping
         return self._strip_simplecdata(
-            self.__unpack_item__(value, restype)
+            self._unpack_item(value, restype)
         )
 
     def sync_args(self, old_args: List[Any], new_args: List[Any], argtypes: List[Dict]):
@@ -459,24 +459,31 @@ class ArgContents:
                 fieldtype,
             )
 
-    def __unpack_item__(self, arg_raw, arg_def_dict):
+    def _unpack_item(self, item: Any, itemtype: Dict) -> Any:
+        """
+        Args:
+            - item: packaged argument / return value from shipping
+            - itemtype: zugbruecke argtype / restype definition
+        Returns:
+            Raw argument / return value
+        """
 
         # The non-trivial case first, arrays
-        if not arg_def_dict["s"]:
+        if not itemtype["s"]:
             # Unpack items in array
-            return self.__unpack_item_array__(arg_raw, arg_def_dict)[1]
+            return self.__unpack_item_array__(item, itemtype)[1]
 
         # Handle fundamental types
-        if arg_def_dict["g"] == GROUP_FUNDAMENTAL:
-            arg_rebuilt = getattr(ctypes, arg_def_dict["t"])(arg_raw)
+        if itemtype["g"] == GROUP_FUNDAMENTAL:
+            item = getattr(ctypes, itemtype["t"])(item)
         # Handle structs
-        elif arg_def_dict["g"] == GROUP_STRUCT:
-            arg_rebuilt = self.__unpack_item_struct__(arg_raw, arg_def_dict)
+        elif itemtype["g"] == GROUP_STRUCT:
+            item = self.__unpack_item_struct__(item, itemtype)
         # Handle functions
-        elif arg_def_dict["g"] == GROUP_FUNCTION:
-            arg_rebuilt = self.__unpack_item_function__(arg_raw, arg_def_dict)
+        elif itemtype["g"] == GROUP_FUNCTION:
+            item = self.__unpack_item_function__(item, itemtype)
         # Handle voids (likely mensync stuff)
-        elif arg_def_dict["g"] == GROUP_VOID:
+        elif itemtype["g"] == GROUP_VOID:
             # Return a placeholder
             return None
         # Handle everything else ...
@@ -484,12 +491,12 @@ class ArgContents:
             raise DataGroupError("unexpected datatype group")
 
         # Step through flags in reverse order (if it's not a memsync field)
-        for flag in reversed(arg_def_dict["f"]):
+        for flag in reversed(itemtype["f"]):
             if flag != FLAG_POINTER:
                 raise DataFlagError("unknown non-pointer flag for scalar")
-            arg_rebuilt = ctypes.pointer(arg_rebuilt)
+            item = ctypes.pointer(item)
 
-        return arg_rebuilt
+        return item
 
     def __unpack_item_array__(self, arg_in, arg_def_dict, flag_index=0):
 
@@ -594,7 +601,7 @@ class ArgContents:
             if field_arg[1] is None:
                 continue
 
-            field_value = self.__unpack_item__(field_arg[1], field_def_dict)
+            field_value = self._unpack_item(field_arg[1], field_def_dict)
 
             try:
 
