@@ -479,7 +479,7 @@ class ArgContents:
             item = getattr(ctypes, itemtype["t"])(item)
         # Handle structs
         elif itemtype["g"] == GROUP_STRUCT:
-            item = self.__unpack_item_struct__(item, itemtype)
+            item = self._unpack_struct(item, itemtype)
         # Handle functions
         elif itemtype["g"] == GROUP_FUNCTION:
             item = self._unpack_func(item, itemtype)
@@ -563,7 +563,7 @@ class ArgContents:
             elif arraytype["g"] == GROUP_STRUCT:
                 subtype = self._cache.struct[arraytype["t"]] * flag
                 array = subtype(
-                    *(self.__unpack_item_struct__(dim, arraytype) for dim in array)
+                    *(self._unpack_struct(dim, arraytype) for dim in array)
                 )
             elif arraytype["g"] == GROUP_FUNCTION:
                 raise NotImplementedError("functions in arrays are not supported")
@@ -604,34 +604,41 @@ class ArgContents:
         # Return name of callback entry
         return self._cache.handle[name]
 
-    def __unpack_item_struct__(self, args_list, struct_def_dict):
+    def _unpack_struct(self, struct: Any, structtype: Dict) -> Any:
+        """
+        Args:
+            struct: Packed struct from shipping
+            structtype: zugbruecke argtype / restype definition
+        Returns:
+            Raw struct object
+        """
 
         # Generate new instance of struct datatype
-        struct_inst = self._cache.struct[struct_def_dict["t"]]()
+        new_struct = self._cache.struct[structtype["t"]]()
 
         # Step through arguments
-        for field_def_dict, field_arg in zip(struct_def_dict["_fields_"], args_list):
+        for (name, value), fieldtype in zip(struct, structtype["_fields_"]):
 
-            # HACK is field_arg[1] is None, it's likely a function pointer sent back from Wine side - skip
-            if field_arg[1] is None:
+            # HACK if value is None, it's likely a function pointer sent back from Wine side - skip
+            if value is None:
                 continue
 
-            field_value = self._unpack_item(field_arg[1], field_def_dict)
+            field_value = self._unpack_item(value, fieldtype)
 
             try:
 
                 setattr(
-                    struct_inst,  # struct instance to be modified
-                    field_arg[0],  # field name (from tuple)
+                    new_struct,  # struct instance to be modified
+                    name,  # field name
                     field_value,  # field value
                 )
 
             except TypeError:  # TODO HACK relevant for structs & callbacks & memsync together
 
                 setattr(
-                    struct_inst,  # struct instance to be modified
-                    field_arg[0],  # field name (from tuple)
+                    new_struct,  # struct instance to be modified
+                    name,  # field name
                     ctypes.cast(field_value, ctypes.c_void_p),
                 )
 
-        return struct_inst
+        return new_struct
