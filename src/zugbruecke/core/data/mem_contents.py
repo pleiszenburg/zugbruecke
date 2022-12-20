@@ -99,7 +99,7 @@ class MemContents:
 
         # Pack data for every pointer into package
         return [
-            self.__pack_memory_item__(memsync, args)
+            self._pack_memory(memsync, args)
             for memsync in memsyncs
         ]
 
@@ -150,7 +150,7 @@ class MemContents:
             # If memory for pointer was allocated here on server side
             if mempkg["a"] is None:
                 mempkg.update(
-                    self.__pack_memory_item__(memsync, args, retval)
+                    self._pack_memory(memsync, args, retval)
                 )
 
             # If pointer pointed to data on client side
@@ -353,32 +353,40 @@ class MemContents:
             )
         )
 
-    def __pack_memory_item__(self, memsync_d, args_tuple, return_value=None):
+    def _pack_memory(self, memsync: Dict, args: List[Any], retval: Optional[Any] = None) -> Dict:
+        """
+        Args:
+            - memsync: Memsync definition
+            - args: Raw arguments
+            - retval: Raw return value
+        Returns:
+            Memory package
+        """
 
         # Search for pointer
         pointer = self._get_item_by_path(
-            memsync_d["p"], args_tuple, return_value
+            memsync["p"], args, retval
         )
 
-        # Convert argument into ctypes datatype TODO more checks needed!
-        if "_c" in memsync_d.keys():
-            pointer = ctypes.pointer(memsync_d["_c"].from_param(pointer))
+        # Convert argument of custom type into ctypes datatype TODO more checks needed!
+        if "_c" in memsync.keys():
+            pointer = ctypes.pointer(memsync["_c"].from_param(pointer))
 
         # Unicode char size if relevant
-        w = WCHAR_BYTES if memsync_d["w"] else None
+        w = WCHAR_BYTES if memsync["w"] else None
 
         # Check for NULL pointer
         if pointer is None or is_null_pointer(pointer):
             return {"d": b"", "l": 0, "a": None, "_a": None, "w": w}
 
-        if memsync_d["n"]:
+        if memsync["n"]:
             # Get length of null-terminated string
             length = self._get_str_len(pointer, bool(w))
         else:
             # Compute actual length
             length = (
-                self._get_arb_len(memsync_d, args_tuple, return_value)
-                * memsync_d["s"]
+                self._get_arb_len(memsync, args, retval)
+                * memsync["s"]
             )
 
         return {
