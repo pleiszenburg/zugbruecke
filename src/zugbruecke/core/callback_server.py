@@ -79,7 +79,7 @@ class CallbackServer(CallbackServerABC):
         )
 
         try:
-            mem_package_list = self._data.client_pack_memory_list(args, self._memsync_d)
+            mem_package_list = self._data.pack_memory_on_client(args, self._memsync_d)
         except Exception as e:
             self._log.out("[callback-server] ... memory packing failed!")
             self._log.err(traceback.format_exc())

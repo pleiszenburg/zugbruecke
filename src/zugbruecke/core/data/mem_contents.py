@@ -32,7 +32,7 @@ specific language governing rights and limitations under the License.
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 import ctypes
-from typing import Dict, List, Union
+from typing import Any, Dict, List, Tuple, Union
 
 from ..const import GROUP_VOID
 from ..errors import DataMemsyncpathError
@@ -84,12 +84,19 @@ class MemContents:
             itemtype["g"] = GROUP_VOID
             itemtype["t"] = None  # no type string
 
-    def client_pack_memory_list(self, args_tuple, memsync_d_list):
+    def pack_memory_on_client(self, args: Tuple[Any], memsyncs: List[Dict]) -> List[Dict]:
+        """
+        Args:
+            args: Raw function arguments
+            memsyncs: Memsync definitions
+        Returns:
+            List of memory packages for shipping
+        """
 
         # Pack data for every pointer, append data to package
         return [
-            self.__pack_memory_item__(memsync_d, args_tuple)
-            for memsync_d in memsync_d_list
+            self.__pack_memory_item__(memsync, args)
+            for memsync in memsyncs
         ]
 
     def client_unpack_memory_list(
