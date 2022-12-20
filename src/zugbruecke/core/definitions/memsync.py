@@ -79,6 +79,43 @@ class DefinitionMemsync(DefinitionMemsyncABC):
 
         return f'<Memsync type={self._type} null={self._null} unic={self._unic} func={self._func is not None}>'
 
+    def apply(self, argtypes: List[Dict], restype: Optional[Dict] = None):
+        """
+        Apply memsync definition to zugbruecke argtypes and restype definitions.
+        Types are switched to void pointers.
+
+        Args:
+            - argtypes: zugbruecke argument type definitions
+            - restype: zugbruecke return type definition
+        Returns:
+            Nothing
+        """
+
+        pass  # TODO
+
+    def pack_memory(self, args: List[Any], retval: Optional[Any] = None, is_server: bool = False,) -> Dict:
+        """
+        Args:
+            args: Raw function arguments
+            memsyncs: Memsync definitions
+        Returns:
+            Memory package for shipping
+        """
+
+        pass  # TODO
+
+    def unpack_memory(self, mempkg: Dict, args: List[Any], retval: Optional[Any] = None, is_server: bool = False,):
+        """
+        Args:
+            mempkg: Memory package from shipping
+            args: Raw function arguments
+            retval: Raw function return value
+        Returns:
+            Nothing
+        """
+
+        pass  # TODO
+
     def as_packed(self) -> Dict:
         """
         Pack as dict so it can be sent to other side
