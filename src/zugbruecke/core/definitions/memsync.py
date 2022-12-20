@@ -31,7 +31,7 @@ specific language governing rights and limitations under the License.
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 import ctypes
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 from ..abc import CacheABC, DefinitionMemsyncABC
 from ..typeguard import typechecked
@@ -50,7 +50,7 @@ class DefinitionMemsync(DefinitionMemsyncABC):
         self,
         cache: CacheABC,
         pointer: List[Union[int, str]],  # "p"
-        length: Optional[List[Union[int, str]]] = None,  # "l"
+        length: Optional[Union[ List[Union[int, str]], Tuple[List[Union[int, str]], ...] ]] = None,  # "l"
         type: str = "c_ubyte",  # "t" - type
         null: bool = False,  # "n" - null-terminated string
         unic: bool = False,  # "w" - handle unicode
