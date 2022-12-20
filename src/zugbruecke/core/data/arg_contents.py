@@ -359,7 +359,7 @@ class ArgContents:
         # The non-trivial case first, arrays
         if not argtype["s"]:
             # Sync items in array
-            self.__sync_item_array__(old_arg, new_arg, argtype)
+            self._sync_array(old_arg, new_arg, argtype)
             # Leave
             return
 
@@ -390,43 +390,46 @@ class ArgContents:
 
         raise DataGroupError("unexpected datatype group")
 
-    def __sync_item_array__(self, old_arg, new_arg, arg_def_dict, flag_index_start=0):
+    def _sync_array(self, old_array: Any, new_array: Any, arraytype: Dict, start: int = 0):
+        """
+        Recursive function, syncing one dimension per call
 
-        for flag_index in range(flag_index_start, len(arg_def_dict["f"])):
+        Args:
+            - old_array: Raw argument
+            - new_array: Raw argument
+            - arraytype: zugbruecke argtype definition
+            - start: dimension to start with when syncing
+        Returns:
+            Nothing
+        """
 
-            # Extract the flag
-            flag = arg_def_dict["f"][flag_index]
+        for idx, flag in enumerate(arraytype["f"][start:], start = start):
 
             # Handle pointers
             if flag == FLAG_POINTER:
-
-                old_arg = self._strip_pointer(old_arg)
-                new_arg = self._strip_pointer(new_arg)
+                old_array = self._strip_pointer(old_array)
+                new_array = self._strip_pointer(new_array)
 
             # Handle arrays
             elif flag > 0:
-
                 # Only dive deeper if this is not the last flag
-                if flag_index < len(arg_def_dict["f"]) - 1:
-
-                    for old_arg_e, new_arg_e in zip(old_arg[:], new_arg[:]):
-                        self.__sync_item_array__(
-                            old_arg_e,
-                            new_arg_e,
-                            arg_def_dict,
-                            flag_index_start=flag_index + 1,
+                if idx < len(arraytype["f"]) - 1:
+                    for old_dim, new_dim in zip(old_array[:], new_array[:]):
+                        self._sync_array(
+                            old_dim,
+                            new_dim,
+                            arraytype,
+                            start=idx + 1,
                         )
-
                 else:
-
-                    if arg_def_dict["g"] == GROUP_FUNDAMENTAL:
-                        old_arg[:] = new_arg[:]
-                    elif arg_def_dict["g"] == GROUP_STRUCT:
-                        for old_struct, new_struct in zip(old_arg[:], new_arg[:]):
+                    if arraytype["g"] == GROUP_FUNDAMENTAL:
+                        old_array[:] = new_array[:]
+                    elif arraytype["g"] == GROUP_STRUCT:
+                        for old_struct, new_struct in zip(old_array[:], new_array[:]):
                             self.__sync_item_struct__(
-                                old_struct, new_struct, arg_def_dict
+                                old_struct, new_struct, arraytype
                             )
-                    elif arg_def_dict["g"] == GROUP_FUNCTION:
+                    elif arraytype["g"] == GROUP_FUNCTION:
                         raise NotImplementedError(
                             "functions in arrays are not supported"
                         )
@@ -435,7 +438,6 @@ class ArgContents:
 
             # Handle unknown flags
             else:
-
                 raise DataFlagError("unknown non-pointer flag for array")
 
     def __sync_item_struct__(self, old_struct, new_struct, struct_def_dict):
