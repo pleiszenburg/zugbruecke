@@ -31,7 +31,7 @@ specific language governing rights and limitations under the License.
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 import ctypes
-from typing import Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 from ..abc import CacheABC, DefinitionMemsyncABC
 from ..typeguard import typechecked
@@ -54,6 +54,7 @@ class DefinitionMemsync(DefinitionMemsyncABC):
         type: str = "c_ubyte",  # "t" - type
         null: bool = False,  # "n" - null-terminated string
         unic: bool = False,  # "w" - handle unicode
+        custom: Optional[Any] = None,  # "_c" - custom data type classes
         func: Optional[str] = None,  # "f" - compile length function
     ):
 
@@ -62,6 +63,7 @@ class DefinitionMemsync(DefinitionMemsyncABC):
         self._type = type
         self._null = null
         self._unic = unic
+        self._custom = custom
         self._func = func
 
         if self._func is not None:
@@ -108,6 +110,22 @@ class DefinitionMemsync(DefinitionMemsyncABC):
         """
         Ingest raw definition given by user
         """
+
+        # Compatibility with older versions of zugbruecke TODO deprecated
+        if 'p' in definition.keys():
+            definition['pointer'] = definition.pop('p')
+        if 'l' in definition.keys():
+            definition['length'] = definition.pop('l')
+        if 't' in definition.keys():
+            definition['type'] = definition.pop('t')
+        if 'n' in definition.keys():
+            definition['null'] = definition.pop('n')
+        if 'w' in definition.keys():
+            definition['unic'] = definition.pop('w')
+        if '_c' in definition.keys():
+            definition['custom'] = definition.pop('_c')
+        if 'f' in definition.keys():
+            definition['func'] = definition.pop('f')
 
         return cls(**definition, cache = cache)
 
