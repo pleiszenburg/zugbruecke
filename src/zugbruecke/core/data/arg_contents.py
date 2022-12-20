@@ -241,7 +241,7 @@ class ArgContents:
         # Handle structs
         if itemtype["g"] == GROUP_STRUCT:
             # Reclusively call this routine for packing structs
-            return self.__pack_item_struct__(item, itemtype)
+            return self._pack_struct(item, itemtype)
 
         # Handle functions
         if itemtype["g"] == GROUP_FUNCTION:
@@ -284,7 +284,7 @@ class ArgContents:
                     array = array[:]
                     if arraytype["g"] == GROUP_STRUCT:
                         array = [
-                            self.__pack_item_struct__(struct, arraytype) for struct in array
+                            self._pack_struct(struct, arraytype) for struct in array
                         ]
 
             # Handle unknown flags
@@ -299,7 +299,7 @@ class ArgContents:
             - func: callable
             - functype: zugbruecke argtype / restype definition
         Returns:
-            (Generated) name of func for cache retrieval
+            (Generated) name of func for shipping
         """
 
         # HACK if on server, just return None
@@ -326,17 +326,24 @@ class ArgContents:
         # Return name of callback entry
         return name
 
-    def __pack_item_struct__(self, struct_raw, struct_def_dict):
+    def _pack_struct(self, struct: Any, structtype: Dict) -> List[Tuple[str, Any]]:
+        """
+        Args:
+            - struct: raw argument / return struct
+            - structtype: zugbruecke argtype / restype definition
+        Returns:
+            Packed list of argument / return field names and values of struct as tuples for shipping
+        """
 
         # Return parameter message list - MUST WORK WITH PICKLE
         return [
             (
-                field_def_dict["n"],
+                fieldtype["n"],
                 self._pack_item(
-                    getattr(struct_raw, field_def_dict["n"]), field_def_dict
+                    getattr(struct, fieldtype["n"]), fieldtype
                 ),
             )
-            for field_def_dict in struct_def_dict["_fields_"]
+            for fieldtype in structtype["_fields_"]
         ]
 
     def __sync_item__(self, old_arg, new_arg, arg_def_dict):
