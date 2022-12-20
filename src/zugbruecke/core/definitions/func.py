@@ -6,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-    src/zugbruecke/core/data/definition_func.py: Func argument definition
+    src/zugbruecke/core/definitions/func.py: Func argument definition
 
     Required to run on platform / side: [UNIX, WINE]
 
@@ -38,7 +38,7 @@ from ..abc import CacheABC, DefinitionABC, MemsyncABC
 from ..const import _FUNCFLAG_STDCALL
 from ..typeguard import typechecked
 
-from . import definition_base as base
+from . import base
 from . import memsync as ms
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

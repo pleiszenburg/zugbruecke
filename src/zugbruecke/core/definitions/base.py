@@ -6,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-    src/zugbruecke/core/data/definition_base.py: Base argument definition
+    src/zugbruecke/core/definitions/base.py: Base argument definition
 
     Required to run on platform / side: [UNIX, WINE]
 
@@ -38,10 +38,10 @@ from ..const import FLAG_POINTER
 from ..errors import DataFlagError
 from ..typeguard import typechecked
 
-from . import definition_simple as simple
-from . import definition_struct as struct
-from . import definition_func as func
-from . import definition_custom as custom
+from . import simple
+from . import struct
+from . import func
+from . import custom
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # CLASS

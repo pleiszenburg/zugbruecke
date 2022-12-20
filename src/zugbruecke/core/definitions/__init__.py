@@ -6,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-    src/zugbruecke/core/data/__init__.py: Arguments, return values and memory
+    src/zugbruecke/core/definitions/__init__.py: Type and sync definitions
 
     Required to run on platform / side: [UNIX, WINE]
 
@@ -31,4 +31,10 @@ specific language governing rights and limitations under the License.
 # EXPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-from .core import Data
+from .base import Definition
+from .custom import DefinitionCustom
+from .func import DefinitionFunc
+from .simple import DefinitionSimple
+from .struct import DefinitionStruct
+
+from .memsync import Memsync

@@ -6,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-    src/zugbruecke/core/data/definition_struct.py: Struct argument definition
+    src/zugbruecke/core/definitions/struct.py: Struct argument definition
 
     Required to run on platform / side: [UNIX, WINE]
 
@@ -36,7 +36,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 from ..abc import CacheABC, DefinitionABC
 from ..typeguard import typechecked
 
-from . import definition_base as base
+from . import base
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # CLASS
