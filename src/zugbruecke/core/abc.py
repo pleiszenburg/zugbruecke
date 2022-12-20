@@ -84,6 +84,10 @@ class LogABC(ABC):
     pass
 
 
+class MempkgABC(ABC):
+    pass
+
+
 class MessageABC(ABC):
     pass
 
