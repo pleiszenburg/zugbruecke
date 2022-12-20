@@ -182,7 +182,8 @@ class MemContents:
                 # Unpack one memory section / item
                 self._unpack_memory(mempkg, memsync, args)
 
-    def _adjust_wchar_length(self, mempkg: Dict):
+    @staticmethod
+    def _adjust_wchar_length(mempkg: Dict):
         """
         Adjust number of bytes per unicode character
 
@@ -207,8 +208,9 @@ class MemContents:
         mempkg["length"] = len(mempkg["data"])
         mempkg["wchar"] = WCHAR_BYTES
 
+    @staticmethod
     def _get_item_by_path(
-        self, path: List[Union[int, str]], args: List[Any], retval: Optional[Any] = None,
+        path: List[Union[int, str]], args: List[Any], retval: Optional[Any] = None,
     ) -> Any:
         """
         Get (fragment of) argument or return value by path
@@ -259,13 +261,13 @@ class MemContents:
             # TODO elements of arrays
             else:
 
-                self._log.err(segment)
                 raise NotImplementedError("array elements can yet not be addressed")
 
         return element
 
+    @staticmethod
     def _get_itemtype_by_path(
-        self, path: List[Union[int, str]], argtypes: List[Dict], restype: Dict,
+        path: List[Union[int, str]], argtypes: List[Dict], restype: Dict,
     ) -> Dict:
         """
         Get zugbruecke argtype or restype by path
@@ -299,7 +301,8 @@ class MemContents:
 
         return itemtype
 
-    def _get_str_len(self, ptr: Any, is_unicode: bool) -> int:
+    @staticmethod
+    def _get_str_len(ptr: Any, is_unicode: bool) -> int:
         """
         Get length of null-terminated string in bytes
 
@@ -319,7 +322,8 @@ class MemContents:
 
         return len(ctypes.cast(ptr, datatype_p).value) * ctypes.sizeof(datatype)
 
-    def _get_arb_len(self, memsync: Dict, args: List[Any], retval: Optional[Any] = None) -> int:
+    @classmethod
+    def _get_arb_len(cls, memsync: Dict, args: List[Any], retval: Optional[Any] = None) -> int:
         """
         Get length of arbitrary data
 
@@ -335,7 +339,7 @@ class MemContents:
         if "_f" not in memsync.keys():
 
             # Search for length
-            length = self._get_item_by_path(
+            length = cls._get_item_by_path(
                 memsync["l"], args, retval
             )
 
@@ -348,7 +352,7 @@ class MemContents:
         # Compute length from arguments and return
         return memsync["_f"](
             *(
-                self._get_item_by_path(path, args, retval)
+                cls._get_item_by_path(path, args, retval)
                 for path in memsync["l"]
             )
         )
@@ -401,7 +405,8 @@ class MemContents:
             "wchar": w,  # local length of Unicode wchar if required
         }
 
-    def _swap_addr(self, mempkg: Dict):
+    @staticmethod
+    def _swap_addr(mempkg: Dict):
         """
         Swaps local and remote memory addresses within memory package
 
