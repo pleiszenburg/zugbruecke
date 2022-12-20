@@ -292,7 +292,7 @@ class ArgContents:
                 log = self._log,
                 argtypes = functype["_argtypes_"],
                 restype = functype["_restype_"],
-                memsyncs = self.unpack_definition_memsync(functype["_memsync_"]),
+                memsyncs = functype["_memsync_"],
             )
 
         # Return name of callback entry
@@ -569,7 +569,7 @@ class ArgContents:
                     log = self._log,
                     argtypes = functype["_argtypes_"],
                     restype = functype["_restype_"],
-                    memsyncs = self.unpack_definition_memsync(functype["_memsync_"]),
+                    memsyncs = functype["_memsync_"],
                 )
             )
 
