@@ -32,10 +32,12 @@ specific language governing rights and limitations under the License.
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 import ctypes
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Union
 
 from ..const import GROUP_VOID
 from ..errors import DataMemsyncpathError
+from ..typeguard import typechecked
+
 from .memory import (
     generate_pointer_from_bytes,
     is_null_pointer,
@@ -52,6 +54,7 @@ WCHAR_BYTES = ctypes.sizeof(ctypes.c_wchar)
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
+@typechecked
 class MemContents:
     """
     MIXIN: Memory contents (memory sync)
@@ -84,7 +87,7 @@ class MemContents:
             itemtype["g"] = GROUP_VOID
             itemtype["t"] = None  # no type string
 
-    def pack_memory_on_client(self, args: Tuple[Any], memsyncs: List[Dict],) -> List[Dict]:
+    def pack_memory_on_client(self, args: List[Any], memsyncs: List[Dict],) -> List[Dict]:
         """
         Args:
             args: Raw function arguments
@@ -204,7 +207,7 @@ class MemContents:
         mempkg["w"] = WCHAR_BYTES
 
     def _get_item_by_path(
-        self, path: List[Union[int, str]], args: Tuple[Any], retval: Optional[Any] = None,
+        self, path: List[Union[int, str]], args: List[Any], retval: Optional[Any] = None,
     ) -> Any:
         """
         Get (fragment of) argument or return value by path

@@ -44,6 +44,8 @@ from ..const import (
 from ..callback_client import CallbackClient
 from ..callback_server import CallbackServer
 from ..errors import DataFlagError, DataGroupError
+from ..typeguard import typechecked
+
 from .memory import is_null_pointer, strip_pointer, strip_simplecdata
 
 
@@ -52,12 +54,13 @@ from .memory import is_null_pointer, strip_pointer, strip_simplecdata
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
+@typechecked
 class ArgContents:
     """
     MIXIN: Argument contents (without memory sync)
     """
 
-    def pack_args(self, args: Tuple[Any], argtypes: List[Dict], conv: Optional[str] = None) -> List[Any]:
+    def pack_args(self, args: List[Any], argtypes: List[Dict], conv: Optional[str] = None) -> List[Any]:
         """
         Args:
             - args: raw arguments
@@ -262,7 +265,7 @@ class ArgContents:
 
         return array
 
-    def _pack_func(self, func: Callable, functype: Dict) -> str:
+    def _pack_func(self, func: Callable, functype: Dict) -> Optional[str]:
         """
         Args:
             - func: callable
@@ -541,7 +544,7 @@ class ArgContents:
 
         return subtype, array
 
-    def _unpack_func(self, name: str, functype: Dict) -> Callable:
+    def _unpack_func(self, name: Optional[str], functype: Dict) -> Optional[Callable]:
         """
         Args:
             - name: (Generated) name of func from shipping
