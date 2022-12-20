@@ -79,7 +79,7 @@ class CallbackClient(CallbackClientABC):
 
         try:
             args_list = self._data.unpack_args(arg_message_list, self._argtypes_d)
-            self._data.server_unpack_memory_list(
+            self._data.unpack_memory_on_server(
                 args_list, arg_memory_list, self._memsync_d
             )
             return_value = None
@@ -102,7 +102,7 @@ class CallbackClient(CallbackClientABC):
             }
 
         try:
-            self._data.server_pack_memory_list(
+            self._data.pack_memory_on_server(
                 args_list, return_value, arg_memory_list, self._memsync_d
             )
             arg_message_list = self._data.pack_args(args_list, self._argtypes_d)

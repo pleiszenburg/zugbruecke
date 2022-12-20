@@ -127,43 +127,56 @@ class MemContents:
                 # Overwrite pointer
                 self.__unpack_memory_item_overwrite__(mempkg, memsync, args)
 
-    def server_pack_memory_list(
-        self, args_list, return_value, mem_package_list, memsync_d_list
+    def pack_memory_on_server(
+        self, args: List[Any], retval: Any, mempkgs: List[Dict], memsyncs: List[Dict],
     ):
+        """
+        Args:
+            args: Raw function arguments
+            retval: Raw function return value
+            mempkgs: List of memory packages from shipping
+            memsyncs: Memsync definitions
+        Returns:
+            Nothing
+        """
 
         # Iterate through pointers and serialize them
-        for memory_d, memsync_d in zip(mem_package_list, memsync_d_list):
+        for mempkg, memsync in zip(mempkgs, memsyncs):
 
             # If memory for pointer was allocated here on server side
-            if memory_d["a"] is None:
-
-                memory_d.update(
-                    self.__pack_memory_item__(memsync_d, args_list, return_value)
+            if mempkg["a"] is None:
+                mempkg.update(
+                    self.__pack_memory_item__(memsync, args, retval)
                 )
 
             # If pointer pointed to data on client side
             else:
-
                 # Overwrite old data in package with new data from memory
-                memory_d["d"] = serialize_pointer_into_bytes(
-                    ctypes.c_void_p(memory_d["a"]), memory_d["l"]
+                mempkg["d"] = serialize_pointer_into_bytes(
+                    ctypes.c_void_p(mempkg["a"]), mempkg["l"]
                 )
 
-    def server_unpack_memory_list(self, args_tuple, arg_memory_list, memsync_d_list):
+    def unpack_memory_on_server(self, args: List[Any], mempkgs: List[Dict], memsyncs: List[Dict],):
+        """
+        Args:
+            args: Raw function arguments
+            mempkgs: List of memory packages from shipping
+            memsyncs: Memsync definitions
+        Returns:
+            Nothing
+        """
 
         # Iterate over memory segments, which must be kept in sync
-        for memory_d, memsync_d in zip(arg_memory_list, memsync_d_list):
+        for mempkg, memsync in zip(mempkgs, memsyncs):
 
             # Is this a null pointer?
-            if memory_d["a"] is None:
-
+            if mempkg["a"] is None:
                 # Insert new NULL pointer
-                self.__unpack_memory_item_null__(memory_d, memsync_d, args_tuple)
+                self.__unpack_memory_item_null__(mempkg, memsync, args)
 
             else:
-
                 # Unpack one memory section / item
-                self.__unpack_memory_item_data__(memory_d, memsync_d, args_tuple)
+                self.__unpack_memory_item_data__(mempkg, memsync, args)
 
     def __adjust_wchar_length__(self, memory_d):
 
