@@ -32,7 +32,7 @@ specific language governing rights and limitations under the License.
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 import ctypes
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from ..const import (
     FLAG_POINTER,
@@ -246,7 +246,7 @@ class ArgContents:
         # Handle functions
         if itemtype["g"] == GROUP_FUNCTION:
             # Packs functions and registers them at RPC server
-            return self.__pack_item_function__(item, itemtype)
+            return self._pack_func(item, itemtype)
 
         # Handle everything else ...
         return None  # Just return None - will (hopefully) be overwritten by memsync
@@ -293,35 +293,31 @@ class ArgContents:
 
         return array
 
-    def __pack_item_function__(self, func_ptr, func_def_dict):
+    def _pack_func(self, func: Callable, functype: Dict) -> str:
 
         # HACK if on server, just return None
         if self._is_server:
             return None
 
         # Use memory address of function pointer as unique name/ID
-        func_name = "func_%x" % id(func_ptr)
+        name = f"func_{id(func):x}"
 
-        # Has callback translator been built before?
-        if func_name in self._cache.handle.keys():
-
-            # Just return its name
-            return func_name
-
-        # Generate and store callback in cache
-        self._cache.handle[func_name] = CallbackClient(
-            name = func_name,
-            handler = func_ptr,
-            rpc_server = self._callback_server,
-            data = self,
-            log = self._log,
-            argtypes_d = func_def_dict["_argtypes_"],
-            restype_d = func_def_dict["_restype_"],
-            memsync_d = self.unpack_definition_memsync(func_def_dict["_memsync_"]),
-        )
+        # Has callback translator not been built yet?
+        if name not in self._cache.handle.keys():
+            # Generate and store callback in cache
+            self._cache.handle[name] = CallbackClient(
+                name = name,
+                handler = func,
+                rpc_server = self._callback_server,
+                data = self,
+                log = self._log,
+                argtypes_d = functype["_argtypes_"],
+                restype_d = functype["_restype_"],
+                memsync_d = self.unpack_definition_memsync(functype["_memsync_"]),
+            )
 
         # Return name of callback entry
-        return func_name
+        return name
 
     def __pack_item_struct__(self, struct_raw, struct_def_dict):
 
