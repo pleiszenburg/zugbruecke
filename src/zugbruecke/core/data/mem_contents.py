@@ -319,7 +319,7 @@ class MemContents:
 
         return len(ctypes.cast(ptr, datatype_p).value) * ctypes.sizeof(datatype)
 
-    def _get_arb_len(self, memsync: Dict, args: List[Any], retval: Optional[Any] = None):
+    def _get_arb_len(self, memsync: Dict, args: List[Any], retval: Optional[Any] = None) -> int:
         """
         Get length of arbitrary data
 
@@ -327,6 +327,8 @@ class MemContents:
             - memsync: Memsync definition
             - args: Raw arguments
             - retval: Raw return value
+        Returns:
+            Length in bytes
         """
 
         # There is no function defining the length?
