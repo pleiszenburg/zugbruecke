@@ -34,7 +34,7 @@ specific language governing rights and limitations under the License.
 import ctypes
 from typing import Any, Dict, List, Optional, Union
 
-from ..const import GROUP_VOID
+from ..const import FLAG_POINTER, GROUP_VOID
 from ..errors import DataMemsyncpathError
 from ..typeguard import typechecked
 
@@ -129,7 +129,7 @@ class MemContents:
             # If pointer pointed to data
             else:
                 # Overwrite pointer
-                self.__unpack_memory_item_overwrite__(mempkg, memsync, args)
+                self._unpack_memory_overwrite(mempkg, memsync)
 
     def pack_memory_on_server(
         self, args: List[Any], retval: Any, mempkgs: List[Dict], memsyncs: List[Dict],
@@ -176,7 +176,7 @@ class MemContents:
             # Is this a null pointer?
             if mempkg["a"] is None:
                 # Insert new NULL pointer
-                self.__unpack_memory_item_null__(mempkg, memsync, args)
+                self._unpack_memory_null(mempkg, memsync, args)
 
             else:
                 # Unpack one memory section / item
@@ -414,100 +414,132 @@ class MemContents:
         mempkg.update({"a": mempkg.get("_a", None), "_a": mempkg.get("a", None)})
 
     def __unpack_memory_item_data__(
-        self, memory_d, memsync_d, args_tuple, return_value=None
+        self, mempkg: Dict, memsync: Dict, args: List[Any], retval: Optional[Any] = None,
     ):
+        """
+        Data is unpacked. Potentially allocated on remote side.
+        Server & client.
+
+        Args:
+            - mempkg: Memory package
+            - memsync: Memsync definition
+            - args: Raw arguments
+            - retval: Raw return value
+        Returns:
+            Nothing
+        """
 
         # Swap local and remote memory addresses
-        self._swap_addr(memory_d)
-
-        # Search for pointer in passed arguments
-        pointer_arg = self._get_item_by_path(
-            memsync_d["p"][:-1], args_tuple, return_value
-        )
+        self._swap_addr(mempkg)
 
         # Adjust Unicode wchar length
-        if memsync_d["w"]:
-            self._adjust_wchar_length(memory_d)
+        if memsync["w"]:
+            self._adjust_wchar_length(mempkg)
 
         # Generate pointer to passed data
-        pointer = generate_pointer_from_bytes(memory_d["d"])
+        ptr = generate_pointer_from_bytes(mempkg["d"])
+
+        # Search for pointer in passed arguments
+        item = self._get_item_by_path(
+            memsync["p"][:-1], args, retval
+        )
 
         # Is this an already existing pointer, which has to be given a new value?
-        if hasattr(pointer_arg, "contents"):
+        if hasattr(item, "contents"):
             # Is the pointer pointing to another pointer?
-            if hasattr(pointer_arg.contents, "value"):
+            if hasattr(item.contents, "value"):
                 # Is the pointer empty?
-                if pointer_arg.contents.value is None:
+                if item.contents.value is None:
                     # Overwrite the pointer's value
-                    pointer_arg.contents.value = pointer.value
+                    item.contents.value = ptr.value
                     # Get out of here HACK
                     return
 
         # If we're in the top level arguments or an array ...
-        if isinstance(memsync_d["p"][-1], int):
+        if isinstance(memsync["p"][-1], int):
             # Handle deepest instance (exchange element in list/tuple) HACK
-            pointer_arg[memsync_d["p"][-1]] = pointer
+            item[memsync["p"][-1]] = ptr
         # If we're at a field of a struct
         else:
             # There is a chance that the pointer has been stripped away ...
-            if hasattr(pointer_arg, "contents"):
-                pointer_arg = pointer_arg.contents
+            item = strip_pointer(item)
             # A c_void_p NULL pointer in a struct is represented by None and must be substituted
-            if getattr(pointer_arg, memsync_d["p"][-1]) is None:
-                setattr(pointer_arg, memsync_d["p"][-1], pointer)
+            if getattr(item, memsync["p"][-1]) is None:
+                setattr(item, memsync["p"][-1], ptr)
             # Anything else must be overwritten with the right type (likely on client side)
             else:
                 setattr(
-                    pointer_arg,
-                    memsync_d["p"][-1],
+                    item,
+                    memsync["p"][-1],
                     ctypes.cast(
-                        pointer,
-                        ctypes.POINTER(getattr(pointer_arg, memsync_d["p"][-1])._type_),
+                        ptr,
+                        ctypes.POINTER(getattr(item, memsync["p"][-1])._type_),
                     ),
                 )
 
         # Store the server's memory address
-        memory_d["a"] = pointer.value
+        mempkg["a"] = ptr.value
 
-    def __unpack_memory_item_null__(self, memory_d, memsync_d, args_tuple):
+    def _unpack_memory_null(self, mempkg: Dict, memsync: Dict, args: List[Any]):
+        """
+        Null-pointer unpacking on server-side prior to func call. No data is unpacked.
+        Server only.
+
+        Args:
+            - mempkg: Memory package
+            - memsync: Memsync definition
+            - args: Raw arguments
+        Returns:
+            Nothing
+        """
 
         # Swap local and remote memory addresses
-        self._swap_addr(memory_d)
+        self._swap_addr(mempkg)
 
         # If this is a return value, do nothing at this stage
-        if memsync_d["p"][0] == "r":
+        if memsync["p"][0] == "r":
             return
 
         # If this is a pointer to a pointer
-        if memsync_d["p"][-1] == -1:
-            pointer = ctypes.pointer(ctypes.c_void_p())
-            path_shift = 1  # cut off 1 element from path
+        if memsync["p"][-1] == FLAG_POINTER:  # likely for R-strings only
+            ptr = ctypes.pointer(ctypes.c_void_p())
+            shift = 1  # cut off 1 element from path
         else:
-            pointer = ctypes.c_void_p()
-            path_shift = 0
+            ptr = ctypes.c_void_p()
+            shift = 0
 
         # Search for pointer in passed arguments
-        pointer_arg = self._get_item_by_path(
-            memsync_d["p"][: (-1 - path_shift)], args_tuple
+        arg = self._get_item_by_path(
+            memsync["p"][: (-1 - shift)], args
         )
 
         # If we're in the top level arguments or an array ...
-        if isinstance(memsync_d["p"][-1 - path_shift], int):
+        if isinstance(memsync["p"][-1 - shift], int):
             # Handle deepest instance (exchange element in list/tuple) HACK
-            pointer_arg[memsync_d["p"][-1 - path_shift]] = pointer
+            arg[memsync["p"][-1 - shift]] = ptr
         # If we're at a field of a struct
         else:
             # Handle deepest instance
-            setattr(pointer_arg.contents, memsync_d["p"][-1 - path_shift], pointer)
+            setattr(arg.contents, memsync["p"][-1 - shift], ptr)
 
-    def __unpack_memory_item_overwrite__(self, memory_d, memsync_d, args_tuple):
+    def _unpack_memory_overwrite(self, mempkg: Dict, memsync: Dict):
+        """
+        Existing memory overwrite.
+        Client.
+
+        Args:
+            - mempkg: Memory package
+            - memsync: Memsync definition
+        Returns:
+            Nothing
+        """
 
         # Swap local and remote memory addresses
-        self._swap_addr(memory_d)
+        self._swap_addr(mempkg)
 
         # Adjust Unicode wchar length
-        if memsync_d["w"]:
-            self._adjust_wchar_length(memory_d)
+        if memsync["w"]:
+            self._adjust_wchar_length(mempkg)
 
         # Overwrite the local pointers with new data
-        overwrite_pointer_with_bytes(ctypes.c_void_p(memory_d["a"]), memory_d["d"])
+        overwrite_pointer_with_bytes(ctypes.c_void_p(mempkg["a"]), mempkg["d"])
