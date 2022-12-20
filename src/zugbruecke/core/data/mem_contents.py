@@ -368,24 +368,24 @@ class MemContents:
         """
 
         # Search for pointer
-        pointer = self._get_item_by_path(
+        ptr = self._get_item_by_path(
             memsync["p"], args, retval
         )
 
         # Convert argument of custom type into ctypes datatype TODO more checks needed!
         if "_c" in memsync.keys():
-            pointer = ctypes.pointer(memsync["_c"].from_param(pointer))
+            ptr = ctypes.pointer(memsync["_c"].from_param(ptr))
 
         # Unicode char size if relevant
         w = WCHAR_BYTES if memsync["w"] else None
 
         # Check for NULL pointer
-        if pointer is None or is_null_pointer(pointer):
+        if ptr is None or is_null_pointer(ptr):
             return {"data": b"", "l": 0, "addr": None, "_addr": None, "w": w}
 
         if memsync["n"]:
             # Get length of null-terminated string
-            length = self._get_str_len(pointer, bool(w))
+            length = self._get_str_len(ptr, bool(w))
         else:
             # Compute actual length
             length = (
@@ -395,11 +395,11 @@ class MemContents:
 
         return {
             "data": serialize_pointer_into_bytes(
-                pointer, length
+                ptr, length
             ),  # serialized data, '' if NULL pointer
             "length": length,  # length of serialized data
             "addr": ctypes.cast(
-                pointer, ctypes.c_void_p
+                ptr, ctypes.c_void_p
             ).value,  # local pointer address as integer
             "_addr": None,  # remote pointer has not been initialized
             "wchar": w,  # local length of Unicode wchar if required
