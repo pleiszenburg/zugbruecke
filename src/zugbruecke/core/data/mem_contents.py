@@ -298,7 +298,16 @@ class MemContents:
 
         return itemtype
 
-    def __get_length_of_null_terminated_string__(self, in_pointer, is_unicode):
+    def _get_str_len(self, ptr: Any, is_unicode: bool) -> int:
+        """
+        Get length of null-terminated string in bytes
+
+        Args:
+            ptr: ctypes pointer to chars/wchars
+            is_unicode: flag indicating unicode characters
+        Returns:
+            Length in bytes
+        """
 
         if is_unicode:
             datatype = ctypes.c_wchar
@@ -307,7 +316,7 @@ class MemContents:
             datatype = ctypes.c_char
             datatype_p = ctypes.c_char_p
 
-        return len(ctypes.cast(in_pointer, datatype_p).value) * ctypes.sizeof(datatype)
+        return len(ctypes.cast(ptr, datatype_p).value) * ctypes.sizeof(datatype)
 
     def __get_number_of_elements__(self, memsync_d, args_tuple, return_value=None):
 
@@ -353,7 +362,7 @@ class MemContents:
 
         if memsync_d["n"]:
             # Get length of null-terminated string
-            length = self.__get_length_of_null_terminated_string__(pointer, bool(w))
+            length = self._get_str_len(pointer, bool(w))
         else:
             # Compute actual length
             length = (
