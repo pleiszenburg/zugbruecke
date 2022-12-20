@@ -178,7 +178,7 @@ class ArgContents:
         for old_arg, new_arg, argtype in zip(
             old_args, new_args, argtypes
         ):
-            self.__sync_item__(old_arg, new_arg, argtype)
+            self._sync_arg(old_arg, new_arg, argtype)
 
     @staticmethod
     def _strip_pointer(item: Any) -> Any:  # _strip_pointer
@@ -346,37 +346,49 @@ class ArgContents:
             for fieldtype in structtype["_fields_"]
         ]
 
-    def __sync_item__(self, old_arg, new_arg, arg_def_dict):
+    def _sync_arg(self, old_arg: Any, new_arg: Any, argtype: Dict):
+        """
+        Args:
+            - old_arg: Raw argument
+            - new_arg: Raw argument
+            - argtype: zugbruecke argtype definition
+        Returns:
+            Nothing
+        """
 
         # The non-trivial case first, arrays
-        if not arg_def_dict["s"]:
+        if not argtype["s"]:
             # Sync items in array
-            self.__sync_item_array__(old_arg, new_arg, arg_def_dict)
+            self.__sync_item_array__(old_arg, new_arg, argtype)
             # Leave
             return
 
         # Do not do this for void pointers, likely handled by memsync
-        if arg_def_dict["g"] == GROUP_VOID:
+        if argtype["g"] == GROUP_VOID:
             return
 
         # Strip away the pointers ... (all flags are pointers in this case)
-        for flag in arg_def_dict["f"]:
+        for flag in argtype["f"]:
             if flag != FLAG_POINTER:
                 raise DataFlagError("unknown non-pointer flag for scalar")
             old_arg = self._strip_pointer(old_arg)
             new_arg = self._strip_pointer(new_arg)
 
-        if arg_def_dict["g"] == GROUP_FUNDAMENTAL:
+        if argtype["g"] == GROUP_FUNDAMENTAL:
             if hasattr(old_arg, "value"):
                 old_arg.value = new_arg.value
             else:
                 pass  # only relevant within structs or for actual pointers to scalars
-        elif arg_def_dict["g"] == GROUP_STRUCT:
-            return self.__sync_item_struct__(old_arg, new_arg, arg_def_dict)
-        elif arg_def_dict["g"] == GROUP_FUNCTION:
-            pass  # Nothing to do?
-        else:
-            raise DataGroupError("unexpected datatype group")
+            return
+
+        if argtype["g"] == GROUP_STRUCT:
+            self.__sync_item_struct__(old_arg, new_arg, argtype)
+            return
+
+        if argtype["g"] == GROUP_FUNCTION:
+            return  # Nothing to do?
+
+        raise DataGroupError("unexpected datatype group")
 
     def __sync_item_array__(self, old_arg, new_arg, arg_def_dict, flag_index_start=0):
 
@@ -431,7 +443,7 @@ class ArgContents:
         # Step through arguments
         for field_def_dict in struct_def_dict["_fields_"]:
 
-            self.__sync_item__(
+            self._sync_arg(
                 getattr(old_struct, field_def_dict["n"]),
                 getattr(new_struct, field_def_dict["n"]),
                 field_def_dict,
