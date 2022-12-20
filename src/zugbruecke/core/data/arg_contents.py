@@ -70,7 +70,7 @@ class ArgContents:
         # Everything is normal
         if len(args) == len(argtypes):
             return [
-                self.__pack_item__(arg, argtype)
+                self._pack_item(arg, argtype)
                 for arg, argtype in zip(args, argtypes)
             ]
 
@@ -84,7 +84,7 @@ class ArgContents:
             and conv == "cdll"
         ):
             return [
-                self.__pack_item__(arg, argtype)
+                self._pack_item(arg, argtype)
                 for arg, argtype in zip(args[:len(argtypes)], argtypes)
             ] + list(args[len(argtypes):])  # let's try ... TODO catch pickling errors
 
@@ -137,7 +137,7 @@ class ArgContents:
         if value is None:
             return None
 
-        return self.__pack_item__(value, restype)
+        return self._pack_item(value, restype)
 
     def unpack_retval(self, value: Any, restype: Dict) -> Any:  # return_msg_unpack
         """
@@ -211,75 +211,87 @@ class ArgContents:
 
         return getattr(item, "value", item)
 
-    def __pack_item__(self, arg_in, arg_def_dict):
+    def _pack_item(self, item: Any, itemtype: Dict) -> Any:
+        """
+        Args:
+            - item: raw argument / return value
+            - itemtype: zugbruecke argtype / restype definition
+        Returns:
+            Packed argument / return value for shipping
+        """
 
         # The non-trivial case first, non-scalars: arrays
-        if not arg_def_dict["s"]:
+        if not itemtype["s"]:
             # Unpack every item in array
-            return self.__pack_item_array__(arg_in, arg_def_dict)
+            return self._pack_array(item, itemtype)
 
         # Strip away the pointers ... (all flags are pointers in this case)
-        for flag in arg_def_dict["f"]:
+        for flag in itemtype["f"]:
             if flag != FLAG_POINTER:
-                raise DataFlagError("unknown non-pointer flag for scalar")
-            if is_null_pointer(arg_in):
-                # Just return None - will (hopefully) be overwritten by memsync
-                return None
-            arg_in = self._strip_pointer(arg_in)
+                raise DataFlagError(f'unknown non-pointer flag for scalar "{flag:d}"')
+            if is_null_pointer(item):
+                return None  # Just return None - will (hopefully) be overwritten by memsync
+            item = self._strip_pointer(item)
 
         # Handle fundamental types
-        if arg_def_dict["g"] == GROUP_FUNDAMENTAL:
+        if itemtype["g"] == GROUP_FUNDAMENTAL:
             # Append argument to list ...
-            return self._strip_simplecdata(arg_in)
+            return self._strip_simplecdata(item)
+
         # Handle structs
-        elif arg_def_dict["g"] == GROUP_STRUCT:
+        if itemtype["g"] == GROUP_STRUCT:
             # Reclusively call this routine for packing structs
-            return self.__pack_item_struct__(arg_in, arg_def_dict)
+            return self.__pack_item_struct__(item, itemtype)
+
         # Handle functions
-        elif arg_def_dict["g"] == GROUP_FUNCTION:
+        if itemtype["g"] == GROUP_FUNCTION:
             # Packs functions and registers them at RPC server
-            return self.__pack_item_function__(arg_in, arg_def_dict)
-        # Handle everything else ... likely pointers handled by memsync
-        else:
-            # Just return None - will (hopefully) be overwritten by memsync
-            return None
+            return self.__pack_item_function__(item, itemtype)
 
-    def __pack_item_array__(self, arg_in, arg_def_dict, flag_index_start=0):
+        # Handle everything else ...
+        return None  # Just return None - will (hopefully) be overwritten by memsync
 
-        for flag_index in range(flag_index_start, len(arg_def_dict["f"])):
+    def _pack_array(self, array: Any, arraytype: Dict, start: int = 0) -> Any:
+        """
+        Recursive function, packing one dimension per call
 
-            # Extract the flag
-            flag = arg_def_dict["f"][flag_index]
+        Args:
+            - array: raw argument / return array, n-dimensional
+            - arraytype: zugbruecke argtype / restype definition
+            - start: dimension to start with when packing
+        Returns:
+            Packed argument / return array for shipping
+        """
 
-            # Handle pointers
+        for idx, flag in enumerate(arraytype["f"][start:], start = start):
+
+            # Is pointer?
             if flag == FLAG_POINTER:
+                # Strip pointer
+                array = self._strip_pointer(array)
 
-                arg_in = self._strip_pointer(arg_in)
-
-            # Handle arrays
+            # Is array dimension?
             elif flag > 0:
-
                 # Only dive deeper if this is not the last flag
-                if flag_index < len(arg_def_dict["f"]) - 1:
-                    arg_in = [
-                        self.__pack_item_array__(
-                            e, arg_def_dict, flag_index_start=flag_index + 1
+                if idx < len(arraytype["f"]) - 1:
+                    array = [
+                        self._pack_array(
+                            dim, arraytype, start=idx + 1
                         )
-                        for e in arg_in[:]
+                        for dim in array[:]
                     ]
                 else:
-                    arg_in = arg_in[:]
-                    if arg_def_dict["g"] == GROUP_STRUCT:
-                        arg_in = [
-                            self.__pack_item_struct__(e, arg_def_dict) for e in arg_in
+                    array = array[:]
+                    if arraytype["g"] == GROUP_STRUCT:
+                        array = [
+                            self.__pack_item_struct__(struct, arraytype) for struct in array
                         ]
 
             # Handle unknown flags
             else:
-
                 raise DataFlagError("unknown non-pointer flag for array")
 
-        return arg_in
+        return array
 
     def __pack_item_function__(self, func_ptr, func_def_dict):
 
@@ -317,7 +329,7 @@ class ArgContents:
         return [
             (
                 field_def_dict["n"],
-                self.__pack_item__(
+                self._pack_item(
                     getattr(struct_raw, field_def_dict["n"]), field_def_dict
                 ),
             )
