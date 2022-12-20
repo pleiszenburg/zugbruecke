@@ -482,7 +482,7 @@ class ArgContents:
             item = self.__unpack_item_struct__(item, itemtype)
         # Handle functions
         elif itemtype["g"] == GROUP_FUNCTION:
-            item = self.__unpack_item_function__(item, itemtype)
+            item = self._unpack_func(item, itemtype)
         # Handle voids (likely mensync stuff)
         elif itemtype["g"] == GROUP_VOID:
             # Return a placeholder
@@ -572,33 +572,30 @@ class ArgContents:
 
         return subtype, array
 
-    def __unpack_item_function__(self, func_name, func_def_dict):
+    def _unpack_func(self, name: str, functype: Dict) -> Callable:
 
         # HACK if this function is called on the client, just return None
         if not self._is_server:
             return None
 
-        # Has callback translator been built?
-        if func_name in self._cache.handle.keys():
+        # Has callback translator not been built yet?
+        if name not in self._cache.handle.keys():
 
-            # Just return handle
-            return self._cache.handle[func_name]
-
-        # Generate, decorate and store callback translator in cache
-        self._cache.handle[func_name] = func_def_dict["_factory_type_"](
-            CallbackServer(
-                name = func_name,
-                rpc_client = self._callback_client,
-                data = self,
-                log = self._log,
-                argtypes_d = func_def_dict["_argtypes_"],
-                restype_d = func_def_dict["_restype_"],
-                memsync_d = self.unpack_definition_memsync(func_def_dict["_memsync_"]),
+            # Generate, decorate and store callback translator in cache
+            self._cache.handle[name] = functype["_factory_type_"](
+                CallbackServer(
+                    name = name,
+                    rpc_client = self._callback_client,
+                    data = self,
+                    log = self._log,
+                    argtypes_d = functype["_argtypes_"],
+                    restype_d = functype["_restype_"],
+                    memsync_d = self.unpack_definition_memsync(functype["_memsync_"]),
+                )
             )
-        )
 
         # Return name of callback entry
-        return self._cache.handle[func_name]
+        return self._cache.handle[name]
 
     def __unpack_item_struct__(self, args_list, struct_def_dict):
 
