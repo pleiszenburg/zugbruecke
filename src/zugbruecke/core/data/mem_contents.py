@@ -32,7 +32,7 @@ specific language governing rights and limitations under the License.
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 import ctypes
-from typing import Any, Dict, List, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 from ..const import GROUP_VOID
 from ..errors import DataMemsyncpathError
@@ -203,55 +203,65 @@ class MemContents:
         mempkg["l"] = len(mempkg["d"])
         mempkg["w"] = WCHAR_BYTES
 
-    def __get_argument_by_memsync_path__(
-        self, memsync_path, args_tuple, return_value=None
-    ):
+    def _get_item_by_path(
+        self, path: List[Union[int, str]], args: Tuple[Any], retval: Optional[Any] = None,
+    ) -> Any:
+        """
+        Get (fragment of) argument or return value by path
+
+        Args:
+            - path: List of int and/or str describing (part of) an argument or return value
+            - args: Raw arguments
+            - retval: Raw return value
+        Returns:
+            Raw (fragment of) argument or return value
+        """
 
         # Reference args_tuple as initial value
-        element = args_tuple
+        element = args
 
         # Step through path
-        for element_index, path_element in enumerate(memsync_path):
+        for idx, segment in enumerate(path):
 
             # Element is an int
-            if isinstance(path_element, int):
+            if isinstance(segment, int):
 
                 # Pointer to pointer (in top-level arguments) for memory allocation by DLL
-                if path_element < 0:
+                if segment < 0:
                     element = strip_pointer(element)
 
                 # Dive into argument tuple
                 else:
-                    element = element[path_element]
+                    element = element[segment]
 
             # Element equals 'r' and index 0: Return value
-            elif isinstance(path_element, str) and element_index == 0:
+            elif isinstance(segment, str) and idx == 0:
 
-                if path_element != "r":
+                if segment != "r":
                     raise DataMemsyncpathError(
                         'field with name (type string) is not return value ("r")'
                     )
 
-                element = return_value
+                element = retval
 
                 if element is None:
                     return None
 
             # Field name in struct
-            elif isinstance(path_element, str) and element_index > 0:
+            elif isinstance(segment, str) and idx > 0:
 
-                element = getattr(strip_pointer(element), path_element)
+                element = getattr(strip_pointer(element), segment)
 
             # TODO elements of arrays
             else:
 
-                self._log.err(path_element)
+                self._log.err(segment)
                 raise NotImplementedError("array elements can yet not be addressed")
 
         return element
 
     def _get_itemtype_by_path(
-        self, path: List[Union[int, str]], argtypes: Dict, restype: Dict,
+        self, path: List[Union[int, str]], argtypes: List[Dict], restype: Dict,
     ) -> Dict:
         """
         Get zugbruecke argtype or restype by path
@@ -302,7 +312,7 @@ class MemContents:
         if "_f" not in memsync_d.keys():
 
             # Search for length
-            length = self.__get_argument_by_memsync_path__(
+            length = self._get_item_by_path(
                 memsync_d["l"], args_tuple, return_value
             )
 
@@ -315,7 +325,7 @@ class MemContents:
         # Compute length from arguments and return
         return memsync_d["_f"](
             *(
-                self.__get_argument_by_memsync_path__(item, args_tuple, return_value)
+                self._get_item_by_path(item, args_tuple, return_value)
                 for item in memsync_d["l"]
             )
         )
@@ -323,7 +333,7 @@ class MemContents:
     def __pack_memory_item__(self, memsync_d, args_tuple, return_value=None):
 
         # Search for pointer
-        pointer = self.__get_argument_by_memsync_path__(
+        pointer = self._get_item_by_path(
             memsync_d["p"], args_tuple, return_value
         )
 
@@ -372,7 +382,7 @@ class MemContents:
         self.__swap_memory_addresses__(memory_d)
 
         # Search for pointer in passed arguments
-        pointer_arg = self.__get_argument_by_memsync_path__(
+        pointer_arg = self._get_item_by_path(
             memsync_d["p"][:-1], args_tuple, return_value
         )
 
@@ -438,7 +448,7 @@ class MemContents:
             path_shift = 0
 
         # Search for pointer in passed arguments
-        pointer_arg = self.__get_argument_by_memsync_path__(
+        pointer_arg = self._get_item_by_path(
             memsync_d["p"][: (-1 - path_shift)], args_tuple
         )
 
