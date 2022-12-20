@@ -37,4 +37,4 @@ from .func import DefinitionFunc
 from .simple import DefinitionSimple
 from .struct import DefinitionStruct
 
-from .memsync import Memsync
+from .memsync import DefinitionMemsync
