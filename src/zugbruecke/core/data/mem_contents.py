@@ -346,8 +346,8 @@ class MemContents:
         # Compute length from arguments and return
         return memsync["_f"](
             *(
-                self._get_item_by_path(item, args, retval)
-                for item in memsync["l"]
+                self._get_item_by_path(path, args, retval)
+                for path in memsync["l"]
             )
         )
 
