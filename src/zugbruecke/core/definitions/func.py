@@ -34,7 +34,7 @@ import ctypes
 from ctypes import _FUNCFLAG_CDECL
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-from ..abc import CacheABC, DefinitionABC, MemsyncABC
+from ..abc import CacheABC, DefinitionABC, DefinitionMemsyncABC
 from ..const import _FUNCFLAG_STDCALL
 from ..typeguard import typechecked
 
@@ -54,7 +54,7 @@ class DefinitionFunc(base.Definition):
         *args: Any,
         argtypes: List[DefinitionABC],
         restype: DefinitionABC,
-        memsync: List[MemsyncABC],
+        memsync: List[DefinitionMemsyncABC],
         func_flags: int,
         **kwargs: Any,
     ):
@@ -102,7 +102,7 @@ class DefinitionFunc(base.Definition):
 
         argtypes = [base.Definition.from_packed(argtype, cache = cache) for argtype in argtypes]
         restype = base.Definition.from_packed(restype, cache = cache)
-        memsync = [ms.Memsync.from_packed(item, cache = cache) for item in memsync]
+        memsync = [ms.DefinitionMemsync.from_packed(item, cache = cache) for item in memsync]
 
         func_flag = _FUNCFLAG_STDCALL if (func_flags & _FUNCFLAG_STDCALL) else _FUNCFLAG_CDECL
         try:
@@ -126,7 +126,7 @@ class DefinitionFunc(base.Definition):
     @classmethod
     def _assemble_datatype(cls,
         type_name: str, flags: List[int],
-        argtypes: List[DefinitionABC], restype: DefinitionABC, memsync: List[MemsyncABC],
+        argtypes: List[DefinitionABC], restype: DefinitionABC, memsync: List[DefinitionMemsyncABC],
         func_flags: int,
     ) -> Tuple[Any, Any]:
         """
@@ -171,7 +171,7 @@ class DefinitionFunc(base.Definition):
             base_type = base_type,
             argtypes = cls.from_data_types(data_types = base_type._argtypes_, cache = cache),
             restype = cls.from_data_type(data_type = base_type._restype_, cache = cache),
-            memsync = ms.Memsync.from_definitions(base_type.memsync, cache = cache),
+            memsync = ms.DefinitionMemsync.from_raws(base_type.memsync, cache = cache),
             func_flags = base_type._flags_,
             cache = cache,
         )

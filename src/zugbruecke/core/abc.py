@@ -64,6 +64,10 @@ class DefinitionABC(ABC):
     pass
 
 
+class DefinitionMemsyncABC(ABC):
+    pass
+
+
 class DllClientABC(ABC):
     pass
 
@@ -77,10 +81,6 @@ class InterpreterABC(ABC):
 
 
 class LogABC(ABC):
-    pass
-
-
-class MemsyncABC(ABC):
     pass
 
 

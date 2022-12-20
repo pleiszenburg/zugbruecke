@@ -33,7 +33,7 @@ specific language governing rights and limitations under the License.
 import ctypes
 from typing import Dict, List, Optional
 
-from ..abc import CacheABC, MemsyncABC
+from ..abc import CacheABC, DefinitionMemsyncABC
 from ..typeguard import typechecked
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -41,7 +41,7 @@ from ..typeguard import typechecked
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 @typechecked
-class Memsync(MemsyncABC):
+class DefinitionMemsync(DefinitionMemsyncABC):
     """
     Represent the definition of a block of memory to be kept in sync
     """
@@ -88,7 +88,7 @@ class Memsync(MemsyncABC):
         }
 
     @classmethod
-    def from_packed(cls, packed: Dict, cache: CacheABC) -> MemsyncABC:
+    def from_packed(cls, packed: Dict, cache: CacheABC) -> DefinitionMemsyncABC:
         """
         Unpack from dict received from other side
 
@@ -98,17 +98,17 @@ class Memsync(MemsyncABC):
         return cls(**packed, cache = cache)
 
     @classmethod
-    def from_definition(cls, definition: Dict, cache: CacheABC) -> MemsyncABC:
+    def from_raw(cls, definition: Dict, cache: CacheABC) -> DefinitionMemsyncABC:
         """
-        Ingest definition given by user
+        Ingest raw definition given by user
         """
 
         return cls(**definition, cache = cache)
 
     @classmethod
-    def from_definitions(cls, definitions: List[Dict], cache: CacheABC) -> List[MemsyncABC]:
+    def from_raws(cls, definitions: List[Dict], cache: CacheABC) -> List[DefinitionMemsyncABC]:
         """
-        Ingest definitions given by user
+        Ingest raw definitions given by user
         """
 
-        return [Memsync.from_definition(definition, cache = cache) for definition in definitions]
+        return [cls.from_raw(definition, cache = cache) for definition in definitions]
