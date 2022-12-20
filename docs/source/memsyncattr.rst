@@ -54,7 +54,7 @@ This parameter describes where *zugbruecke*'s parser can find the pointer, which
 Key: ``l``, path to length
 --------------------------
 
-- Type: ``list[str | int] | tuple[list[str | int]]``
+- Type: ``list[str | int] | tuple[list[str | int], ...]``
 - Optional, if alternatives are provided.
 
 This parameter describes where *zugbruecke*'s parser can find a number (integer) which represents the length of the memory block or, alternatively, arguments for a custom length function.
