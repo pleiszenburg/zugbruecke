@@ -401,16 +401,24 @@ class MemContents:
             "w": w,  # local length of Unicode wchar if required
         }
 
-    def __swap_memory_addresses__(self, memory_d):
+    def _swap_addr(self, mempkg: Dict):
+        """
+        Swaps local and remote memory addresses within memory package
 
-        memory_d.update({"a": memory_d.get("_a", None), "_a": memory_d.get("a", None)})
+        Args:
+            - mempkg: Memory package from shipping
+        Returns:
+            Nothing
+        """
+
+        mempkg.update({"a": mempkg.get("_a", None), "_a": mempkg.get("a", None)})
 
     def __unpack_memory_item_data__(
         self, memory_d, memsync_d, args_tuple, return_value=None
     ):
 
         # Swap local and remote memory addresses
-        self.__swap_memory_addresses__(memory_d)
+        self._swap_addr(memory_d)
 
         # Search for pointer in passed arguments
         pointer_arg = self._get_item_by_path(
@@ -464,7 +472,7 @@ class MemContents:
     def __unpack_memory_item_null__(self, memory_d, memsync_d, args_tuple):
 
         # Swap local and remote memory addresses
-        self.__swap_memory_addresses__(memory_d)
+        self._swap_addr(memory_d)
 
         # If this is a return value, do nothing at this stage
         if memsync_d["p"][0] == "r":
@@ -495,7 +503,7 @@ class MemContents:
     def __unpack_memory_item_overwrite__(self, memory_d, memsync_d, args_tuple):
 
         # Swap local and remote memory addresses
-        self.__swap_memory_addresses__(memory_d)
+        self._swap_addr(memory_d)
 
         # Adjust Unicode wchar length
         if memsync_d["w"]:
