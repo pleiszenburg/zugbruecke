@@ -44,6 +44,7 @@ from .memory import (
     overwrite_pointer_with_bytes,
     serialize_pointer_into_bytes,
     strip_pointer,
+    strip_simplecdata,
 )
 
 WCHAR_BYTES = ctypes.sizeof(ctypes.c_wchar)
@@ -303,8 +304,8 @@ class MemContents:
         Get length of null-terminated string in bytes
 
         Args:
-            ptr: ctypes pointer to chars/wchars
-            is_unicode: flag indicating unicode characters
+            - ptr: ctypes pointer to chars/wchars
+            - is_unicode: flag indicating unicode characters
         Returns:
             Length in bytes
         """
@@ -318,27 +319,35 @@ class MemContents:
 
         return len(ctypes.cast(ptr, datatype_p).value) * ctypes.sizeof(datatype)
 
-    def __get_number_of_elements__(self, memsync_d, args_tuple, return_value=None):
+    def _get_arb_len(self, memsync: Dict, args: List[Any], retval: Optional[Any] = None):
+        """
+        Get length of arbitrary data
+
+        Args:
+            - memsync: Memsync definition
+            - args: Raw arguments
+            - retval: Raw return value
+        """
 
         # There is no function defining the length?
-        if "_f" not in memsync_d.keys():
+        if "_f" not in memsync.keys():
 
             # Search for length
             length = self._get_item_by_path(
-                memsync_d["l"], args_tuple, return_value
+                memsync["l"], args, retval
             )
 
             # Length might come from ctypes or a Python datatype
-            return getattr(length, "value", length)
+            return strip_simplecdata(length)
 
         # Make sure length can be computed from a tuple of arguments
-        assert isinstance(memsync_d["l"], tuple)
+        assert isinstance(memsync["l"], tuple)
 
         # Compute length from arguments and return
-        return memsync_d["_f"](
+        return memsync["_f"](
             *(
-                self._get_item_by_path(item, args_tuple, return_value)
-                for item in memsync_d["l"]
+                self._get_item_by_path(item, args, retval)
+                for item in memsync["l"]
             )
         )
 
@@ -366,7 +375,7 @@ class MemContents:
         else:
             # Compute actual length
             length = (
-                self.__get_number_of_elements__(memsync_d, args_tuple, return_value)
+                self._get_arb_len(memsync_d, args_tuple, return_value)
                 * memsync_d["s"]
             )
 
