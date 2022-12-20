@@ -71,6 +71,8 @@ class CallbackServer(CallbackServerABC):
 
     def __call__(self, *args: Any) -> Any:
 
+        args = list(args)
+
         self._log.out(
             '[callback-server] Trying to call callback routine "{NAME:s}" ...'.format(NAME = self._name)
         )

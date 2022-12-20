@@ -105,6 +105,8 @@ class RoutineClient(RoutineClientABC):
         TODO Optimize for speed!
         """
 
+        args = list(args)
+
         self._log.out(
             '[routine-client] Trying to call routine "{NAME:s}" in DLL file "{DLL_NAME:s}" ...'.format(
                 NAME=str(self._name),
