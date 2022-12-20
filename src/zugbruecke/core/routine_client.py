@@ -155,7 +155,7 @@ class RoutineClient(RoutineClientABC):
         self._log.out("[routine-client] ... overwriting memory ...")
 
         # Unpack memory (call may have failed partially only)
-        self._data.client_unpack_memory_list(
+        self._data.unpack_memory_on_client(
             args, return_value, return_dict["memory"], self._memsync_d
         )
 

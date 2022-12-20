@@ -106,7 +106,7 @@ class CallbackServer(CallbackServerABC):
             return_value = self._data.unpack_retval(
                 return_dict["return_value"], self._restype_d
             )
-            self._data.client_unpack_memory_list(
+            self._data.unpack_memory_on_client(
                 args, return_value, return_dict["memory"], self._memsync_d
             )
         except Exception as e:

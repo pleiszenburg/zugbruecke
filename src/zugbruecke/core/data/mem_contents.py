@@ -72,7 +72,7 @@ class MemContents:
             Nothing
         """
 
-        # Iterate over memory segments, which must be kept in sync
+        # Iterate over memory segments which must be kept in sync
         for memsync in memsyncs:
 
             # Get type of pointer argument
@@ -84,7 +84,7 @@ class MemContents:
             itemtype["g"] = GROUP_VOID
             itemtype["t"] = None  # no type string
 
-    def pack_memory_on_client(self, args: Tuple[Any], memsyncs: List[Dict]) -> List[Dict]:
+    def pack_memory_on_client(self, args: Tuple[Any], memsyncs: List[Dict],) -> List[Dict]:
         """
         Args:
             args: Raw function arguments
@@ -93,32 +93,39 @@ class MemContents:
             List of memory packages for shipping
         """
 
-        # Pack data for every pointer, append data to package
+        # Pack data for every pointer into package
         return [
             self.__pack_memory_item__(memsync, args)
             for memsync in memsyncs
         ]
 
-    def client_unpack_memory_list(
-        self, args_list, return_value, mem_package_list, memsync_d_list
+    def unpack_memory_on_client(
+        self, args: List[Any], retval: Any, mempkgs: List[Dict], memsyncs: List[Dict],
     ):
+        """
+        Args:
+            args: Raw function arguments
+            retval: Raw function return value
+            mempkgs: List of memory packages from shipping
+            memsyncs: Memsync definitions
+        Returns:
+            Nothing
+        """
 
         # Iterate over memory package dicts
-        for memory_d, memsync_d in zip(mem_package_list, memsync_d_list):
+        for mempkg, memsync in zip(mempkgs, memsyncs):
 
             # If memory for pointer has been allocated by remote side
-            if memory_d["_a"] is None:
-
+            if mempkg["_a"] is None:
                 # Unpack one memory section / item
                 self.__unpack_memory_item_data__(
-                    memory_d, memsync_d, args_list, return_value
+                    mempkg, memsync, args, retval
                 )
 
             # If pointer pointed to data
             else:
-
                 # Overwrite pointer
-                self.__unpack_memory_item_overwrite__(memory_d, memsync_d, args_list)
+                self.__unpack_memory_item_overwrite__(mempkg, memsync, args)
 
     def server_pack_memory_list(
         self, args_list, return_value, mem_package_list, memsync_d_list
