@@ -471,7 +471,8 @@ class ArgContents:
         # The non-trivial case first, arrays
         if not itemtype["s"]:
             # Unpack items in array
-            return self.__unpack_item_array__(item, itemtype)[1]
+            _, item = self._unpack_array(item, itemtype)
+            return item
 
         # Handle fundamental types
         if itemtype["g"] == GROUP_FUNDAMENTAL:
@@ -498,47 +499,57 @@ class ArgContents:
 
         return item
 
-    def __unpack_item_array__(self, arg_in, arg_def_dict, flag_index=0):
+    def _unpack_array(self, array: Any, arraytype: Dict, start: int = 0) -> Tuple[Any, Any]:
+        """
+        Recursive function, packing one dimension per call
+
+        Args:
+            - array: packed argument / return array, n-dimensional, from shipping
+            - arraytype: zugbruecke argtype / restype definition
+            - start: flag to start with when packing
+        Returns:
+            Tuple of ctypes type and unpacked argument / return array
+        """
 
         # Extract the flag
-        flag = arg_def_dict["f"][flag_index]
+        flag = arraytype["f"][start]
 
         # Dive deeper?
-        if flag_index < len(arg_def_dict["f"]) - 1:
+        if start < len(arraytype["f"]) - 1:
 
             # Get index of next flag
-            next_flag_index = flag_index + 1
+            next_start = start + 1
 
             # If it's a Python list, dive once per element of list
-            if type(arg_in) == list and flag != FLAG_POINTER:
+            if isinstance(array, list) and flag != FLAG_POINTER:
 
-                arg_in_tuple_list = [
-                    self.__unpack_item_array__(
-                        e, arg_def_dict, flag_index=next_flag_index
+                dims = [
+                    self._unpack_array(
+                        dim, arraytype, start=next_start
                     )
-                    for e in arg_in
+                    for dim in array
                 ]
-                arg_type = arg_in_tuple_list[0][0]
-                arg_in = [e[1] for e in arg_in_tuple_list]
+                subtype = dims[0][0]
+                array = [dim[1] for dim in dims]
 
             # Likely a scalar or a ctypes object
             else:
 
-                arg_type, arg_in = self.__unpack_item_array__(
-                    arg_in, arg_def_dict, flag_index=next_flag_index
+                subtype, array = self._unpack_array(
+                    array, arraytype, start=next_start
                 )
 
             # Handle pointers
             if flag == FLAG_POINTER:
-                arg_type = ctypes.POINTER(arg_type)
-                arg_in = ctypes.pointer(arg_in)
+                subtype = ctypes.POINTER(subtype)
+                array = ctypes.pointer(array)
             # Handle arrays
             elif flag > 0:
-                arg_type = arg_type * flag
-                arg_in = arg_type(*arg_in)
+                subtype = subtype * flag
+                array = subtype(*array)
             # Handle unknown flags
             else:
-                raise DataFlagError("unknown non-pointer flag for array")
+                raise DataFlagError(f'unknown non-pointer flag for array "{flag:d}"')
 
         # No dive, we're at the bottom - just get the original ctypes type
         else:
@@ -546,20 +557,20 @@ class ArgContents:
             if flag == FLAG_POINTER:
                 raise DataFlagError("unexpected pointer flag for array")
 
-            if arg_def_dict["g"] == GROUP_FUNDAMENTAL:
-                arg_type = getattr(ctypes, arg_def_dict["t"]) * flag
-                arg_in = arg_type(*arg_in)
-            elif arg_def_dict["g"] == GROUP_STRUCT:
-                arg_type = self._cache.struct[arg_def_dict["t"]] * flag
-                arg_in = arg_type(
-                    *(self.__unpack_item_struct__(e, arg_def_dict) for e in arg_in)
+            if arraytype["g"] == GROUP_FUNDAMENTAL:
+                subtype = getattr(ctypes, arraytype["t"]) * flag
+                array = subtype(*array)
+            elif arraytype["g"] == GROUP_STRUCT:
+                subtype = self._cache.struct[arraytype["t"]] * flag
+                array = subtype(
+                    *(self.__unpack_item_struct__(dim, arraytype) for dim in array)
                 )
-            elif arg_def_dict["g"] == GROUP_FUNCTION:
+            elif arraytype["g"] == GROUP_FUNCTION:
                 raise NotImplementedError("functions in arrays are not supported")
             else:
                 raise DataGroupError("unexpected datatype group")
 
-        return arg_type, arg_in
+        return subtype, array
 
     def __unpack_item_function__(self, func_name, func_def_dict):
 
