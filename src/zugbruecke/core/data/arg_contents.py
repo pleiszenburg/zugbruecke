@@ -382,7 +382,7 @@ class ArgContents:
             return
 
         if argtype["g"] == GROUP_STRUCT:
-            self.__sync_item_struct__(old_arg, new_arg, argtype)
+            self._sync_struct(old_arg, new_arg, argtype)
             return
 
         if argtype["g"] == GROUP_FUNCTION:
@@ -426,7 +426,7 @@ class ArgContents:
                         old_array[:] = new_array[:]
                     elif arraytype["g"] == GROUP_STRUCT:
                         for old_struct, new_struct in zip(old_array[:], new_array[:]):
-                            self.__sync_item_struct__(
+                            self._sync_struct(
                                 old_struct, new_struct, arraytype
                             )
                     elif arraytype["g"] == GROUP_FUNCTION:
@@ -440,15 +440,23 @@ class ArgContents:
             else:
                 raise DataFlagError("unknown non-pointer flag for array")
 
-    def __sync_item_struct__(self, old_struct, new_struct, struct_def_dict):
+    def _sync_struct(self, old_struct: Any, new_struct: Any, structtype: Dict):
+        """
+        Args:
+            - old_struct: raw argument struct
+            - new_struct: raw argument struct
+            - structtype: zugbruecke argtype definition
+        Returns:
+            Nothing
+        """
 
         # Step through arguments
-        for field_def_dict in struct_def_dict["_fields_"]:
+        for fieldtype in structtype["_fields_"]:
 
             self._sync_arg(
-                getattr(old_struct, field_def_dict["n"]),
-                getattr(new_struct, field_def_dict["n"]),
-                field_def_dict,
+                getattr(old_struct, fieldtype["n"]),
+                getattr(new_struct, fieldtype["n"]),
+                fieldtype,
             )
 
     def __unpack_item__(self, arg_raw, arg_def_dict):
