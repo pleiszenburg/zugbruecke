@@ -290,9 +290,9 @@ class ArgContents:
                 rpc_server = self._callback_server,
                 data = self,
                 log = self._log,
-                argtypes_d = functype["_argtypes_"],
-                restype_d = functype["_restype_"],
-                memsync_d = self.unpack_definition_memsync(functype["_memsync_"]),
+                argtypes = functype["_argtypes_"],
+                restype = functype["_restype_"],
+                memsyncs = self.unpack_definition_memsync(functype["_memsync_"]),
             )
 
         # Return name of callback entry
@@ -567,9 +567,9 @@ class ArgContents:
                     rpc_client = self._callback_client,
                     data = self,
                     log = self._log,
-                    argtypes_d = functype["_argtypes_"],
-                    restype_d = functype["_restype_"],
-                    memsync_d = self.unpack_definition_memsync(functype["_memsync_"]),
+                    argtypes = functype["_argtypes_"],
+                    restype = functype["_restype_"],
+                    memsyncs = self.unpack_definition_memsync(functype["_memsync_"]),
                 )
             )
 
