@@ -573,6 +573,13 @@ class ArgContents:
         return subtype, array
 
     def _unpack_func(self, name: str, functype: Dict) -> Callable:
+        """
+        Args:
+            - name: (Generated) name of func from shipping
+            - functype: zugbruecke argtype / restype definition
+        Returns:
+            Callable
+        """
 
         # HACK if this function is called on the client, just return None
         if not self._is_server:
