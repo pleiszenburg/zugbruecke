@@ -194,7 +194,7 @@ class RoutineClient(RoutineClientABC):
         memsync_d_packed = self._data.pack_definition_memsync(self._memsync_d)
 
         # Adjust definitions with void pointers
-        self._data.apply_memsync_to_argtypes_and_restype_definition(
+        self._data.apply_memsync(
             self._memsync_d, self._argtypes_d, self._restype_d
         )
 

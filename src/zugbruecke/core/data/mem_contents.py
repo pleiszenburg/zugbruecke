@@ -32,6 +32,7 @@ specific language governing rights and limitations under the License.
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 import ctypes
+from typing import Dict, List, Union
 
 from ..const import GROUP_VOID
 from ..errors import DataMemsyncpathError
@@ -50,22 +51,37 @@ WCHAR_BYTES = ctypes.sizeof(ctypes.c_wchar)
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
-class memory_contents_class:
-    def apply_memsync_to_argtypes_and_restype_definition(
-        self, memsync_d_list, argtypes_d, restype_d
+class MemContents:
+    """
+    MIXIN: Memory contents (memory sync)
+    """
+
+    def apply_memsync(
+        self, memsyncs: List[Dict], argtypes: List[Dict], restype: Dict,
     ):
+        """
+        Apply memsync definitions to zugbruecke argtypes and restype definitions.
+        Types are switched to void pointers.
+
+        Args:
+            - memsyncs: List of memsync definitions
+            - argtypes: zugbruecke argument type definitions
+            - restype: zugbruecke return type definition
+        Returns:
+            Nothing
+        """
 
         # Iterate over memory segments, which must be kept in sync
-        for memsync_d in memsync_d_list:
+        for memsync in memsyncs:
 
             # Get type of pointer argument
-            arg_type = self.__get_argument_type_by_memsync_path__(
-                memsync_d["p"], argtypes_d, restype_d
+            itemtype = self._get_itemtype_by_path(
+                memsync["p"], argtypes, restype,
             )
 
             # HACK make memory sync pointers type agnostic
-            arg_type["g"] = GROUP_VOID
-            arg_type["t"] = None  # no type string
+            itemtype["g"] = GROUP_VOID
+            itemtype["t"] = None  # no type string
 
     def client_pack_memory_list(self, args_tuple, memsync_d_list):
 
@@ -198,32 +214,40 @@ class memory_contents_class:
 
         return element
 
-    def __get_argument_type_by_memsync_path__(
-        self, memsync_path, argtypes_d, restype_d
-    ):
+    def _get_itemtype_by_path(
+        self, path: List[Union[int, str]], argtypes: Dict, restype: Dict,
+    ) -> Dict:
+        """
+        Get zugbruecke argtype or restype by path
 
-        # Is path targetting an argument or the return value?
-        if isinstance(memsync_path[0], int):
-            arg_type = argtypes_d[memsync_path[0]]
-        elif memsync_path[0] == "r":
-            arg_type = restype_d
+        Args:
+            - path: List of int and/or str describing (part of) an argument or return value
+            - argtypes: zugbruecke argument types
+            - restype: zugbruecke return type
+        Returns:
+            One zugbruecke argtype / restype definition
+        """
+
+        if isinstance(path[0], int):  # function argument
+            itemtype = argtypes[path[0]]
+        elif path[0] == "r":  # function return value
+            itemtype = restype
         else:
             raise DataMemsyncpathError(
-                'field is neither return value ("r") nor parameter (type int)'
+                f'path[0] is neither return value ("r") nor parameter (type int) "{path[0]}"'
             )
 
         # Step through path to argument type ...
-        for path_element in memsync_path[1:]:
+        for segment in path[1:]:
             # Continue on special flags HACK
-            if isinstance(path_element, int):
-                if path_element < 0:
-                    continue
+            if isinstance(segment, int) and segment < 0:
+                continue
             # Go deeper ...
-            arg_type = {field["n"]: field for field in arg_type["_fields_"]}[
-                path_element
+            itemtype = {field["n"]: field for field in itemtype["_fields_"]}[
+                segment
             ]
 
-        return arg_type
+        return itemtype
 
     def __get_length_of_null_terminated_string__(self, in_pointer, is_unicode):
 

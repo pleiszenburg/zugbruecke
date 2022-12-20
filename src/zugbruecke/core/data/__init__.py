@@ -36,7 +36,7 @@ from typing import Optional
 
 from .arg_contents import ArgContents
 from .arg_definition import arguments_definition_class
-from .mem_contents import memory_contents_class
+from .mem_contents import MemContents
 from .mem_definition import memory_definition_class
 
 from ..abc import CacheABC, DataABC, LogABC, RpcClientABC, RpcServerABC
@@ -55,7 +55,7 @@ class Data(
     DataABC,
     ArgContents,
     arguments_definition_class,
-    memory_contents_class,
+    MemContents,
     memory_definition_class,
 ):
     """
