@@ -35,7 +35,6 @@ from typing import Optional
 
 from .arg_contents import ArgContents
 from .arg_definition import arguments_definition_class
-from .mem_definition import memory_definition_class
 
 from ..abc import CacheABC, DataABC, LogABC, RpcClientABC, RpcServerABC
 from ..typeguard import typechecked
@@ -52,7 +51,6 @@ class Data(
     DataABC,
     ArgContents,
     arguments_definition_class,
-    memory_definition_class,
 ):
     """
     Handles argument definitions, contents and memory sync

@@ -42,6 +42,7 @@ from ..const import (
     GROUP_STRUCT,
     GROUP_FUNCTION,
 )
+from ..definitions import DefinitionMemsync
 from ..errors import DataFlagError, DataTypeError
 
 
@@ -73,7 +74,7 @@ class arguments_definition_class:
             class FunctionType(ctypes._CFuncPtr):
                 _argtypes_ = argtypes
                 _restype_ = restype
-                memsync = self.unpack_definition_memsync(_memsync_)
+                memsync = DefinitionMemsync.from_raws(_memsync_, self._cache)
                 _flags_ = flags
 
             # Store the new type and return
@@ -263,7 +264,7 @@ class arguments_definition_class:
                 "g": GROUP_FUNCTION,
                 "_argtypes_": self.pack_definition_argtypes(datatype._argtypes_),
                 "_restype_": self.pack_definition_returntype(datatype._restype_),
-                "_memsync_": self.pack_definition_memsync(datatype.memsync),
+                "_memsync_": [item.as_packed() for item in datatype.memsync],
                 "_flags_": datatype._flags_,
             }
 
@@ -337,7 +338,7 @@ class arguments_definition_class:
             datatype_d_dict["_flags_"],
             self.unpack_definition_returntype(datatype_d_dict["_restype_"]),
             *self.unpack_definition_argtypes(datatype_d_dict["_argtypes_"]),
-            memsync=self.unpack_definition_memsync(datatype_d_dict["_memsync_"]),
+            memsync=[DefinitionMemsync.from_packed(item, self._cache) for item in datatype_d_dict["_memsync_"]],
         )
 
         # Store function pointer type for subsequent use as decorator
