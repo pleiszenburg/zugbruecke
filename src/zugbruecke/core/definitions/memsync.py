@@ -433,7 +433,7 @@ class DefinitionMemsync(DefinitionMemsyncABC):
         if is_server:
 
             # Is this a null pointer?
-            if mempkg.local_addr is None:
+            if mempkg.remote_addr is None:
                 # Insert new NULL pointer
                 self._unpack_null(args)
 
@@ -444,7 +444,7 @@ class DefinitionMemsync(DefinitionMemsyncABC):
         else:
 
             # If memory for pointer has been allocated by remote side
-            if mempkg.remote_addr is None:
+            if mempkg.local_addr is None:
                 # Unpack one memory section / item
                 self._unpack_memory(mempkg, args, retval)
 
