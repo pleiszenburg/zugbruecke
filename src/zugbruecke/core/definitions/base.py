@@ -38,11 +38,6 @@ from ..const import FLAG_POINTER
 from ..errors import DataFlagError
 from ..typeguard import typechecked
 
-from . import simple
-from . import struct
-from . import func
-from . import custom
-
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # CLASS
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -189,16 +184,20 @@ class Definition(DefinitionABC):
         Counterpart to `as_packed`
         """
 
+        from .simple import DefinitionSimple
+        from .struct import DefinitionStruct
+        from .func import DefinitionFunc
+
         group = packed.pop("group")
 
-        if group == simple.DefinitionSimple.GROUP:
-            return simple.DefinitionSimple.from_packed(**packed)
+        if group == DefinitionSimple.GROUP:
+            return DefinitionSimple.from_packed(**packed)
 
-        if group == struct.DefinitionStruct.GROUP:
-            return struct.DefinitionStruct.from_packed(**packed, cache = cache)
+        if group == DefinitionStruct.GROUP:
+            return DefinitionStruct.from_packed(**packed, cache = cache)
 
-        if group == func.DefinitionFunc.GROUP:
-            return func.DefinitionFunc.from_packed(**packed, cache = cache)
+        if group == DefinitionFunc.GROUP:
+            return DefinitionFunc.from_packed(**packed, cache = cache)
 
         raise ValueError(f'unknown group "{group}"')  # TODO new error type?
 
@@ -224,6 +223,11 @@ class Definition(DefinitionABC):
         flags: Pointer flag or length of array (one entry per dimension)
         """
 
+        from .simple import DefinitionSimple
+        from .struct import DefinitionStruct
+        from .func import DefinitionFunc
+        from .custom import DefinitionCustom
+
         base_type, type_name, group, flags = cls._disassemble_datatype(data_type)
 
         kwargs = dict(
@@ -235,16 +239,16 @@ class Definition(DefinitionABC):
             cache = cache,
         )
 
-        if group == simple.DefinitionSimple.GROUP:
-            return simple.DefinitionSimple._from_data_type(**kwargs)
+        if group == DefinitionSimple.GROUP:
+            return DefinitionSimple._from_data_type(**kwargs)
 
-        if group == struct.DefinitionStruct.GROUP:
-            return struct.DefinitionStruct._from_data_type(**kwargs)
+        if group == DefinitionStruct.GROUP:
+            return DefinitionStruct._from_data_type(**kwargs)
 
-        if group == func.DefinitionFunc.GROUP:
-            return func.DefinitionFunc._from_data_type(**kwargs)
+        if group == DefinitionFunc.GROUP:
+            return DefinitionFunc._from_data_type(**kwargs)
 
         if hasattr(data_type, 'from_param'):
-            return custom.DefinitionCustom._from_data_type(**kwargs)
+            return DefinitionCustom._from_data_type(**kwargs)
 
         raise ValueError(f'unknown group "{group}"')  # TODO new error type?
