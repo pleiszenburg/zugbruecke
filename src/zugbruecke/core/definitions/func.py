@@ -105,10 +105,19 @@ class DefinitionFunc(base.Definition):
         memsync = [ms.DefinitionMemsync.from_packed(item, cache = cache) for item in memsync]
 
         func_flag = _FUNCFLAG_STDCALL if (func_flags & _FUNCFLAG_STDCALL) else _FUNCFLAG_CDECL
+
         try:
             base_type, data_type = cache.by_flag(func_flag)[type_name]
         except KeyError:
-            base_type, data_type = cls._assemble_datatype(type_name, flags, argtypes, restype, memsync, func_flags, cache)
+            base_type, data_type = cls._assemble_datatype(
+                type_name = type_name,
+                argtypes = argtypes,
+                flags = flags,
+                restype = restype,
+                memsync = memsync,
+                func_flags = func_flags,
+                cache = cache,
+            )
             cache.by_flag(func_flag)[type_name] = base_type, data_type
 
         return cls(
@@ -124,9 +133,13 @@ class DefinitionFunc(base.Definition):
         )
 
     @classmethod
-    def _assemble_datatype(cls,
-        type_name: str, flags: List[int],
-        argtypes: List[DefinitionABC], restype: DefinitionABC, memsync: List[DefinitionMemsyncABC],
+    def _assemble_datatype(
+        cls,
+        type_name: str,
+        flags: List[int],
+        argtypes: List[DefinitionABC],
+        restype: DefinitionABC,
+        memsync: List[DefinitionMemsyncABC],
         func_flags: int,
         cache: CacheABC,
     ) -> Tuple[Any, Any]:
@@ -160,6 +173,11 @@ class DefinitionFunc(base.Definition):
 
         return base_type, data_type
 
+    @staticmethod
+    def _make_type_name(restype: Any, argtypes: List[Any], func_flags: int) -> str:
+
+        return f'func_{hash((restype, tuple(argtypes), func_flags)):x}'
+
     @classmethod
     def _from_data_type(
         cls,
@@ -177,7 +195,7 @@ class DefinitionFunc(base.Definition):
         return cls(
             flags = flags,
             field_name = field_name,
-            type_name = f'func_{hash((base_type._restype_, base_type._argtypes_, base_type._flags_)):x}',
+            type_name = cls._make_type_name(base_type._restype_, base_type._argtypes_, base_type._flags_),
             data_type = data_type,
             base_type = base_type,
             argtypes = cls.from_data_types(data_types = base_type._argtypes_, cache = cache),
@@ -186,3 +204,34 @@ class DefinitionFunc(base.Definition):
             func_flags = base_type._flags_,
             cache = cache,
         )
+
+    @classmethod
+    def generate_callback_decorator(
+        cls,
+        cache: CacheABC,
+        func_flags: int,
+        restype: Any,
+        argtypes: List[Any],
+    ) -> Any:
+        """
+        Used by CFUNCTYPE and WINFUNCTYPE
+        """
+
+        type_name = cls._make_type_name(restype, argtypes, func_flags)
+        func_flag = _FUNCFLAG_STDCALL if (func_flags & _FUNCFLAG_STDCALL) else _FUNCFLAG_CDECL
+
+        try:
+            base_type, data_type = cache.by_flag(func_flag)[type_name]
+        except KeyError:
+            base_type, data_type = cls._assemble_datatype(
+                type_name = type_name,
+                argtypes = argtypes,
+                flags = [],  # no flags available
+                restype = restype,
+                memsync = [],  # no memsync available
+                func_flags = func_flags,
+                cache = cache,
+            )
+            cache.by_flag(func_flag)[type_name] = base_type, data_type
+
+        return data_type
