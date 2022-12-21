@@ -33,6 +33,7 @@ specific language governing rights and limitations under the License.
 
 import ctypes
 from ctypes import _FUNCFLAG_CDECL
+from typing import Dict, List
 
 from ..const import (
     _FUNCFLAG_STDCALL,
@@ -54,7 +55,7 @@ from ..errors import DataFlagError, DataTypeError
 class arguments_definition_class:
     def generate_callback_decorator(self, flags, restype, *argtypes, **kwargs):
 
-        _memsync_ = kwargs.pop("memsync", [])
+        memsync = kwargs.pop("memsync", [])  # DefinitionMemsync objects
 
         if not (flags & _FUNCFLAG_STDCALL):
             func_flag = _FUNCFLAG_CDECL
@@ -70,11 +71,20 @@ class arguments_definition_class:
 
         except KeyError:
 
+            # Meta class for memsync handling
+            class PyCFuncPtrType(type(ctypes._CFuncPtr)):  # name of meta class is important, later used as group name
+                @property
+                def memsync(cls):
+                    return getattr(cls, '_memsync_', [])
+                @memsync.setter
+                def memsync(cls, value: List[Dict]):
+                    setattr(cls, '_memsync_', DefinitionMemsync.from_raws(value, self._cache))
+
             # Create new function pointer type class
-            class FunctionType(ctypes._CFuncPtr):
+            class FunctionType(ctypes._CFuncPtr, metaclass = PyCFuncPtrType):
                 _argtypes_ = argtypes
                 _restype_ = restype
-                memsync = DefinitionMemsync.from_raws(_memsync_, self._cache)
+                _memsync_ = memsync
                 _flags_ = flags
 
             # Store the new type and return
@@ -264,7 +274,7 @@ class arguments_definition_class:
                 "g": GROUP_FUNCTION,
                 "_argtypes_": self.pack_definition_argtypes(datatype._argtypes_),
                 "_restype_": self.pack_definition_returntype(datatype._restype_),
-                "_memsync_": [item.as_packed() for item in datatype.memsync],
+                "_memsync_": [item.as_packed() for item in datatype._memsync_],
                 "_flags_": datatype._flags_,
             }
 
