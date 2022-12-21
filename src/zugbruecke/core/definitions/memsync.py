@@ -35,8 +35,8 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 from ..abc import CacheABC, DefinitionMemsyncABC
 from ..const import FLAG_POINTER, GROUP_VOID
-from ..data.mempkg import Mempkg
-from ..data.memory import (
+from ..mempkg import Mempkg
+from ..memory import (
     is_null_pointer,
     serialize_pointer_into_bytes,
     strip_pointer,
@@ -79,7 +79,7 @@ class DefinitionMemsync(DefinitionMemsyncABC):
 
         self._type_cls = getattr(ctypes, self._type, None)  # "_t"
         if self._type_cls is None:
-            _, self._type_cls = cache.struct[self._type]
+            self._type_cls = cache.struct[self._type]
 
         self._size = ctypes.sizeof(self._type_cls)  # "s"
 
@@ -330,7 +330,7 @@ class DefinitionMemsync(DefinitionMemsyncABC):
             # Handle deepest instance
             setattr(arg.contents, self._pointer[-1 - shift], ptr)
 
-    def apply(self, argtypes: List[Dict], restype: Optional[Dict] = None):
+    def apply_one(self, argtypes: List[Dict], restype: Optional[Dict] = None):
         """
         Apply memsync definition to zugbruecke argtypes and restype definitions.
         Types are switched to void pointers.
@@ -512,7 +512,7 @@ class DefinitionMemsync(DefinitionMemsyncABC):
         return [cls.from_raw(definition, cache = cache) for definition in definitions]
 
     @staticmethod
-    def apply_multiple(
+    def apply_many(
         memsyncs: List[DefinitionMemsyncABC],
         argtypes: List[Dict],
         restype: Dict,
