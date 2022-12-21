@@ -41,33 +41,40 @@ from .typeguard import typechecked
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
-def is_null_pointer(ctypes_pointer):
+@typechecked
+def is_null_pointer(ptr: Any) -> bool:
+    """
+    Args:
+        - ptr: ctypes pointer object
+    Returns:
+        Is it null?
+    """
 
     try:
-        return ctypes.cast(ctypes_pointer, ctypes.c_void_p).value is None
+        return ctypes.cast(ptr, ctypes.c_void_p).value is None
     except ctypes.ArgumentError:  # catch non-pointer arguments
         return False
 
 
 @typechecked
-def strip_pointer(item: Any) -> Any:
+def strip_pointer(ptr: Any) -> Any:
     """
     Args:
-        - item: ctypes pointer object
+        - ptr: ctypes pointer object
     Returns:
         ctypes object, extracted from pointer
     """
 
     # Handle pointer object
-    if hasattr(item, "contents"):
-        return item.contents
+    if hasattr(ptr, "contents"):
+        return ptr.contents
 
     # Handle reference (byref) 'light pointer'
-    if hasattr(item, "_obj"):
-        return item._obj
+    if hasattr(ptr, "_obj"):
+        return ptr._obj
 
     # Object was likely not provided as a pointer
-    return item
+    return ptr
 
 
 @typechecked
