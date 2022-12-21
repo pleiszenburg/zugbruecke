@@ -108,7 +108,7 @@ class DefinitionFunc(base.Definition):
         try:
             base_type, data_type = cache.by_flag(func_flag)[type_name]
         except KeyError:
-            base_type, data_type = cls._assemble_datatype(type_name, flags, argtypes, restype, memsync, func_flags)
+            base_type, data_type = cls._assemble_datatype(type_name, flags, argtypes, restype, memsync, func_flags, cache)
             cache.by_flag(func_flag)[type_name] = base_type, data_type
 
         return cls(
@@ -128,6 +128,7 @@ class DefinitionFunc(base.Definition):
         type_name: str, flags: List[int],
         argtypes: List[DefinitionABC], restype: DefinitionABC, memsync: List[DefinitionMemsyncABC],
         func_flags: int,
+        cache: CacheABC,
     ) -> Tuple[Any, Any]:
         """
         Assemble ctypes data type
@@ -135,13 +136,23 @@ class DefinitionFunc(base.Definition):
         Counterpart to `_disassemble_datatype`
         """
 
-        base_type = type(
-            type_name,  # Potenial BUG: in __main__ scope, problematic?
+        class PyCFuncPtrType(type(ctypes._CFuncPtr)):  # name of meta class is important, later used as group name
+            @property
+            def memsync(cls):
+                return getattr(cls, '_memsync_', [])
+            @memsync.setter
+            def memsync(cls, value: List[Dict]):
+                if not isinstance(value, list):
+                    TypeError('memsync attr must be a list')
+                setattr(cls, '_memsync_', ms.DefinitionMemsync.from_raws(value, cache))
+
+        base_type = PyCFuncPtrType(
+            type_name,
             (ctypes._CFuncPtr,),
             {
                 "_argtypes_": [argtype.data_type for argtype in argtypes],
                 "_restype_": restype.data_type,
-                "memsync": memsync,
+                "_memsync_": memsync,
                 "_flags_": func_flags,
             },
         )
