@@ -6,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-    src/zugbruecke/core/definitions/mempkg.py: Memory (data) package
+    src/zugbruecke/core/mempkg.py: Memory (data) package
 
     Required to run on platform / side: [UNIX, WINE]
 
@@ -33,14 +33,13 @@ specific language governing rights and limitations under the License.
 import ctypes
 from typing import Any, Dict, Optional
 
-from ..abc import MempkgABC
-from ..typeguard import typechecked
-
+from .abc import MempkgABC
 from .memory import (
     generate_pointer_from_bytes,
     overwrite_pointer_with_bytes,
     serialize_pointer_into_bytes,
 )
+from .typeguard import typechecked
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # CLASS
