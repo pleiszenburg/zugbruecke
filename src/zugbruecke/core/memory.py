@@ -41,32 +41,6 @@ from .typeguard import typechecked
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
-def generate_pointer_from_bytes(in_bytes):
-
-    return ctypes.cast(
-        ctypes.pointer((ctypes.c_ubyte * len(in_bytes)).from_buffer_copy(in_bytes)),
-        ctypes.c_void_p,
-    )
-
-
-def overwrite_pointer_with_bytes(ctypes_pointer, in_bytes):
-
-    ctypes.memmove(
-        ctypes_pointer,
-        ctypes.pointer((ctypes.c_ubyte * len(in_bytes)).from_buffer_copy(in_bytes)),
-        len(in_bytes),
-    )
-
-
-def serialize_pointer_into_bytes(ctypes_pointer, size_bytes):
-
-    return bytes(
-        ctypes.cast(
-            ctypes_pointer, ctypes.POINTER(ctypes.c_ubyte * size_bytes)
-        ).contents
-    )
-
-
 def is_null_pointer(ctypes_pointer):
 
     try:

@@ -38,7 +38,6 @@ from ..const import FLAG_POINTER, GROUP_VOID
 from ..mempkg import Mempkg
 from ..memory import (
     is_null_pointer,
-    serialize_pointer_into_bytes,
     strip_pointer,
     strip_simplecdata,
 )
@@ -390,13 +389,7 @@ class DefinitionMemsync(DefinitionMemsyncABC):
                 * self._size
             )
 
-        return Mempkg(
-            data = serialize_pointer_into_bytes(ptr, length),
-            length = length,
-            local_addr = ctypes.cast(ptr, ctypes.c_void_p).value,
-            remote_addr = None,
-            wchar = wchar,
-        )
+        return Mempkg.from_pointer(ptr = ptr, length = length, wchar = wchar)
 
     def update_memory(self, mempkg: Mempkg, args: List[Any], retval: Optional[Any] = None):
         """

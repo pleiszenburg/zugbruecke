@@ -34,11 +34,6 @@ import ctypes
 from typing import Any, Dict, Optional
 
 from .abc import MempkgABC
-from .memory import (
-    generate_pointer_from_bytes,
-    overwrite_pointer_with_bytes,
-    serialize_pointer_into_bytes,
-)
 from .typeguard import typechecked
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -131,14 +126,21 @@ class Mempkg(MempkgABC):
         Generate pointer around data
         """
 
-        return generate_pointer_from_bytes(self._data)
+        return ctypes.cast(
+            ctypes.pointer((ctypes.c_ubyte * len(self._data)).from_buffer_copy(self._data)),
+            ctypes.c_void_p,
+        )
 
     def overwrite(self):
         """
         Write data to local address
         """
 
-        overwrite_pointer_with_bytes(ctypes.c_void_p(self._local_addr), self._data)
+        ctypes.memmove(
+            ctypes.c_void_p(self._local_addr),
+            ctypes.pointer((ctypes.c_ubyte * len(self._data)).from_buffer_copy(self._data)),
+            len(self._data),
+        )
 
     def update(self, other: MempkgABC):
         """
@@ -159,11 +161,17 @@ class Mempkg(MempkgABC):
         Update data from local address
         """
 
-        self._data = serialize_pointer_into_bytes(
-            ctypes.c_void_p(self._local_addr), self._length
+        self._data = bytes(
+            ctypes.cast(
+                ctypes.c_void_p(self._local_addr),
+                ctypes.POINTER(ctypes.c_ubyte * self._length),
+            ).contents
         )
 
     def as_packed(self) -> Dict:
+        """
+        Pack for shipping
+        """
 
         return {
             'data': self._data,
@@ -175,6 +183,9 @@ class Mempkg(MempkgABC):
 
     @classmethod
     def from_packed(cls, packed: Dict):
+        """
+        Unpack from shipping, fix wchar size, swap addresses
+        """
 
         packed.update({
             'local_addr': packed['remote_addr'],  # swap
@@ -185,3 +196,26 @@ class Mempkg(MempkgABC):
             cls._adjust_wchar_length(packed)
 
         return cls(**packed)
+
+    @classmethod
+    def from_pointer(cls, ptr: Any, length: int, wchar: Optional[int]):
+        """
+        Generate package from ctypes pointer
+
+        Args:
+            - ptr: ctypes pointer
+            - length: number of bytes
+            - wchar: length of wchar on platform
+        """
+
+        return cls(
+            data = bytes(
+                ctypes.cast(
+                    ptr, ctypes.POINTER(ctypes.c_ubyte * length)
+                ).contents
+            ),
+            length = length,
+            local_addr = ctypes.cast(ptr, ctypes.c_void_p).value,
+            remote_addr = None,
+            wchar = wchar,
+        )
