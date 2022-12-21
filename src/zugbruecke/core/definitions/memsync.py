@@ -34,6 +34,14 @@ import ctypes
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 from ..abc import CacheABC, DefinitionMemsyncABC
+from ..const import FLAG_POINTER, GROUP_VOID
+from ..mempkg import Mempkg
+from ..memory import (
+    is_null_pointer,
+    strip_pointer,
+    strip_simplecdata,
+)
+from ..errors import DataMemsyncpathError
 from ..typeguard import typechecked
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -66,12 +74,11 @@ class DefinitionMemsync(DefinitionMemsyncABC):
         self._custom = custom
         self._func = func
 
-        if self._func is not None:
-            self._func_callable = eval(self._func)  # "_f" - HACK?
+        self._func_callable = None if self._func is None else eval(self._func)  # "_f" HACK?
 
         self._type_cls = getattr(ctypes, self._type, None)  # "_t"
         if self._type_cls is None:
-            _, self._type_cls = cache.struct[self._type]
+            self._type_cls = cache.struct[self._type]
 
         self._size = ctypes.sizeof(self._type_cls)  # "s"
 
@@ -79,7 +86,250 @@ class DefinitionMemsync(DefinitionMemsyncABC):
 
         return f'<Memsync type={self._type} null={self._null} unic={self._unic} func={self._func is not None}>'
 
-    def apply(self, argtypes: List[Dict], restype: Optional[Dict] = None):
+    @staticmethod
+    def _get_str_len(ptr: Any, is_unicode: bool) -> int:
+        """
+        Get length of null-terminated string in bytes
+
+        Args:
+            - ptr: ctypes pointer to chars/wchars
+            - is_unicode: flag indicating unicode characters
+        Returns:
+            Length in bytes
+        """
+
+        if is_unicode:
+            datatype = ctypes.c_wchar
+            datatype_p = ctypes.c_wchar_p
+        else:
+            datatype = ctypes.c_char
+            datatype_p = ctypes.c_char_p
+
+        return len(ctypes.cast(ptr, datatype_p).value) * ctypes.sizeof(datatype)
+
+    def _get_arb_len(self, args: List[Any], retval: Optional[Any] = None) -> int:
+        """
+        Get length of arbitrary data
+
+        Args:
+            - args: Raw arguments
+            - retval: Raw return value
+        Returns:
+            Length in bytes
+        """
+
+        # There is no function defining the length?
+        if self._func is None:
+
+            # Search for length
+            length = self._get_item_by_path(
+                self._length, args, retval
+            )
+
+            # Length might come from ctypes or a Python datatype
+            return strip_simplecdata(length)
+
+        # Make sure length can be computed from a tuple of arguments
+        assert isinstance(self._length, tuple)
+
+        # Compute length from arguments and return
+        return self._func_callable(
+            *(
+                self._get_item_by_path(path, args, retval)
+                for path in self._length
+            )
+        )
+
+    @staticmethod
+    def _get_item_by_path(
+        path: List[Union[int, str]], args: List[Any], retval: Optional[Any] = None,
+    ) -> Any:
+        """
+        Get (fragment of) argument or return value by path
+
+        Args:
+            - path: List of int and/or str describing (part of) an argument or return value
+            - args: Raw arguments
+            - retval: Raw return value
+        Returns:
+            Raw (fragment of) argument or return value
+        """
+
+        # Reference args_tuple as initial value
+        element = args
+
+        # Step through path
+        for idx, segment in enumerate(path):
+
+            # Element is an int
+            if isinstance(segment, int):
+
+                # Pointer to pointer (in top-level arguments) for memory allocation by DLL
+                if segment < 0:
+                    element = strip_pointer(element)
+
+                # Dive into argument tuple
+                else:
+                    element = element[segment]
+
+            # Element equals 'r' and index 0: Return value
+            elif isinstance(segment, str) and idx == 0:
+
+                if segment != "r":
+                    raise DataMemsyncpathError(
+                        'field with name (type string) is not return value ("r")'
+                    )
+
+                element = retval
+
+                if element is None:
+                    return None
+
+            # Field name in struct
+            elif isinstance(segment, str) and idx > 0:
+
+                element = getattr(strip_pointer(element), segment)
+
+            # TODO elements of arrays
+            else:
+
+                raise NotImplementedError("array elements can yet not be addressed")
+
+        return element
+
+    @staticmethod
+    def _get_itemtype_by_path(
+        path: List[Union[int, str]], argtypes: List[Dict], restype: Dict,
+    ) -> Dict:
+        """
+        Get zugbruecke argtype or restype by path
+
+        Args:
+            - path: List of int and/or str describing (part of) an argument or return value
+            - argtypes: zugbruecke argument types
+            - restype: zugbruecke return type
+        Returns:
+            One zugbruecke argtype / restype definition
+        """
+
+        if isinstance(path[0], int):  # function argument
+            itemtype = argtypes[path[0]]
+        elif path[0] == "r":  # function return value
+            itemtype = restype
+        else:
+            raise DataMemsyncpathError(
+                f'path[0] is neither return value ("r") nor parameter (type int) "{path[0]}"'
+            )
+
+        # Step through path to argument type ...
+        for segment in path[1:]:
+            # Continue on special flags HACK
+            if isinstance(segment, int) and segment < 0:
+                continue
+            # Go deeper ...
+            itemtype = {field["n"]: field for field in itemtype["_fields_"]}[
+                segment
+            ]
+
+        return itemtype
+
+    def _unpack_memory(
+        self, mempkg: Mempkg, args: List[Any], retval: Optional[Any] = None,
+    ):
+        """
+        Data is unpacked. Potentially allocated on remote side.
+        Server & client.
+
+        Args:
+            - mempkg: Memory package
+            - args: Raw arguments
+            - retval: Raw return value
+        Returns:
+            Nothing
+        """
+
+        # Generate pointer to passed data
+        ptr = mempkg.make_pointer()
+
+        # Search for pointer in passed arguments
+        item = self._get_item_by_path(
+            self._pointer[:-1], args, retval
+        )
+
+        # Is this an already existing pointer, which has to be given a new value?
+        if hasattr(item, "contents"):
+            # Is the pointer pointing to another pointer?
+            if hasattr(item.contents, "value"):
+                # Is the pointer empty?
+                if item.contents.value is None:
+                    # Overwrite the pointer's value
+                    item.contents.value = ptr.value
+                    # Get out of here HACK
+                    return
+
+        # If we're in the top level arguments or an array ...
+        if isinstance(self._pointer[-1], int):
+            # Handle deepest instance (exchange element in list/tuple) HACK
+            item[self._pointer[-1]] = ptr
+        # If we're at a field of a struct
+        else:
+            # There is a chance that the pointer has been stripped away ...
+            item = strip_pointer(item)
+            # A c_void_p NULL pointer in a struct is represented by None and must be substituted
+            if getattr(item, self._pointer[-1]) is None:
+                setattr(item, self._pointer[-1], ptr)
+            # Anything else must be overwritten with the right type (likely on client side)
+            else:
+                setattr(
+                    item,
+                    self._pointer[-1],
+                    ctypes.cast(
+                        ptr,
+                        ctypes.POINTER(getattr(item, self._pointer[-1])._type_),
+                    ),
+                )
+
+        # Store the server's memory address
+        mempkg.local_addr = ptr.value
+
+    def _unpack_null(self, args: List[Any]):
+        """
+        Null-pointer unpacking prior to func call. No data is unpacked.
+        Server only.
+
+        Args:
+            - args: Raw arguments
+        Returns:
+            Nothing
+        """
+
+        # If this is a return value, do nothing at this stage
+        if self._pointer[0] == "r":
+            return
+
+        # If this is a pointer to a pointer
+        if self._pointer[-1] == FLAG_POINTER:  # likely for R-strings only
+            ptr = ctypes.pointer(ctypes.c_void_p())
+            shift = 1  # cut off 1 element from path
+        else:
+            ptr = ctypes.c_void_p()
+            shift = 0
+
+        # Search for pointer in passed arguments
+        arg = self._get_item_by_path(
+            self._pointer[: (-1 - shift)], args
+        )
+
+        # If we're in the top level arguments or an array ...
+        if isinstance(self._pointer[-1 - shift], int):
+            # Handle deepest instance (exchange element in list/tuple) HACK
+            arg[self._pointer[-1 - shift]] = ptr
+        # If we're at a field of a struct
+        else:
+            # Handle deepest instance
+            setattr(arg.contents, self._pointer[-1 - shift], ptr)
+
+    def apply_one(self, argtypes: List[Dict], restype: Optional[Dict] = None):
         """
         Apply memsync definition to zugbruecke argtypes and restype definitions.
         Types are switched to void pointers.
@@ -91,21 +341,79 @@ class DefinitionMemsync(DefinitionMemsyncABC):
             Nothing
         """
 
-        pass  # TODO
+        # Get type of pointer argument
+        itemtype = self._get_itemtype_by_path(self._pointer, argtypes, restype,)
 
-    def pack_memory(self, args: List[Any], retval: Optional[Any] = None, is_server: bool = False,) -> Dict:
+        # HACK make memory sync pointers type agnostic
+        itemtype["g"] = GROUP_VOID
+        itemtype["t"] = None  # no type string
+
+    def pkg_memory(self, args: List[Any], retval: Optional[Any] = None) -> Mempkg:
         """
+        Client. Pkg memory prior to call.
+
         Args:
             args: Raw function arguments
             memsyncs: Memsync definitions
         Returns:
-            Memory package for shipping
+            Memory package
         """
 
-        pass  # TODO
+        # Search for pointer
+        ptr = self._get_item_by_path(self._pointer, args, retval)
 
-    def unpack_memory(self, mempkg: Dict, args: List[Any], retval: Optional[Any] = None, is_server: bool = False,):
+        # Convert argument of custom type into ctypes datatype TODO more checks needed!
+        if self._custom is not None:
+            ptr = ctypes.pointer(self._custom.from_param(ptr))
+
+        # Unicode char size if relevant
+        wchar = ctypes.sizeof(ctypes.c_wchar) if self._unic else None
+
+        # Check for NULL pointer
+        if ptr is None or is_null_pointer(ptr):
+            return Mempkg(
+                data = b'',
+                local_addr = None,
+                remote_addr = None,
+                wchar = wchar,
+            )
+
+        if self._null:
+            # Get length of null-terminated string
+            length = self._get_str_len(ptr, bool(wchar))
+        else:
+            # Compute actual length
+            length = (
+                self._get_arb_len(args, retval)
+                * self._size
+            )
+
+        return Mempkg.from_pointer(ptr = ptr, length = length, wchar = wchar)
+
+    def update_memory(self, mempkg: Mempkg, args: List[Any], retval: Optional[Any] = None):
         """
+        Server. Used instead of pkg before return shipment to client.
+
+        Args:
+            - mempkg: Memory package
+        Returns:
+            Nothing
+        """
+
+        # If memory for pointer was allocated here on server side
+        if mempkg.local_addr is None:
+            # Update memory package completely
+            mempkg.update(self.pkg_memory(args, retval))
+
+        # If pointer pointed to data on client side
+        else:
+            # Overwrite old data in package with new data from memory
+            mempkg.update_data()
+
+    def unpkg_memory(self, mempkg: Mempkg, args: List[Any], retval: Optional[Any] = None, is_server: bool = False,):
+        """
+        Client/Server.
+
         Args:
             mempkg: Memory package from shipping
             args: Raw function arguments
@@ -114,7 +422,28 @@ class DefinitionMemsync(DefinitionMemsyncABC):
             Nothing
         """
 
-        pass  # TODO
+        if is_server:
+
+            # Is this a null pointer?
+            if mempkg.remote_addr is None:
+                # Insert new NULL pointer
+                self._unpack_null(args)
+
+            else:
+                # Unpack one memory section / item
+                self._unpack_memory(mempkg, args)
+
+        else:
+
+            # If memory for pointer has been allocated by remote side
+            if mempkg.local_addr is None:
+                # Unpack one memory section / item
+                self._unpack_memory(mempkg, args, retval)
+
+            # If pointer pointed to data
+            else:
+                # Overwrite pointer
+                mempkg.overwrite()
 
     def as_packed(self) -> Dict:
         """
@@ -173,3 +502,86 @@ class DefinitionMemsync(DefinitionMemsyncABC):
         """
 
         return [cls.from_raw(definition, cache = cache) for definition in definitions]
+
+    @staticmethod
+    def apply_many(
+        memsyncs: List[DefinitionMemsyncABC],
+        argtypes: List[Dict],
+        restype: Dict,
+    ):
+        """
+        Apply memsync definitions to zugbruecke argtypes and restype definitions.
+
+        Args:
+            - memsyncs: List of memsync definitions
+            - argtypes: zugbruecke argument type definitions
+            - restype: zugbruecke return type definition
+        Returns:
+            Nothing
+        """
+
+        for memsync in memsyncs:
+            memsync.apply_one(argtypes, restype)
+
+    @staticmethod
+    def pkg_memories(
+        args: List[Any],
+        memsyncs: List[DefinitionMemsyncABC],
+    ) -> List[Mempkg]:
+        """
+        Client. Before initial shipment.
+
+        Args:
+            args: Raw function arguments
+            memsyncs: Memsync definitions
+        Returns:
+            List of memory packages for shipping
+        """
+
+        return [memsync.pkg_memory(args) for memsync in memsyncs]
+
+    @staticmethod
+    def update_memories(
+        args: List[Any],
+        retval: Any,
+        mempkgs: List[Mempkg],
+        memsyncs: List[DefinitionMemsyncABC],
+    ):
+        """
+        Server. After call, for return shipment.
+
+        Args:
+            args: Raw function arguments
+            retval: Raw function return value
+            mempkgs: List of packed memory packages from shipping
+            memsyncs: Memsync definitions
+        Returns:
+            Nothing
+        """
+
+        # Iterate over memory package dicts
+        for mempkg, memsync in zip(mempkgs, memsyncs):
+            memsync.update_memory(mempkg, args, retval)
+
+    @staticmethod
+    def unpkg_memories(
+        args: List[Any],
+        retval: Optional[Any],
+        mempkgs: List[Mempkg],
+        memsyncs: List[DefinitionMemsyncABC],
+        is_server: bool = False,
+    ):
+        """
+        Client/Server. After shipment.
+
+        Args:
+            args: Raw function arguments
+            retval: Raw function return value
+            mempkgs: List of memory packages from shipping
+            memsyncs: Memsync definitions
+        Returns:
+            Nothing
+        """
+
+        for mempkg, memsync in zip(mempkgs, memsyncs):
+            memsync.unpkg_memory(mempkg, args, retval, is_server)

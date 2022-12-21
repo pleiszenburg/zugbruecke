@@ -44,9 +44,8 @@ from ..const import (
 from ..callback_client import CallbackClient
 from ..callback_server import CallbackServer
 from ..errors import DataFlagError, DataGroupError
+from ..memory import is_null_pointer, strip_pointer, strip_simplecdata
 from ..typeguard import typechecked
-
-from .memory import is_null_pointer, strip_pointer, strip_simplecdata
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -290,9 +289,9 @@ class ArgContents:
                 rpc_server = self._callback_server,
                 data = self,
                 log = self._log,
-                argtypes_d = functype["_argtypes_"],
-                restype_d = functype["_restype_"],
-                memsync_d = self.unpack_definition_memsync(functype["_memsync_"]),
+                argtypes = functype["_argtypes_"],
+                restype = functype["_restype_"],
+                memsyncs = functype["_memsync_"],
             )
 
         # Return name of callback entry
@@ -567,9 +566,9 @@ class ArgContents:
                     rpc_client = self._callback_client,
                     data = self,
                     log = self._log,
-                    argtypes_d = functype["_argtypes_"],
-                    restype_d = functype["_restype_"],
-                    memsync_d = self.unpack_definition_memsync(functype["_memsync_"]),
+                    argtypes = functype["_argtypes_"],
+                    restype = functype["_restype_"],
+                    memsyncs = functype["_memsync_"],
                 )
             )
 

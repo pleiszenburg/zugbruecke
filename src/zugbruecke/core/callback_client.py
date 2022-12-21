@@ -32,9 +32,16 @@ specific language governing rights and limitations under the License.
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 import traceback
-from typing import Callable, Dict, List
+from typing import Any, Callable, Dict, List
 
-from .abc import CallbackClientABC, DataABC, LogABC, RpcServerABC
+from .abc import (
+    CallbackClientABC,
+    DataABC,
+    LogABC,
+    RpcServerABC,
+)
+from .definitions import DefinitionMemsync
+from .mempkg import Mempkg
 from .typeguard import typechecked
 
 
@@ -56,62 +63,68 @@ class CallbackClient(CallbackClientABC):
         rpc_server: RpcServerABC,
         data: DataABC,
         log: LogABC,
-        argtypes_d: List,
-        restype_d: Dict,
-        memsync_d: List,
+        argtypes: List[Dict],
+        restype: Dict,
+        memsyncs: List[Dict],
     ):
 
         self._name = name
         self._handler = handler
         self._data = data
         self._log = log
-        self._argtypes_d = argtypes_d
-        self._restype_d = restype_d
-        self._memsync_d = memsync_d
+        self._argtypes = argtypes
+        self._restype = restype
+        self._memsyncs = [DefinitionMemsync.from_packed(memsync, self._data.cache) for memsync in memsyncs]
 
         rpc_server.register_function(self, public_name=name)
 
-    def __call__(self, arg_message_list: List, arg_memory_list: List) -> Dict:
+    def __call__(self, packed_args: List[Any], packed_mempkgs: List[Dict]) -> Dict:
 
         self._log.out(
             '[callback-client] Trying to call callback routine "{NAME:s}" ...'.format(NAME = self._name)
         )
 
         try:
-            args_list = self._data.unpack_args(arg_message_list, self._argtypes_d)
-            self._data.unpack_memory_on_server(
-                args_list, arg_memory_list, self._memsync_d
+            args = self._data.unpack_args(packed_args, self._argtypes)
+            retval = None
+            mempkgs = [Mempkg.from_packed(packed_mempkg) for packed_mempkg in packed_mempkgs]
+            DefinitionMemsync.unpkg_memories(
+                args = args,
+                retval = retval,
+                mempkgs = mempkgs,
+                memsyncs = self._memsyncs,
+                is_server = True,
             )
-            return_value = None
         except Exception as e:
             self._log.out("[callback-client] ... call preparation failed!")
             self._log.err(traceback.format_exc())
             raise e
 
         try:
-            return_value = self._handler(*args_list)
+            retval = self._handler(*args)
         except Exception as e:
             self._log.out("[callback-client] ... call failed!")
             self._log.err(traceback.format_exc())
             return {
-                "args": arg_message_list,
-                "return_value": return_value,
-                "memory": arg_memory_list,
+                "args": packed_args,  # unchanged
+                "retval": retval,  # unchanged, still None
+                "mempkgs": packed_mempkgs,  # unchanged
                 "success": False,
                 "exception": e,
             }
 
         try:
-            self._data.pack_memory_on_server(
-                args_list, return_value, arg_memory_list, self._memsync_d
+            DefinitionMemsync.update_memories(
+                args = args,
+                retval = retval,
+                mempkgs = mempkgs,
+                memsyncs = self._memsyncs,
             )
-            arg_message_list = self._data.pack_args(args_list, self._argtypes_d)
-            return_message = self._data.pack_retval(return_value, self._restype_d)
             self._log.out("[callback-client] ... done.")
             return {
-                "args": arg_message_list,
-                "return_value": return_message,
-                "memory": arg_memory_list,
+                "args": self._data.pack_args(args, self._argtypes),
+                "retval": self._data.pack_retval(retval, self._restype),
+                "mempkgs": [mempkg.as_packed() for mempkg in mempkgs],
                 "success": True,
                 "exception": None,
             }

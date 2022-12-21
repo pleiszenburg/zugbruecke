@@ -6,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-    src/zugbruecke/core/data/memory.py: Handles memory transfers between both sides
+    src/zugbruecke/core/memory.py: Handles memory transfers between both sides
 
     Required to run on platform / side: [UNIX, WINE]
 
@@ -33,7 +33,7 @@ specific language governing rights and limitations under the License.
 from typing import Any
 import ctypes
 
-from ..typeguard import typechecked
+from .typeguard import typechecked
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -41,59 +41,40 @@ from ..typeguard import typechecked
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
-def generate_pointer_from_bytes(in_bytes):
-
-    return ctypes.cast(
-        ctypes.pointer((ctypes.c_ubyte * len(in_bytes)).from_buffer_copy(in_bytes)),
-        ctypes.c_void_p,
-    )
-
-
-def overwrite_pointer_with_bytes(ctypes_pointer, in_bytes):
-
-    ctypes.memmove(
-        ctypes_pointer,
-        ctypes.pointer((ctypes.c_ubyte * len(in_bytes)).from_buffer_copy(in_bytes)),
-        len(in_bytes),
-    )
-
-
-def serialize_pointer_into_bytes(ctypes_pointer, size_bytes):
-
-    return bytes(
-        ctypes.cast(
-            ctypes_pointer, ctypes.POINTER(ctypes.c_ubyte * size_bytes)
-        ).contents
-    )
-
-
-def is_null_pointer(ctypes_pointer):
+@typechecked
+def is_null_pointer(ptr: Any) -> bool:
+    """
+    Args:
+        - ptr: ctypes pointer object
+    Returns:
+        Is it null?
+    """
 
     try:
-        return ctypes.cast(ctypes_pointer, ctypes.c_void_p).value is None
+        return ctypes.cast(ptr, ctypes.c_void_p).value is None
     except ctypes.ArgumentError:  # catch non-pointer arguments
         return False
 
 
 @typechecked
-def strip_pointer(item: Any) -> Any:
+def strip_pointer(ptr: Any) -> Any:
     """
     Args:
-        - item: ctypes pointer object
+        - ptr: ctypes pointer object
     Returns:
         ctypes object, extracted from pointer
     """
 
     # Handle pointer object
-    if hasattr(item, "contents"):
-        return item.contents
+    if hasattr(ptr, "contents"):
+        return ptr.contents
 
     # Handle reference (byref) 'light pointer'
-    if hasattr(item, "_obj"):
-        return item._obj
+    if hasattr(ptr, "_obj"):
+        return ptr._obj
 
     # Object was likely not provided as a pointer
-    return item
+    return ptr
 
 
 @typechecked
