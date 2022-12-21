@@ -71,8 +71,8 @@ class arguments_definition_class:
 
         except KeyError:
 
-            # Meta class for memsync handling
-            class PyCFuncPtrType(type(ctypes._CFuncPtr)):  # name of meta class is important, later used as group name
+            # Meta class for memsync handling (name is important for compatibility)
+            class PyCFuncPtrType(type(ctypes._CFuncPtr)):
                 @property
                 def memsync(cls):
                     return getattr(cls, '_memsync_', [])
