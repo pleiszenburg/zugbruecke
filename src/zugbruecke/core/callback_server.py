@@ -41,8 +41,8 @@ from .abc import (
     LogABC,
     RpcClientABC,
 )
-from .data import Mempkg
 from .definitions import DefinitionMemsync
+from .mempkg import Mempkg
 from .typeguard import typechecked
 
 
