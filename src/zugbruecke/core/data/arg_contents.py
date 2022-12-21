@@ -44,9 +44,8 @@ from ..const import (
 from ..callback_client import CallbackClient
 from ..callback_server import CallbackServer
 from ..errors import DataFlagError, DataGroupError
+from ..memory import is_null_pointer, strip_pointer, strip_simplecdata
 from ..typeguard import typechecked
-
-from .memory import is_null_pointer, strip_pointer, strip_simplecdata
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
