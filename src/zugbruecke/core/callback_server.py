@@ -65,7 +65,7 @@ class CallbackServer(CallbackServerABC):
         log: LogABC,
         argtypes: List[Dict],
         restype: Dict,
-        memsyncs: List[DefinitionMemsync],
+        memsyncs: List[Dict],
     ):
 
         self._name = name
@@ -74,7 +74,7 @@ class CallbackServer(CallbackServerABC):
         self._log = log
         self._argtypes = argtypes
         self._restype = restype
-        self._memsyncs = memsyncs
+        self._memsyncs = [DefinitionMemsync.from_packed(memsync, self._data.cache) for memsync in memsyncs]
 
     def __call__(self, *args: Any) -> Any:
 
