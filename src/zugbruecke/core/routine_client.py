@@ -37,7 +37,6 @@ from typing import Any, List, Tuple, Union
 
 from .abc import DataABC, LogABC, RoutineClientABC, RpcClientABC
 from .definitions import DefinitionMemsync
-from .errors import DataMemsyncsyntaxError
 from .mempkg import Mempkg
 from .typeguard import typechecked
 
@@ -262,6 +261,6 @@ class RoutineClient(RoutineClientABC):
     def memsync(self, value: List):
 
         if not isinstance(value, list):
-            raise DataMemsyncsyntaxError("memsync attribute must be a list")
+            raise TypeError("memsync attribute must be a list")
 
         self._memsyncs_raw = value

@@ -78,6 +78,8 @@ class arguments_definition_class:
                     return getattr(cls, '_memsync_', [])
                 @memsync.setter
                 def memsync(cls, value: List[Dict]):
+                    if not isinstance(value, list):
+                        TypeError('memsync attr must be a list')
                     setattr(cls, '_memsync_', DefinitionMemsync.from_raws(value, self._cache))
 
             # Create new function pointer type class
