@@ -104,10 +104,10 @@ class DefinitionFunc(base.Definition):
         restype = base.Definition.from_packed(restype, cache = cache)
         memsync = [ms.DefinitionMemsync.from_packed(item, cache = cache) for item in memsync]
 
-        func_flag = _FUNCFLAG_STDCALL if (func_flags & _FUNCFLAG_STDCALL) else _FUNCFLAG_CDECL
+        conv = _FUNCFLAG_STDCALL if (func_flags & _FUNCFLAG_STDCALL) else _FUNCFLAG_CDECL
 
         try:
-            base_type, data_type = cache.by_flag(func_flag)[type_name]
+            base_type, data_type = cache.by_conv(conv)[type_name]
         except KeyError:
             base_type, data_type = cls._assemble_datatype(
                 type_name = type_name,
@@ -118,7 +118,7 @@ class DefinitionFunc(base.Definition):
                 func_flags = func_flags,
                 cache = cache,
             )
-            cache.by_flag(func_flag)[type_name] = base_type, data_type
+            cache.by_conv(conv)[type_name] = base_type, data_type
 
         return cls(
             flags = flags,
@@ -218,10 +218,10 @@ class DefinitionFunc(base.Definition):
         """
 
         type_name = cls._make_type_name(restype, argtypes, func_flags)
-        func_flag = _FUNCFLAG_STDCALL if (func_flags & _FUNCFLAG_STDCALL) else _FUNCFLAG_CDECL
+        conv = _FUNCFLAG_STDCALL if (func_flags & _FUNCFLAG_STDCALL) else _FUNCFLAG_CDECL
 
         try:
-            base_type, data_type = cache.by_flag(func_flag)[type_name]
+            base_type, data_type = cache.by_conv(conv)[type_name]
         except KeyError:
             base_type, data_type = cls._assemble_datatype(
                 type_name = type_name,
@@ -232,6 +232,6 @@ class DefinitionFunc(base.Definition):
                 func_flags = func_flags,
                 cache = cache,
             )
-            cache.by_flag(func_flag)[type_name] = base_type, data_type
+            cache.by_conv(conv)[type_name] = base_type, data_type
 
         return data_type

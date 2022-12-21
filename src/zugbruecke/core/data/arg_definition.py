@@ -58,14 +58,14 @@ class arguments_definition_class:
         memsync = kwargs.pop("memsync", [])  # DefinitionMemsync objects
 
         if not (flags & _FUNCFLAG_STDCALL):
-            func_flag = _FUNCFLAG_CDECL
+            conv = _FUNCFLAG_CDECL
         else:
-            func_flag = _FUNCFLAG_STDCALL
+            conv = _FUNCFLAG_STDCALL
 
         try:
 
             # There already is a matching function pointer type available
-            return self._cache.by_flag(func_flag)[
+            return self._cache.by_conv(conv)[
                 (restype, argtypes, flags)
             ]
 
@@ -90,7 +90,7 @@ class arguments_definition_class:
                 _flags_ = flags
 
             # Store the new type and return
-            self._cache.by_flag(func_flag)[
+            self._cache.by_conv(conv)[
                 (restype, argtypes, flags)
             ] = FunctionType
             return FunctionType
