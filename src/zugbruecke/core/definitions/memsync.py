@@ -373,7 +373,6 @@ class DefinitionMemsync(DefinitionMemsyncABC):
         if ptr is None or is_null_pointer(ptr):
             return Mempkg(
                 data = b'',
-                length = 0,
                 local_addr = None,
                 remote_addr = None,
                 wchar = wchar,

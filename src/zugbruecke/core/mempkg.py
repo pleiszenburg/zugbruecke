@@ -49,31 +49,28 @@ class Mempkg(MempkgABC):
     def __init__(
         self,
         data: bytes,  # serialized data, '' if NULL pointer
-        length: int,  # length of serialized data
         local_addr: Optional[int],  # local pointer address as integer
         remote_addr: Optional[int],  # remote pointer has not been initialized
         wchar: Optional[int],  # local length of Unicode wchar if required
     ):
 
         self._data = data
-        self._length = length
         self._local_addr = local_addr
         self._remote_addr = remote_addr
         self._wchar = wchar
 
     def __repr__(self) -> str:
 
-        return f'<Mempkg length={self._length:d} local_addr={self._local_addr:x} remote_addr={self._remote_addr:x}>'
+        return f'<Mempkg len={len(self):d} local_addr={self._local_addr:x} remote_addr={self._remote_addr:x}>'
+
+    def __len__(self) -> int:
+
+        return len(self._data)
 
     @property
     def data(self) -> bytes:
 
         return self._data
-
-    @property
-    def length(self) -> int:
-
-        return self._length
 
     @property
     def local_addr(self) -> Optional[int]:
@@ -112,13 +109,12 @@ class Mempkg(MempkgABC):
         if old_len == new_len:
             return
 
-        tmp = bytearray(mempkg["length"] * new_len // old_len)
+        tmp = bytearray(len(mempkg["data"]) * new_len // old_len)
 
         for index in range(old_len if new_len > old_len else new_len):
             tmp[index::new_len] = mempkg["data"][index::old_len]
 
         mempkg["data"] = bytes(tmp)
-        mempkg["length"] = len(mempkg["data"])
         mempkg["wchar"] = new_len
 
     def make_pointer(self) -> Any:
@@ -127,7 +123,7 @@ class Mempkg(MempkgABC):
         """
 
         return ctypes.cast(
-            ctypes.pointer((ctypes.c_ubyte * len(self._data)).from_buffer_copy(self._data)),
+            ctypes.pointer((ctypes.c_ubyte * len(self)).from_buffer_copy(self._data)),
             ctypes.c_void_p,
         )
 
@@ -138,8 +134,8 @@ class Mempkg(MempkgABC):
 
         ctypes.memmove(
             ctypes.c_void_p(self._local_addr),
-            ctypes.pointer((ctypes.c_ubyte * len(self._data)).from_buffer_copy(self._data)),
-            len(self._data),
+            ctypes.pointer((ctypes.c_ubyte * len(self)).from_buffer_copy(self._data)),
+            len(self),
         )
 
     def update(self, other: MempkgABC):
@@ -151,7 +147,6 @@ class Mempkg(MempkgABC):
         """
 
         self._data = other.data
-        self._length = other.length
         self._local_addr = other.local_addr
         self._remote_addr = other.remote_addr
         self._wchar = other.wchar
@@ -164,7 +159,7 @@ class Mempkg(MempkgABC):
         self._data = bytes(
             ctypes.cast(
                 ctypes.c_void_p(self._local_addr),
-                ctypes.POINTER(ctypes.c_ubyte * self._length),
+                ctypes.POINTER(ctypes.c_ubyte * len(self)),
             ).contents
         )
 
@@ -175,7 +170,6 @@ class Mempkg(MempkgABC):
 
         return {
             'data': self._data,
-            'length': self._length,
             'local_addr': self._local_addr,
             'remote_addr': self._remote_addr,
             'wchar': self._wchar,
@@ -214,7 +208,6 @@ class Mempkg(MempkgABC):
                     ptr, ctypes.POINTER(ctypes.c_ubyte * length)
                 ).contents
             ),
-            length = length,
             local_addr = ctypes.cast(ptr, ctypes.c_void_p).value,
             remote_addr = None,
             wchar = wchar,
