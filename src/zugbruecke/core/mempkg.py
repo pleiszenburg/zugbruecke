@@ -66,6 +66,10 @@ class Mempkg(MempkgABC):
         self._remote_addr = remote_addr
         self._wchar = wchar
 
+    def __repr__(self) -> str:
+
+        return f'<Mempkg length={self._length:d} local_addr={self._local_addr:x} remote_addr={self._remote_addr:x}>'
+
     @property
     def data(self) -> bytes:
 
