@@ -33,12 +33,11 @@ specific language governing rights and limitations under the License.
 
 from typing import Optional
 
-from .arg_contents import ArgContents
-from .arg_definition import arguments_definition_class
-
 from ..abc import CacheABC, DataABC, LogABC, RpcClientABC, RpcServerABC
 from ..typeguard import typechecked
 
+from .arg_contents import ArgContents
+from .arg_definition import arguments_definition_class
 from .cache import Cache
 
 
