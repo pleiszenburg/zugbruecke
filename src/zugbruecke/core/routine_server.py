@@ -34,11 +34,11 @@ specific language governing rights and limitations under the License.
 from ctypes import _CFuncPtr
 from pprint import pformat as pf
 import traceback
-from typing import Dict, List, Union
+from typing import Any, Dict, List, Union
 
 from .abc import DataABC, LogABC, RoutineServerABC, RpcServerABC
-from .data import Mempkg
 from .definitions import DefinitionMemsync
+from .mempkg import Mempkg
 from .typeguard import typechecked
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -89,7 +89,7 @@ class RoutineServer(RoutineServerABC):
                 ),
             )
 
-    def call(self, packed_args: List[Dict], packed_mempkgs: List[Dict]) -> Dict:
+    def call(self, packed_args: List[Any], packed_mempkgs: List[Dict]) -> Dict:
         """
         Called by routine client
         """
