@@ -36,9 +36,9 @@ from pprint import pformat as pf
 from typing import Any, List, Tuple, Union
 
 from .abc import DataABC, LogABC, RoutineClientABC, RpcClientABC
-from .data import Mempkg
 from .definitions import DefinitionMemsync
 from .errors import DataMemsyncsyntaxError
+from .mempkg import Mempkg
 from .typeguard import typechecked
 
 
@@ -202,7 +202,7 @@ class RoutineClient(RoutineClientABC):
         )
 
         # Adjust definitions with void pointers
-        DefinitionMemsync.apply_multiple(
+        DefinitionMemsync.apply_many(
             memsyncs = self._memsyncs,
             argtypes = self._argtypes,
             restype = self._restype,
