@@ -122,6 +122,14 @@ class Definition(DefinitionABC):
 
         return self.array_depth == 0
 
+    @property
+    def is_void(self) -> bool:
+        """
+        Indicate minimal void pointer, no flags, no array, likely handled by memsync
+        """
+
+        return self._data_type == ctypes.c_void_p and not self.is_pointer and self.is_scalar
+
     @staticmethod
     def _apply_flags(data_type: Any, flags: List[int]) -> Any:
         """
