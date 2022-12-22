@@ -6,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-    src/zugbruecke/core/data/cache.py: Cached types and handles
+    src/zugbruecke/core/cache.py: Cached types and handles
 
     Required to run on platform / side: [UNIX, WINE]
 
@@ -33,9 +33,9 @@ specific language governing rights and limitations under the License.
 from ctypes import _FUNCFLAG_CDECL
 from typing import Dict
 
-from ..abc import CacheABC
-from ..const import _FUNCFLAG_STDCALL
-from ..typeguard import typechecked
+from .abc import CacheABC
+from .const import _FUNCFLAG_STDCALL
+from .typeguard import typechecked
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # CLASS
