@@ -222,7 +222,6 @@ class DefinitionFunc(base.Definition):
             restype = cls.from_data_type(data_type = base_type._restype_, cache = cache),
             memsyncs = base_type.memsync,  # already parsed into definition via meta class
             func_flags = base_type._flags_,
-            cache = cache,
         )
 
     @classmethod
@@ -245,9 +244,9 @@ class DefinitionFunc(base.Definition):
         except KeyError:
             base_type, data_type = cls._assemble_datatype(
                 type_name = type_name,
-                argtypes = argtypes,
+                argtypes =  base.Definition.from_data_types(cache = cache, data_types = argtypes),
                 flags = [],  # no flags available
-                restype = restype,
+                restype = base.Definition.from_data_type(cache = cache, data_type = restype),
                 memsyncs = [],  # no memsync available
                 func_flags = func_flags,
                 cache = cache,
