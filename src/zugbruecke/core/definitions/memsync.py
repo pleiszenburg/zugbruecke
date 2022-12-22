@@ -34,7 +34,7 @@ import ctypes
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 from ..abc import CacheABC, DefinitionMemsyncABC
-from ..const import FLAG_POINTER
+from ..const import FLAG_POINTER, SIMPLE_GROUP, STRUCT_GROUP
 from ..mempkg import Mempkg
 from ..memory import (
     is_null_pointer,
@@ -45,6 +45,7 @@ from ..errors import DataMemsyncpathError
 from ..typeguard import typechecked
 
 from .base import Definition
+from .struct import DefinitionStruct
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # CLASS
@@ -80,7 +81,7 @@ class DefinitionMemsync(DefinitionMemsyncABC):
 
         self._type_cls = getattr(ctypes, self._type, None)  # "_t"
         if self._type_cls is None:
-            self._type_cls = cache.struct[self._type]
+            self._type_cls, _ = cache.struct[self._type]  # access base type
 
         self._size = ctypes.sizeof(self._type_cls)  # "s"
 
@@ -557,6 +558,15 @@ class DefinitionMemsync(DefinitionMemsyncABC):
             definition['custom'] = definition.pop('_c')
         if 'f' in definition.keys():
             definition['func'] = definition.pop('f')
+
+        # In older versions of zugbruecke type could only be string - struct names in cache changed though
+        if 'type' in definition.keys() and not isinstance(definition['type'], str):
+            if type(definition['type']).__name__ == SIMPLE_GROUP:
+                definition['type'] = definition['type'].__name__
+            elif type(definition['type']).__name__ == STRUCT_GROUP:
+                definition['type'] = DefinitionStruct.from_data_type(cache = cache, data_type = definition['type']).type_name
+            else:
+                raise TypeError('unhandled type in memsync definition')
 
         return cls(**definition, cache = cache)
 
