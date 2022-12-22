@@ -204,6 +204,11 @@ class ArgContents:
                 return None  # Just return None - will (hopefully) be overwritten by memsync
             item = strip_pointer(item)
 
+        # Likely handled by memsync
+        if itemtype.is_void:
+            # Leave empty
+            return None
+
         # Handle fundamental types
         if itemtype.GROUP == SIMPLE_GROUP:
             # Append argument to list ...
@@ -335,7 +340,7 @@ class ArgContents:
             return
 
         # Do not do this for void pointers, likely handled by memsync
-        if argtype.data_type == ctypes.c_void_p and not argtype.is_pointer and argtype.is_scalar:
+        if argtype.is_void:
             return
 
         # Strip away the pointers ... (all flags are pointers in this case)
@@ -445,7 +450,7 @@ class ArgContents:
             return item
 
         # Handle voids (likely mensync stuff)
-        if itemtype.data_type == ctypes.c_void_p and not itemtype.is_pointer and itemtype.is_scalar:
+        if itemtype.is_void:
             # Return a placeholder
             return None
         # Handle fundamental types
