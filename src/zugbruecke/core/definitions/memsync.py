@@ -430,7 +430,9 @@ class DefinitionMemsync(DefinitionMemsyncABC):
 
         # Convert argument of custom type into ctypes datatype TODO more checks needed!
         if self._custom is not None:
-            ptr = ctypes.pointer(self._custom.from_param(ptr))
+            ptr = self._custom.from_param(ptr)
+            if not hasattr(ptr, 'contents'):
+                ptr = ctypes.pointer(ptr)
 
         # Unicode char size if relevant
         wchar = ctypes.sizeof(ctypes.c_wchar) if self._unic else None

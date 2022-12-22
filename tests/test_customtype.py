@@ -82,7 +82,7 @@ def test_customtype(arch, conv, ctypes, dll_handle):
         Custom ctypes data type
         """
 
-        def from_param(self, param: Any) -> ctypes.c_double:
+        def from_param(self, param: Any) -> Any:
             """
             Called by ctypes/zugbruecke, dispatches to different implementations
             """
@@ -96,7 +96,7 @@ def test_customtype(arch, conv, ctypes, dll_handle):
 
             raise TypeError(f"Can't convert {typename:s}")
 
-        def from_array(self, param: array) -> ctypes.c_double:
+        def from_array(self, param: array) -> ctypes.POINTER(ctypes.c_double):
             """
             Implementation for basic Python array (from standard library)
             """
@@ -104,23 +104,24 @@ def test_customtype(arch, conv, ctypes, dll_handle):
             if param.typecode != "d":
                 raise TypeError("must be an array of doubles")
             ptr, _ = param.buffer_info()
-            return ctypes.cast(ptr, ctypes.POINTER(ctypes.c_double * len(param))).contents
+            return ctypes.cast(ptr, ctypes.POINTER(ctypes.c_double * len(param)))
 
         def from_list(self, param: Union[List[float], Tuple[float, ...]]) -> ctypes.c_double:
             """
             Implementation for Python list (and tuple)
             """
 
+            # does not need to be a pointer IN THIS CASE (can be though)
             return ((ctypes.c_double) * len(param))(*param)
 
         from_tuple = from_list
 
-        def from_ndarray(self, param: np.ndarray) -> ctypes.c_double:
+        def from_ndarray(self, param: np.ndarray) -> ctypes.POINTER(ctypes.c_double):
             """
             Implementation for numpy.ndarray
             """
 
-            return param.ctypes.data_as(ctypes.POINTER(ctypes.c_double)).contents
+            return param.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
 
     DoubleArray = DoubleArrayType()
     avg_dll = dll_handle.avg
