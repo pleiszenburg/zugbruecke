@@ -35,7 +35,7 @@ from ctypes import _FUNCFLAG_CDECL
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 from ..abc import CacheABC, DefinitionABC, DefinitionMemsyncABC
-from ..const import _FUNCFLAG_STDCALL
+from ..const import _FUNCFLAG_STDCALL, FUNC_GROUP
 from ..typeguard import typechecked
 
 from . import base
@@ -48,13 +48,13 @@ from . import memsync as ms
 @typechecked
 class DefinitionFunc(base.Definition):
 
-    GROUP = "PyCFuncPtrType"
+    GROUP = FUNC_GROUP
 
     def __init__(self,
         *args: Any,
         argtypes: List[DefinitionABC],
         restype: DefinitionABC,
-        memsync: List[DefinitionMemsyncABC],
+        memsyncs: List[DefinitionMemsyncABC],
         func_flags: int,
         **kwargs: Any,
     ):
@@ -62,8 +62,28 @@ class DefinitionFunc(base.Definition):
         super().__init__(*args, **kwargs)
         self._argtypes = argtypes
         self._restype = restype
-        self._memsync = memsync
+        self._memsyncs = memsyncs
         self._func_flags = func_flags
+
+    @property
+    def argtypes(self) -> List[DefinitionABC]:
+
+        return self._argtypes
+
+    @property
+    def restype(self) -> DefinitionABC:
+
+        return self._restype
+
+    @property
+    def memsyncs(self) -> List[DefinitionMemsyncABC]:
+
+        return self._memsyncs
+
+    @property
+    def func_flags(self) -> int:
+
+        return self._func_flags
 
     def as_packed(self) -> Dict:
         """
@@ -79,7 +99,7 @@ class DefinitionFunc(base.Definition):
             "type_name": self._type_name,
             "argtypes": [argtype.as_packed() for argtype in self._argtypes],
             "restype": self._restype.as_packed(),
-            "memsync": [item.as_packed() for item in self._memsync],
+            "memsyncs": [item.as_packed() for item in self._memsyncs],
             "func_flags": self._func_flags
         }
 
@@ -90,7 +110,7 @@ class DefinitionFunc(base.Definition):
         type_name: str, # t
         argtypes: List[Dict],
         restype: Dict,
-        memsync: List[Dict],
+        memsyncs: List[Dict],
         func_flags: int,
         cache: CacheABC,
     ) -> DefinitionABC:
@@ -102,7 +122,7 @@ class DefinitionFunc(base.Definition):
 
         argtypes = [base.Definition.from_packed(argtype, cache = cache) for argtype in argtypes]
         restype = base.Definition.from_packed(restype, cache = cache)
-        memsync = [ms.DefinitionMemsync.from_packed(item, cache = cache) for item in memsync]
+        memsyncs = [ms.DefinitionMemsync.from_packed(item, cache = cache) for item in memsyncs]
 
         conv = _FUNCFLAG_STDCALL if (func_flags & _FUNCFLAG_STDCALL) else _FUNCFLAG_CDECL
 
@@ -114,7 +134,7 @@ class DefinitionFunc(base.Definition):
                 argtypes = argtypes,
                 flags = flags,
                 restype = restype,
-                memsync = memsync,
+                memsyncs = memsyncs,
                 func_flags = func_flags,
                 cache = cache,
             )
@@ -128,7 +148,7 @@ class DefinitionFunc(base.Definition):
             base_type = base_type,
             argtypes = argtypes,
             restype = restype,
-            memsync = memsync,
+            memsyncs = memsyncs,
             func_flags = func_flags,
         )
 
@@ -139,7 +159,7 @@ class DefinitionFunc(base.Definition):
         flags: List[int],
         argtypes: List[DefinitionABC],
         restype: DefinitionABC,
-        memsync: List[DefinitionMemsyncABC],
+        memsyncs: List[DefinitionMemsyncABC],
         func_flags: int,
         cache: CacheABC,
     ) -> Tuple[Any, Any]:
@@ -165,7 +185,7 @@ class DefinitionFunc(base.Definition):
             {
                 "_argtypes_": [argtype.data_type for argtype in argtypes],
                 "_restype_": restype.data_type,
-                "_memsync_": memsync,
+                "_memsync_": memsyncs,
                 "_flags_": func_flags,
             },
         )
@@ -176,7 +196,7 @@ class DefinitionFunc(base.Definition):
     @staticmethod
     def _make_type_name(restype: Any, argtypes: List[Any], func_flags: int) -> str:
 
-        return f'func_{hash((restype, tuple(argtypes), func_flags)):x}'
+        return f'functype_{hash((restype, tuple(argtypes), func_flags)):x}'
 
     @classmethod
     def _from_data_type(
@@ -200,7 +220,7 @@ class DefinitionFunc(base.Definition):
             base_type = base_type,
             argtypes = cls.from_data_types(data_types = base_type._argtypes_, cache = cache),
             restype = cls.from_data_type(data_type = base_type._restype_, cache = cache),
-            memsync = ms.DefinitionMemsync.from_raws(base_type.memsync, cache = cache),
+            memsyncs = base_type.memsync,  # already parsed into definition via meta class
             func_flags = base_type._flags_,
             cache = cache,
         )
@@ -228,7 +248,7 @@ class DefinitionFunc(base.Definition):
                 argtypes = argtypes,
                 flags = [],  # no flags available
                 restype = restype,
-                memsync = [],  # no memsync available
+                memsyncs = [],  # no memsync available
                 func_flags = func_flags,
                 cache = cache,
             )
