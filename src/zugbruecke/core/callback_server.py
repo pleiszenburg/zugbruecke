@@ -65,7 +65,7 @@ class CallbackServer(CallbackServerABC):
         log: LogABC,
         argtypes: List[Definition],
         restype: Definition,
-        memsyncs: DefinitionMemsync,
+        memsyncs: List[DefinitionMemsync],
     ):
 
         self._name = name
