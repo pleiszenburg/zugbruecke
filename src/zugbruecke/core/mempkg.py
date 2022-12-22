@@ -43,7 +43,7 @@ from .typeguard import typechecked
 @typechecked
 class Mempkg(MempkgABC):
     """
-    Represent the definition of a block of memory to be kept in sync
+    Represents a block of memory to be kept in sync
     """
 
     def __init__(
