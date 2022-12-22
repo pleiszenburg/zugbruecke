@@ -147,7 +147,7 @@ class Definition(DefinitionABC):
         return data_type
 
     @classmethod
-    def _assemble_datatype(cls, type_name: str, flags: List[int]) -> Tuple[Any, Any]:
+    def _assemble_datatype(cls, type_name: Optional[str], flags: List[int]) -> Tuple[Any, Any]:
         """
         Assemble ctypes data type
 
