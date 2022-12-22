@@ -199,11 +199,14 @@ class RoutineServer(RoutineServerABC):
 
             raise e
 
-        self._log.out(f" memsyncs: \n{pf(self._memsyncs):s}")
-        self._log.out(f" handler.argtypes: \n{pf(self._handler.argtypes):s}")
-        self._log.out(f" argtypes: \n{pf(self._argtypes):s}")
-        self._log.out(f" handler.restype: \n{pf(self._handler.restype):s}")
-        self._log.out(f" restype: \n{pf(self._restype):s}")
+        # log status
+        self._log.out(pf(dict(
+            argtypes_raw = self._handler.argtypes,
+            argtypes = self._argtypes,
+            restype_raw = self._handler.restype,
+            restype = self._restype,
+            memsync = self._memsyncs,
+        )))
 
     def get_repr(self) -> str:
         """

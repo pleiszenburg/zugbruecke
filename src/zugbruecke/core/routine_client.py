@@ -215,12 +215,14 @@ class RoutineClient(RoutineClientABC):
         )
 
         # Log status
-        self._log.out("<memsync_raw>", self._memsyncs_raw, "</memsync_raw>")
-        self._log.out("<memsync>", self._memsyncs, "</memsync>")
-        self._log.out("<argtypes_raw>", self._argtypes_raw, "</argtypes_raw>")
-        self._log.out("<argtypes>", self._argtypes, "</argtypes>")
-        self._log.out("<restype_raw>", self._restype_raw, "</restype_raw>")
-        self._log.out("<restype>", self._restype, "</restype>")
+        self._log.out(pf(dict(
+            argtypes_raw = self._argtypes_raw,
+            argtypes = self._argtypes,
+            restype_raw = self._restype_raw,
+            restype = self._restype,
+            memsync_raw = self._memsyncs_raw,
+            memsync = self._memsyncs,
+        )))
 
         # Pass argument and return value types as strings ...
         _ = self._configure_on_server(
