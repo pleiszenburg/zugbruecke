@@ -37,7 +37,7 @@ import traceback
 from typing import Any, Dict, List, Union
 
 from .abc import DataABC, LogABC, RoutineServerABC, RpcServerABC
-from .definitions import DefinitionMemsync
+from .definitions import Definition, DefinitionMemsync
 from .mempkg import Mempkg
 from .typeguard import typechecked
 
@@ -152,33 +152,45 @@ class RoutineServer(RoutineServerABC):
             self._log.err(traceback.format_exc())
             raise e
 
-    def configure(self, argtypes: List[Dict], restype: Dict, packed_memsyncs: List[Dict]):
+    def configure(self, packed_argtypes: List[Dict], packed_restype: Dict, packed_memsyncs: List[Dict]):
         """
         Called by routine client
         """
 
-        # Store argtype definition dict
-        self._argtypes = argtypes
-
-        # Store return value definition dict
-        self._restype = restype
-
         try:
 
+            # Unpack argtype definitions
+            self._argtypes = [
+                Definition.from_packed(
+                    packed = packed_argtype,
+                    cache = self._data.cache,
+                )
+                for packed_argtype in packed_argtypes
+            ]
+
+            # Unpack return type definition
+            self._restype = Definition.from_packed(
+                packed = packed_restype,
+                cache = self._data.cache,
+            )
+
+            # Unpack memory sync definitions
+            self._memsyncs = [
+                DefinitionMemsync.from_packed(
+                    packed = packed_memsync,
+                    cache = self._data.cache,
+                )
+                for packed_memsync in packed_memsyncs
+            ]
+
             # Parse and apply argtype definition dict to actual ctypes routine
-            _argtypes = self._data.unpack_definition_argtypes(argtypes)
+            argtypes = [argtype.data_type for argtype in self._argtypes]
             # Only configure if there are definitions, otherwise calls with int parameters without definition fail
-            if len(_argtypes) > 0:
-                self._handler.argtypes = _argtypes
+            if len(argtypes) > 0:
+                self._handler.argtypes = argtypes
 
             # Parse and apply restype definition dict to actual ctypes routine
-            self._handler.restype = self._data.unpack_definition_returntype(restype)
-
-            # Store memory sync instructions
-            self._memsyncs = [DefinitionMemsync.from_packed(
-                packed = packed_memsync,
-                cache = self._data.cache,
-            ) for packed_memsync in packed_memsyncs]
+            self._handler.restype = self._restype.data_type
 
         except Exception as e:
 

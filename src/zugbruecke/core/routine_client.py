@@ -36,7 +36,7 @@ from pprint import pformat as pf
 from typing import Any, List, Tuple, Union
 
 from .abc import DataABC, LogABC, RoutineClientABC, RpcClientABC
-from .definitions import DefinitionMemsync
+from .definitions import Definition, DefinitionMemsync
 from .mempkg import Mempkg
 from .typeguard import typechecked
 
@@ -188,20 +188,27 @@ class RoutineClient(RoutineClientABC):
             "[routine-client] ... has not been called before. Configuring ..."
         )
 
-        # Prepare list of arguments by parsing them into list of dicts (TODO field name / kw)
-        self._argtypes = self._data.pack_definition_argtypes(self._argtypes_raw)
+        # Parse raw argtypes into definitions
+        self._argtypes = Definition.from_data_types(
+            cache = self._data.cache,
+            data_types = self._argtypes_raw,
+        )
 
-        # Parse return type
-        self._restype = self._data.pack_definition_returntype(self._restype_raw)
+        # Parse raw return type into definition
+        self._restype = Definition.from_data_type(
+            cache = self._data.cache,
+            data_type = self._restype_raw,
+        )
 
-        # Compile memsync statements
+        # Parse memsync statements into definitions
         self._memsyncs = DefinitionMemsync.from_raws(
             definitions = self._memsyncs_raw,
             cache = self._data.cache,
         )
 
         # Adjust definitions with void pointers
-        DefinitionMemsync.apply_many(
+        self._argtypes, self._restype = DefinitionMemsync.apply_many(
+            cache = self._data.cache,
             memsyncs = self._memsyncs,
             argtypes = self._argtypes,
             restype = self._restype,
@@ -215,12 +222,11 @@ class RoutineClient(RoutineClientABC):
         self._log.out("<restype_raw>", self._restype_raw, "</restype_raw>")
         self._log.out("<restype>", self._restype, "</restype>")
 
-        # Pack memsync_d again for shipping
-        packed_memsyncs = [memsync.as_packed() for memsync in self._memsyncs]
-
         # Pass argument and return value types as strings ...
         _ = self._configure_on_server(
-            self._argtypes, self._restype, packed_memsyncs
+            [argtype.as_packed() for argtype in self._argtypes],
+            self._restype.as_packed(),
+            [memsync.as_packed() for memsync in self._memsyncs],
         )
 
         # Change status of routine - it has been called once and is therefore configured
@@ -240,7 +246,7 @@ class RoutineClient(RoutineClientABC):
         if not isinstance(value, list) and not isinstance(value, tuple):
             raise TypeError  # original ctypes does that
 
-        self._argtypes_raw = value
+        self._argtypes_raw = list(value)
 
     @property
     def restype(self) -> Any:
