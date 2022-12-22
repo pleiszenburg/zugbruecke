@@ -1,6 +1,8 @@
 # Changes
 
-## 0.1.1 (2022-XX-XX)
+## 0.2.0 (2022-XX-XX)
+
+**CAUTION**: The datatype parser and definition code was rewritten completely. It should work as becore in almost all instances although unexpected breakages may occur. If entire struct objects are synced via `memsync` directives, the struct types now have to be specified directly instead of their names as strings as before.
 
 - FIX: If `zugbruecke` (and `wenv`) were installed into user site-packages, the installation would break, see #88.
 
