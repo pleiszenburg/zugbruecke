@@ -55,6 +55,7 @@ test = [
     "coverage[toml]",
     "pytest-cov",
     "typeguard",
+    "numpy",
 ]
 
 [project.urls]

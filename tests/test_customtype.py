@@ -6,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-    tests/test_customtype.py: Test custom ctypes data type argument passing as pointer
+    tests/test_customtype.py: Test custom ctypes data type argument passing
 
     Required to run on platform / side: [UNIX, WINE]
 
@@ -63,6 +63,7 @@ from typing import Any, List, Tuple, Union
 
 from .lib.ctypes import get_context
 
+import numpy as np
 import pytest
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -81,20 +82,21 @@ def test_customtype(arch, conv, ctypes, dll_handle):
         Custom ctypes data type
         """
 
-        def from_param(self, param: Any) -> ctypes.POINTER(ctypes.c_double):
+        def from_param(self, param: Any) -> ctypes.c_double:
             """
             Called by ctypes/zugbruecke, dispatches to different implementations
             """
 
             typename = type(param).__name__
+
             if hasattr(self, "from_" + typename):
                 return getattr(self, "from_" + typename)(param)
-            elif isinstance(param, ctypes.Array):
+            if isinstance(param, ctypes.Array):
                 return param
-            else:
-                raise TypeError(f"Can't convert {typename:s}")
 
-        def from_array(self, param: array) -> ctypes.POINTER(ctypes.c_double):
+            raise TypeError(f"Can't convert {typename:s}")
+
+        def from_array(self, param: array) -> ctypes.c_double:
             """
             Implementation for basic Python array (from standard library)
             """
@@ -102,24 +104,23 @@ def test_customtype(arch, conv, ctypes, dll_handle):
             if param.typecode != "d":
                 raise TypeError("must be an array of doubles")
             ptr, _ = param.buffer_info()
-            return ctypes.cast(ptr, ctypes.POINTER(ctypes.c_double))
+            return ctypes.cast(ptr, ctypes.POINTER(ctypes.c_double * len(param))).contents
 
-        def from_list(self, param: Union[List[float], Tuple[float, ...]]) -> ctypes.POINTER(ctypes.c_double):
+        def from_list(self, param: Union[List[float], Tuple[float, ...]]) -> ctypes.c_double:
             """
             Implementation for Python list (and tuple)
             """
 
-            val = ((ctypes.c_double) * len(param))(*param)
-            return val
+            return ((ctypes.c_double) * len(param))(*param)
 
         from_tuple = from_list
 
-        def from_ndarray(self, param: 'numpy.ndarray') -> ctypes.POINTER(ctypes.c_double):
+        def from_ndarray(self, param: np.ndarray) -> ctypes.c_double:
             """
             Implementation for numpy.ndarray
             """
 
-            return param.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
+            return param.ctypes.data_as(ctypes.POINTER(ctypes.c_double)).contents
 
     DoubleArray = DoubleArrayType()
     avg_dll = dll_handle.avg
@@ -134,7 +135,11 @@ def test_customtype(arch, conv, ctypes, dll_handle):
     avg_dll.argtypes = (DoubleArray, ctypes.c_int)
     avg_dll.restype = ctypes.c_double
 
-    def avg(values: List[float]) -> float:
-        return avg_dll(values, len(values))
-
-    assert pytest.approx(2.5, 0.0000001) == avg([1, 2, 3, 4])
+    for blob in (
+        [1, 2, 3, 4],
+        [1.0, 2.0, 3.0, 4.0],
+        (1.0, 2.0, 3.0, 4.0),
+        np.array([1.0, 2.0, 3.0, 4.0], dtype = 'f8'),
+        array('d', [1.0, 2.0, 3.0, 4.0]),
+    ):
+        assert pytest.approx(2.5, 0.0000001) == avg_dll(blob, len(blob))
