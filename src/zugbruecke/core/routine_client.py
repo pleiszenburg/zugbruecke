@@ -118,11 +118,7 @@ class RoutineClient(RoutineClientABC):
         if not self._configured:
             self._configure()
 
-        self._log.out(
-            '[routine-client] ... parameters are "{ARGS:s}". Packing and pushing to server ...'.format(
-                ARGS=pf(args)
-            )
-        )
+        self._log.out('[routine-client] ... packing and pushing args to server ...')
 
         # Pack stuff
         packed_args = self._data.pack_args(args, self._argtypes, self._convention)
@@ -130,6 +126,12 @@ class RoutineClient(RoutineClientABC):
             args = args,
             memsyncs = self._memsyncs,
         )]
+
+        self._log.out(pf(dict(
+            args = args,
+            packed_args = packed_args,
+            packed_mempkgs = packed_mempkgs,
+        )))
 
         # Actually call routine in DLL
         return_package = self._call_on_server(packed_args, packed_mempkgs)
