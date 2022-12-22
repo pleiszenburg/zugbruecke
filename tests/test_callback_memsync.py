@@ -209,6 +209,9 @@ def test_callback_memsync(arch, conv, ctypes, dll_handle):
 
     @filter_func_type
     def filter_edge_detection(buffer: ctypes.POINTER(Image)) -> int:
+        """
+        Callback function, called by DLL function
+        """
 
         filter_matrix = [[0, 1, 0], [1, -4, 1], [0, 1, 0]]
 
@@ -232,6 +235,9 @@ def test_callback_memsync(arch, conv, ctypes, dll_handle):
         ])
 
     def apply_filter_to_image(image: List[List[int]]) -> List[List[int]]:
+        """
+        User-facing wrapper around DLL function
+        """
 
         width = len(image[0])
         height = len(image)
@@ -264,9 +270,17 @@ def test_callback_memsync(arch, conv, ctypes, dll_handle):
         )
 
     def array_to_matrix(array: List[int], width: int, height: int) -> List[List[int]]:
+        """
+        Helper
+        """
+
         return [array[(i * width) : ((i + 1) * width)] for i in range(height)]
 
     def matrix_to_array(matrix: List[List[int]]) -> List[int]:
+        """
+        Helper
+        """
+
         return [item for line in matrix for item in line]
 
     result = apply_filter_to_image(
