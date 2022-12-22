@@ -178,7 +178,7 @@ class DefinitionStruct(base.Definition):
             )) for field in base_type._fields_
         ]
 
-        return cls(
+        structtype = cls(
             flags = flags,
             field_name = field_name,
             type_name = f'structtype_{hash(tuple((name, definition.data_type) for name, definition in fields)):x}',
@@ -186,3 +186,8 @@ class DefinitionStruct(base.Definition):
             base_type = base_type,
             fields = fields,
         )
+
+        if not structtype.type_name in cache.struct.keys():  # HACK for memsync
+            cache.struct[structtype.type_name] = structtype.base_type, structtype.data_type
+
+        return structtype
