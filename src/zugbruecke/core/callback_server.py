@@ -33,7 +33,7 @@ specific language governing rights and limitations under the License.
 
 from pprint import pformat as pf
 import traceback
-from typing import Any, Dict, List
+from typing import Any, List
 
 from .abc import (
     CallbackServerABC,
