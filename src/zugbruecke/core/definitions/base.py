@@ -70,12 +70,25 @@ class Definition(DefinitionABC):
         return f'<Definition group={self.GROUP} field={self._field_name} type={self._type_name} flags={self._flags}>'  # TODO
 
     @property
+    def flags(self) -> List[int]:
+
+        return self._flags
+
+    @property
     def data_type(self) -> Any:
         """
         The actual ctypes data type (all flags applied)
         """
 
         return self._data_type
+
+    @property
+    def base_type(self) -> Any:
+        """
+        Base ctypes data type (no flags applied)
+        """
+
+        return self._base_type
 
     @property
     def field_name(self) -> Union[str, int, None]:
@@ -205,7 +218,7 @@ class Definition(DefinitionABC):
     def from_data_types(
         cls,
         cache: CacheABC,
-        data_types: List[DefinitionABC],
+        data_types: List[Any],
     ) -> List[DefinitionABC]:
 
         return [cls.from_data_type(data_type = data_type, cache = cache) for data_type in data_types]
