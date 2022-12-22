@@ -99,6 +99,14 @@ class Definition(DefinitionABC):
         return self._field_name
 
     @property
+    def type_name(self) -> Optional[str]:
+        """
+        Relevant to access cached types
+        """
+
+        return self._type_name
+
+    @property
     def array_depth(self) -> int:  # "d"
         """
         Number of array flags (i.e. "dimensions")
