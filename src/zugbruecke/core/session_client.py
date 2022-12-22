@@ -47,6 +47,7 @@ from .abc import DataABC, SessionClientABC
 from .const import _FUNCFLAG_STDCALL, CONVENTIONS
 from .config import Config
 from .data import Data
+from .definitions import DefinitionFunc
 from .dll_client import DllClient
 from .interpreter import Interpreter
 from .lib import get_free_port, get_hash_of_string
@@ -160,7 +161,12 @@ class SessionClient(SessionClientABC):
         if use_last_error:
             flags |= _FUNCFLAG_USE_LASTERROR
 
-        return self._data.generate_callback_decorator(flags, restype, *argtypes)
+        return DefinitionFunc.generate_callback_decorator(
+            cache = self._data.cache,
+            func_flags = flags,
+            restype = restype,
+            argtypes = list(argtypes),
+        )
 
     def WINFUNCTYPE(self, restype: Any, *argtypes: Any, use_errno: bool = False, use_last_error: bool = False) -> Type:
 
@@ -171,7 +177,12 @@ class SessionClient(SessionClientABC):
         if use_last_error:
             flags |= _FUNCFLAG_USE_LASTERROR
 
-        return self._data.generate_callback_decorator(flags, restype, *argtypes)
+        return DefinitionFunc.generate_callback_decorator(
+            cache = self._data.cache,
+            func_flags = flags,
+            restype = restype,
+            argtypes = list(argtypes),
+        )
 
     def load_library(
         self,

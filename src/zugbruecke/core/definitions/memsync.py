@@ -34,7 +34,7 @@ import ctypes
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 from ..abc import CacheABC, DefinitionMemsyncABC
-from ..const import FLAG_POINTER, GROUP_VOID
+from ..const import FLAG_POINTER, SIMPLE_GROUP, STRUCT_GROUP
 from ..mempkg import Mempkg
 from ..memory import (
     is_null_pointer,
@@ -43,6 +43,9 @@ from ..memory import (
 )
 from ..errors import DataMemsyncpathError
 from ..typeguard import typechecked
+
+from .base import Definition
+from .struct import DefinitionStruct
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # CLASS
@@ -78,7 +81,7 @@ class DefinitionMemsync(DefinitionMemsyncABC):
 
         self._type_cls = getattr(ctypes, self._type, None)  # "_t"
         if self._type_cls is None:
-            self._type_cls = cache.struct[self._type]
+            self._type_cls, _ = cache.struct[self._type]  # access base type
 
         self._size = ctypes.sizeof(self._type_cls)  # "s"
 
@@ -199,8 +202,10 @@ class DefinitionMemsync(DefinitionMemsyncABC):
 
     @staticmethod
     def _get_itemtype_by_path(
-        path: List[Union[int, str]], argtypes: List[Dict], restype: Dict,
-    ) -> Dict:
+        path: List[Union[int, str]],
+        argtypes: List[Definition],
+        restype: Optional[Definition],
+    ) -> Definition:
         """
         Get zugbruecke argtype or restype by path
 
@@ -232,6 +237,56 @@ class DefinitionMemsync(DefinitionMemsyncABC):
             ]
 
         return itemtype
+
+    @staticmethod
+    def _set_itemtype_by_path(
+        path: List[Union[int, str]],
+        argtypes: List[Definition],
+        restype: Optional[Definition],
+        itemtype: Definition,
+    ) -> Tuple[List[Definition], Optional[Definition]]:
+        """
+        Set zugbruecke argtype or restype by path
+
+        Args:
+            - path: List of int and/or str describing (part of) an argument or return value
+            - argtypes: zugbruecke argument types
+            - restype: zugbruecke return type
+        Returns:
+            Altered argtypes and return type definitions
+        """
+
+        # Remove pointer and array flags from path. TODO Function does not handle arrays.
+        short_path = [
+            segment
+            for idx, segment in enumerate(path)
+            if idx == 0 or isinstance(segment, str)
+        ]
+
+        if isinstance(short_path[0], int):  # function argument
+            if len(short_path) == 1:
+                argtypes[short_path[0]] = itemtype
+                return argtypes, restype
+            else:
+                subtype = argtypes[short_path[0]]
+        elif short_path[0] == "r":  # function return value
+            if len(short_path) == 1:
+                return argtypes, itemtype
+            else:
+                subtype = restype
+        else:
+            raise DataMemsyncpathError(
+                f'short_path[0] is neither return value ("r") nor parameter (type int) "{short_path[0]}"'
+            )
+
+        # Step through short path to argument type ...
+        for segment in short_path[1:-1]:
+            # Go deeper ...
+            subtype = subtype.get_field(name = segment)
+
+        subtype.set_field(name = short_path[-1], definition = itemtype)
+
+        return argtypes, restype
 
     def _unpack_memory(
         self, mempkg: Mempkg, args: List[Any], retval: Optional[Any] = None,
@@ -329,24 +384,35 @@ class DefinitionMemsync(DefinitionMemsyncABC):
             # Handle deepest instance
             setattr(arg.contents, self._pointer[-1 - shift], ptr)
 
-    def apply_one(self, argtypes: List[Dict], restype: Optional[Dict] = None):
+    def apply_one(
+        self,
+        cache: CacheABC,
+        argtypes: List[Definition],
+        restype: Optional[Definition] = None,
+    ) -> Tuple[List[Definition], Optional[Definition]]:
         """
         Apply memsync definition to zugbruecke argtypes and restype definitions.
         Types are switched to void pointers.
 
         Args:
+            - cache: cached types
             - argtypes: zugbruecke argument type definitions
             - restype: zugbruecke return type definition
         Returns:
-            Nothing
+            Altered argtypes and return type definitions
         """
 
-        # Get type of pointer argument
-        itemtype = self._get_itemtype_by_path(self._pointer, argtypes, restype,)
+        argtypes, restype = self._set_itemtype_by_path(
+            path = self._pointer,
+            argtypes = argtypes,
+            restype = restype,
+            itemtype = Definition.from_data_type(
+                cache = cache,
+                data_type = ctypes.c_void_p,  # HACK make memory sync pointers type agnostic
+            ),  # New definition to replace the old one with
+        )
 
-        # HACK make memory sync pointers type agnostic
-        itemtype["g"] = GROUP_VOID
-        itemtype["t"] = None  # no type string
+        return argtypes, restype
 
     def pkg_memory(self, args: List[Any], retval: Optional[Any] = None) -> Mempkg:
         """
@@ -493,6 +559,15 @@ class DefinitionMemsync(DefinitionMemsyncABC):
         if 'f' in definition.keys():
             definition['func'] = definition.pop('f')
 
+        # In older versions of zugbruecke type could only be string - struct names in cache changed though
+        if 'type' in definition.keys() and not isinstance(definition['type'], str):
+            if type(definition['type']).__name__ == SIMPLE_GROUP:
+                definition['type'] = definition['type'].__name__
+            elif type(definition['type']).__name__ == STRUCT_GROUP:
+                definition['type'] = DefinitionStruct.from_data_type(cache = cache, data_type = definition['type']).type_name
+            else:
+                raise TypeError('unhandled type in memsync definition')
+
         return cls(**definition, cache = cache)
 
     @classmethod
@@ -505,14 +580,16 @@ class DefinitionMemsync(DefinitionMemsyncABC):
 
     @staticmethod
     def apply_many(
+        cache: CacheABC,
         memsyncs: List[DefinitionMemsyncABC],
-        argtypes: List[Dict],
-        restype: Dict,
-    ):
+        argtypes: List[Definition],
+        restype: Optional[Definition] = None,
+    ) -> Tuple[List[Definition], Optional[Definition]]:
         """
         Apply memsync definitions to zugbruecke argtypes and restype definitions.
 
         Args:
+            - cache: cached types
             - memsyncs: List of memsync definitions
             - argtypes: zugbruecke argument type definitions
             - restype: zugbruecke return type definition
@@ -521,7 +598,13 @@ class DefinitionMemsync(DefinitionMemsyncABC):
         """
 
         for memsync in memsyncs:
-            memsync.apply_one(argtypes, restype)
+            argtypes, restype = memsync.apply_one(
+                cache = cache,
+                argtypes = argtypes,
+                restype = restype,
+            )
+
+        return argtypes, restype
 
     @staticmethod
     def pkg_memories(

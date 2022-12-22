@@ -37,7 +37,6 @@ from ..abc import CacheABC, DataABC, LogABC, RpcClientABC, RpcServerABC
 from ..typeguard import typechecked
 
 from .arg_contents import ArgContents
-from .arg_definition import arguments_definition_class
 from .cache import Cache
 
 
@@ -49,7 +48,6 @@ from .cache import Cache
 class Data(
     DataABC,
     ArgContents,
-    arguments_definition_class,
 ):
     """
     Handles argument definitions, contents and memory sync

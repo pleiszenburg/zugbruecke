@@ -34,6 +34,7 @@ import ctypes
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 from ..abc import CacheABC, DefinitionABC
+from ..const import STRUCT_GROUP
 from ..typeguard import typechecked
 
 from . import base
@@ -45,16 +46,52 @@ from . import base
 @typechecked
 class DefinitionStruct(base.Definition):
 
-    GROUP = "PyCStructType"
+    GROUP = STRUCT_GROUP
 
     def __init__(self,
         *args: Any,
-        fields: List[DefinitionABC],
+        fields: List[Tuple[str, DefinitionABC]],
         **kwargs: Any,
     ):
 
         super().__init__(*args, **kwargs)
         self._fields = fields
+
+    @property
+    def fields(self) -> List[Tuple[str, DefinitionABC]]:
+
+        return self._fields
+
+    def get_field(self, name: str) -> DefinitionABC:
+        """
+        Allows to get a field based on name. Useful for memsync.
+        """
+
+        idx = None
+        for idx, (field_name, _) in enumerate(self._fields):
+            if name == field_name:
+                break
+
+        if idx is None:
+            raise KeyError(f'struct does not contain field named "{name:s}"')
+
+        _, definition = self._fields[idx]
+        return definition
+
+    def set_field(self, name: str, definition: DefinitionABC):
+        """
+        Allows to change the definition of a field based on name. Useful for memsync.
+        """
+
+        idx = None
+        for idx, (field_name, _) in enumerate(self._fields):
+            if name == field_name:
+                break
+
+        if idx is None:
+            raise KeyError(f'struct does not contain field named "{name:s}"')
+
+        self._fields[idx] = (name, definition)
 
     def as_packed(self) -> Dict:
         """
@@ -68,7 +105,7 @@ class DefinitionStruct(base.Definition):
             "flags": self._flags,
             "field_name": self._field_name,
             "type_name": self._type_name,
-            "fields": [field.as_packed() for field in self._fields],
+            "fields": [(name, field.as_packed()) for name, field in self._fields],
         }
 
     @classmethod
@@ -76,7 +113,7 @@ class DefinitionStruct(base.Definition):
         flags: List[int], # f
         field_name: Union[str, int, None], # n
         type_name: str, # t
-        fields: List[Dict],
+        fields: List[Tuple[str, Dict]],
         cache: CacheABC,
     ) -> DefinitionABC:
         """
@@ -85,7 +122,7 @@ class DefinitionStruct(base.Definition):
         Counterpart to `as_packed`
         """
 
-        fields = [base.Definition.from_packed(field, cache = cache) for field in fields]
+        fields = [(name, base.Definition.from_packed(field, cache = cache)) for name, field in fields]
 
         try:
             base_type, data_type = cache.struct[type_name]
@@ -103,7 +140,7 @@ class DefinitionStruct(base.Definition):
         )
 
     @classmethod
-    def _assemble_datatype(cls, type_name: str, flags: List[int], fields: List[DefinitionABC]) -> Tuple[Any, Any]:
+    def _assemble_datatype(cls, type_name: str, flags: List[int], fields: List[Tuple[str, DefinitionABC]]) -> Tuple[Any, Any]:
         """
         Assemble ctypes data type
 
@@ -113,7 +150,7 @@ class DefinitionStruct(base.Definition):
         base_type = type(
             type_name,  # Potenial BUG: in __main__ scope, problematic?
             (ctypes.Structure,),
-            {"_fields_": [(field.field_name, field.data_type) for field in fields]},
+            {"_fields_": [(name, field.data_type) for name, field in fields]},
         )
         data_type = cls._apply_flags(base_type, flags)
 
@@ -134,19 +171,23 @@ class DefinitionStruct(base.Definition):
         """
 
         fields = [
-            cls.from_data_type(
+            (field[0], cls.from_data_type(
                 data_type = field[1],
                 field_name = field[0],
                 cache = cache,
-            ) for field in base_type._fields_
+            )) for field in base_type._fields_
         ]
 
-        return cls(
+        structtype = cls(
             flags = flags,
             field_name = field_name,
-            type_name = f'struct_{hash(tuple((field.field_name, field.data_type) for field in fields)):x}',
+            type_name = f'structtype_{hash(tuple((name, definition.data_type) for name, definition in fields)):x}',
             data_type = data_type,
             base_type = base_type,
             fields = fields,
-            cache = cache,
         )
+
+        if not structtype.type_name in cache.struct.keys():  # HACK for memsync
+            cache.struct[structtype.type_name] = structtype.base_type, structtype.data_type
+
+        return structtype

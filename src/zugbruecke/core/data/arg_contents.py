@@ -36,13 +36,13 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from ..const import (
     FLAG_POINTER,
-    GROUP_VOID,
-    GROUP_FUNDAMENTAL,
-    GROUP_STRUCT,
-    GROUP_FUNCTION,
+    SIMPLE_GROUP,
+    STRUCT_GROUP,
+    FUNC_GROUP,
 )
 from ..callback_client import CallbackClient
 from ..callback_server import CallbackServer
+from ..definitions import Definition
 from ..errors import DataFlagError, DataGroupError
 from ..memory import is_null_pointer, strip_pointer, strip_simplecdata
 from ..typeguard import typechecked
@@ -59,7 +59,7 @@ class ArgContents:
     MIXIN: Argument contents (without memory sync)
     """
 
-    def pack_args(self, args: List[Any], argtypes: List[Dict], conv: Optional[str] = None) -> List[Any]:
+    def pack_args(self, args: List[Any], argtypes: List[Definition], conv: Optional[str] = None) -> List[Any]:
         """
         Args:
             - args: raw arguments
@@ -93,7 +93,7 @@ class ArgContents:
         # Number of arguments is just wrong
         raise TypeError  # Must be TypeError for ctypes compatibility
 
-    def unpack_args(self, args: List[Any], argtypes: List[Dict], conv: Optional[str] = None) -> List[Any]:
+    def unpack_args(self, args: List[Any], argtypes: List[Definition], conv: Optional[str] = None) -> List[Any]:
         """
         Args:
             - args: packed list of arguments from shipping
@@ -127,7 +127,7 @@ class ArgContents:
         # Number of arguments is just wrong
         raise TypeError  # Highly unlikely case, pack_args will fail instead
 
-    def pack_retval(self, value: Any, restype: Dict) -> Any:  # return_msg_pack
+    def pack_retval(self, value: Any, restype: Definition) -> Any:  # return_msg_pack
         """
         Args:
             - value: raw return value
@@ -141,7 +141,7 @@ class ArgContents:
 
         return self._pack_item(value, restype)
 
-    def unpack_retval(self, value: Any, restype: Dict) -> Any:  # return_msg_unpack
+    def unpack_retval(self, value: Any, restype: Definition) -> Any:  # return_msg_unpack
         """
         Args:
             - value: packed return value from shipping
@@ -155,8 +155,8 @@ class ArgContents:
 
         # If this is not a fundamental datatype or if there is a pointer involved, just unpack
         if (
-            not restype["g"] == GROUP_FUNDAMENTAL
-            or FLAG_POINTER in restype["f"]
+            not restype.GROUP == SIMPLE_GROUP
+            or FLAG_POINTER in restype.flags
         ):
             return self._unpack_item(value, restype)
 
@@ -167,7 +167,7 @@ class ArgContents:
             self._unpack_item(value, restype)
         )
 
-    def sync_args(self, old_args: List[Any], new_args: List[Any], argtypes: List[Dict]):
+    def sync_args(self, old_args: List[Any], new_args: List[Any], argtypes: List[Definition]):
         """
         Args:
             - old_args: Raw arguments
@@ -182,7 +182,7 @@ class ArgContents:
         ):
             self._sync_arg(old_arg, new_arg, argtype)
 
-    def _pack_item(self, item: Any, itemtype: Dict) -> Any:
+    def _pack_item(self, item: Any, itemtype: Definition) -> Any:
         """
         Args:
             - item: raw argument / return value
@@ -192,37 +192,42 @@ class ArgContents:
         """
 
         # The non-trivial case first, non-scalars: arrays
-        if not itemtype["s"]:
+        if not itemtype.is_scalar:
             # Unpack every item in array
             return self._pack_array(item, itemtype)
 
         # Strip away the pointers ... (all flags are pointers in this case)
-        for flag in itemtype["f"]:
+        for flag in itemtype.flags:
             if flag != FLAG_POINTER:
                 raise DataFlagError(f'unknown non-pointer flag for scalar "{flag:d}"')
             if is_null_pointer(item):
                 return None  # Just return None - will (hopefully) be overwritten by memsync
             item = strip_pointer(item)
 
+        # Likely handled by memsync
+        if itemtype.is_void:
+            # Leave empty
+            return None
+
         # Handle fundamental types
-        if itemtype["g"] == GROUP_FUNDAMENTAL:
+        if itemtype.GROUP == SIMPLE_GROUP:
             # Append argument to list ...
             return strip_simplecdata(item)
 
         # Handle structs
-        if itemtype["g"] == GROUP_STRUCT:
+        if itemtype.GROUP == STRUCT_GROUP:
             # Reclusively call this routine for packing structs
             return self._pack_struct(item, itemtype)
 
         # Handle functions
-        if itemtype["g"] == GROUP_FUNCTION:
+        if itemtype.GROUP == FUNC_GROUP:
             # Packs functions and registers them at RPC server
             return self._pack_func(item, itemtype)
 
         # Handle everything else ...
         return None  # Just return None - will (hopefully) be overwritten by memsync
 
-    def _pack_array(self, array: Any, arraytype: Dict, start: int = 0) -> Any:
+    def _pack_array(self, array: Any, arraytype: Definition, start: int = 0) -> Any:
         """
         Recursive function, packing one dimension per call
 
@@ -234,7 +239,7 @@ class ArgContents:
             Packed argument / return array for shipping
         """
 
-        for idx, flag in enumerate(arraytype["f"][start:], start = start):
+        for idx, flag in enumerate(arraytype.flags[start:], start = start):
 
             # Is pointer?
             if flag == FLAG_POINTER:
@@ -244,7 +249,7 @@ class ArgContents:
             # Is array dimension?
             elif flag > 0:
                 # Only dive deeper if this is not the last flag
-                if idx < len(arraytype["f"]) - 1:
+                if idx < len(arraytype.flags) - 1:
                     array = [
                         self._pack_array(
                             dim, arraytype, start=idx + 1
@@ -253,7 +258,7 @@ class ArgContents:
                     ]
                 else:
                     array = array[:]
-                    if arraytype["g"] == GROUP_STRUCT:
+                    if arraytype.GROUP == STRUCT_GROUP:
                         array = [
                             self._pack_struct(struct, arraytype) for struct in array
                         ]
@@ -264,7 +269,7 @@ class ArgContents:
 
         return array
 
-    def _pack_func(self, func: Callable, functype: Dict) -> Optional[str]:
+    def _pack_func(self, func: Callable, functype: Definition) -> Optional[str]:
         """
         Args:
             - func: callable
@@ -289,15 +294,15 @@ class ArgContents:
                 rpc_server = self._callback_server,
                 data = self,
                 log = self._log,
-                argtypes = functype["_argtypes_"],
-                restype = functype["_restype_"],
-                memsyncs = functype["_memsync_"],
+                argtypes = functype.argtypes,
+                restype = functype.restype,
+                memsyncs = functype.memsyncs,
             )
 
         # Return name of callback entry
         return name
 
-    def _pack_struct(self, struct: Any, structtype: Dict) -> List[Tuple[str, Any]]:
+    def _pack_struct(self, struct: Any, structtype: Definition) -> List[Tuple[str, Any]]:
         """
         Args:
             - struct: raw argument / return struct
@@ -309,15 +314,15 @@ class ArgContents:
         # Return parameter message list - MUST WORK WITH PICKLE
         return [
             (
-                fieldtype["n"],
+                name,
                 self._pack_item(
-                    getattr(struct, fieldtype["n"]), fieldtype
+                    getattr(struct, name), definition
                 ),
             )
-            for fieldtype in structtype["_fields_"]
+            for name, definition in structtype.fields
         ]
 
-    def _sync_arg(self, old_arg: Any, new_arg: Any, argtype: Dict):
+    def _sync_arg(self, old_arg: Any, new_arg: Any, argtype: Definition):
         """
         Args:
             - old_arg: Raw argument
@@ -328,40 +333,40 @@ class ArgContents:
         """
 
         # The non-trivial case first, arrays
-        if not argtype["s"]:
+        if not argtype.is_scalar:
             # Sync items in array
             self._sync_array(old_arg, new_arg, argtype)
             # Leave
             return
 
         # Do not do this for void pointers, likely handled by memsync
-        if argtype["g"] == GROUP_VOID:
+        if argtype.is_void:
             return
 
         # Strip away the pointers ... (all flags are pointers in this case)
-        for flag in argtype["f"]:
+        for flag in argtype.flags:
             if flag != FLAG_POINTER:
                 raise DataFlagError("unknown non-pointer flag for scalar")
             old_arg = strip_pointer(old_arg)
             new_arg = strip_pointer(new_arg)
 
-        if argtype["g"] == GROUP_FUNDAMENTAL:
+        if argtype.GROUP == SIMPLE_GROUP:
             if hasattr(old_arg, "value"):
                 old_arg.value = new_arg.value
             else:
                 pass  # only relevant within structs or for actual pointers to scalars
             return
 
-        if argtype["g"] == GROUP_STRUCT:
+        if argtype.GROUP == STRUCT_GROUP:
             self._sync_struct(old_arg, new_arg, argtype)
             return
 
-        if argtype["g"] == GROUP_FUNCTION:
+        if argtype.GROUP == FUNC_GROUP:
             return  # Nothing to do?
 
         raise DataGroupError("unexpected datatype group")
 
-    def _sync_array(self, old_array: Any, new_array: Any, arraytype: Dict, start: int = 0):
+    def _sync_array(self, old_array: Any, new_array: Any, arraytype: Definition, start: int = 0):
         """
         Recursive function, syncing one dimension per call
 
@@ -374,7 +379,7 @@ class ArgContents:
             Nothing
         """
 
-        for idx, flag in enumerate(arraytype["f"][start:], start = start):
+        for idx, flag in enumerate(arraytype.flags[start:], start = start):
 
             # Handle pointers
             if flag == FLAG_POINTER:
@@ -384,7 +389,7 @@ class ArgContents:
             # Handle arrays
             elif flag > 0:
                 # Only dive deeper if this is not the last flag
-                if idx < len(arraytype["f"]) - 1:
+                if idx < len(arraytype.flags) - 1:
                     for old_dim, new_dim in zip(old_array[:], new_array[:]):
                         self._sync_array(
                             old_dim,
@@ -393,14 +398,14 @@ class ArgContents:
                             start=idx + 1,
                         )
                 else:
-                    if arraytype["g"] == GROUP_FUNDAMENTAL:
+                    if arraytype.GROUP == SIMPLE_GROUP:
                         old_array[:] = new_array[:]
-                    elif arraytype["g"] == GROUP_STRUCT:
+                    elif arraytype.GROUP == STRUCT_GROUP:
                         for old_struct, new_struct in zip(old_array[:], new_array[:]):
                             self._sync_struct(
                                 old_struct, new_struct, arraytype
                             )
-                    elif arraytype["g"] == GROUP_FUNCTION:
+                    elif arraytype.GROUP == FUNC_GROUP:
                         raise NotImplementedError(
                             "functions in arrays are not supported"
                         )
@@ -411,7 +416,7 @@ class ArgContents:
             else:
                 raise DataFlagError("unknown non-pointer flag for array")
 
-    def _sync_struct(self, old_struct: Any, new_struct: Any, structtype: Dict):
+    def _sync_struct(self, old_struct: Any, new_struct: Any, structtype: Definition):
         """
         Args:
             - old_struct: raw argument struct
@@ -422,15 +427,14 @@ class ArgContents:
         """
 
         # Step through arguments
-        for fieldtype in structtype["_fields_"]:
-
+        for name, definition in structtype.fields:
             self._sync_arg(
-                getattr(old_struct, fieldtype["n"]),
-                getattr(new_struct, fieldtype["n"]),
-                fieldtype,
+                getattr(old_struct, name),
+                getattr(new_struct, name),
+                definition,
             )
 
-    def _unpack_item(self, item: Any, itemtype: Dict) -> Any:
+    def _unpack_item(self, item: Any, itemtype: Definition) -> Any:
         """
         Args:
             - item: packaged argument / return value from shipping
@@ -440,37 +444,37 @@ class ArgContents:
         """
 
         # The non-trivial case first, arrays
-        if not itemtype["s"]:
+        if not itemtype.is_scalar:
             # Unpack items in array
             _, item = self._unpack_array(item, itemtype)
             return item
 
-        # Handle fundamental types
-        if itemtype["g"] == GROUP_FUNDAMENTAL:
-            item = getattr(ctypes, itemtype["t"])(item)
-        # Handle structs
-        elif itemtype["g"] == GROUP_STRUCT:
-            item = self._unpack_struct(item, itemtype)
-        # Handle functions
-        elif itemtype["g"] == GROUP_FUNCTION:
-            item = self._unpack_func(item, itemtype)
         # Handle voids (likely mensync stuff)
-        elif itemtype["g"] == GROUP_VOID:
+        if itemtype.is_void:
             # Return a placeholder
             return None
+        # Handle fundamental types
+        elif itemtype.GROUP == SIMPLE_GROUP:
+            item = itemtype.base_type(item)
+        # Handle structs
+        elif itemtype.GROUP == STRUCT_GROUP:
+            item = self._unpack_struct(item, itemtype)
+        # Handle functions
+        elif itemtype.GROUP == FUNC_GROUP:
+            item = self._unpack_func(item, itemtype)
         # Handle everything else ...
         else:
             raise DataGroupError("unexpected datatype group")
 
         # Step through flags in reverse order (if it's not a memsync field)
-        for flag in reversed(itemtype["f"]):
+        for flag in reversed(itemtype.flags):
             if flag != FLAG_POINTER:
                 raise DataFlagError("unknown non-pointer flag for scalar")
             item = ctypes.pointer(item)
 
         return item
 
-    def _unpack_array(self, array: Any, arraytype: Dict, start: int = 0) -> Tuple[Any, Any]:
+    def _unpack_array(self, array: Any, arraytype: Definition, start: int = 0) -> Tuple[Any, Any]:
         """
         Recursive function, packing one dimension per call
 
@@ -483,10 +487,10 @@ class ArgContents:
         """
 
         # Extract the flag
-        flag = arraytype["f"][start]
+        flag = arraytype.flags[start]
 
         # Dive deeper?
-        if start < len(arraytype["f"]) - 1:
+        if start < len(arraytype.flags) - 1:
 
             # Get index of next flag
             next_start = start + 1
@@ -528,22 +532,22 @@ class ArgContents:
             if flag == FLAG_POINTER:
                 raise DataFlagError("unexpected pointer flag for array")
 
-            if arraytype["g"] == GROUP_FUNDAMENTAL:
-                subtype = getattr(ctypes, arraytype["t"]) * flag
+            if arraytype.GROUP == SIMPLE_GROUP:
+                subtype = arraytype.base_type * flag
                 array = subtype(*array)
-            elif arraytype["g"] == GROUP_STRUCT:
-                subtype = self._cache.struct[arraytype["t"]] * flag
+            elif arraytype.GROUP == STRUCT_GROUP:
+                subtype = arraytype.base_type * flag
                 array = subtype(
                     *(self._unpack_struct(dim, arraytype) for dim in array)
                 )
-            elif arraytype["g"] == GROUP_FUNCTION:
+            elif arraytype.GROUP == FUNC_GROUP:
                 raise NotImplementedError("functions in arrays are not supported")
             else:
                 raise DataGroupError("unexpected datatype group")
 
         return subtype, array
 
-    def _unpack_func(self, name: Optional[str], functype: Dict) -> Optional[Callable]:
+    def _unpack_func(self, name: Optional[str], functype: Definition) -> Optional[Callable]:
         """
         Args:
             - name: (Generated) name of func from shipping
@@ -560,22 +564,22 @@ class ArgContents:
         if name not in self._cache.handle.keys():
 
             # Generate, decorate and store callback translator in cache
-            self._cache.handle[name] = functype["_factory_type_"](
+            self._cache.handle[name] = functype.base_type(
                 CallbackServer(
                     name = name,
                     rpc_client = self._callback_client,
                     data = self,
                     log = self._log,
-                    argtypes = functype["_argtypes_"],
-                    restype = functype["_restype_"],
-                    memsyncs = functype["_memsync_"],
+                    argtypes = functype.argtypes,
+                    restype = functype.restype,
+                    memsyncs = functype.memsyncs,
                 )
             )
 
         # Return name of callback entry
         return self._cache.handle[name]
 
-    def _unpack_struct(self, struct: Any, structtype: Dict) -> Any:
+    def _unpack_struct(self, struct: Any, structtype: Definition) -> Any:
         """
         Args:
             struct: Packed struct from shipping
@@ -585,23 +589,23 @@ class ArgContents:
         """
 
         # Generate new instance of struct datatype
-        new_struct = self._cache.struct[structtype["t"]]()
+        new_struct = structtype.base_type()
 
         # Step through arguments
-        for (name, value), fieldtype in zip(struct, structtype["_fields_"]):
+        for (name, packed_value), (_, definition) in zip(struct, structtype.fields):
 
             # HACK if value is None, it's likely a function pointer sent back from Wine side - skip
-            if value is None:
+            if packed_value is None:
                 continue
 
-            field_value = self._unpack_item(value, fieldtype)
+            value = self._unpack_item(packed_value, definition)
 
             try:
 
                 setattr(
                     new_struct,  # struct instance to be modified
                     name,  # field name
-                    field_value,  # field value
+                    value,  # field value
                 )
 
             except TypeError:  # TODO HACK relevant for structs & callbacks & memsync together
@@ -609,7 +613,7 @@ class ArgContents:
                 setattr(
                     new_struct,  # struct instance to be modified
                     name,  # field name
-                    ctypes.cast(field_value, ctypes.c_void_p),
+                    ctypes.cast(value, ctypes.c_void_p),
                 )
 
         return new_struct

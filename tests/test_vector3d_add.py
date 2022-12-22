@@ -152,7 +152,7 @@ class sample_class_b:
         )
         self._vector3d_add_array.restype = self._c.POINTER(self._vector3d)
         self._vector3d_add_array.memsync = [
-            {"p": [0], "l": [1], "t": "vector3d@{ID:d}".format(ID=id(vector3d))}
+            {"p": [0], "l": [1], "t": vector3d}
         ]
 
     def vector3d_add_array(self, v):

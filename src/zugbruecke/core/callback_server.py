@@ -33,7 +33,7 @@ specific language governing rights and limitations under the License.
 
 from pprint import pformat as pf
 import traceback
-from typing import Any, Dict, List
+from typing import Any, List
 
 from .abc import (
     CallbackServerABC,
@@ -41,7 +41,7 @@ from .abc import (
     LogABC,
     RpcClientABC,
 )
-from .definitions import DefinitionMemsync
+from .definitions import Definition, DefinitionMemsync
 from .mempkg import Mempkg
 from .typeguard import typechecked
 
@@ -63,18 +63,19 @@ class CallbackServer(CallbackServerABC):
         rpc_client: RpcClientABC,
         data: DataABC,
         log: LogABC,
-        argtypes: List[Dict],
-        restype: Dict,
-        memsyncs: List[Dict],
+        argtypes: List[Definition],
+        restype: Definition,
+        memsyncs: List[DefinitionMemsync],
     ):
 
         self._name = name
         self._handler = getattr(rpc_client, name)
         self._data = data
         self._log = log
+
         self._argtypes = argtypes
         self._restype = restype
-        self._memsyncs = [DefinitionMemsync.from_packed(memsync, self._data.cache) for memsync in memsyncs]
+        self._memsyncs = memsyncs
 
     def __call__(self, *args: Any) -> Any:
 

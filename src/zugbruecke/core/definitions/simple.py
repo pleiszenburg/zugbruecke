@@ -34,6 +34,7 @@ import ctypes
 from typing import Any, Dict, List, Tuple, Union
 
 from ..abc import CacheABC, DefinitionABC
+from ..const import SIMPLE_GROUP
 from ..typeguard import typechecked
 
 from . import base
@@ -45,7 +46,7 @@ from . import base
 @typechecked
 class DefinitionSimple(base.Definition):
 
-    GROUP = "PyCSimpleType"
+    GROUP = SIMPLE_GROUP
 
     def __init__(self, *args: Any, **kwargs: Any):
 

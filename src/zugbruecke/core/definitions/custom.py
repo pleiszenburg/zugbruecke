@@ -31,9 +31,10 @@ specific language governing rights and limitations under the License.
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 import ctypes
-from typing import Any, Dict, List, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 from ..abc import CacheABC, DefinitionABC
+from ..const import CUSTOM_GROUP
 from ..typeguard import typechecked
 
 from . import base
@@ -45,7 +46,7 @@ from . import base
 @typechecked
 class DefinitionCustom(base.Definition):
 
-    GROUP = "Custom"
+    GROUP = CUSTOM_GROUP
 
     def __init__(self, *args: Any, **kwargs: Any):
 
@@ -69,7 +70,7 @@ class DefinitionCustom(base.Definition):
     def from_packed(cls,
         flags: List[int], # f
         field_name: Union[str, int, None], # n
-        type_name: str, # t
+        type_name: Optional[str], # t
     ) -> DefinitionABC:
         """
         Unpack from dict received from other side
@@ -88,7 +89,7 @@ class DefinitionCustom(base.Definition):
         )
 
     @classmethod
-    def _assemble_datatype(cls, type_name: str, flags: List[int]) -> Tuple[Any, Any]:
+    def _assemble_datatype(cls, type_name: Optional[str], flags: List[int]) -> Tuple[Any, Any]:
         """
         Assemble ctypes data type
 
@@ -107,7 +108,7 @@ class DefinitionCustom(base.Definition):
         cls,
         flags: List[int], # f
         field_name: Union[str, int, None], # n
-        type_name: str, # t
+        type_name: Optional[str], # t
         data_type: Any,
         base_type: Any,
         cache: CacheABC,

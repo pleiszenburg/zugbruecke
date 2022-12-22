@@ -74,7 +74,10 @@ class Cache(CacheABC):
 
         return self._handle
 
-    def by_flag(self, flag: int) -> Dict:
+    def by_conv(self, flag: int) -> Dict:
+        """
+        By calling convention flag
+        """
 
         if flag == _FUNCFLAG_CDECL:
             return self._cdecl

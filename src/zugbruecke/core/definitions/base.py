@@ -70,6 +70,11 @@ class Definition(DefinitionABC):
         return f'<Definition group={self.GROUP} field={self._field_name} type={self._type_name} flags={self._flags}>'  # TODO
 
     @property
+    def flags(self) -> List[int]:
+
+        return self._flags
+
+    @property
     def data_type(self) -> Any:
         """
         The actual ctypes data type (all flags applied)
@@ -78,12 +83,28 @@ class Definition(DefinitionABC):
         return self._data_type
 
     @property
+    def base_type(self) -> Any:
+        """
+        Base ctypes data type (no flags applied)
+        """
+
+        return self._base_type
+
+    @property
     def field_name(self) -> Union[str, int, None]:
         """
         Relevant if definition is part of a struct
         """
 
         return self._field_name
+
+    @property
+    def type_name(self) -> Optional[str]:
+        """
+        Relevant to access cached types
+        """
+
+        return self._type_name
 
     @property
     def array_depth(self) -> int:  # "d"
@@ -109,6 +130,14 @@ class Definition(DefinitionABC):
 
         return self.array_depth == 0
 
+    @property
+    def is_void(self) -> bool:
+        """
+        Indicate minimal void pointer, no flags, no array, likely handled by memsync
+        """
+
+        return self._data_type == ctypes.c_void_p and not self.is_pointer and self.is_scalar
+
     @staticmethod
     def _apply_flags(data_type: Any, flags: List[int]) -> Any:
         """
@@ -126,7 +155,7 @@ class Definition(DefinitionABC):
         return data_type
 
     @classmethod
-    def _assemble_datatype(cls, type_name: str, flags: List[int]) -> Tuple[Any, Any]:
+    def _assemble_datatype(cls, type_name: Optional[str], flags: List[int]) -> Tuple[Any, Any]:
         """
         Assemble ctypes data type
 
@@ -205,7 +234,7 @@ class Definition(DefinitionABC):
     def from_data_types(
         cls,
         cache: CacheABC,
-        data_types: List[DefinitionABC],
+        data_types: List[Any],
     ) -> List[DefinitionABC]:
 
         return [cls.from_data_type(data_type = data_type, cache = cache) for data_type in data_types]
