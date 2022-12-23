@@ -78,7 +78,11 @@ def _run_tests_wine(*args: str):
                 cmd = ['make', '_clean_py'],
             )
             _run(
-                cmd = ['wenv', 'pytest', '--hypothesis-show-statistics', *args],
+                cmd = [
+                    'wenv', 'pytest',
+                    '--full-trace', '-v', '--log-level=DEBUG',  # debugging github actions
+                    '--hypothesis-show-statistics', *args
+                ],
                 env = {
                     'WENV_DEBUG': '1',
                     'WENV_ARCH': arch,
