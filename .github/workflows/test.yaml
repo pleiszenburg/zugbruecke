@@ -11,7 +11,13 @@ jobs:
     strategy:
       matrix:
         os: ["ubuntu-20.04"]
-        python-version: [3.7, 3.8, 3.9, "3.10", "3.11"]
+        python-version: [
+          # 3.7,
+          # 3.8,
+          # 3.9,
+          # "3.10",
+          "3.11"
+        ]
 
     runs-on: ${{ matrix.os }}
 
@@ -56,6 +62,10 @@ jobs:
       - name: Build docs
         run: |
           make docs
+      - name: DEBUG WENV PATHS
+          WENV_PYTHONVERSION="3.7.9" wenv help
+          WENV_PYTHONVERSION="3.7.9" wenv python -c "import os; print(os.listdir(\"C:\\\\python-3.7.9.stable\\\\lib\\\\site-packages\\\\\"))"
+          WENV_PYTHONVERSION="3.7.9" wenv python -c "import os; print(os.listdir(\"C:\\\\python-3.7.9.stable\\\\lib\\\\site-packages\\\\wenv\\\\\"))"
       - name: Run tests
         run: |
           ZUGBRUECKE_LOG_LEVEL=100 make test
