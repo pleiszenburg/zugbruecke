@@ -63,6 +63,7 @@ jobs:
         run: |
           make docs
       - name: DEBUG WENV PATHS
+        run: |
           WENV_PYTHONVERSION="3.7.9" wenv help
           WENV_PYTHONVERSION="3.7.9" wenv python -c "import os; print(os.listdir(\"C:\\\\python-3.7.9.stable\\\\lib\\\\site-packages\\\\\"))"
           WENV_PYTHONVERSION="3.7.9" wenv python -c "import os; print(os.listdir(\"C:\\\\python-3.7.9.stable\\\\lib\\\\site-packages\\\\wenv\\\\\"))"
