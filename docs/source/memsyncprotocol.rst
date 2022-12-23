@@ -3,6 +3,10 @@
 The Memory Synchronization Protocol
 ===================================
 
+.. warning::
+
+    Before using ``memsync``, make sure to understand its use first case by reading the introduction on :ref:`memory synchronization <memsyncintro>`.
+
 A Simple Example
 ----------------
 
