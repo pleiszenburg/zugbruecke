@@ -87,6 +87,7 @@ def _run_tests_wine(*args: str):
                     'WENV_DEBUG': '1',
                     'WENV_ARCH': arch,
                     'WENV_PYTHONVERSION': str(build),
+                    **os.environ,  # debugging github actions
                 },
             )
 
