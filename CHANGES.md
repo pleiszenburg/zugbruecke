@@ -10,6 +10,7 @@
 - FIX: Syncing entire structs via `memsync` was broken, see #92.
 - DEPRECATED: Single-character parameter names in memsync directives.
 - DEPRECATED: `ctypes` fundamental types specified by name as strings in `memsync` directives.
+- DOCS: More detailed explanation of `memsync`, where it is needed and where it is not, among other improvements.
 - DEV: Added tests on custom types and array objects (standard library) as well as numpy ndarray objects.
 
 ## 0.1.0 (2022-09-11)

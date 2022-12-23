@@ -1,6 +1,10 @@
 The ``memsync`` attribute
 =========================
 
+.. warning::
+
+    Before using ``memsync``, make sure to understand its use first case by reading the introduction on :ref:`memory synchronization <memsyncintro>`.
+
 ``memsync`` must be of type ``list[dict]``, i.e. a list of dictionaries. Each dictionary represents one memory section, which must be kept in sync. It can have the following keys:
 
 * ``pointer`` (:ref:`path to pointer <pathpointer>`)
@@ -18,8 +22,8 @@ Paths
 
 .. code:: python
 
-	# arg index: 0        1        2
-	some_routine(param_a, param_b, param_c)
+    # arg index: 0        1        2
+    some_routine(param_a, param_b, param_c)
 
 If ``param_b`` was the item in question, its path would be ``[1]``, a list with a single integer, referring to the second argument of ``some_routine`` counted from zero.
 
@@ -27,14 +31,14 @@ The following more complex example illustrates why the list is actually represen
 
 .. code:: python
 
-	class some_struct(Structure):
-		_fields_ = [
-			('field_a', POINTER(c_float)),
-			('field_b', c_int),
-		]
+    class some_struct(Structure):
+        _fields_ = [
+            ('field_a', POINTER(c_float)),
+            ('field_b', c_int),
+        ]
 
-	# arg index:       0        1        2        3
-	some_other_routine(param_a, param_b, param_c, param_d)
+    # arg index:       0        1        2        3
+    some_other_routine(param_a, param_b, param_c, param_d)
 
 Let's assume that ``param_a`` is of type ``some_struct`` and ``field_a`` contains the target item. The path would look as follows: ``[0, 'field_a']``. The target item is found in ``field_a`` of the first parameter of ``some_other_routine`` counted from zero, ``param_a``.
 
