@@ -6,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-    src/zugbruecke/core/data/arg_contents.py: (Un-) packing of argument contents
+    src/zugbruecke/core/data.py: (Un-) packing of arguments and return values
 
     Required to run on platform / side: [UNIX, WINE]
 
@@ -32,20 +32,22 @@ specific language governing rights and limitations under the License.
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 import ctypes
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any, Callable, List, Optional, Tuple
 
-from ..const import (
+from .abc import CacheABC, DataABC, LogABC, RpcClientABC, RpcServerABC
+from .cache import Cache
+from .const import (
     FLAG_POINTER,
     SIMPLE_GROUP,
     STRUCT_GROUP,
     FUNC_GROUP,
 )
-from ..callback_client import CallbackClient
-from ..callback_server import CallbackServer
-from ..definitions import Definition
-from ..errors import DataFlagError, DataGroupError
-from ..memory import is_null_pointer, strip_pointer, strip_simplecdata
-from ..typeguard import typechecked
+from .callback_client import CallbackClient
+from .callback_server import CallbackServer
+from .definitions import Definition
+from .errors import DataFlagError, DataGroupError
+from .memory import is_null_pointer, strip_pointer, strip_simplecdata
+from .typeguard import typechecked
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -54,10 +56,31 @@ from ..typeguard import typechecked
 
 
 @typechecked
-class ArgContents:
+class Data(DataABC):
     """
-    MIXIN: Argument contents (without memory sync)
+    Handles argument and return value contents, prepares stage for memsync if required
     """
+
+    def __init__(
+        self,
+        log: LogABC,
+        is_server: bool,
+        callback_client: Optional[RpcClientABC] = None,
+        callback_server: Optional[RpcServerABC] = None,
+    ):
+
+        self._log = log
+        self._is_server = is_server
+
+        self._callback_client = callback_client
+        self._callback_server = callback_server
+
+        self._cache = Cache()
+
+    @property
+    def cache(self) -> CacheABC:
+
+        return self._cache
 
     def pack_args(self, args: List[Any], argtypes: List[Definition], conv: Optional[str] = None) -> List[Any]:
         """

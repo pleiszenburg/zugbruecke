@@ -2,9 +2,15 @@
 
 ## 0.2.0 (2022-XX-XX)
 
-**CAUTION**: The datatype parser and definition code was rewritten completely. It should work as becore in almost all instances although unexpected breakages may occur. If entire struct objects are synced via `memsync` directives, the struct types now have to be specified directly instead of their names as strings as before. In addition, other ctypes types do not need to be specified by their name as strings in `memsync` directives anymore - plain ctypes types can be used instead. Strings remain valid specifications for compatibility though. `memsync` directives allow for more descriptive parameter names while the old single-character names remain valid for compatibility.
+**CAUTION**: The datatype parser and definition code was rewritten completely. It should work as becore in almost all instances although unexpected breakages may occur. If entire struct objects are synced via `memsync` directives, the struct types now have to be specified directly instead of their names as strings as before.
 
+- FEATURE: In `memsync` directives, `ctypes` types do not need to be specified by their name as strings anymore - plain `ctypes` fundamental types and structure types can be used instead. Strings remain valid specifications for compatibility though.
+- FEATURE: `memsync` directives allow for more descriptive parameter names while the old single-character names remain valid for compatibility.
 - FIX: If `zugbruecke` (and `wenv`) were installed into user site-packages, the installation would break, see #88.
+- FIX: Syncing entire structs via `memsync` was broken, see #92.
+- DEPRECATED: Single-character parameter names in memsync directives.
+- DEPRECATED: `ctypes` fundamental types specified by name as strings in `memsync` directives.
+- DEV: Added tests on custom types and array objects (standard library) as well as numpy ndarray objects.
 
 ## 0.1.0 (2022-09-11)
 
