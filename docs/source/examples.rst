@@ -106,6 +106,17 @@ Thanks to Wine, which can run both in 32 bit and in 64 bit mode, it is perfectly
     ctypes_windows32 = CtypesSession(arch = 'win32')
     ctypes_windows64 = CtypesSession(arch = 'win64')
 
+Calling Conventions
+-------------------
+
+While the handling of different calling conventions is absolutely identical between *ctypes* and *zugbruecke*, it is actually a common trap for beginners when using *zugbruecke* (or *ctypes*) for the first time. The confusion arises around ``ctypes.CDLL`` / ``ctypes.cdll`` and ``ctypes.WinDLL`` / ``ctypes.windll``, which refer to two different `calling conventions`_. In fact, both types of calling conventions can be found on Windows. Any given DLL might use either one. While both calling conventions are ironically identical for 64-bit DLLs and can be used interchangeably in those cases, calling conventions actually differ for 32-bit DLLs. The main difference or symptom is that function arguments are passed to the function in a location differing by an offset of 8 bytes. You might see exceptions similar to "arguments 8 bytes too short" or "arguments 8 bytes too long" if using the wrong calling convention. In rare cases, you might not even get an exception but receive plain wrong results from the called function instead.
+
+.. _calling conventions: https://en.wikipedia.org/wiki/Calling_convention
+
+.. note::
+
+    If the DLL's C-code is available, the calling convention can be deduced from "annotations" in front of functions. ``__stdcall`` points to ``WINDLL``, while ``__cdecl`` points to ``CDLL``.
+
 Memory Synchronization
 ----------------------
 
