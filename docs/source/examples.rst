@@ -3,18 +3,18 @@
 .. _examples:
 
 .. index::
-	pair: cdll; example
-	pair: windll; example
-	pair: oledll; example
-	pair: memsync; example
-	single: demo_dll
+    pair: cdll; example
+    pair: windll; example
+    pair: oledll; example
+    pair: memsync; example
+    single: demo_dll
 
 Getting Started
 ===============
 
 .. warning::
 
-	Read the `ctypes documentation`_ first if you have not done so already. **zugbruecke is a drop-in replacement for ctypes**. *zugbruecke*'s documentation does **NOT** cover how to use *ctypes*.
+    Read the `ctypes documentation`_ first if you have not done so already. **zugbruecke is a drop-in replacement for ctypes**. *zugbruecke*'s documentation does **NOT** cover how to use *ctypes*.
 
 .. _ctypes documentation: https://docs.python.org/3/library/ctypes.html
 
@@ -25,38 +25,38 @@ A lot of code, which was written with ``ctypes``' ``cdll``, ``windll`` or ``oled
 
 .. code:: c
 
-	float
-	__stdcall __declspec(dllimport)
-	simplefunc(
-		float a,
-		float b
-	)
-	{
-		return a - (a / b);
-	}
+    float
+    __stdcall __declspec(dllimport)
+    simplefunc(
+        float a,
+        float b
+    )
+    {
+        return a - (a / b);
+    }
 
 On Windows, you could call it via ``ctypes`` by importing it first:
 
 .. code:: python
 
-	import ctypes
+    import ctypes
 
 On Unix-like systems such as Linux, Mac OS or BSD, you simply import ``zugbruecke.ctypes`` instead:
 
 .. code:: python
 
-	import zugbruecke.ctypes as ctypes
+    import zugbruecke.ctypes as ctypes
 
 From now on, the code is - in most but not all cases - the same. You can call the function as follows:
 
 .. code:: python
 
-	simplefunc = ctypes.windll.LoadLibrary('demo.dll').simplefunc
-	simplefunc.argtypes = (ctypes.c_float, ctypes.c_float)
-	simplefunc.restype = ctypes.c_float
+    simplefunc = ctypes.windll.LoadLibrary('demo.dll').simplefunc
+    simplefunc.argtypes = (ctypes.c_float, ctypes.c_float)
+    simplefunc.restype = ctypes.c_float
 
-	result = simplefunc(20.0, 1.07)
-	print(f'Got "{result:f}".')
+    result = simplefunc(20.0, 1.07)
+    print(f'Got "{result:f}".')
 
 It will happily print ``Got "1.308412".``
 
@@ -76,13 +76,13 @@ Because of the drop-in replacement design of *zugbruecke*, it is therefore possi
 
 .. code:: python
 
-	from sys import platform
-	if any(platform.startswith(name) for name in ('linux', 'darwin', 'freebsd')):
-		import zugbruecke.ctypes as ctypes
-	elif platform.startswith('win'):
-		import ctypes
-	else:
-		raise SystemError('unsupported platform')
+    from sys import platform
+    if any(platform.startswith(name) for name in ('linux', 'darwin', 'freebsd')):
+        import zugbruecke.ctypes as ctypes
+    elif platform.startswith('win'):
+        import ctypes
+    else:
+        raise SystemError('unsupported platform')
 
 Shared Objects and DLLs
 -----------------------
@@ -91,8 +91,8 @@ There is no harm in calling into both Shared Object files and DLLs from the same
 
 .. code:: python
 
-	import zugbruecke.ctypes as ctypes_windows # for DLLs
-	import ctypes as ctypes_unix # for shared objects
+    import zugbruecke.ctypes as ctypes_windows # for DLLs
+    import ctypes as ctypes_unix # for shared objects
 
 32 bit and 64 bit DLLs
 ----------------------
@@ -101,10 +101,10 @@ Thanks to Wine, which can run both in 32 bit and in 64 bit mode, it is perfectly
 
 .. code:: python
 
-	from zugbruecke import CtypesSession
+    from zugbruecke import CtypesSession
 
-	ctypes_windows32 = CtypesSession(arch = 'win32')
-	ctypes_windows64 = CtypesSession(arch = 'win64')
+    ctypes_windows32 = CtypesSession(arch = 'win32')
+    ctypes_windows64 = CtypesSession(arch = 'win64')
 
 Memory Synchronization
 ----------------------
