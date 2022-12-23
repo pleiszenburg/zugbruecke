@@ -65,8 +65,10 @@ jobs:
       - name: DEBUG WENV PATHS
         run: |
           WENV_PYTHONVERSION="3.7.9" wenv help
+          WENV_PYTHONVERSION="3.7.9" wenv python -c "import sys; print(sys.path)"
           WENV_PYTHONVERSION="3.7.9" wenv python -c "import os; print(os.listdir(\"C:\\\\python-3.7.9.stable\\\\lib\\\\site-packages\\\\\"))"
           WENV_PYTHONVERSION="3.7.9" wenv python -c "import os; print(os.listdir(\"C:\\\\python-3.7.9.stable\\\\lib\\\\site-packages\\\\wenv\\\\\"))"
+          WENV_PYTHONVERSION="3.7.9" wenv python -c "import os; print(os.listdir(\"C:\\\\python-3.7.9.stable\\\\lib\\\\site-packages\\\\wenv\\\\_core\\\\\"))"
       - name: Run tests
         run: |
           ZUGBRUECKE_LOG_LEVEL=100 make test
