@@ -60,6 +60,15 @@ From now on, the code is - in most but not all cases - the same. You can call th
 
 It will happily print ``Got "1.308412".``
 
+Optional ``argtypes`` and ``restype`` annotations
+-------------------------------------------------
+
+The original *ctypes* allows to omit specifying ``argtypes`` and ``restype`` annotations in some cases. It tends to default to integers, ``ctypes.c_int``, in most cases, while also accepting pointers. *zugbruecke* is more strict in those cases and basically only allows passing integers without type annotations.
+
+.. note::
+
+    Differing from original *ctypes*, it is recommended to always specify ``argtypes`` and ``restype`` when using *zugbruecke*. Pointer types must be explicitly indicated. *ctypes* may accept data and even implicitly pass it as pointers in one way or another which is a mechanism not properly supported by *zugbruecke*.
+
 Platform-Independent Code
 -------------------------
 
