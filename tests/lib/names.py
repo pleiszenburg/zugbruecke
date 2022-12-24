@@ -44,7 +44,7 @@ from .const import DLL_FLD
 
 
 @typechecked
-def get_dll_fn(arch: str, convention: str, fn: str, custom: Optional[str] = None) -> str:
+def get_dll_fn(arch: str, convention: str, fn: str) -> str:
     """
     get name & path of test dll for given arch and convention
 
@@ -52,7 +52,6 @@ def get_dll_fn(arch: str, convention: str, fn: str, custom: Optional[str] = None
         - arch: Architecture of DLL
         - convention: Calling convention
         - fn: File name of Python source file
-        - custom: Custom suffix
     Returns:
         DLL file name
     """
@@ -60,16 +59,15 @@ def get_dll_fn(arch: str, convention: str, fn: str, custom: Optional[str] = None
     assert fn.lower().endswith(".py")
     name = fn[:-3]
 
-    return "{NAME:s}_{CONVENTION:s}-{ARCH:s}{CUSTOM:s}.dll".format(
+    return "{NAME:s}_{CONVENTION:s}-{ARCH:s}.dll".format(
         NAME=name,
         CONVENTION=convention,
         ARCH=arch,
-        CUSTOM=("-" + custom) if custom is not None else "",
     )
 
 
 @typechecked
-def get_dll_path(arch: str, convention: str, fn: str, custom: Optional[str] = None) -> str:
+def get_dll_path(arch: str, convention: str, fn: str) -> str:
     """
     get name & path of test dll for given arch and convention RELATIVE TO CWD
 
@@ -77,7 +75,6 @@ def get_dll_path(arch: str, convention: str, fn: str, custom: Optional[str] = No
         - arch: Architecture of DLL
         - convention: Calling convention
         - fn: File name of Python source file
-        - custom: Custom suffix
     Returns:
         Full DLL path
     """
@@ -85,7 +82,7 @@ def get_dll_path(arch: str, convention: str, fn: str, custom: Optional[str] = No
     return os.path.join(
         get_test_fld(abspath=False),
         DLL_FLD,
-        get_dll_fn(arch, convention, fn, custom=custom),
+        get_dll_fn(arch, convention, fn),
     )
 
 
