@@ -15,6 +15,7 @@
 - DOCS: More detailed explanation of `memsync`, where it is needed and where it is not, among other improvements.
 - DEV: Added tests on custom types and array objects (standard library) as well as numpy ndarray objects.
 - DEV: Simplified / clarified many of the older tests.
+- DEV: Test support library cleaned up, documented and typed.
 
 ## 0.1.0 (2022-09-11)
 
