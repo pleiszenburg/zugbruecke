@@ -47,7 +47,7 @@ jobs:
           pip install -U setuptools
       - name: Install zugbruecke package
         run: |
-          make install
+          ZUGBRUECKE__ISSUES_50_WORKAROUND=true make install
       - name: Pre-check
         run: |
           wine --version
