@@ -168,8 +168,8 @@ def make_dll(
 
     dll_fn = get_dll_fn(arch, convention, fn)
 
-    dll_test_path = os.path.join(fld, DLL_FLD, dll_fn)
     dll_build_path = os.path.join(build_fld, dll_fn)
+    dll_deploy_path = os.path.join(fld, DLL_FLD, dll_fn)
     header_path = os.path.join(build_fld, HEADER_FN)
     source_path = os.path.join(build_fld, SOURCE_FN)
 
@@ -212,8 +212,8 @@ def make_dll(
             err.decode("utf-8"),
         )
 
-    shutil.move(dll_build_path, dll_test_path)
-    if not os.path.isfile(dll_test_path):
+    shutil.move(dll_build_path, dll_deploy_path)
+    if not os.path.isfile(dll_deploy_path):
         raise SystemError("dll file was not moved from build directory")
 
     shutil.rmtree(build_fld)
