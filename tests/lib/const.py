@@ -30,6 +30,9 @@ specific language governing rights and limitations under the License.
 # CONST
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+HEADER_FN = "tmp_header.h"
+SOURCE_FN = "tmp_source.c"
+
 DLL_FLD = "dlls"
 
 DLL_HEADER = """
