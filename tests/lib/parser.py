@@ -31,42 +31,64 @@ specific language governing rights and limitations under the License.
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 import ast
+from typing import Any, Dict, Optional
+
+from typeguard import typechecked
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # ROUTINES
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
-def get_vars_from_source(src, *names, default=None):
+@typechecked
+def get_vars_from_source(
+    src: str,
+    *names: str,
+    default: Optional[Any] = None,
+) -> Dict[str, Optional[Any]]:
+    """
+    Extract variables from code by variable name
+
+    Args:
+        - src: Raw source code
+        - names: Variable names
+        - default: Default value of variable is not present in code
+    """
+
     tree = ast.parse(src)
-    out_dict = {name: default for name in names}
+    out = {name: default for name in names}
     for item in tree.body:
         if not isinstance(item, ast.Assign):
             continue
         for target in item.targets:
             if target.id not in names:
                 continue
-            out_dict[target.id] = _parse_tree(item.value)
-    return out_dict
+            out[target.id] = _parse_tree(item.value)
+    return out
 
 
-def _parse_tree(leaf):
+@typechecked
+def _parse_tree(leaf: Any) -> Any:
+    """
+    Recursively walk leafs of abstract syntax tree
+    """
+
     if isinstance(leaf, ast.Str) or isinstance(leaf, ast.Bytes):
         return leaf.s
-    elif isinstance(leaf, ast.Num):
+    if isinstance(leaf, ast.Num):
         return leaf.n
-    elif isinstance(leaf, ast.NameConstant):
+    if isinstance(leaf, ast.NameConstant):
         return leaf.value
-    elif isinstance(leaf, ast.Dict):
+    if isinstance(leaf, ast.Dict):
         return {
             _parse_tree(leaf_key): _parse_tree(leaf_value)
             for leaf_key, leaf_value in zip(leaf.keys, leaf.values)
         }
-    elif isinstance(leaf, ast.List):
+    if isinstance(leaf, ast.List):
         return [_parse_tree(leaf_item) for leaf_item in leaf.elts]
-    elif isinstance(leaf, ast.Tuple):
+    if isinstance(leaf, ast.Tuple):
         return tuple([_parse_tree(leaf_item) for leaf_item in leaf.elts])
-    elif isinstance(leaf, ast.Set):
+    if isinstance(leaf, ast.Set):
         return {_parse_tree(leaf_item) for leaf_item in leaf.elts}
-    else:
-        raise SyntaxError("unhandled type: %s (%s)" % (str(leaf), str(dir(leaf))))
+
+    raise SyntaxError(f"unhandled type: {str(leaf):s} ({str(dir(leaf)):s})")
