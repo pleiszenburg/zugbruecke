@@ -39,7 +39,7 @@ from typeguard import typechecked
 from wenv import EnvConfig
 
 from .const import ARCHS, CONVENTIONS, PYTHONBUILDS_FN
-from .names import get_dll_path
+from .names import get_dll_path, get_test_fld
 from .pythonversion import read_python_builds
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -85,7 +85,7 @@ else:
 
 
 @typechecked
-def get_dll_handle(arch: str, ctypes: Any, convention: str, fn: str) -> Any:
+def get_dll_handle(arch: str, ctypes: Any, convention: str, fld: str, fn: str) -> Any:
     """
     get handle to dll for given arch and convention
 
@@ -93,24 +93,22 @@ def get_dll_handle(arch: str, ctypes: Any, convention: str, fn: str) -> Any:
         - arch: Architecture
         - ctypes: zugbruecke ctypes session or original ctypes
         - convention: Calling convention
+        - fld: root, either tests or benchmark
         - fn: File name of Python source file
     Returns:
         Handle on DLL file
     """
 
+    path = get_dll_path(arch, convention, fld, fn)
+
     try:
-        return getattr(ctypes, convention).LoadLibrary(
-            get_dll_path(
-                arch, convention, fn
-            )  # TODO this will parse pyproject.toml on EVERY call
-        )
+        return getattr(ctypes, convention).LoadLibrary(path)
     except Exception as e:
         raise SystemError(
-            "Ups!",
+            "failed to attach to DLL file",
             arch,
             convention,
-            fn,
-            get_dll_path(arch, convention, fn),
+            path,
             os.getcwd(),
         ) from e
 
@@ -128,6 +126,7 @@ def get_context(fn: str, handle: bool = True) -> Union[Any, str]:
     """
 
     fn = os.path.basename(fn)
+    fld = get_test_fld(abspath=False)
 
     for convention in CONVENTIONS:
         for arch in ARCHS:
@@ -138,12 +137,23 @@ def get_context(fn: str, handle: bool = True) -> Union[Any, str]:
                             arch,
                             convention,
                             ctypes_build,
-                            get_dll_handle(arch, ctypes_build, convention, fn),
+                            get_dll_handle(
+                                arch,
+                                ctypes_build,
+                                convention,
+                                fld,
+                                fn,
+                            ),
                         )
                     else:
                         yield (
                             arch,
                             convention,
                             ctypes_build,
-                            get_dll_path(arch, convention, fn),
+                            get_dll_path(
+                                arch,
+                                convention,
+                                fld,
+                                fn,
+                            ),
                         )

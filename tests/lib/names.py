@@ -67,20 +67,21 @@ def get_dll_fn(arch: str, convention: str, fn: str) -> str:
 
 
 @typechecked
-def get_dll_path(arch: str, convention: str, fn: str) -> str:
+def get_dll_path(arch: str, convention: str, fld: str, fn: str) -> str:
     """
-    get name & path of test dll for given arch and convention RELATIVE TO CWD
+    get path to dll for given arch and convention
 
     Args:
-        - arch: Architecture of DLL
+        - arch: Architecture
         - convention: Calling convention
+        - fld: root, either tests or benchmark
         - fn: File name of Python source file
     Returns:
-        Full DLL path
+        Path to DLL file
     """
 
     return os.path.join(
-        get_test_fld(abspath=False),
+        fld,
         DLL_FLD,
         get_dll_fn(arch, convention, fn),
     )
