@@ -35,6 +35,7 @@ from subprocess import Popen
 import sys
 from typing import Dict, List, Optional
 
+from typeguard import typechecked
 from wenv import EnvConfig
 
 from .const import PYTHONBUILDS_FN
@@ -62,11 +63,15 @@ def run_tests():
         raise SystemError('unknown test target', target)
 
 
+@typechecked
 def _run_tests_wine(*args: str):
     """
     Runs test suite on Wine as if it was running on Windows,
     i.e. testing & verifying against original ctypes.
     No coverage recorded.
+
+    Args:
+        - args: Remaining command line arguments
     """
 
     cfg = EnvConfig()
@@ -90,9 +95,13 @@ def _run_tests_wine(*args: str):
             )
 
 
+@typechecked
 def _run_tests_unix(*args: str):
     """
     Does a single run of pytest. ARCH and PYTHONVERSION are parameterized within pytest.
+
+    Args:
+        - args: Remaining command line arguments
     """
 
     _run(
@@ -116,7 +125,15 @@ def _run_tests_unix(*args: str):
     )
 
 
+@typechecked
 def _run(cmd: List[str], env: Optional[Dict[str, str]] = None):
+    """
+    Minimal subprocess.Popen wrapper
+
+    Args:
+        - cmd: List of command fragments for Popen
+        - env: Environment variables
+    """
 
     envvars = os.environ.copy()
     if env is not None:
