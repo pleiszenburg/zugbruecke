@@ -181,7 +181,7 @@ class Config(dict, ConfigABC):
         # Look for config in the usual spots
         for fn in [
             "/etc/zugbruecke",
-            os.path.join("/etc", CONFIG_FN), # TODO deprecated
+            os.path.join("/etc", CONFIG_FN),  # TODO deprecated
             os.path.join("/etc", CONFIG_FN[1:]),
             os.path.join(os.path.expanduser("~"), CONFIG_FN),
             os.path.join(os.getcwd(), CONFIG_FN),
@@ -211,20 +211,16 @@ class Config(dict, ConfigABC):
             with open(try_path, "r", encoding="utf-8") as f:
                 cnt = f.read()
         except Exception as e:
-            raise ConfigParserError(
-                'Config file could not be read: "%s"' % try_path
-            ) from e
+            raise ConfigParserError(f'could not be read: "{try_path:s}"' ) from e
 
         # Try to parse it
         try:
             cnt = json.loads(cnt)
         except Exception as e:
-            raise ConfigParserError(
-                'Config file could not be parsed: "%s"' % try_path
-            ) from e
+            raise ConfigParserError(f'could not be parsed: "{try_path:s}"') from e
 
         # Ensure that config has the right format
         if not isinstance(cnt, dict):
-            raise ConfigParserError('Config file is malformed: "%s"' % try_path)
+            raise ConfigParserError(f'malformed: "{try_path:s}"')
 
         return cnt
