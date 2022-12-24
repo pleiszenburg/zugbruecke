@@ -31,7 +31,6 @@ specific language governing rights and limitations under the License.
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-from collections.abc import KeysView
 import os
 import json
 import sys
@@ -69,6 +68,7 @@ class Config(dict, ConfigABC):
         "pythonversion",
         "timeout_start",
         "timeout_stop",
+        "copy_modules",
     )
 
     def __init__(self, **override: Any):
@@ -148,6 +148,8 @@ class Config(dict, ConfigABC):
             return 30  # Timeout for waiting on Wine-Python start
         if key == "timeout_stop":
             return 30  # Timeout for waiting on Wine-Python stop
+        if key == "copy_modules":
+            return False  # Do not symlink zugbruecke and wenv into wenv env but copy them instead
 
         raise KeyError("not a valid configuration key", key)
 
