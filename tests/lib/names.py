@@ -31,7 +31,7 @@ specific language governing rights and limitations under the License.
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 import os
-from typing import List, Optional
+from typing import List
 
 from toml import loads
 from typeguard import typechecked
