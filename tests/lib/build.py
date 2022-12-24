@@ -34,8 +34,9 @@ import multiprocessing
 import os
 import shutil
 import subprocess
+import sys
 import tempfile
-from typing import Any, List, Optional, Tuple
+from typing import Any, Optional, Tuple
 
 from jinja2 import Template
 from typeguard import typechecked
@@ -54,7 +55,13 @@ from .const import (
     SUFFIX,
     SOURCE_FN,
 )
-from .names import get_dll_fn, get_test_fld
+from .names import (
+    get_dll_fn,
+    get_benchmark_fld,
+    get_benchmark_fns,
+    get_test_fld,
+    get_test_fns,
+)
 from .parser import get_vars_from_source
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -81,38 +88,22 @@ def get_header_and_source_from_test(fn: str) -> Tuple[Optional[str], Optional[st
     return variables["HEADER"], variables["SOURCE"], variables["EXTRA"]
 
 
-@typechecked
-def get_testfn_list(fld: str) -> List[str]:
-    """
-    get list of Python test files in project test folder
-
-    Args:
-        - fld: Path to directory containing Python test code files
-    Returns:
-        List of file names
-    """
-
-    fns = []
-
-    for entry in os.listdir(fld):
-        if not entry.lower().endswith(".py"):
-            continue
-        if not entry.lower().startswith("test_"):
-            continue
-        if not os.path.isfile(os.path.join(fld, entry)):
-            continue
-        fns.append(entry)
-
-    return fns
-
-
 def make_all():
     """
-    Build all test DLLs from test cases
+    Build all DLLs C code templates in Python files in given folder
     """
 
-    fld = get_test_fld()
-    fns = get_testfn_list(fld)
+    group = sys.argv[1]
+    assert group in ('tests', 'benchmark')
+
+    if group == 'tests':
+        fld = get_test_fld()
+        fns = get_test_fns(fld)
+    elif group == 'benchmark':
+        fld = get_benchmark_fld()
+        fns = get_benchmark_fns(fld)
+    else:
+        raise ValueError(f'unknown group of DLLs "{group:s}"')
 
     jobs = []
 

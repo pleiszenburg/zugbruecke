@@ -31,7 +31,7 @@ specific language governing rights and limitations under the License.
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 import os
-from typing import Optional
+from typing import List, Optional
 
 from toml import loads
 from typeguard import typechecked
@@ -88,6 +88,49 @@ def get_dll_path(arch: str, convention: str, fn: str, custom: Optional[str] = No
         get_dll_fn(arch, convention, fn, custom=custom),
     )
 
+
+@typechecked
+def get_benchmark_fld(abspath: bool = True) -> str:
+    """
+    get full path of benchmark folder
+
+    Args:
+        - abspath: Require absolute path
+    Returns:
+        Path to benchmark
+    """
+
+    if not abspath:
+        return 'benchmark'
+
+    return os.path.join(os.path.abspath(os.getcwd()), 'benchmark')
+
+
+@typechecked
+def get_benchmark_fns(fld: str) -> List[str]:
+    """
+    get list of Python benchmark files in project benchmark folder
+
+    Args:
+        - fld: Path to directory containing Python benchmark code files
+    Returns:
+        List of file names
+    """
+
+    fns = []
+
+    for entry in os.listdir(fld):
+        if not entry.lower().endswith(".py"):
+            continue
+        if entry.lower().startswith("_"):
+            continue
+        if not os.path.isfile(os.path.join(fld, entry)):
+            continue
+        fns.append(entry)
+
+    return fns
+
+
 @typechecked
 def get_test_fld(abspath: bool = True) -> str:
     """
@@ -119,3 +162,28 @@ def get_test_fld(abspath: bool = True) -> str:
         )
 
     return fld
+
+
+@typechecked
+def get_test_fns(fld: str) -> List[str]:
+    """
+    get list of Python test files in project test folder
+
+    Args:
+        - fld: Path to directory containing Python test code files
+    Returns:
+        List of file names
+    """
+
+    fns = []
+
+    for entry in os.listdir(fld):
+        if not entry.lower().endswith(".py"):
+            continue
+        if not entry.lower().startswith("test_"):
+            continue
+        if not os.path.isfile(os.path.join(fld, entry)):
+            continue
+        fns.append(entry)
+
+    return fns
