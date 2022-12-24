@@ -35,6 +35,7 @@ from subprocess import Popen
 from typing import Dict, List
 
 from toml import loads
+from typeguard import typechecked
 
 from zugbruecke import Config, Env
 
@@ -58,6 +59,9 @@ from .pythonversion import write_python_builds
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 def install():
+    """
+    Create all required Wine Python environments for testing
+    """
 
     cfg = EnvConfig()
     builds = _get_latest_python_builds()
@@ -69,7 +73,11 @@ def install():
             _install_env(arch, build)
 
 
+@typechecked
 def _get_latest_python_builds() -> Dict[str, List[PythonVersion]]:
+    """
+    Create a list per architecture of the latest Python maintenance release per minor version
+    """
 
     _builds = get_available_python_builds()
 
@@ -89,7 +97,15 @@ def _get_latest_python_builds() -> Dict[str, List[PythonVersion]]:
     return builds
 
 
+@typechecked
 def _install_env(arch: str, build: PythonVersion):
+    """
+    Create a Wine Python environment
+
+    Args:
+        - arch: Architecture
+        - build: Python version
+    """
 
     print(f'<INSTALLING WENV PYTHON {str(build).upper()} ON {arch.upper():s}>')
 
