@@ -51,6 +51,10 @@ from .typeguard import typechecked
 @typechecked
 def _symlink(src: str, dest: str):
 
+    if os.path.exists(dest) and not os.path.islink(dest):
+        warnings.warn(f'"{dest:s}" is exists but not a symlink', RuntimeWarning)
+        return
+
     if not os.path.lexists(dest):
         os.symlink(src, dest)
 
