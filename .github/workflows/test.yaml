@@ -76,4 +76,4 @@ jobs:
           ls -lah /opt/hostedtoolcache/Python/3.11.1/x64/share/wenv/win32/drive_c/python-3.7.9.stable/Lib/site-packages/wenv/
       - name: Run tests
         run: |
-          ZUGBRUECKE_LOG_LEVEL=100 make test
+          ZUGBRUECKE_LOG_LEVEL=100 ZUGBRUECKE__ISSUES_50_WORKAROUND=true make test
