@@ -12,10 +12,10 @@ jobs:
       matrix:
         os: ["ubuntu-20.04"]
         python-version: [
-          # 3.7,
-          # 3.8,
-          # 3.9,
-          # "3.10",
+          3.7,
+          3.8,
+          3.9,
+          "3.10",
           "3.11"
         ]
 
@@ -62,18 +62,6 @@ jobs:
       - name: Build docs
         run: |
           make docs
-      - name: DEBUG WENV PATHS
-        run: |
-          WENV_PYTHONVERSION="3.7.9" wenv help
-          WENV_PYTHONVERSION="3.7.9" wenv python -c "import sys; print(sys.path)"
-          WENV_PYTHONVERSION="3.7.9" wenv python -c "import os; print(os.listdir(\"C:\\\\python-3.7.9.stable\\\\lib\\\\site-packages\\\\\"))"
-          WENV_PYTHONVERSION="3.7.9" wenv python -c "import os; print(os.listdir(\"C:\\\\python-3.7.9.stable\\\\lib\\\\site-packages\\\\wenv\\\\\"))"
-          WENV_PYTHONVERSION="3.7.9" wenv python -c "import os; print(os.listdir(\"C:\\\\python-3.7.9.stable\\\\lib\\\\site-packages\\\\wenv\\\\_core\\\\\"))"
-          ls -lah /opt/hostedtoolcache/Python/3.11.1/x64/
-          ls -lah /opt/hostedtoolcache/Python/3.11.1/x64/share/
-          ls -lah /opt/hostedtoolcache/Python/3.11.1/x64/share/wenv/
-          ls -lah /opt/hostedtoolcache/Python/3.11.1/x64/share/wenv/win32/drive_c/python-3.7.9.stable/Lib/site-packages/
-          ls -lah /opt/hostedtoolcache/Python/3.11.1/x64/share/wenv/win32/drive_c/python-3.7.9.stable/Lib/site-packages/wenv/
       - name: Run tests
         run: |
           ZUGBRUECKE_LOG_LEVEL=100 make test
