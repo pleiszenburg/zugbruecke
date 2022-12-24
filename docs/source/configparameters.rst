@@ -91,6 +91,10 @@ The following parameters can be configured:
       - ``int``
       - Wait seconds for *Windows Python* to terminate.
       - ``30``
+    * - copy_modules
+      - ``bool``
+      - Copy ``zugbruecke`` and ``wenv`` modules into wenv instead of symlink.
+      - ``False``
 
 .. note::
 
