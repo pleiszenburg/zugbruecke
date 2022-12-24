@@ -6,6 +6,7 @@
 
 - FEATURE: In `memsync` directives, `ctypes` types do not need to be specified by their name as strings anymore - plain `ctypes` fundamental types and structure types can be used instead. Strings remain valid specifications for compatibility though.
 - FEATURE: `memsync` directives allow for more descriptive parameter names while the old single-character names remain valid for compatibility.
+- FEATURE: Added support for CPython 3.11, see #86 and #87.
 - FIX: CI revealed that an issue similar to #50 returned as packages on Wine side can sometimes not be imported if they are symlinked. The new `copy_modules` configuration parameter can be used to indicate that a copy instead of symlinks is required.
 - FIX: If `zugbruecke` (and `wenv`) were installed into user site-packages, the installation would break, see #88.
 - FIX: Syncing entire structs via `memsync` was broken, see #92.
