@@ -36,7 +36,7 @@ from typing import Dict, List
 
 from toml import loads
 
-from zugbruecke import Env
+from zugbruecke import Config, Env
 
 from wenv import (
     EnvConfig,
@@ -113,7 +113,11 @@ def _install_env(arch: str, build: PythonVersion):
         if proc.returncode != 0:
             raise SystemError('wenv setup command failed', arch, build, cmd)
 
-    env = Env(**EnvConfig(arch = arch, pythonversion=build).export_dict())
+    env = Env(**EnvConfig(
+        arch = arch,
+        pythonversion = build,
+        copy_modules = Config()['copy_modules'],  # pass option on
+    ).export_dict())
     env.setup_zugbruecke() # link packages to wenv python environment
 
 
