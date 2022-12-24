@@ -35,20 +35,24 @@ import os
 import shutil
 import subprocess
 import tempfile
+from typing import Any, List, Optional, Tuple
 
 from jinja2 import Template
+from typeguard import typechecked
 
 from .const import (
     ARCHS,
     CONVENTIONS,
     CC,
     CFLAGS,
+    HEADER_FN,
     LDFLAGS,
     DLL_FLD,
     DLL_HEADER,
     DLL_SOURCE,
     PREFIX,
     SUFFIX,
+    SOURCE_FN,
 )
 from .names import get_dll_fn, get_test_fld
 from .parser import get_vars_from_source
@@ -58,83 +62,127 @@ from .parser import get_vars_from_source
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
-def get_header_and_source_from_test(fn):
-    "extract header and source from Python test file without importing it"
+@typechecked
+def get_header_and_source_from_test(fn: str) -> Tuple[Optional[str], Optional[str], Optional[Any]]:
+    """
+    extract header and source from Python test file without importing it
+
+    Args:
+        - fn: File name / path of Python code file
+    Returns:
+        Tuple of header, source and extra strings
+    """
 
     with open(fn, "r", encoding="utf-8") as f:
         src = f.read()
 
-    var_dict = get_vars_from_source(src, "HEADER", "SOURCE", "EXTRA")
+    variables = get_vars_from_source(src, "HEADER", "SOURCE", "EXTRA")
 
-    return var_dict["HEADER"], var_dict["SOURCE"], var_dict["EXTRA"]
+    return variables["HEADER"], variables["SOURCE"], variables["EXTRA"]
 
 
-def get_testfn_list(test_fld):
-    "get list of Python test files in project test folder"
+@typechecked
+def get_testfn_list(fld: str) -> List[str]:
+    """
+    get list of Python test files in project test folder
 
-    testfn_list = []
+    Args:
+        - fld: Path to directory containing Python test code files
+    Returns:
+        List of file names
+    """
 
-    for entry in os.listdir(test_fld):
+    fns = []
+
+    for entry in os.listdir(fld):
         if not entry.lower().endswith(".py"):
             continue
         if not entry.lower().startswith("test_"):
             continue
-        if not os.path.isfile(os.path.join(test_fld, entry)):
+        if not os.path.isfile(os.path.join(fld, entry)):
             continue
-        testfn_list.append(entry)
+        fns.append(entry)
 
-    return testfn_list
+    return fns
 
 
 def make_all():
+    """
+    Build all test DLLs from test cases
+    """
 
-    test_fld = get_test_fld()
-    test_fn_list = get_testfn_list(test_fld)
+    fld = get_test_fld()
+    fns = get_testfn_list(fld)
 
     jobs = []
 
-    for test_fn in test_fn_list:
+    for fn in fns:
 
         header, source, extra = get_header_and_source_from_test(
-            os.path.join(test_fld, test_fn)
+            os.path.join(fld, fn)
         )
         if header is None:
-            print('test "%s" does not contain a C HEADER - ignoring' % test_fn)
+            print(f'test "{fn:s}" does not contain a C HEADER - ignoring')
             continue
         if source is None:
-            print('test "%s" does not contain C SOURCE - ignoring' % test_fn)
+            print(f'test "{fn:s}" does not contain C SOURCE - ignoring')
             continue
 
         for convention in CONVENTIONS:
             for arch in ARCHS:
                 jobs.append(
-                    (test_fld, arch, convention, test_fn, header, source, extra)
+                    (fld, fn, arch, convention, header, source, extra)
                 )
 
     with multiprocessing.Pool(multiprocessing.cpu_count()) as p:
-        _ = p.map(make_dll, jobs)
+        _ = p.map(make_dll_wrapper, jobs)
 
 
-def make_dll(param):
-    "compile test dll"
+@typechecked
+def make_dll_wrapper(params: Tuple):
+    """
+    Wrapper for argument unpacking in multiprocessing
+    """
 
-    test_fld, arch, convention, test_fn, header, source, extra = param
+    make_dll(*params)
+
+
+@typechecked
+def make_dll(
+    fld: str,
+    fn: str,
+    arch: str,
+    convention: str,
+    header: str,
+    source: str,
+    extra: Optional[Any] = None,
+):
+    """
+    compile DLL from fragments
+
+    Args:
+        - fld: Location of Python source code file
+        - fn: Name of Python source code file
+        - arch: Architecture
+        - convention: Calling convention
+        - header: C header template
+        - source: C source template
+        - extra: Additional parameters for template engine
+    """
 
     if extra is None:
         extra = dict()
 
-    HEADER_FN = "tmp_header.h"
-    SOURCE_FN = "tmp_source.c"
-
     build_fld = tempfile.mkdtemp()
 
-    dll_fn = get_dll_fn(arch, convention, test_fn)
-    dll_test_path = os.path.join(test_fld, DLL_FLD, dll_fn)
+    dll_fn = get_dll_fn(arch, convention, fn)
+
+    dll_test_path = os.path.join(fld, DLL_FLD, dll_fn)
     dll_build_path = os.path.join(build_fld, dll_fn)
     header_path = os.path.join(build_fld, HEADER_FN)
     source_path = os.path.join(build_fld, SOURCE_FN)
 
-    print('Building "{DLL_FN:s}" ... '.format(DLL_FN=dll_fn), end="")
+    print(f'Building "{dll_fn:s}" ... ', end = '')
 
     with open(header_path, "w", encoding="utf-8") as f:
         f.write(
