@@ -33,7 +33,9 @@ specific language governing rights and limitations under the License.
 import os
 from sys import platform
 from platform import architecture
+from typing import Any, Union
 
+from typeguard import typechecked
 from wenv import EnvConfig
 
 from .const import ARCHS, CONVENTIONS, PYTHONBUILDS_FN
@@ -82,32 +84,50 @@ else:
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
-def get_dll_handle(arch, ctypes_build, convention, test_fn):
-    "get handle to dll for given arch and convention"
+@typechecked
+def get_dll_handle(arch: str, ctypes: Any, convention: str, fn: str) -> Any:
+    """
+    get handle to dll for given arch and convention
+
+    Args:
+        - arch: Architecture
+        - ctypes: zugbruecke ctypes session or original ctypes
+        - convention: Calling convention
+        - fn: File name of Python source file
+    Returns:
+        Handle on DLL file
+    """
 
     try:
-        return getattr(ctypes_build, convention).LoadLibrary(
+        return getattr(ctypes, convention).LoadLibrary(
             get_dll_path(
-                arch, convention, test_fn
-            )  # TODO this will parse setup.cfg on EVERY call
+                arch, convention, fn
+            )  # TODO this will parse pyproject.toml on EVERY call
         )
-    except:
+    except Exception as e:
         raise SystemError(
             "Ups!",
             arch,
             convention,
-            test_fn,
-            get_dll_path(arch, convention, test_fn),
+            fn,
+            get_dll_path(arch, convention, fn),
             os.getcwd(),
-        )
+        ) from e
 
 
-def get_context(test_path: str, handle: bool = True):
-    """all archs and conventions,
-    either test dll handle or path is provided
+@typechecked
+def get_context(fn: str, handle: bool = True) -> Union[Any, str]:
+    """
+    all archs and conventions, either test dll handle or path is provided
+
+    Args:
+        - fn: File name of Python source file
+        - handle: Return handle on DLL (or just its path)
+    Yields:
+        DLL handles (or paths) per calling convention, architecture and wenv Python version
     """
 
-    test_fn = os.path.basename(test_path)
+    fn = os.path.basename(fn)
 
     for convention in CONVENTIONS:
         for arch in ARCHS:
@@ -118,12 +138,12 @@ def get_context(test_path: str, handle: bool = True):
                             arch,
                             convention,
                             ctypes_build,
-                            get_dll_handle(arch, ctypes_build, convention, test_fn),
+                            get_dll_handle(arch, ctypes_build, convention, fn),
                         )
                     else:
                         yield (
                             arch,
                             convention,
                             ctypes_build,
-                            get_dll_path(arch, convention, test_fn),
+                            get_dll_path(arch, convention, fn),
                         )
