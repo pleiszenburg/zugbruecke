@@ -79,28 +79,13 @@ def _run_tests_wine(*args: str):
             )
             _run(
                 cmd = [
-                    'wenv', 'python',
-                    '-c',
-                    'from wenv import Env; print("Done importing", Env);',
-                ],
-                env = {
-                    'WENV_DEBUG': '1',
-                    'WENV_ARCH': arch,
-                    'WENV_PYTHONVERSION': str(build),
-                    **os.environ,
-                },
-            )  # debugging github actions
-            _run(
-                cmd = [
                     'wenv', 'pytest',
-                    '--full-trace', '-v', '--log-level=DEBUG',  # debugging github actions
                     '--hypothesis-show-statistics', *args
                 ],
                 env = {
                     'WENV_DEBUG': '1',
                     'WENV_ARCH': arch,
                     'WENV_PYTHONVERSION': str(build),
-                    **os.environ,  # debugging github actions
                 },
             )
 
