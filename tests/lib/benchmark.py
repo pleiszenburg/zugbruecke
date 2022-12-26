@@ -31,8 +31,9 @@ specific language governing rights and limitations under the License.
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 from functools import wraps
-from pprint import pformat as pf
+import importlib
 import os
+from pprint import pformat as pf
 import sys
 from time import time_ns
 from typing import Any, Callable, Dict, List
@@ -149,42 +150,75 @@ def benchmark(fn: str, initializer: Callable) -> Any:
     return outer
 
 
+@typechecked
+def _get_benchmarks() -> List[Callable]:
+    """
+    auto-detects benchmarks
+    """
+
+    benchmarks = []
+
+    for item in os.listdir('benchmark'):
+
+        if item.startswith("_") or not item.lower().endswith(".py"):
+            continue
+
+        try:
+            mod = importlib.import_module(f"benchmark.{item[:-3]:s}")
+        except ModuleNotFoundError:  # likely no gui support
+            continue
+
+        for attr in dir(mod):
+            entry = getattr(mod, attr)
+            if not hasattr(entry, 'is_benchmark'):
+                continue
+            benchmarks.append(entry)
+
+    return benchmarks
+
+
+def _run_wenv():
+    """
+    Run benchmarks on Wine from Unix
+    """
+
+    cfg = EnvConfig()
+    builds = read_python_builds(fn = os.path.join(cfg['prefix'], PYTHONBUILDS_FN))
+
+    for arch, _builds in builds.items():
+        for build in _builds:
+            run_cmd(
+                cmd = ['make', '_clean_py'],
+            )
+            run_cmd(
+                cmd = [
+                    'wenv', 'python', '-m', 'tests.lib.benchmark'
+                ],
+                env = {
+                    'WENV_DEBUG': '0',
+                    'WENV_ARCH': arch,
+                    'WENV_PYTHONVERSION': str(build),
+                    'WENV_NO_PTH_FILE': 'true' if build.minor >= 11 else 'false',  # CPython PR #31542
+                },
+            )
+    run_cmd(
+        cmd = ['make', '_clean_py'],
+    )
+
+
 def run_all():
     """
     Run all benchmarks both on Unix and Wine
     """
 
     if len(sys.argv) > 1 and sys.argv[1] == 'wine':
-
-        cfg = EnvConfig()
-        builds = read_python_builds(fn = os.path.join(cfg['prefix'], PYTHONBUILDS_FN))
-
-        for arch, _builds in builds.items():
-            for build in _builds:
-                run_cmd(
-                    cmd = ['make', '_clean_py'],
-                )
-                run_cmd(
-                    cmd = [
-                        'wenv', 'python', '-m', 'tests.lib.benchmark'
-                    ],
-                    env = {
-                        'WENV_DEBUG': '0',
-                        'WENV_ARCH': arch,
-                        'WENV_PYTHONVERSION': str(build),
-                        'WENV_NO_PTH_FILE': 'true' if build.minor >= 11 else 'false',  # CPython PR #31542
-                    },
-                )
-        run_cmd(
-            cmd = ['make', '_clean_py'],
-        )
+        _run_wenv()
         return
-
     elif len(sys.argv) > 1 and sys.argv[1] != 'unix':
-
         raise SystemError(f'unknown platform "{sys.argv[1]:s}"')
 
-    print('running on', sys.platform, sys.version)
+    for item in _get_benchmarks():
+        item()
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
