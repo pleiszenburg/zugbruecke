@@ -13,9 +13,11 @@
 - DEPRECATED: Single-character parameter names in memsync directives.
 - DEPRECATED: `ctypes` fundamental types specified by name as strings in `memsync` directives.
 - DOCS: More detailed explanation of `memsync`, where it is needed and where it is not, among other improvements.
+- DOCS: Updated benchmarks.
 - DEV: Added tests on custom types and array objects (standard library) as well as numpy ndarray objects.
 - DEV: Simplified / clarified many of the older tests.
 - DEV: Test support library cleaned up, documented and typed.
+- DEV: New benchmark infrastructure similar to the test suite, allowing to easily add benchmarks. Their results now get automatically included into the project documentation.
 
 ## 0.1.0 (2022-09-11)
 
