@@ -34,7 +34,9 @@ from functools import wraps
 import importlib
 from json import dumps, loads
 import os
+from platform import architecture, release
 from pprint import pformat as pf
+from subprocess import Popen, PIPE
 import sys
 from time import time_ns
 from typing import Any, Callable, Dict, List
@@ -229,7 +231,7 @@ def _make_table(name: str, group: Dict, doc: str):
 
     with open(os.path.join('docs', 'source', f'benchmark_{name}.rst'), mode = 'w', encoding="utf-8") as f:
 
-        f.write(f'.. csv-table:: "{name:s}" benchmarks, CPython {sys.version.split(" ")[0]:s} on {sys.platform:s}, versions of CPython on Wine\n')
+        f.write(f'.. csv-table:: "{name:s}" benchmark, CPython {sys.version.split(" ")[0]:s} on {sys.platform:s}, versions of CPython on Wine\n')
         f.write('    :header: "arch", "version", "convention", "ctypes [µs]", "zugbruecke [µs]", "overhead [µs]"\n')
         f.write('    :delim: 0x0003B\n')
         f.write('\n')
@@ -254,6 +256,24 @@ def _make_inventory(names: List[str]):
             f.write(f'.. include:: benchmark_{name:s}.rst\n')
 
 
+def _make_sysinfo():
+
+    with open('/proc/cpuinfo', mode='r', encoding='utf-8') as f:
+        cpuinfo = f.read()
+    cpuinfo = [line for line in cpuinfo.split('\n') if 'model name' in line][0].split(':')[1].strip()
+
+    proc = Popen(['wine', '--version'], stdout = PIPE)
+    wine, _ = proc.communicate()
+    wine = wine.decode('utf-8').strip().split('-')[1]
+
+    with open(os.path.join('docs', 'source', 'benchmarks_sysinfo.rst'), mode = 'w', encoding="utf-8") as f:
+        f.write('Benchmarks were performed on an ')
+        f.write(f'"{cpuinfo:s}" CPU, ')
+        f.write(f'Linux {release():s} {architecture()[0]}, ')
+        f.write(f'and Wine {wine:s}')
+        f.write('.\n')
+
+
 def _make_tables():
     """
     Write RST table from raw benchmark data
@@ -276,6 +296,7 @@ def _make_tables():
         _make_table(name, group, benchmarks[name])
 
     _make_inventory(list(benchmarks.keys()))
+    _make_sysinfo()
 
 
 def _run_wenv():
