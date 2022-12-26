@@ -218,7 +218,7 @@ def main():
     elif len(sys.argv) > 1 and sys.argv[1] != 'unix':
         raise SystemError(f'unknown platform "{sys.argv[1]:s}"')
 
-    fn = os.path.join('benchmark', 'data.log')
+    fn = os.path.join('benchmark', 'data.raw')
 
     if not os.path.exists(fn):
         with open(fn, mode = 'w', encoding='utf-8') as f:

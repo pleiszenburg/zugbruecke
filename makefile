@@ -52,7 +52,7 @@ black:
 
 benchmark:
 	make clean
-	-rm benchmark/data.log
+	-rm benchmark/data.raw
 	python -m tests.lib.build benchmark
 	python -m tests.lib.benchmark wine
 	python -m tests.lib.benchmark unix
