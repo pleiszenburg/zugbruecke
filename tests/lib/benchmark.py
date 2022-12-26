@@ -217,7 +217,7 @@ def _group_data(data: List) -> Dict:
 
 
 @typechecked
-def _make_table(name: str, group: Dict):
+def _make_table(name: str, group: Dict, doc: str):
     """
     Write on RST table from parsed and grouped data
     """
@@ -240,11 +240,20 @@ def _make_table(name: str, group: Dict):
             unix, wine = round(unix['runtime'] / 1e3), round(wine['runtime'] / 1e3)
             f.write(f'    "{arch:s}", "{version:s}", "{conv:s}", {wine:d}, {unix:d}, {unix-wine:d} \n')
 
+        f.write('\n')
+        for line in doc.split('\n'):
+            f.write(f'{line[4:]:s}\n')
+
 
 def _make_tables():
     """
     Write RST table from raw benchmark data
     """
+
+    benchmarks = {
+        entry.__name__: entry.__doc__
+        for entry in _get_benchmarks()
+    }
 
     data = []
     with open(os.path.join('benchmark', 'data.raw'), mode = 'r', encoding='utf-8') as f:
@@ -255,7 +264,7 @@ def _make_tables():
             data.extend(loads(line))
 
     for name, group in _group_data(data).items():
-        _make_table(name, group)
+        _make_table(name, group, benchmarks[name])
 
 
 def _run_wenv():
