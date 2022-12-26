@@ -246,6 +246,14 @@ def _make_table(name: str, group: Dict, doc: str):
             f.write(f'{line[4:]:s}\n')
 
 
+@typechecked
+def _make_inventory(names: List[str]):
+
+    with open(os.path.join('docs', 'source', 'benchmarks_all.rst'), mode = 'w', encoding="utf-8") as f:
+        for name in names:
+            f.write(f'.. include:: benchmark_{name:s}.rst\n')
+
+
 def _make_tables():
     """
     Write RST table from raw benchmark data
@@ -266,6 +274,8 @@ def _make_tables():
 
     for name, group in _group_data(data).items():
         _make_table(name, group, benchmarks[name])
+
+    _make_inventory(list(benchmarks.keys()))
 
 
 def _run_wenv():
