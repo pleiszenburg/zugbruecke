@@ -32,7 +32,7 @@ specific language governing rights and limitations under the License.
 
 from functools import wraps
 import importlib
-from json import dumps
+from json import dumps, loads
 import os
 from pprint import pformat as pf
 import sys
@@ -40,7 +40,7 @@ from time import time_ns
 from typing import Any, Callable, Dict, List
 
 from typeguard import typechecked
-from wenv import EnvConfig
+from wenv import EnvConfig, PythonVersion
 
 from .cmd import run_cmd
 from .const import ARCHITECTURE, ARCHS, CONVENTIONS, PLATFORM, PYTHONBUILDS_FN
@@ -137,7 +137,7 @@ def benchmark(fn: str, initializer: Callable) -> Any:
                     platform = PLATFORM,
                     arch = arch,
                     convention = convention,
-                    benchmark = func.__name__,
+                    name = func.__name__,
                     runtime = min_runtime,
                     runs = counter,
                     server = server,
@@ -182,6 +182,82 @@ def _get_benchmarks() -> List[Callable]:
     return benchmarks
 
 
+@typechecked
+def _group_data(data: List) -> Dict:
+    """
+    Group parsed raw data by benchmark, arch, version and calling convention
+    """
+
+    by_benchmark = {}
+    for entry in data:
+        name = entry['name']
+        try:
+            group = by_benchmark[name]
+        except KeyError:
+            group = []
+            by_benchmark[name] = group
+        group.append(entry)
+
+    by_archverconv = {name: {} for name in by_benchmark.keys()}
+    for name, group in by_benchmark.items():
+        for entry in group:
+            archver = (
+                entry['arch'],
+                entry['server'] if entry['server'] is not None else entry['client'],
+                entry['convention']
+            )
+            try:
+                subgroup = by_archverconv[name][archver]
+            except KeyError:
+                subgroup = []
+                by_archverconv[name][archver] = subgroup
+            subgroup.append(entry)
+
+    return by_archverconv
+
+
+@typechecked
+def _make_table(name: str, group: Dict):
+    """
+    Write on RST table from parsed and grouped data
+    """
+
+    keys = sorted(
+        group.keys(),
+        key = (lambda item: (item[0], PythonVersion.from_config(item[0], item[1]), item[2])),
+    )
+
+    with open(os.path.join('benchmark', f'table_{name}.rst'), mode = 'w', encoding="utf-8") as f:
+
+        f.write(f'.. csv-table:: "{name:s}" benchmarks, Python {sys.version.split(" ")[0]:s} on {sys.platform:s}, versions of Python on Wine\n')
+        f.write('    :header: "arch", "version", "convention", "ctypes [µs]", "zugbruecke [µs]", "overhead [µs]"\n')
+        f.write('\n')
+
+        for arch, version, conv in keys:
+            unix, wine = group[(arch, version, conv)]
+            if unix['server'] is None:
+                unix, wine = wine, unix
+            unix, wine = round(unix['runtime'] / 1e3), round(wine['runtime'] / 1e3)
+            f.write(f'    "{arch:s}", "{version:s}", "{conv:s}", {wine:d}, {unix:d}, {unix-wine:d} \n')
+
+
+def _make_tables():
+    """
+    Write RST table from raw benchmark data
+    """
+
+    data = []
+    with open(os.path.join('benchmark', 'data.raw'), mode = 'r', encoding='utf-8') as f:
+        for line in f:
+            line = line.strip()
+            if len(line) == 0:
+                continue
+            data.extend(loads(line))
+
+    for name, group in _group_data(data).items():
+        _make_table(name, group)
+
+
 def _run_wenv():
     """
     Run benchmarks on Wine from Unix
@@ -219,8 +295,11 @@ def main():
     if len(sys.argv) > 1 and sys.argv[1] == 'wine':
         _run_wenv()
         return
-    elif len(sys.argv) > 1 and sys.argv[1] != 'unix':
-        raise SystemError(f'unknown platform "{sys.argv[1]:s}"')
+    if len(sys.argv) > 1 and sys.argv[1] == 'table':
+        _make_tables()
+        return
+    if len(sys.argv) > 1 and sys.argv[1] != 'unix':
+        raise SystemError(f'unknown parameter "{sys.argv[1]:s}"')
 
     fn = os.path.join('benchmark', 'data.raw')
 
