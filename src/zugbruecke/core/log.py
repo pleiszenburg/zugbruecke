@@ -89,10 +89,7 @@ class Log(LogABC):
 
         self._f = None
         if self._p["log_write"]:
-            self._f = "zb_{ID:s}_{PLATFORM:s}.txt".format(
-                ID=self._id,
-                PLATFORM=self._p["platform"],
-            )
+            self._f = f'zb_{self._id:s}_{self._p["platform"]:s}.txt'
 
         if rpc_server is not None:
             rpc_server.register_function(self._receive, "transfer_message")
@@ -201,17 +198,15 @@ class Message(MessageABC):
 
     def print(self):
 
-        message_list = []
+        msg = []
 
-        message_list.append(
-            c["GREY"] + "(%.2f/%s) " % (self._time, self._id) + c["RESET"]
-        )
+        msg.append(f'{c["GREY"]:s}({self._time:.2f}/{self._id:s}{c["RESET"]:s})')
 
-        message_list.append(c["BLUE"] if self._platform == "UNIX" else c["MAGENTA"])
-        message_list.append("%s " % self._platform + c["RESET"])
+        msg.append(c["BLUE"] if self._platform == "UNIX" else c["MAGENTA"])
+        msg.append(f'{self._platform:s} {c["RESET"]:s}')
 
-        message_list.append(c["GREEN"] if self._pipe == "out" else c["RED"])
-        message_list.append(self._pipe[0] + c["RESET"] + ": ")
+        msg.append(c["GREEN"] if self._pipe == "out" else c["RED"])
+        msg.append(f'{self._pipe[0]:s}{c["RESET"]:s}: ')
         if any(
             ext in self._cnt
             for ext in [
@@ -223,15 +218,15 @@ class Message(MessageABC):
                 ":trace:",
             ]
         ):
-            message_list.append(c["GREY"])
+            msg.append(c["GREY"])
         else:
-            message_list.append(c["WHITE"])
-        message_list.append(self._cnt + c["RESET"] + "\n")
+            msg.append(c["WHITE"])
+        msg.append(f'{self._cnt:s}{c["RESET"]:s}\n')
 
-        message_string = "".join(message_list)
+        msg = "".join(msg)
 
         pipe = sys.stdout if self._pipe == "out" else sys.stderr
-        pipe.write(message_string)
+        pipe.write(msg)
 
     def store(self, fn):
 
