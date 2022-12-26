@@ -221,7 +221,7 @@ class Message(MessageABC):
 
     def store(self, fn):
 
-        with open(fn, "a+") as f:
+        with open(fn, mode="a+", encoding="utf-8") as f:
             f.write(self.as_serialized() + "\n")
 
     @property
