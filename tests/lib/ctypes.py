@@ -31,14 +31,12 @@ specific language governing rights and limitations under the License.
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 import os
-from sys import platform
-from platform import architecture
 from typing import Any, Union
 
 from typeguard import typechecked
 from wenv import EnvConfig
 
-from .const import ARCHS, CONVENTIONS, PYTHONBUILDS_FN
+from .const import ARCHITECTURE, ARCHS, CONVENTIONS, PLATFORM, PYTHONBUILDS_FN
 from .names import get_dll_path, get_test_fld
 from .pythonversion import read_python_builds
 
@@ -46,9 +44,7 @@ from .pythonversion import read_python_builds
 # IMPORT / PLATFORM
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-ARCHITECTURE = architecture()[0][:2]
-
-if any([platform.startswith(os_name) for os_name in ["linux", "darwin", "freebsd"]]):
+if PLATFORM == "unix":
 
     import zugbruecke
     cfg = EnvConfig()
@@ -60,9 +56,8 @@ if any([platform.startswith(os_name) for os_name in ["linux", "darwin", "freebsd
             for build in builds[arch]
         ] for arch in ARCHS
     }
-    PLATFORM = "unix"
 
-elif platform.startswith("win"):
+elif PLATFORM == "wine":
 
     import ctypes as _ctypes
     from ctypes import util
@@ -73,7 +68,6 @@ elif platform.startswith("win"):
         arch: [_ctypes]
         for arch in ARCHS if arch[3:] == ARCHITECTURE
     }
-    PLATFORM = "wine"
 
 else:
 
