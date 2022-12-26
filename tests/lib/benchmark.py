@@ -143,7 +143,7 @@ def benchmark(fn: str, initializer: Callable) -> Any:
 
                 print(pf(report))
 
-            return report
+            return reports
 
         inner.is_benchmark = None
         return inner
@@ -225,9 +225,9 @@ def main():
             f.write("")
 
     for item in _get_benchmarks():
-        report = item()
+        reports = item()
         with open(fn, mode = "a", encoding='utf-8') as f:
-            f.write(f'{dumps(report):s}\n')
+            f.write(f'{dumps(reports):s}\n')
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
