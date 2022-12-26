@@ -108,7 +108,11 @@ def benchmark(fn: str, initializer: Callable) -> Any:
 
                 print(f'Benchmark ...')
 
-                func_handle = initializer(ctypes, dll_handle)
+                func_handle = initializer(
+                    ctypes = ctypes,
+                    dll_handle = dll_handle,
+                    conv = convention,
+                )
                 min_runtime = None
                 benchmark_start = time_ns()
                 counter = 0

@@ -54,11 +54,11 @@ SOURCE = """
 from tests.lib.benchmark import benchmark
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# TEST(s)
+# BENCHMARK(s)
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
-def init(ctypes, dll_handle):
+def init(ctypes, dll_handle, conv):
 
     add_int = dll_handle.add_int
     add_int.argtypes = (ctypes.c_int, ctypes.c_int)
@@ -68,16 +68,18 @@ def init(ctypes, dll_handle):
 
 
 @benchmark(fn = __file__, initializer = init)
-def minimal(ctypes, func_handle):
+def minimal(ctypes, func):
     """
     Minimal call
 
-    Parameters: 2 c_int
-    Return value: 1 c_int
-    Rointers: no
-    Memsync: no
+    Call:
+        Parameters: 2 c_int
+        Return value: 1 c_int
+        Pointers: no
+        Memsync: no
+    Callback: no
     """
 
     x, y = 3, 4
-    z = func_handle(x, y)
+    z = func(x, y)
     assert z == 7
