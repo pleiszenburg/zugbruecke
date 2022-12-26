@@ -32,6 +32,7 @@ specific language governing rights and limitations under the License.
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 import json
+from logging import NOTSET, DEBUG, INFO, WARNING, ERROR, CRITICAL
 from pprint import pformat
 import sys
 import time
@@ -99,15 +100,25 @@ class Log(LogABC):
             rpc_client.transfer_message if rpc_client is not None else None
         )
 
-    def err(self, *raw_messages: Any, level: int = 1):
+    def debug(self, *raw_messages: Any):
 
-        if level <= self._p["log_level"]:
-            self._process_raw(*raw_messages, pipe="err", level=level)
+        self._process_raw(*raw_messages, pipe="out", level=DEBUG)
 
-    def out(self, *raw_messages: Any, level: int = 1):
+    def info(self, *raw_messages: Any):
 
-        if level <= self._p["log_level"]:
-            self._process_raw(*raw_messages, pipe="out", level=level)
+        self._process_raw(*raw_messages, pipe="out", level=INFO)
+
+    def warning(self, *raw_messages: Any):
+
+        self._process_raw(*raw_messages, pipe="out", level=WARNING)
+
+    def error(self, *raw_messages: Any):
+
+        self._process_raw(*raw_messages, pipe="err", level=ERROR)
+
+    def critical(self, *raw_messages: Any):
+
+        self._process_raw(*raw_messages, pipe="err", level=CRITICAL)
 
     def terminate(self):
 
@@ -116,7 +127,10 @@ class Log(LogABC):
 
         self._up = False
 
-    def _process_raw(self, *raw_messages: Any, pipe: str, level: int):
+    def _process_raw(self, *raw_messages: Any, pipe: str, level: int = NOTSET):
+
+        if level < self._p["log_level"]:
+            return
 
         for raw_message in raw_messages:
             for message in Message.from_raw(
