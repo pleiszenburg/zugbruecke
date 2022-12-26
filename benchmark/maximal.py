@@ -282,7 +282,7 @@ def init(ctypes, dll_handle, conv):
 @benchmark(fn = __file__, initializer = init)
 def maximal(ctypes, func):
     """
-    The "maximal" benchmark is runs through everything that *zugbuecke* has to offer.
+    The "maximal" benchmark runs through everything that *zugbuecke* has to offer.
     The DLL function takes three arguments: Two pointers to structs and a function pointer.
     The structs themselves contain pointers to memory of arbitrary length which is handled by ``memsync``.
     The function pointer allows to pass a reference to a callback function, written in pure Python.
