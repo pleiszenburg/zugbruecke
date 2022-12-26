@@ -32,6 +32,7 @@ specific language governing rights and limitations under the License.
 
 from functools import wraps
 import importlib
+from json import dumps
 import os
 from pprint import pformat as pf
 import sys
@@ -206,7 +207,7 @@ def _run_wenv():
     )
 
 
-def run_all():
+def main():
     """
     Run all benchmarks both on Unix and Wine
     """
@@ -217,8 +218,16 @@ def run_all():
     elif len(sys.argv) > 1 and sys.argv[1] != 'unix':
         raise SystemError(f'unknown platform "{sys.argv[1]:s}"')
 
+    fn = os.path.join('benchmark', 'data.log')
+
+    if not os.path.exists(fn):
+        with open(fn, mode = 'w', encoding='utf-8') as f:
+            f.write("")
+
     for item in _get_benchmarks():
-        item()
+        report = item()
+        with open(fn, mode = "a", encoding='utf-8') as f:
+            f.write(f'{dumps(report):s}\n')
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -227,4 +236,4 @@ def run_all():
 
 if __name__ == "__main__":
 
-    run_all()
+    main()
