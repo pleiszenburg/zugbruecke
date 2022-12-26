@@ -53,9 +53,12 @@ black:
 benchmark:
 	make clean
 	-rm benchmark/data.raw
+	-rm docs/source/benchmark_*.rst
 	python -m tests.lib.build benchmark
 	python -m tests.lib.benchmark wine
 	python -m tests.lib.benchmark unix
+	python -m tests.lib.benchmark table
+	make docs
 
 clean:
 	make _clean_release
@@ -88,4 +91,5 @@ test:
 	python -m tests.lib.run unix
 	mv .coverage .coverage.00 ; coverage combine ; coverage html -i
 
-.PHONY: docs, benchmark
+.PHONY: docs
+.PHONY: benchmark
