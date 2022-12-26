@@ -282,18 +282,15 @@ def init(ctypes, dll_handle, conv):
 @benchmark(fn = __file__, initializer = init)
 def maximal(ctypes, func):
     """
-    Maximal call
-
-    Call:
-        Parameters: 2 pointers to struct (Image), 1 call back function
-        Return value: void
-        Pointers: yes
-        Memsync: yes
-    Callback: yes
-        Parameters: 1 pointer to struct (Image)
-        Return value: 1 c_int16
-        Pointers: yes
-        Memsync: yes
+    The "maximal" benchmark is runs through everything that *zugbuecke* has to offer.
+    The DLL function takes three arguments: Two pointers to structs and a function pointer.
+    The structs themselves contain pointers to memory of arbitrary length which is handled by ``memsync``.
+    The function pointer allows to pass a reference to a callback function, written in pure Python.
+    It takes a single pointer to a struct, again containing a pointer to memory of arbitrary length,
+    yet again handled by ``memsync``, and returns a single integer.
+    The callback is invoked 100 times per DLL function call.
+    The test is based on a simple monochrom image filter where the DLL function iterates over every pixel
+    in a 10x10 pixel monochrom image while the filter's kernel is provided by the callback function.
     """
 
     result = func(

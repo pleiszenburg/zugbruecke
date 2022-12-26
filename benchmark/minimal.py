@@ -70,14 +70,9 @@ def init(ctypes, dll_handle, conv):
 @benchmark(fn = __file__, initializer = init)
 def minimal(ctypes, func):
     """
-    Minimal call
-
-    Call:
-        Parameters: 2 c_int
-        Return value: 1 c_int
-        Pointers: no
-        Memsync: no
-    Callback: no
+    The "minimal" benchmark is a simple function call with
+    two ``c_int`` parameters and a single ``c_int`` return value.
+    The DLL function simply adds the two numbers and returns the result.
     """
 
     x, y = 3, 4
