@@ -31,14 +31,13 @@ specific language governing rights and limitations under the License.
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 import os
-from subprocess import Popen
 import sys
-from typing import Dict, List, Optional
 
 from typeguard import typechecked
 from wenv import EnvConfig
 
 from .const import PYTHONBUILDS_FN
+from .cmd import run_cmd
 from .pythonversion import read_python_builds
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -79,10 +78,10 @@ def _run_tests_wine(*args: str):
 
     for arch, _builds in builds.items():
         for build in _builds:
-            _run(
+            run_cmd(
                 cmd = ['make', '_clean_py'],
             )
-            _run(
+            run_cmd(
                 cmd = [
                     'wenv', 'pytest',
                     '--hypothesis-show-statistics', *args
@@ -104,10 +103,10 @@ def _run_tests_unix(*args: str):
         - args: Remaining command line arguments
     """
 
-    _run(
+    run_cmd(
         cmd = ['make', '_clean_py'],
     )
-    _run(
+    run_cmd(
         cmd = [
             'pytest',
             '--cov=zugbruecke',
@@ -123,26 +122,6 @@ def _run_tests_unix(*args: str):
             # 'ZUGBRUECKE_LOG_WRITE': 'True',
         },
     )
-
-
-@typechecked
-def _run(cmd: List[str], env: Optional[Dict[str, str]] = None):
-    """
-    Minimal subprocess.Popen wrapper
-
-    Args:
-        - cmd: List of command fragments for Popen
-        - env: Environment variables
-    """
-
-    envvars = os.environ.copy()
-    if env is not None:
-        envvars.update(env)
-
-    proc = Popen(cmd, env = envvars)
-    proc.wait()
-    if proc.returncode != 0:
-        raise SystemError('test command failed', cmd, env)
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
