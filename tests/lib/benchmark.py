@@ -227,10 +227,11 @@ def _make_table(name: str, group: Dict, doc: str):
         key = (lambda item: (item[0], PythonVersion.from_config(item[0], item[1]), item[2])),
     )
 
-    with open(os.path.join('benchmark', f'table_{name}.rst'), mode = 'w', encoding="utf-8") as f:
+    with open(os.path.join('docs', 'source', f'benchmark_{name}.rst'), mode = 'w', encoding="utf-8") as f:
 
-        f.write(f'.. csv-table:: "{name:s}" benchmarks, Python {sys.version.split(" ")[0]:s} on {sys.platform:s}, versions of Python on Wine\n')
+        f.write(f'.. csv-table:: "{name:s}" benchmarks, CPython {sys.version.split(" ")[0]:s} on {sys.platform:s}, versions of CPython on Wine\n')
         f.write('    :header: "arch", "version", "convention", "ctypes [µs]", "zugbruecke [µs]", "overhead [µs]"\n')
+        f.write('    :delim: 0x0003B\n')
         f.write('\n')
 
         for arch, version, conv in keys:
@@ -238,7 +239,7 @@ def _make_table(name: str, group: Dict, doc: str):
             if unix['server'] is None:
                 unix, wine = wine, unix
             unix, wine = round(unix['runtime'] / 1e3), round(wine['runtime'] / 1e3)
-            f.write(f'    "{arch:s}", "{version:s}", "{conv:s}", {wine:d}, {unix:d}, {unix-wine:d} \n')
+            f.write(f'    "{arch:s}"; "{version:s}"; "{conv:s}"; {wine:,d}; {unix:,d}; {unix-wine:,d}\n')
 
         f.write('\n')
         for line in doc.split('\n'):
