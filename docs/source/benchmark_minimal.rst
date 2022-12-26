@@ -1,4 +1,4 @@
-.. csv-table:: "minimal" benchmarks, CPython 3.10.6 on linux, versions of CPython on Wine
+.. csv-table:: "minimal" benchmark, CPython 3.10.6 on linux, versions of CPython on Wine
     :header: "arch", "version", "convention", "ctypes [µs]", "zugbruecke [µs]", "overhead [µs]"
     :delim: 0x0003B
 

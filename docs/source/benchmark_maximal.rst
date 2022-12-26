@@ -1,4 +1,4 @@
-.. csv-table:: "maximal" benchmarks, CPython 3.10.6 on linux, versions of CPython on Wine
+.. csv-table:: "maximal" benchmark, CPython 3.10.6 on linux, versions of CPython on Wine
     :header: "arch", "version", "convention", "ctypes [µs]", "zugbruecke [µs]", "overhead [µs]"
     :delim: 0x0003B
 
@@ -24,7 +24,7 @@
     "win64"; "3.11.1"; "windll"; 1,252; 51,516; 50,264
 
 
-The "maximal" benchmark is runs through everything that *zugbuecke* has to offer.
+The "maximal" benchmark runs through everything that *zugbuecke* has to offer.
 The DLL function takes three arguments: Two pointers to structs and a function pointer.
 The structs themselves contain pointers to memory of arbitrary length which is handled by ``memsync``.
 The function pointer allows to pass a reference to a callback function, written in pure Python.
