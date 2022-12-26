@@ -53,7 +53,8 @@ black:
 benchmark:
 	make clean
 	python -m tests.lib.build benchmark
-	python -c "from benchmark.minimal import minimal; minimal()"
+	python -m tests.lib.benchmark wine
+	python -m tests.lib.benchmark unix
 
 clean:
 	make _clean_release

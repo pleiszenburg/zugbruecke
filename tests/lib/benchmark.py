@@ -38,10 +38,12 @@ from time import time_ns
 from typing import Any, Callable, Dict, List
 
 from typeguard import typechecked
+from wenv import EnvConfig
 
-from .const import ARCHS, CONVENTIONS
-from .ctypes import ARCHITECTURE, CTYPES, PLATFORM, get_dll_handle
+from .cmd import run_cmd
+from .const import ARCHITECTURE, ARCHS, CONVENTIONS, PLATFORM, PYTHONBUILDS_FN
 from .names import get_benchmark_fld
+from .pythonversion import read_python_builds
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # ROUTINES
@@ -58,6 +60,8 @@ def _permutations(fn: str):
     Yields:
         Tuple containing arch, convention, ctypes, dll handle
     """
+
+    from .ctypes import CTYPES, get_dll_handle
 
     fn = os.path.basename(fn)
     fld = get_benchmark_fld()
@@ -143,3 +147,50 @@ def benchmark(fn: str, initializer: Callable) -> Any:
         return inner
 
     return outer
+
+
+def run_all():
+    """
+    Run all benchmarks both on Unix and Wine
+    """
+
+    if len(sys.argv) > 1 and sys.argv[1] == 'wine':
+
+        cfg = EnvConfig()
+        builds = read_python_builds(fn = os.path.join(cfg['prefix'], PYTHONBUILDS_FN))
+
+        for arch, _builds in builds.items():
+            for build in _builds:
+                run_cmd(
+                    cmd = ['make', '_clean_py'],
+                )
+                run_cmd(
+                    cmd = [
+                        'wenv', 'python', '-m', 'tests.lib.benchmark'
+                    ],
+                    env = {
+                        'WENV_DEBUG': '0',
+                        'WENV_ARCH': arch,
+                        'WENV_PYTHONVERSION': str(build),
+                        'WENV_NO_PTH_FILE': 'true' if build.minor >= 11 else 'false',  # CPython PR #31542
+                    },
+                )
+        run_cmd(
+            cmd = ['make', '_clean_py'],
+        )
+        return
+
+    elif len(sys.argv) > 1 and sys.argv[1] != 'unix':
+
+        raise SystemError(f'unknown platform "{sys.argv[1]:s}"')
+
+    print('running on', sys.platform, sys.version)
+
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# MODULE ENTRY POINT
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+if __name__ == "__main__":
+
+    run_all()
