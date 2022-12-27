@@ -32,25 +32,25 @@ specific language governing rights and limitations under the License.
 
 HEADER = """
 {{ PREFIX }} void {{ SUFFIX }} replace_char(
-	char **in_string,
-	char old_letter,
-	char new_letter
-	);
+    char **in_string,
+    char old_letter,
+    char new_letter
+    );
 """
 
 SOURCE = """
 {{ PREFIX }} void {{ SUFFIX }} replace_char(
-	char **in_string,
-	char old_letter,
-	char new_letter
-	)
+    char **in_string,
+    char old_letter,
+    char new_letter
+    )
 {
-	int i;
-	for (i = 0; i < strlen((*in_string)); i++) {
-		if((*in_string)[i] == old_letter) {
-			(*in_string)[i] = new_letter;
-		}
-	}
+    int i;
+    for (i = 0; i < strlen((*in_string)); i++) {
+        if((*in_string)[i] == old_letter) {
+            (*in_string)[i] = new_letter;
+        }
+    }
 }
 """
 
