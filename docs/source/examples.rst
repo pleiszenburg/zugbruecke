@@ -106,6 +106,34 @@ Thanks to Wine, which can run both in 32 bit and in 64 bit mode, it is perfectly
     ctypes_windows32 = CtypesSession(arch = 'win32')
     ctypes_windows64 = CtypesSession(arch = 'win64')
 
+Platform-Dependent Integer Widths
+---------------------------------
+
+The width, i.e. size in bytes, of long integer types differs between platforms and therefore also between Unix-like systems and Windows systems. *zugbruecke* is no exception here, where long integer types have different widths between the Unix-side from where you want to call a DLL function and the Wine-side where the DLL function is being executed:
+
+.. code:: bash
+
+    (env) user@comp:~> python -m platform
+    Linux
+    (env) user@comp:~> python -c "from ctypes import c_long, c_ulong, sizeof as s; \
+    > print(s(c_long), s(c_ulong))"
+    8 8
+    (env) user@comp:~> wenv python -m platform
+    Windows
+    (env) user@comp:~> wenv python -c "from ctypes import c_long, c_ulong, sizeof as s; \
+    > print(s(c_long), s(c_ulong))"
+    4 4
+
+For consistency, *zugbruecke* deals with this by sticking to the width of long integers on Unix-like systems, i.e. 8 bytes.
+
+.. warning::
+
+    `c_long` on the Unix side is being translated to `c_int64` on the Wine side. `c_ulong` on the Unix side is being translated to `c_uint64` on the Wine side. If you require `c_long` or `c_ulong` following Windows' definitions, you will have to use `c_int32` or `c_uint32` on the Unix side.
+
+.. note::
+
+    Integers with specified length, e.g. `c_int32`, always have the same length on both, the Unix and the Wine side.
+
 .. _callingconvention:
 
 Calling Conventions
