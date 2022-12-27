@@ -6,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-    tests/test_int_minimal.py: Tests by reference argument passing (int pointer)
+    tests/test_int_minimal.py: Tests by basic integer handling, with/without pointers
 
     Required to run on platform / side: [UNIX, WINE]
 
@@ -40,6 +40,10 @@ HEADER = """
 {{ PREFIX }} int {{ SUFFIX }} gcd(
     int x,
     int y
+    );
+
+{{ PREFIX }} int16_t {{ SUFFIX }} sqrt_int(
+    int16_t a
     );
 """
 
@@ -77,6 +81,13 @@ SOURCE = """
         y = g;
     }
     return g;
+}
+
+{{ PREFIX }} int16_t {{ SUFFIX }} sqrt_int(
+    int16_t a
+    )
+{
+    return (int16_t)sqrt(a);
 }
 """
 
@@ -152,3 +163,16 @@ def test_int_without_pointer(arch, conv, ctypes, dll_handle):
     gcd.restype = ctypes.c_int
 
     assert 7 == gcd(35, 42)
+
+
+@pytest.mark.parametrize("arch,conv,ctypes,dll_handle", get_context(__file__))
+def test_int_with_size_without_pointer(arch, conv, ctypes, dll_handle):
+    """
+    Test simple int passing with size
+    """
+
+    sqrt_int = dll_handle.sqrt_int
+    sqrt_int.argtypes = (ctypes.c_int16,)
+    sqrt_int.restype = ctypes.c_int16
+
+    assert 3 == sqrt_int(9)
