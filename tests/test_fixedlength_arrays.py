@@ -6,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-    tests/test_pointers_to_fixedlength_arrays.py: Tests 2D fixed length arrays w/ floats
+    tests/test_fixedlength_arrays.py: Tests fixed length arrays with & without pointers
 
     Required to run on platform / side: [UNIX, WINE]
 
