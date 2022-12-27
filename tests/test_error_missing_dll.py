@@ -6,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-    tests/test_error_missingdll.py: Checks for proper error handling if DLL does not exist
+    tests/test_error_missing_dll.py: Checks for proper error handling if DLL does not exist
 
     Required to run on platform / side: [UNIX, WINE]
 
@@ -31,6 +31,8 @@ specific language governing rights and limitations under the License.
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+import os
+
 from .lib.ctypes import get_context
 
 import pytest
@@ -44,30 +46,27 @@ import pytest
     "arch,conv,ctypes,dll_path", get_context(__file__, handle=False)
 )
 def test_missingdll(arch, conv, ctypes, dll_path):
+    """
+    DLL file does not exist, via LoadLibrary
+    """
 
-    missing_path = "tests/nonexistent_%s_%s.dll" % (conv, arch)
+    missing = f"tests/nonexistent_{conv:s}_{arch:s}.dll"
+
+    assert not os.path.exists(missing)
 
     with pytest.raises(OSError):
-        dll = getattr(ctypes, conv).LoadLibrary(missing_path)
+        _ = getattr(ctypes, conv).LoadLibrary(missing)
 
 
 @pytest.mark.parametrize(
     "arch,conv,ctypes,dll_path", get_context(__file__, handle=False)
 )
 def test_missingdll_attr(arch, conv, ctypes, dll_path):
+    """
+    DLL file does not exist, via attribute
+    """
 
-    missing_attr = "nonexistent_%s_%s_attr" % (conv, arch)
+    missing = f"nonexistent_{conv:s}_{arch:s}_attr"
 
     with pytest.raises(OSError):
-        dll = getattr(ctypes.cdll, missing_attr)
-
-
-# def test_missingdll_oledll(): # TODO
-#
-# 	with pytest.raises(OSError):
-# 		dll = ctypes.oledll.LoadLibrary('tests/nonexistent3_dll.dll')
-
-# def test_missingdll_oledll_attr(): # TODO
-#
-# 	with pytest.raises(OSError):
-# 		dll = ctypes.oledll.nonexistent33_dll
+        _ = getattr(ctypes.cdll, missing)

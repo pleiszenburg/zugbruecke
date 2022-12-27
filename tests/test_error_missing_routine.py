@@ -6,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-    tests/test_error_missingroutine.py: Checks for proper error handling if routine does not exist
+    tests/test_error_missing_routine.py: Checks for proper error handling if routine does not exist
 
     Required to run on platform / side: [UNIX, WINE]
 
@@ -60,6 +60,9 @@ import pytest
 
 @pytest.mark.parametrize("arch,conv,ctypes,dll_handle", get_context(__file__))
 def test_missingroutine(arch, conv, ctypes, dll_handle):
+    """
+    Routine in DLL does not exist
+    """
 
     with pytest.raises(AttributeError):
-        missing_routine = dll_handle.missing_routine
+        _ = dll_handle.missing_routine
