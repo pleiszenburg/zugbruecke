@@ -249,6 +249,9 @@ class RoutineClient(RoutineClientABC):
     @restype.setter
     def restype(self, value: Any):
 
+        if isinstance(value, tuple) or isinstance(value, list):  # TODO better check for ctypes types?
+            raise TypeError  # original ctypes does that
+
         self._restype_raw = value
 
     @property
