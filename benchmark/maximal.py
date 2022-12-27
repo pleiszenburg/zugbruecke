@@ -288,35 +288,21 @@ def maximal(ctypes, func):
     The function pointer allows to pass a reference to a callback function, written in pure Python.
     It takes a single pointer to a struct, again containing a pointer to memory of arbitrary length,
     yet again handled by ``memsync``, and returns a single integer.
-    The callback is invoked 100 times per DLL function call.
+    The callback is invoked 9 times per DLL function call.
     The test is based on a simple monochrom image filter where the DLL function iterates over every pixel
-    in a 10x10 pixel monochrom image while the filter's kernel is provided by the callback function.
+    in a 3x3 pixel monochrom image while the filter's kernel is provided by the callback function.
     """
 
     result = func(
         [
-            [253, 252, 254, 243, 243, 230, 251, 247, 255, 254],
-            [252, 254, 239, 144, 253, 247, 220, 252, 235, 255],
-            [252, 246, 166, 123, 168, 237, 244, 252, 235, 255],
-            [255, 228, 176, 103, 138, 250, 228, 252, 252, 252],
-            [219, 217, 146, 152, 146, 170, 250, 253, 246, 243],
-            [254, 162, 116, 128, 133, 154, 247, 255, 244, 253],
-            [224, 116, 136, 154, 129, 147, 189, 248, 254, 205],
-            [192, 105, 117, 138, 148, 101, 111, 248, 248, 239],
-            [254, 231, 168, 153, 124, 113, 111, 207, 238, 245],
-            [216, 255, 251, 235, 247, 227, 175, 182, 249, 248],
+            [253, 252, 254],
+            [252, 254, 239],
+            [252, 246, 166],
         ]
     )
 
     assert [
-        [-508, -247, -282, -331, -246, -179, -307, -230, -284, -506],
-        [-249, -27, -138, 282, -210, -48, 114, -54, 57, -276],
-        [-255, -84, 120, 89, 79, -39, -39, -25, 54, -278],
-        [-321, -18, -61, 177, 115, -227, 84, -23, -23, -258],
-        [-150, -113, 77, -85, 9, 120, -102, -9, 8, -221],
-        [-411, 55, 108, 43, 25, 81, -140, -28, 32, -320],
-        [-334, 163, -41, -85, 66, -15, -3, -46, -71, -74],
-        [-185, 236, 79, 20, -100, 115, 205, -178, -13, -258],
-        [-377, -142, 80, 53, 165, 111, 162, -49, -3, -255],
-        [-355, -322, -346, -289, -402, -373, -180, -97, -328, -498],
+        [-508, -247, -525],
+        [-249, -27, -282],
+        [-510, -312, -179],
     ] == result
