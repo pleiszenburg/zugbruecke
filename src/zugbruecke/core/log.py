@@ -126,6 +126,8 @@ class Log(LogABC):
 
     def _process_raw(self, *raw_messages: Any, pipe: str, level: int = NOTSET):
 
+        if self._p["log_level"] == NOTSET:
+            return
         if level < self._p["log_level"]:
             return
 

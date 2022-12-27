@@ -81,12 +81,9 @@ class CallbackServer(CallbackServerABC):
 
         args = list(args)
 
-        self._log.out(
-            '[callback-server] Trying to call callback routine "{NAME:s}" ...'.format(NAME = self._name)
-        )
-        self._log.out(
-            '[callback-server] ... parameters are "{ARGS:s}". Packing and pushing to client ...'.format(ARGS = pf(args))
-        )
+        self._log.info(f'[callback-server] Trying to call callback routine "{self._name:s}" ...')
+        self._log.info('[callback-server] ... packing and pushing to client ...')
+        self._log.debug(args)
 
         try:
             packed_args = self._data.pack_args(args, self._argtypes)
@@ -95,21 +92,19 @@ class CallbackServer(CallbackServerABC):
                 memsyncs = self._memsyncs,
             )]
         except Exception as e:
-            self._log.out("[callback-server] ... memory packing failed!")
-            self._log.err(traceback.format_exc())
+            self._log.error("[callback-server] ... memory packing failed!")
+            self._log.error(traceback.format_exc())
             raise e
 
         try:
             return_package = self._handler(packed_args, packed_mempkgs)
         except Exception as e:
-            self._log.out("[callback-server] ... call failed!")
-            self._log.err(traceback.format_exc())
+            self._log.error("[callback-server] ... call failed!")
+            self._log.error(traceback.format_exc())
             raise e
 
         try:
-            self._log.out(
-                "[callback-server] ... received feedback from client, unpacking ..."
-            )
+            self._log.info("[callback-server] ... received feedback from client, unpacking ...")
             self._data.sync_args(
                 args,
                 self._data.unpack_args(return_package["args"], self._argtypes),
@@ -125,14 +120,14 @@ class CallbackServer(CallbackServerABC):
                 memsyncs = self._memsyncs,
             )
         except Exception as e:
-            self._log.out("[callback-server] ... unpacking failed!")
-            self._log.err(traceback.format_exc())
+            self._log.error("[callback-server] ... unpacking failed!")
+            self._log.error(traceback.format_exc())
             raise e
 
         if not return_package["success"]:
-            self._log.out("[callback-server] ... call raised an error.")
+            self._log.error("[callback-server] ... call raised an error.")
             raise return_package["exception"]
 
-        self._log.out("[callback-server] ... unpacked, return.")
+        self._log.info("[callback-server] ... unpacked, return.")
 
         return retval

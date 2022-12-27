@@ -92,12 +92,10 @@ class RoutineClient(RoutineClientABC):
         ):
             setattr(
                 self,
-                "_{ATTR:s}_on_server".format(ATTR=attr),
+                f"_{attr:s}_on_server",
                 getattr(
                     rpc_client,
-                    "{HASH_ID:s}_{NAME:s}_{ATTR:s}".format(
-                        HASH_ID=hash_id, NAME=str(self._name), ATTR=attr
-                    ),
+                    f"{hash_id:s}_{str(self._name):s}_{attr:s}",
                 ),
             )
 
@@ -108,17 +106,12 @@ class RoutineClient(RoutineClientABC):
 
         args = list(args)
 
-        self._log.out(
-            '[routine-client] Trying to call routine "{NAME:s}" in DLL file "{DLL_NAME:s}" ...'.format(
-                NAME=str(self._name),
-                DLL_NAME=self._dll_name,
-            )
-        )
+        self._log.info(f'[routine-client] Trying to call routine "{str(self._name):s}" in DLL file "{self._dll_name:s}" ...')
 
         if not self._configured:
             self._configure()
 
-        self._log.out('[routine-client] ... packing and pushing args to server ...')
+        self._log.info('[routine-client] ... packing and pushing args to server ...')
 
         # Pack stuff
         packed_args = self._data.pack_args(args, self._argtypes, self._convention)
@@ -127,18 +120,16 @@ class RoutineClient(RoutineClientABC):
             memsyncs = self._memsyncs,
         )]
 
-        self._log.out(pf(dict(
+        self._log.debug(dict(
             args = args,
             packed_args = packed_args,
             packed_mempkgs = packed_mempkgs,
-        )))
+        ))
 
         # Actually call routine in DLL
         return_package = self._call_on_server(packed_args, packed_mempkgs)
 
-        self._log.out(
-            "[routine-client] ... received feedback from server, unpacking & syncing arguments ..."
-        )
+        self._log.info("[routine-client] ... received feedback from server, unpacking & syncing arguments ...")
 
         # Unpack return dict (call may have failed partially only)
         self._data.sync_args(
@@ -151,14 +142,14 @@ class RoutineClient(RoutineClientABC):
             self._argtypes,
         )
 
-        self._log.out("[routine-client] ... unpacking return value ...")
+        self._log.info("[routine-client] ... unpacking return value ...")
 
         # Unpack return value of routine
         retval = self._data.unpack_retval(
             return_package["retval"], self._restype
         )
 
-        self._log.out("[routine-client] ... overwriting memory ...")
+        self._log.info("[routine-client] ... overwriting memory ...")
 
         # Unpack memory (call may have failed partially only)
         DefinitionMemsync.unpkg_memories(
@@ -168,14 +159,14 @@ class RoutineClient(RoutineClientABC):
             memsyncs = self._memsyncs,
         )
 
-        self._log.out("[routine-client] ... everything unpacked and overwritten ...")
+        self._log.info("[routine-client] ... everything unpacked and overwritten ...")
 
         # Raise the original error if call was not a success
         if not return_package["success"]:
-            self._log.out("[routine-client] ... call raised an error.")
+            self._log.error("[routine-client] ... call raised an error.")
             raise return_package["exception"]
 
-        self._log.out("[routine-client] ... return.")
+        self._log.info("[routine-client] ... return.")
 
         # Return result. return_value will be None if there was not a result.
         return retval
@@ -186,9 +177,7 @@ class RoutineClient(RoutineClientABC):
 
     def _configure(self):
 
-        self._log.out(
-            "[routine-client] ... has not been called before. Configuring ..."
-        )
+        self._log.info("[routine-client] ... has not been called before. Configuring ...")
 
         # Parse raw argtypes into definitions
         self._argtypes = Definition.from_data_types(
@@ -217,14 +206,14 @@ class RoutineClient(RoutineClientABC):
         )
 
         # Log status
-        self._log.out(pf(dict(
+        self._log.debug(dict(
             argtypes_raw = self._argtypes_raw,
             argtypes = self._argtypes,
             restype_raw = self._restype_raw,
             restype = self._restype,
             memsync_raw = self._memsyncs_raw,
             memsync = self._memsyncs,
-        )))
+        ))
 
         # Pass argument and return value types as strings ...
         _ = self._configure_on_server(
@@ -237,7 +226,7 @@ class RoutineClient(RoutineClientABC):
         self._configured = True
 
         # Log status
-        self._log.out("[routine-client] ... configured. Proceeding ...")
+        self._log.info("[routine-client] ... configured. Proceeding ...")
 
     @property
     def argtypes(self) -> Union[List, Tuple]:

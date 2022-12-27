@@ -79,7 +79,7 @@ class DllServer(DllServerABC):
         ):
             self._rpc_server.register_function(
                 getattr(self, name),
-                "{HASH_ID:s}_{NAME:s}".format(HASH_ID=self._hash_id, NAME=name),
+                f"{self._hash_id:s}_{name:s}",
             )
 
     def get_repr(self) -> str:
@@ -97,12 +97,7 @@ class DllServer(DllServerABC):
         if name in self._routines.keys():
             return
 
-        self._log.out(
-            '[dll-server] Trying to access "{NAME:s}" in DLL file "{DLL_NAME:s}" ...'.format(
-                NAME=str(name),
-                DLL_NAME=self._name,
-            )
-        )
+        self._log.info(f'[dll-server] Trying to access "{str(name):s}" in DLL file "{self._name:s}" ...')
 
         try:
             if isinstance(name, str):
@@ -110,10 +105,11 @@ class DllServer(DllServerABC):
             else:
                 routine_handler = self._handler[name]
         except AttributeError as e:
-            self._log.out("[dll-server] ... failed!")
+            self._log.info("[dll-server] ... failed!")
             raise e
         except Exception as e:
-            self._log.err(traceback.format_exc())
+            self._log.info("[dll-server] ... failed!")
+            self._log.error(traceback.format_exc())
             raise e
 
         # Generate new instance of routine class
@@ -128,4 +124,4 @@ class DllServer(DllServerABC):
             self._data,
         )
 
-        self._log.out("[dll-server] ... done.")
+        self._log.info("[dll-server] ... done.")

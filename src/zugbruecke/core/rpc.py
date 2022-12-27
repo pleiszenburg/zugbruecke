@@ -124,8 +124,8 @@ class RpcServer(RpcServerABC):
         self._log = log
 
         if self._log is not None:
-            self._log.out("[rpc-server] STARTING ...")
-            self._log.out("[rpc-server] Log attached.")
+            self._log.info("[rpc-server] STARTING ...")
+            self._log.info("[rpc-server] Log attached.")
 
         self._socket_path = socket_path
         self._authkey = authkey.encode("utf-8")
@@ -138,7 +138,7 @@ class RpcServer(RpcServerABC):
         self.register_function(self.get_rpc_status)
 
         if self._log is not None:
-            self._log.out("[rpc-server] STARTED.")
+            self._log.info("[rpc-server] STARTED.")
 
     def get_rpc_status(self) -> bool:
         """
@@ -163,13 +163,13 @@ class RpcServer(RpcServerABC):
         self._up = False
 
         if self._log is not None:
-            self._log.out("[rpc-server] TERMINATING ...")
+            self._log.info("[rpc-server] TERMINATING ...")
 
         if self._terminate_function is not None:
             self._terminate_function()
 
         if self._log is not None:
-            self._log.out("[rpc-server] TERMINATED.")
+            self._log.info("[rpc-server] TERMINATED.")
 
         self._server.close()
 
@@ -186,8 +186,8 @@ class RpcServer(RpcServerABC):
                 t.start()
             except OSError:
                 if self._log is not None:
-                    self._log.out("[rpc-server] OSError: Socket likely closed.")
-            except:
+                    self._log.error("[rpc-server] OSError: Socket likely closed.")
+            except Exception as e:
                 traceback.print_exc()
 
     def server_forever_in_thread(self, daemon: bool = True):

@@ -84,9 +84,7 @@ class RoutineServer(RoutineServerABC):
         ):
             rpc_server.register_function(
                 getattr(self, attr),
-                "{HASH_ID:s}_{NAME:s}_{ATTR:s}".format(
-                    HASH_ID=hash_id, NAME=str(self._name), ATTR=attr
-                ),
+                f"{hash_id:s}_{str(self._name):s}_{attr:s}",
             )
 
     def call(self, packed_args: List[Any], packed_mempkgs: List[Dict]) -> Dict:
@@ -94,12 +92,7 @@ class RoutineServer(RoutineServerABC):
         Called by routine client
         """
 
-        self._log.out(
-            '[routine-server] Trying to call routine "{NAME:s}" in DLL file "{DLL_NAME:s}" ...'.format(
-                NAME=str(self._name),
-                DLL_NAME=self._dll_name,
-            )
-        )
+        self._log.info(f'[routine-server] Trying to call routine "{str(self._name):s}" in DLL file "{self._dll_name:s}" ...')
 
         try:
             args = self._data.unpack_args(
@@ -115,15 +108,15 @@ class RoutineServer(RoutineServerABC):
                 is_server = True,
             )
         except Exception as e:
-            self._log.out("[routine-server] ... call preparation failed!")
-            self._log.err(traceback.format_exc())
+            self._log.error("[routine-server] ... call preparation failed!")
+            self._log.error(traceback.format_exc())
             raise e
 
         try:
             retval = self._handler(*args)
         except Exception as e:
-            self._log.out("[routine-server] ... call failed!")
-            self._log.err(traceback.format_exc())
+            self._log.error("[routine-server] ... call failed!")
+            self._log.error(traceback.format_exc())
             return {
                 "args": packed_args,  # unchanged
                 "retval": retval,  # unchanged, still None
@@ -139,7 +132,7 @@ class RoutineServer(RoutineServerABC):
                 mempkgs = mempkgs,
                 memsyncs = self._memsyncs,
             )
-            self._log.out("[routine-server] ... done.")
+            self._log.info("[routine-server] ... done.")
             return {
                 "args": self._data.pack_args(args, self._argtypes, self._convention),
                 "retval": self._data.pack_retval(retval, self._restype),
@@ -148,8 +141,8 @@ class RoutineServer(RoutineServerABC):
                 "exception": None,
             }
         except Exception as e:
-            self._log.out("[routine-server] ... call post-processing failed!")
-            self._log.err(traceback.format_exc())
+            self._log.error("[routine-server] ... call post-processing failed!")
+            self._log.error(traceback.format_exc())
             raise e
 
     def configure(self, packed_argtypes: List[Dict], packed_restype: Dict, packed_memsyncs: List[Dict]):
@@ -195,18 +188,18 @@ class RoutineServer(RoutineServerABC):
         except Exception as e:
 
             # Push traceback to log
-            self._log.err(traceback.format_exc())
+            self._log.error(traceback.format_exc())
 
             raise e
 
         # log status
-        self._log.out(pf(dict(
+        self._log.debug(dict(
             argtypes_raw = self._handler.argtypes,
             argtypes = self._argtypes,
             restype_raw = self._handler.restype,
             restype = self._restype,
             memsync = self._memsyncs,
-        )))
+        ))
 
     def get_repr(self) -> str:
         """

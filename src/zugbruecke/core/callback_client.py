@@ -81,9 +81,7 @@ class CallbackClient(CallbackClientABC):
 
     def __call__(self, packed_args: List[Any], packed_mempkgs: List[Dict]) -> Dict:
 
-        self._log.out(
-            '[callback-client] Trying to call callback routine "{NAME:s}" ...'.format(NAME = self._name)
-        )
+        self._log.info(f'[callback-client] Trying to call callback routine "{self._name:s}" ...')
 
         try:
             args = self._data.unpack_args(packed_args, self._argtypes)
@@ -97,15 +95,15 @@ class CallbackClient(CallbackClientABC):
                 is_server = True,
             )
         except Exception as e:
-            self._log.out("[callback-client] ... call preparation failed!")
-            self._log.err(traceback.format_exc())
+            self._log.error("[callback-client] ... call preparation failed!")
+            self._log.error(traceback.format_exc())
             raise e
 
         try:
             retval = self._handler(*args)
         except Exception as e:
-            self._log.out("[callback-client] ... call failed!")
-            self._log.err(traceback.format_exc())
+            self._log.error("[callback-client] ... call failed!")
+            self._log.error(traceback.format_exc())
             return {
                 "args": packed_args,  # unchanged
                 "retval": retval,  # unchanged, still None
@@ -121,7 +119,7 @@ class CallbackClient(CallbackClientABC):
                 mempkgs = mempkgs,
                 memsyncs = self._memsyncs,
             )
-            self._log.out("[callback-client] ... done.")
+            self._log.info("[callback-client] ... done.")
             return {
                 "args": self._data.pack_args(args, self._argtypes),
                 "retval": self._data.pack_retval(retval, self._restype),
@@ -130,6 +128,6 @@ class CallbackClient(CallbackClientABC):
                 "exception": None,
             }
         except Exception as e:
-            self._log.out("[callback-client] ... call post-processing failed!")
-            self._log.err(traceback.format_exc())
+            self._log.error("[callback-client] ... call post-processing failed!")
+            self._log.error(traceback.format_exc())
             raise e
