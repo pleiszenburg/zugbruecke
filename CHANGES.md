@@ -19,9 +19,10 @@ This **RELEASE FIXES A CRITICAL BUG** where *zugbruecke* was falsely translating
 - FEATURE: Logging now relies on Python's `logging` module's log levels, i.e. `NOTSET`, `DEBUG`, `INFO`, `WARNING`, `ERROR` and `CRITICAL`. This change serves to work towards #84.
 - FEATURE: Log output has been divided into log levels, see #9.
 - FIX: Argtypes and restype would translate `c_int64`, `c_uint64`, `c_long` and `c_ulong` from the Unix side to their 32-bit equivalents, `c_int32` and `c_uint32`, on the Wine side. This was due to `c_long` and `c_ulong` being 8 bytes long on Unix-like systems while they are 4 bytes long on Window.
+- FIX: The new `argtypes` and `restype` parser does not suffer from #61 anymore where earlier different structure types from different name spaces but with identical names would cause problems.
 - FIX: CI revealed that an issue similar to #50 returned as packages on Wine side can sometimes not be imported if they are symlinked. The new `copy_modules` configuration parameter can be used to indicate that a copy instead of symlinks is required.
 - FIX: If `zugbruecke` (and `wenv`) were installed into user site-packages, the installation would break, see #88.
-- FIX: Syncing entire structs via `memsync` was broken, see #92. The changes made also finally fix #61.
+- FIX: Syncing entire structs via `memsync` was broken, see #92.
 - FIX: `restype` would not throw an exception when by accident set to a list or tuple like original `ctypes` does.
 - DEPRECATED: Single-character parameter names in memsync directives.
 - DEPRECATED: `ctypes` fundamental types specified by name as strings in `memsync` directives.
