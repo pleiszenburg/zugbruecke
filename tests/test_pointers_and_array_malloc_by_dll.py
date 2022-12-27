@@ -6,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-    tests/test_square_int_array.py: Test allocation of memory by DLL
+    tests/test_pointers_and_array_malloc_by_dll.py: Test array pointer and allocation of memory by DLL
 
     Required to run on platform / side: [UNIX, WINE]
 
@@ -59,44 +59,11 @@ SOURCE = """
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+from typing import List
+
 from .lib.ctypes import get_context
 
 import pytest
-
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# CLASSES AND ROUTINES
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-
-class sample_class:
-    def __init__(self, ctypes, dll_handle):
-
-        self._c = ctypes
-        self._square_int_array = dll_handle.square_int_array
-        self._square_int_array.argtypes = (
-            self._c.POINTER(self._c.c_int16),
-            self._c.c_void_p,
-            self._c.c_int16,
-        )
-        self._square_int_array.memsync = [
-            {"p": [0], "l": [2], "t": "c_int16"},
-            {"p": [1, -1], "l": [2], "t": "c_int16"},
-        ]
-
-    def square_int_array(self, in_array):
-
-        in_array_p = self._c.cast(
-            self._c.pointer((self._c.c_int16 * len(in_array))(*in_array)),
-            self._c.POINTER(self._c.c_int16),
-        )
-        out_array_p = self._c.pointer(self._c.c_void_p())
-
-        self._square_int_array(in_array_p, out_array_p, self._c.c_int16(len(in_array)))
-
-        return self._c.cast(
-            out_array_p.contents, self._c.POINTER(self._c.c_int16 * len(in_array))
-        ).contents[:]
-
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # TEST(s)
@@ -104,8 +71,42 @@ class sample_class:
 
 
 @pytest.mark.parametrize("arch,conv,ctypes,dll_handle", get_context(__file__))
-def test_square_int_array(arch, conv, ctypes, dll_handle):
+def test_pointers_and_array_malloc_by_dll(arch, conv, ctypes, dll_handle):
 
-    sample = sample_class(ctypes, dll_handle)
+    square_int_array_dll = dll_handle.square_int_array
+    square_int_array_dll.argtypes = (
+        ctypes.POINTER(ctypes.c_int16),
+        ctypes.c_void_p,
+        ctypes.c_int16,
+    )
+    square_int_array_dll.memsync = [
+        dict(
+            pointer = [0],
+            length = [2],
+            type = ctypes.c_int16,
+        ),
+        dict(
+            pointer = [1, -1],
+            length = [2],
+            type = ctypes.c_int16,
+        ),
+    ]
 
-    assert [4, 16, 9, 25] == sample.square_int_array([2, 4, 3, 5])
+    def square_int_array(data: List[int]) -> List[int]:
+        """
+        Callback function, called by DLL function
+        """
+
+        in_ptr = ctypes.cast(
+            ctypes.pointer((ctypes.c_int16 * len(data))(*data)),
+            ctypes.POINTER(ctypes.c_int16),
+        )
+        out_ptr = ctypes.pointer(ctypes.c_void_p())
+
+        square_int_array_dll(in_ptr, out_ptr, ctypes.c_int16(len(data)))
+
+        return ctypes.cast(
+            out_ptr.contents, ctypes.POINTER(ctypes.c_int16 * len(data))
+        ).contents[:]
+
+    assert [4, 16, 9, 25] == square_int_array([2, 4, 3, 5])
