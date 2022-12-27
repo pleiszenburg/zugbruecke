@@ -106,6 +106,8 @@ Thanks to Wine, which can run both in 32 bit and in 64 bit mode, it is perfectly
     ctypes_windows32 = CtypesSession(arch = 'win32')
     ctypes_windows64 = CtypesSession(arch = 'win64')
 
+.. _integerwidths:
+
 Platform-Dependent Integer Widths
 ---------------------------------
 

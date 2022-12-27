@@ -44,6 +44,11 @@ Pointers to simple C data types (int, float, etc.) used as function parameters o
 
 Pointers to arbitrary data structures can be handled if another parameter of the call contains the length of the memory section the pointer is pointing to or if it is a zero/null-terminated string buffer. *zugbruecke* uses a special ``memsync`` protocol for indicating which memory sections must be kept in sync between the *Unix* and the *Wine* side of the code. If executed on *Windows*, the regular *ctypes* will just ignore any ``memsync`` directive in the code. See :ref:`chapter on memsync <memsync>` for details.
 
+How are integer widths handled for long integer types?
+------------------------------------------------------
+
+*zugbruecke* sticks to the Unix-specific width of long integer types. For details, see the :ref:`introduction to integer width handling <integerwidths>`.
+
 Is it thread-safe?
 ------------------
 
