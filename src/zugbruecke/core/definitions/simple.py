@@ -115,6 +115,11 @@ class DefinitionSimple(base.Definition):
         Simple group-specific helper for from ctypes data type
         """
 
+        if type_name in ('c_int', 'c_long', 'c_longlong'):
+            type_name = f'c_int{ctypes.sizeof(base_type)*8:d}'
+        if type_name in ('c_uint', 'c_ulong', 'c_ulonglong'):
+            type_name = f'c_uint{ctypes.sizeof(base_type)*8:d}'
+
         return cls(
             flags = flags,
             field_name = field_name,
