@@ -32,37 +32,37 @@ specific language governing rights and limitations under the License.
 
 HEADER = """
 typedef struct point {
-	double x, y;
+    double x, y;
 } point;
 
 {{ PREFIX }} double {{ SUFFIX }} distance(
-	point *p1,
-	point *p2
-	);
+    point *p1,
+    point *p2
+    );
 
 {{ PREFIX }} double {{ SUFFIX }} *distance_pointer(
-	point *p1,
-	point *p2
-	);
+    point *p1,
+    point *p2
+    );
 """
 
 SOURCE = """
 {{ PREFIX }} double {{ SUFFIX }} distance(
-	point *p1,
-	point *p2
-	)
+    point *p1,
+    point *p2
+    )
 {
-	return hypot(p1->x - p2->x, p1->y - p2->y);
+    return hypot(p1->x - p2->x, p1->y - p2->y);
 }
 
 {{ PREFIX }} double {{ SUFFIX }} *distance_pointer(
-	point *p1,
-	point *p2
-	)
+    point *p1,
+    point *p2
+    )
 {
-	double *distance_p = (double *)malloc(sizeof(double));
-	*distance_p = hypot(p1->x - p2->x, p1->y - p2->y);
-	return distance_p;
+    double *distance_p = (double *)malloc(sizeof(double));
+    *distance_p = hypot(p1->x - p2->x, p1->y - p2->y);
+    return distance_p;
 }
 """
 
