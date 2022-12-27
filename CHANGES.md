@@ -30,8 +30,8 @@ This **RELEASE FIXES A CRITICAL BUG** where *zugbruecke* was falsely translating
 - DOCS: Added explanation of handling of floating point types and the lack of "long double" support.
 - DOCS: Updated benchmarks.
 - DOCS: Removed old `examples` folder from project as its code was more than outdated and can now be found in the documentation, the test suite and/or the newly added benchmarks.
-- DEV: Added tests on custom types and array objects (standard library) as well as numpy ndarray objects.
-- DEV: Added tests for int64 limits / overflows for win64.
+- DEV: Added tests on custom types and `array.array` objects (standard library) as well as `numpy.ndarray` objects.
+- DEV: Added tests for 64 bit integer limits / overflows for win64.
 - DEV: Added tests on `restype` configuration errors.
 - DEV: Simplified / clarified many of the older tests.
 - DEV: Test support library cleaned up, documented and typed.
