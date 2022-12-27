@@ -66,54 +66,11 @@ SOURCE = """
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+from typing import List
+
 from .lib.ctypes import get_context
 
 import pytest
-
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# CLASSES AND ROUTINES
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-
-class sample_class:
-    def __init__(self, conv, ctypes, dll_handle):
-
-        if conv == "cdll":
-            func_type = ctypes.CFUNCTYPE
-        elif conv == "windll":
-            func_type = ctypes.WINFUNCTYPE
-        else:
-            raise ValueError("unknown calling convention", conv)
-        conveyor_belt = func_type(ctypes.c_int16, ctypes.c_int16)
-
-        class conveyor_belt_data(ctypes.Structure):
-            _fields_ = [("len", ctypes.c_int16), ("get_data", conveyor_belt)]
-
-        self._conveyor_belt_data = conveyor_belt_data
-
-        self._sum_elements_from_callback_in_struct = (
-            dll_handle.sum_elements_from_callback_in_struct
-        )
-        self._sum_elements_from_callback_in_struct.argtypes = (
-            ctypes.POINTER(conveyor_belt_data),
-        )
-        self._sum_elements_from_callback_in_struct.restype = ctypes.c_int16
-
-        self.DATA = [1, 6, 8, 4, 9, 7, 4, 2, 5, 2]
-
-        @conveyor_belt
-        def get_data(index):
-            print((index, self.DATA[index]))
-            return self.DATA[index]
-
-        self._get_data = get_data
-
-    def sum_elements_from_callback_in_struct(self):
-
-        in_struct = self._conveyor_belt_data(len(self.DATA), self._get_data)
-
-        return self._sum_elements_from_callback_in_struct(in_struct)
-
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # TEST(s)
@@ -122,7 +79,46 @@ class sample_class:
 
 @pytest.mark.parametrize("arch,conv,ctypes,dll_handle", get_context(__file__))
 def test_callback_simple(arch, conv, ctypes, dll_handle):
+    """
+    Demonstrates callback in struct
+    """
 
-    sample = sample_class(conv, ctypes, dll_handle)
+    if conv == "cdll":
+        func_type = ctypes.CFUNCTYPE
+    elif conv == "windll":
+        func_type = ctypes.WINFUNCTYPE
+    else:
+        raise ValueError("unknown calling convention", conv)
 
-    assert 48 == sample.sum_elements_from_callback_in_struct()
+    ConveyorBeltFunc = func_type(ctypes.c_int16, ctypes.c_int16)
+
+    class ConveyorBeltData(ctypes.Structure):
+        _fields_ = [("len", ctypes.c_int16), ("get_data", ConveyorBeltFunc)]
+
+    sum_elements_from_callback_in_struct_dll = (
+        dll_handle.sum_elements_from_callback_in_struct
+    )
+    sum_elements_from_callback_in_struct_dll.argtypes = (
+        ctypes.POINTER(ConveyorBeltData),
+    )
+    sum_elements_from_callback_in_struct_dll.restype = ctypes.c_int16
+
+    DATA = [1, 6, 8, 4, 9, 7, 4, 2, 5, 2]
+
+    @ConveyorBeltFunc
+    def get_data(index):
+        """
+        Callback function, called by DLL function
+        """
+
+        print(index, DATA[index])
+        return DATA[index]
+
+    def sum_elements_from_callback_in_struct(data: List[int]) -> int:
+        """
+        User-facing wrapper around DLL function
+        """
+
+        return sum_elements_from_callback_in_struct_dll(ConveyorBeltData(len(data), get_data))
+
+    assert 48 == sum_elements_from_callback_in_struct(DATA)
