@@ -4,6 +4,7 @@
 
 **CAUTION**: The datatype parser and definition code was rewritten completely. It should work as before in almost all instances although unexpected breakages may occur. If entire struct objects are synced via `memsync` directives, the struct types now have to be specified directly instead of their names as strings as before, breaking backwards compatibility for those use cases. *zugbruecke* now follows the Python's `logging` module's log levels. The most logging output can now be achieved via `logging.DEBUG` or `10` (as opposed to `100` in earlier versions). Log level `0` remains as "no logs" as per `logging.NOTSET`. This change may break debugging and development workflows.
 
+- FEATURE: Improved performance. With logging disabled, function calls carry 10% less overhead on average.
 - FEATURE: In `memsync` directives, `ctypes` types do not need to be specified by their name as strings anymore - plain `ctypes` fundamental types and structure types can be used instead. Strings remain valid specifications for compatibility though.
 - FEATURE: `memsync` directives allow for more descriptive parameter names while the old single-character names remain valid for compatibility.
 - FEATURE: Added support for CPython 3.11, see #86 and #87.
