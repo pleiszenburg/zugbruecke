@@ -64,12 +64,13 @@ from sys import platform
 
 @pytest.mark.parametrize("arch,conv,ctypes,dll_handle", get_context(__file__))
 def test_memsync_on_routine_not_list(arch, conv, ctypes, dll_handle):
+    """
+    Memsync on DLL function has wrong type
+    """
 
     sub_ints = dll_handle.sub_ints
 
-    if any(
-        [platform.startswith(os_name) for os_name in ["linux", "darwin", "freebsd"]]
-    ):
+    if any(platform.startswith(os_name) for os_name in ["linux", "darwin", "freebsd"]):
         with pytest.raises(TypeError):
             sub_ints.memsync = {}
     elif platform.startswith("win"):
@@ -78,6 +79,9 @@ def test_memsync_on_routine_not_list(arch, conv, ctypes, dll_handle):
 
 @pytest.mark.parametrize("arch,conv,ctypes,dll_handle", get_context(__file__))
 def test_memsync_on_callback_not_list(arch, conv, ctypes, dll_handle):
+    """
+    Memsync on callback function type has wrong type
+    """
 
     if conv == "cdll":
         func_type = ctypes.CFUNCTYPE
@@ -88,9 +92,8 @@ def test_memsync_on_callback_not_list(arch, conv, ctypes, dll_handle):
 
     conveyor_belt = func_type(ctypes.c_int16, ctypes.c_int16)
 
-    # BUG temporarily disabled - see below
-    if any([platform.startswith(os_name) for os_name in ['linux', 'darwin', 'freebsd']]):
-    	with pytest.raises(TypeError):
-    		conveyor_belt.memsync = {}
+    if any(platform.startswith(os_name) for os_name in ['linux', 'darwin', 'freebsd']):
+        with pytest.raises(TypeError):
+            conveyor_belt.memsync = {}
     elif platform.startswith('win'):
-    	conveyor_belt.memsync = {}
+        conveyor_belt.memsync = {}
