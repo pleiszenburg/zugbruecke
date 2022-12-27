@@ -123,6 +123,7 @@ def test_error_restype_unconfigured_int(
 
 
 @pytest.mark.parametrize("arch,conv,ctypes,dll_handle", get_context(__file__))
+@pytest.mark.skip(reason="test passes on its own but makes original ctypes crash in later tests")
 def test_error_restype_unconfigured_nondefault_float(
     arch, conv, ctypes, dll_handle
 ):
@@ -140,6 +141,7 @@ def test_error_restype_unconfigured_nondefault_float(
 
 
 @pytest.mark.parametrize("arch,conv,ctypes,dll_handle", get_context(__file__))
+@pytest.mark.skip(reason="test passes on its own but makes original ctypes crash in later tests")
 def test_error_restype_unconfigured_nondefault_double(
     arch, conv, ctypes, dll_handle
 ):
