@@ -32,112 +32,112 @@ specific language governing rights and limitations under the License.
 
 HEADER = """
 typedef struct Image {
-	int16_t *data;
-	int16_t width;
-	int16_t height;
+    int16_t *data;
+    int16_t width;
+    int16_t height;
 } Image;
 
 typedef int16_t {{ SUFFIX }} (*filter_func_type)(Image *section);
 
 {{ PREFIX }} void {{ SUFFIX }} apply_filter_to_image(
-	Image *in_image,
-	Image *out_image,
-	filter_func_type filter_func
-	);
+    Image *in_image,
+    Image *out_image,
+    filter_func_type filter_func
+    );
 
 int16_t _coordinates_in_image_(
-	Image *in_image, int16_t x, int16_t y
-	);
+    Image *in_image, int16_t x, int16_t y
+    );
 
 int16_t _image_pixel_get_(
-	Image *in_image, int16_t x, int16_t y
-	);
+    Image *in_image, int16_t x, int16_t y
+    );
 
 void _image_pixel_set_(
-	Image *in_image, int16_t x, int16_t y, int16_t value
-	);
+    Image *in_image, int16_t x, int16_t y, int16_t value
+    );
 
 void _image_copy_segment_to_buffer_(
-	Image *in_image, Image *in_buffer, int16_t x, int16_t y
-	);
+    Image *in_image, Image *in_buffer, int16_t x, int16_t y
+    );
 """
 
 SOURCE = """
 {{ PREFIX }} void {{ SUFFIX }} apply_filter_to_image(
-	Image *in_image,
-	Image *out_image,
-	filter_func_type filter_func
-	)
+    Image *in_image,
+    Image *out_image,
+    filter_func_type filter_func
+    )
 {
 
-	int16_t i, j;
-	const int16_t F_W = 3;
-	const int16_t F_H = 3;
-	const int16_t F_W_off = F_W / 2;
-	const int16_t F_H_off = F_H / 2;
+    int16_t i, j;
+    const int16_t F_W = 3;
+    const int16_t F_H = 3;
+    const int16_t F_W_off = F_W / 2;
+    const int16_t F_H_off = F_H / 2;
 
-	out_image->data = malloc(sizeof(int16_t) * in_image->width * in_image->height);
-	out_image->width = in_image->width;
-	out_image->height = in_image->height;
+    out_image->data = malloc(sizeof(int16_t) * in_image->width * in_image->height);
+    out_image->width = in_image->width;
+    out_image->height = in_image->height;
 
-	Image *buffer = malloc(sizeof(Image));
-	buffer->data = malloc(sizeof(int16_t) * F_W * F_H);
-	buffer->width = F_W;
-	buffer->height = F_H;
+    Image *buffer = malloc(sizeof(Image));
+    buffer->data = malloc(sizeof(int16_t) * F_W * F_H);
+    buffer->width = F_W;
+    buffer->height = F_H;
 
-	for(i = 0; i < in_image->width; i++)
-	{
-		for(j = 0; j < in_image->height; j++)
-		{
-			_image_copy_segment_to_buffer_(in_image, buffer, i - F_W_off, j - F_H_off);
-			_image_pixel_set_(out_image, i, j, filter_func(buffer));
-		}
-	}
+    for(i = 0; i < in_image->width; i++)
+    {
+        for(j = 0; j < in_image->height; j++)
+        {
+            _image_copy_segment_to_buffer_(in_image, buffer, i - F_W_off, j - F_H_off);
+            _image_pixel_set_(out_image, i, j, filter_func(buffer));
+        }
+    }
 
-	free(buffer->data);
-	free(buffer);
+    free(buffer->data);
+    free(buffer);
 
 }
 
 int16_t _coordinates_in_image_(
-	Image *in_image, int16_t x, int16_t y
-	)
+    Image *in_image, int16_t x, int16_t y
+    )
 {
-	if(x < 0 || x >= in_image->width || y < 0 || y >= in_image->height){ return 0; }
-	return 1;
+    if(x < 0 || x >= in_image->width || y < 0 || y >= in_image->height){ return 0; }
+    return 1;
 }
 
 
 int16_t _image_pixel_get_(
-	Image *in_image, int16_t x, int16_t y
-	)
+    Image *in_image, int16_t x, int16_t y
+    )
 {
-	if(!_coordinates_in_image_(in_image, x, y)) { return 0; }
-	return in_image->data[(in_image->width * y) + x];
+    if(!_coordinates_in_image_(in_image, x, y)) { return 0; }
+    return in_image->data[(in_image->width * y) + x];
 }
 
 
 void _image_pixel_set_(
-	Image *in_image, int16_t x, int16_t y, int16_t value
-	)
+    Image *in_image, int16_t x, int16_t y, int16_t value
+    )
 {
-	if(!_coordinates_in_image_(in_image, x, y)) { return; }
-	in_image->data[(in_image->width * y) + x] = value;
+    if(!_coordinates_in_image_(in_image, x, y)) { return; }
+    in_image->data[(in_image->width * y) + x] = value;
 }
 
 
 void _image_copy_segment_to_buffer_(
-	Image *in_image, Image *in_buffer, int16_t x, int16_t y
-	)
+    Image *in_image, Image *in_buffer, int16_t x, int16_t y
+    )
 {
-	int16_t m, n;
-	for(m = 0; m < in_buffer->width; m++)
-	{
-		for(n = 0; n < in_buffer->height; n++)
-		{
-			_image_pixel_set_(in_buffer, m, n, _image_pixel_get_(in_image, x + m, y + n));
-		}
-	}
+    int16_t m, n;
+    for(m = 0; m < in_buffer->width; m++)
+    {
+        for(n = 0; n < in_buffer->height; n++)
+        {
+            _image_pixel_set_(in_buffer, m, n, _image_pixel_get_(in_image, x + m, y + n));
+        }
+    }
 }
 """
 
