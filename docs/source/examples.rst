@@ -136,7 +136,7 @@ For consistency, *zugbruecke* deals with this by sticking to the width of long i
 
     Integers with specified length, e.g. `c_int32`, always have the same length on both, the Unix and the Wine side.
 
-.. _longfloat:
+.. _floattypes:
 
 Platform-Dependent Floating-Point Behaviour
 -------------------------------------------
@@ -145,11 +145,12 @@ Single-precision floats, `c_float`, 32 bits or 4 bytes long as per `IEEE 754`_, 
 
 .. warning::
 
-    `Long double`_ types or `quadruple-precision floating-point`_ types pose a special kind of problem. Long story short: Support and implementation between platforms differ significantly. Windows, a bit simplified, has virtually no support for those types although e.g. certain C compilers offer some support on Windows on their own. Since *zugbruecke* is build on top of CPython and `ctypes`, it is following its capabilities. While `c_longdouble` is in fact 128 bits or 16 bytes long on Linux for instance, it maps to `c_double` on Windows at 64 bits or 8 bytes. Passing floating point numbers longer than 64 bits is therefore basically not supported by `zugbruecke`. This may be partially worked around by passing buffers of 16 bytes.
+    `Long double`_ types or `quadruple-precision floating-point`_ types pose a special kind of problem. Long story short: Support and implementation between platforms differ significantly. Windows, a bit simplified, has virtually no support for those types although e.g. certain C compilers offer some support on Windows on their own. Since *zugbruecke* is built on top of CPython and `ctypes`, it is following its capabilities. While `c_longdouble` is in fact 128 bits or 16 bytes long on Linux for instance, it maps to `c_double` on Windows at 64 bits or 8 bytes. Passing floating point numbers longer than 64 bits is therefore basically not supported by `zugbruecke`. This may be partially worked around by passing buffers of 16 bytes per number or using numpy's `support of long double`_.
 
 .. _IEEE 754: https://en.wikipedia.org/wiki/IEEE_754
 .. _long double: https://en.wikipedia.org/wiki/Long_double
 .. _quadruple-precision floating-point: https://en.wikipedia.org/wiki/Quadruple-precision_floating-point_format
+.. _support of long double: https://numpy.org/doc/stable/user/basics.types.html#extended-precision
 
 .. code:: bash
 
@@ -163,6 +164,15 @@ Single-precision floats, `c_float`, 32 bits or 4 bytes long as per `IEEE 754`_, 
     (env) user@comp:~> wenv python -c "from ctypes import c_longdouble, sizeof as s; \
     print(s(c_longdouble))"
     8
+
+.. warning::
+
+    `Half-precision floating-point`_ types have recently seen a boost in popularity thanks to machine learning applications. There are completely different variations/implementations of the idea going by different names such as `bfloat16`_. Since *zugbruecke* is built on top of CPython and `ctypes`, which does not offer any form of support for half-precision floating-point types, it is following its capabilities i.e. there is no direct support for them in *zugbruecke*. This may be partially worked around by passing buffers of 2 bytes per number or using numpy's `support of half-precision floating-point`_. numpy's `support of bfloat16`_ is still, as of late 2022, under development.
+
+.. _Half-precision floating-point: https://en.wikipedia.org/wiki/Half-precision_floating-point_format
+.. _bfloat16: https://en.wikipedia.org/wiki/Bfloat16_floating-point_format
+.. _support of half-precision floating-point: https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.half
+.. _support of bfloat16: https://github.com/numpy/numpy/issues/19808
 
 .. _callingconvention:
 
