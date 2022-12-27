@@ -34,30 +34,30 @@ HEADER = """
 typedef int16_t {{ SUFFIX }} (*conveyor_belt)(int16_t index);
 
 typedef struct conveyor_belt_data {
-	int16_t len;
-	conveyor_belt get_data;
+    int16_t len;
+    conveyor_belt get_data;
 } conveyor_belt_data;
 
 {{ PREFIX }} int16_t {{ SUFFIX }} sum_elements_from_callback_in_struct(
-	struct conveyor_belt_data *data
-	);
+    struct conveyor_belt_data *data
+    );
 """
 
 SOURCE = """
 {{ PREFIX }} int16_t {{ SUFFIX }} sum_elements_from_callback_in_struct(
-	struct conveyor_belt_data *data
-	)
+    struct conveyor_belt_data *data
+    )
 {
 
-	int16_t sum = 0;
-	int16_t i;
+    int16_t sum = 0;
+    int16_t i;
 
-	for(i = 0; i < data->len; i++)
-	{
-		sum += data->get_data(i);
-	}
+    for(i = 0; i < data->len; i++)
+    {
+        sum += data->get_data(i);
+    }
 
-	return sum;
+    return sum;
 
 }
 """
