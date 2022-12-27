@@ -30,6 +30,7 @@ specific language governing rights and limitations under the License.
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+from logging import DEBUG
 import os
 import sys
 
@@ -118,7 +119,7 @@ def _run_tests_unix(*args: str):
         env = {
             'WENV_DEBUG': '1',
             'ZUGBRUECKE_DEBUG': '1',
-            'ZUGBRUECKE_LOG_LEVEL': '50',
+            'ZUGBRUECKE_LOG_LEVEL': f'{DEBUG:d}',
             # 'ZUGBRUECKE_LOG_WRITE': 'True',
         },
     )
