@@ -95,6 +95,10 @@ Two things have changed. First, the import statement turned from *ctypes* to *zu
 
     Because the ``memsync`` attribute will be ignored by *ctypes*, you can make the above piece of code platform-independent by adjusting the import statement only.
 
+.. warning::
+
+    Because ``memsync`` can rely on information from ``argtypes`` and ``restype``, it is recommended to set ``memsync`` after those attributes.
+
 The complete example, which will run on *Unix* and on *Windows*, looks just like this:
 
 .. code:: python
