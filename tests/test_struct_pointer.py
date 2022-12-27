@@ -32,30 +32,30 @@ specific language governing rights and limitations under the License.
 
 HEADER = """
 typedef struct Vector4d {
-	int16_t x, y, z, u;
+    int16_t x, y, z, u;
 } Vector4d;
 
 {{ PREFIX }} Vector4d {{ SUFFIX }} *vector4d_add(
-	Vector4d *v1,
-	Vector4d *v2
-	);
+    Vector4d *v1,
+    Vector4d *v2
+    );
 """
 
 SOURCE = """
 {{ PREFIX }} Vector4d {{ SUFFIX }} *vector4d_add(
-	Vector4d *v1,
-	Vector4d *v2
-	)
+    Vector4d *v1,
+    Vector4d *v2
+    )
 {
 
-	Vector4d *v3 = malloc(sizeof(Vector4d));
+    Vector4d *v3 = malloc(sizeof(Vector4d));
 
-	v3->x = v1->x + v2->x;
-	v3->y = v1->y + v2->y;
-	v3->z = v1->z + v2->z;
-	v3->u = v1->u + v2->u;
+    v3->x = v1->x + v2->x;
+    v3->y = v1->y + v2->y;
+    v3->z = v1->z + v2->z;
+    v3->u = v1->u + v2->u;
 
-	return v3;
+    return v3;
 
 }
 """
