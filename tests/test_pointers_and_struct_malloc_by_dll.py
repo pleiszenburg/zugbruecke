@@ -6,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-    tests/test_fibonacci_sequence.py: Test allocation of memory by DLL, returned as struct
+    tests/test_pointers_and_struct_malloc_by_dll.py: Test allocation of memory by DLL, returned as struct
 
     Required to run on platform / side: [UNIX, WINE]
 
@@ -62,41 +62,11 @@ SOURCE = """
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+from typing import List
+
 from .lib.ctypes import get_context
 
 import pytest
-
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# CLASSES AND ROUTINES
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-
-class sample_class:
-    def __init__(self, ctypes, dll_handle):
-
-        self._c = ctypes
-
-        class int_array_data(self._c.Structure):
-            _fields_ = [
-                ("data", self._c.POINTER(self._c.c_int16)),
-                ("len", self._c.c_int16),
-            ]
-
-        self._fibonacci_sequence = dll_handle.fibonacci_sequence
-        self._fibonacci_sequence.argtypes = (self._c.c_int16,)
-        self._fibonacci_sequence.restype = self._c.POINTER(int_array_data)
-        self._fibonacci_sequence.memsync = [
-            {"p": ["r", "data"], "l": ["r", "len"], "t": "c_int16"}
-        ]
-
-    def fibonacci_sequence(self, length):
-
-        out_array_obj = self._fibonacci_sequence(length)
-
-        return self._c.cast(
-            out_array_obj.contents.data, self._c.POINTER(self._c.c_int16 * length)
-        ).contents[:]
-
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # TEST(s)
@@ -104,8 +74,37 @@ class sample_class:
 
 
 @pytest.mark.parametrize("arch,conv,ctypes,dll_handle", get_context(__file__))
-def test_fibonacci_sequence(arch, conv, ctypes, dll_handle):
+def test_pointers_and_struct_malloc_by_dll(arch, conv, ctypes, dll_handle):
+    """
+    Retrieve data from memory (within returned struct) that has been allocated by DLL
+    """
 
-    sample = sample_class(ctypes, dll_handle)
+    class ArrayData(ctypes.Structure):
+        _fields_ = [
+            ("data", ctypes.POINTER(ctypes.c_int16)),
+            ("len", ctypes.c_int16),
+        ]
 
-    assert [1, 1, 2, 3, 5, 8, 13, 21, 34, 55] == sample.fibonacci_sequence(10)
+    fibonacci_sequence_dll = dll_handle.fibonacci_sequence
+    fibonacci_sequence_dll.argtypes = (ctypes.c_int16,)
+    fibonacci_sequence_dll.restype = ctypes.POINTER(ArrayData)
+    fibonacci_sequence_dll.memsync = [
+        dict(
+            pointer = ["r", "data"],
+            length = ["r", "len"],
+            type = ctypes.c_int16,
+        )
+    ]
+
+    def fibonacci_sequence(length: int) -> List[int]:
+        """
+        User-facing wrapper around DLL function
+        """
+
+        ptr = fibonacci_sequence_dll(length)
+
+        return ctypes.cast(
+            ptr.contents.data, ctypes.POINTER(ctypes.c_int16 * length)
+        ).contents[:]
+
+    assert [1, 1, 2, 3, 5, 8, 13, 21, 34, 55] == fibonacci_sequence(10)
