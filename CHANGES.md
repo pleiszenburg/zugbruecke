@@ -10,6 +10,7 @@
 - FEATURE: Added support for CPython 3.11, see #86 and #87.
 - FEATURE: Logging now relies on Python `logging` module's log levels, i.e. `NOTSET`, `DEBUG`, `INFO`, `WARNING`, `ERROR` and `CRITICAL`. This change serves to work towards #84.
 - FEATURE: Log output has been divided into log levels, see #9.
+- FIX: Argtypes and restype would translate `c_int64` and `c_uint64` from Unix side to `c_int32` and `c_uint32` on Wine side (`c_long` vs `c_longlong` and `c_ulong` vs `c_ulonglong`).
 - FIX: CI revealed that an issue similar to #50 returned as packages on Wine side can sometimes not be imported if they are symlinked. The new `copy_modules` configuration parameter can be used to indicate that a copy instead of symlinks is required.
 - FIX: If `zugbruecke` (and `wenv`) were installed into user site-packages, the installation would break, see #88.
 - FIX: Syncing entire structs via `memsync` was broken, see #92.
@@ -19,6 +20,7 @@
 - DOCS: Updated benchmarks.
 - DOCS: Removed old `examples` folder from project as its code was more than outdated and can now be found in the documentation, the test suite and/or the newly added benchmarks.
 - DEV: Added tests on custom types and array objects (standard library) as well as numpy ndarray objects.
+- DEV: Added missing tests for int64 limits / overflows for win64.
 - DEV: Simplified / clarified many of the older tests.
 - DEV: Test support library cleaned up, documented and typed.
 - DEV: New benchmark infrastructure similar to the test suite, allowing to easily add benchmarks. Their results now get automatically included into the project documentation.
