@@ -32,33 +32,33 @@ specific language governing rights and limitations under the License.
 
 HEADER = """
 typedef struct bubblesort_data {
-	float *a;
-	int n;
+    float *a;
+    int n;
 } bubblesort_data;
 
 {{ PREFIX }} void {{ SUFFIX }} bubblesort_struct(
-	bubblesort_data *data
-	);
+    bubblesort_data *data
+    );
 """
 
 SOURCE = """
 {{ PREFIX }} void {{ SUFFIX }} bubblesort_struct(
-	bubblesort_data *data
-	)
+    bubblesort_data *data
+    )
 {
-	int i, j;
-	for (i = 0; i < data->n - 1; ++i)
-	{
-		for (j = 0; j < data->n - i - 1; ++j)
-		{
-			if (data->a[j] > data->a[j + 1])
-			{
-				float tmp = data->a[j];
-				data->a[j] = data->a[j + 1];
-				data->a[j + 1] = tmp;
-			}
-		}
-	}
+    int i, j;
+    for (i = 0; i < data->n - 1; ++i)
+    {
+        for (j = 0; j < data->n - i - 1; ++j)
+        {
+            if (data->a[j] > data->a[j + 1])
+            {
+                float tmp = data->a[j];
+                data->a[j] = data->a[j + 1];
+                data->a[j + 1] = tmp;
+            }
+        }
+    }
 }
 """
 

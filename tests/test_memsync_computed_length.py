@@ -32,33 +32,33 @@ specific language governing rights and limitations under the License.
 
 HEADER = """
 {{ PREFIX }} void {{ SUFFIX }} bubblesort(
-	float *a,
-	int u,
-	int v
-	);
+    float *a,
+    int u,
+    int v
+    );
 """
 
 SOURCE = """
 {{ PREFIX }} void {{ SUFFIX }} bubblesort(
-	float *a,
-	int u,
-	int v
-	)
+    float *a,
+    int u,
+    int v
+    )
 {
-	int i, j;
-	int n = u * v;
-	for (i = 0; i < n - 1; ++i)
-	{
-		for (j = 0; j < n - i - 1; ++j)
-		{
-			if (a[j] > a[j + 1])
-			{
-				float tmp = a[j];
-				a[j] = a[j + 1];
-				a[j + 1] = tmp;
-			}
-		}
-	}
+    int i, j;
+    int n = u * v;
+    for (i = 0; i < n - 1; ++i)
+    {
+        for (j = 0; j < n - i - 1; ++j)
+        {
+            if (a[j] > a[j + 1])
+            {
+                float tmp = a[j];
+                a[j] = a[j + 1];
+                a[j + 1] = tmp;
+            }
+        }
+    }
 }
 """
 

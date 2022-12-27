@@ -32,41 +32,41 @@ specific language governing rights and limitations under the License.
 
 HEADER = """
 typedef struct Vector5d {
-	int16_t x, y, z, u, w;
+    int16_t x, y, z, u, w;
 } Vector5d;
 
 {{ PREFIX }} Vector5d {{ SUFFIX }} *vector5d_add_array(
-	Vector5d *v,
-	int16_t len
-	);
+    Vector5d *v,
+    int16_t len
+    );
 """
 
 SOURCE = """
 {{ PREFIX }} Vector5d {{ SUFFIX }} *vector5d_add_array(
-	Vector5d *v,
-	int16_t len
-	)
+    Vector5d *v,
+    int16_t len
+    )
 {
 
-	int16_t i;
+    int16_t i;
 
-	Vector5d *v_out = malloc(sizeof(Vector5d));
-	v_out->x = 0;
-	v_out->y = 0;
-	v_out->z = 0;
-	v_out->u = 0;
-	v_out->w = 0;
+    Vector5d *v_out = malloc(sizeof(Vector5d));
+    v_out->x = 0;
+    v_out->y = 0;
+    v_out->z = 0;
+    v_out->u = 0;
+    v_out->w = 0;
 
-	for(i = 0; i < len; i++)
-	{
-		v_out->x += v[i].x;
-		v_out->y += v[i].y;
-		v_out->z += v[i].z;
-		v_out->u += v[i].u;
-		v_out->w += v[i].w;
-	}
+    for(i = 0; i < len; i++)
+    {
+        v_out->x += v[i].x;
+        v_out->y += v[i].y;
+        v_out->z += v[i].z;
+        v_out->u += v[i].u;
+        v_out->w += v[i].w;
+    }
 
-	return v_out;
+    return v_out;
 
 }
 """
