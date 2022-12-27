@@ -84,10 +84,16 @@ import pytest
 
 
 @pytest.mark.parametrize("arch,conv,ctypes,dll_handle", get_context(__file__))
-def test_float_types(arch, conv, ctypes, dll_handle):
+@pytest.mark.parametrize("dtype", ['float', 'double'])
+def test_float_types(dtype, arch, conv, ctypes, dll_handle):
+    """
+    Testing float arguments for multiple float types
+    """
 
-    in_mandel_dll = dll_handle.in_mandel_double
-    in_mandel_dll.argtypes = (ctypes.c_double, ctypes.c_double, ctypes.c_int)
+    c_type = getattr(ctypes, f'c_{dtype:s}')
+
+    in_mandel_dll = getattr(dll_handle, f'in_mandel_{dtype:s}')
+    in_mandel_dll.argtypes = (c_type, c_type, ctypes.c_int)
     in_mandel_dll.restype = ctypes.c_int
 
     assert 1 == in_mandel_dll(0.0, 0.0, 500)
