@@ -6,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-    tests/test_square_int_array_with_struct.py: Test allocation of memory by DLL in struct
+    tests/test_pointers_and_array_in_struct_malloc_by_dll.py: Test array pointer in struct and allocation of memory by DLL
 
     Required to run on platform / side: [UNIX, WINE]
 
@@ -62,55 +62,11 @@ SOURCE = """
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+from typing import List
+
 from .lib.ctypes import get_context
 
 import pytest
-
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# CLASSES AND ROUTINES
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-
-class sample_class:
-    def __init__(self, ctypes, dll_handle):
-
-        self._c = ctypes
-
-        class int_array_data(self._c.Structure):
-            _fields_ = [
-                ("data", self._c.POINTER(self._c.c_int16)),
-                ("len", self._c.c_int16),
-            ]
-
-        self._int_array_data = int_array_data
-
-        self._square_int_array_with_struct = dll_handle.square_int_array_with_struct
-        self._square_int_array_with_struct.argtypes = (
-            self._c.POINTER(self._int_array_data),
-            self._c.POINTER(self._int_array_data),
-        )
-        self._square_int_array_with_struct.memsync = [
-            {"p": [0, "data"], "l": [0, "len"], "t": "c_int16"},
-            {"p": [1, "data"], "l": [1, "len"], "t": "c_int16"},
-        ]
-
-    def square_int_array_with_struct(self, in_array):
-
-        in_array_obj = self._int_array_data()
-        out_array_obj = self._int_array_data()
-
-        in_array_obj.data = self._c.cast(
-            self._c.pointer((self._c.c_int16 * len(in_array))(*in_array)),
-            self._c.POINTER(self._c.c_int16),
-        )
-        in_array_obj.len = len(in_array)
-
-        self._square_int_array_with_struct(in_array_obj, out_array_obj)
-
-        return self._c.cast(
-            out_array_obj.data, self._c.POINTER(self._c.c_int16 * len(in_array))
-        ).contents[:]
-
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # TEST(s)
@@ -118,8 +74,53 @@ class sample_class:
 
 
 @pytest.mark.parametrize("arch,conv,ctypes,dll_handle", get_context(__file__))
-def test_square_int_array_with_struct(arch, conv, ctypes, dll_handle):
+def test_pointers_and_array_in_struct_malloc_by_dll(arch, conv, ctypes, dll_handle):
+    """
+    Test array pointer in struct and allocation of memory by DLL
+    """
 
-    sample = sample_class(ctypes, dll_handle)
+    class ArrayData(ctypes.Structure):
+        _fields_ = [
+            ("data", ctypes.POINTER(ctypes.c_int16)),
+            ("len", ctypes.c_int16),
+        ]
 
-    assert [4, 16, 9, 25] == sample.square_int_array_with_struct([2, 4, 3, 5])
+    square_int_array_with_struct_dll = dll_handle.square_int_array_with_struct
+    square_int_array_with_struct_dll.argtypes = (
+        ctypes.POINTER(ArrayData),
+        ctypes.POINTER(ArrayData),
+    )
+    square_int_array_with_struct_dll.memsync = [
+        dict(
+            pointer = [0, "data"],
+            length = [0, "len"],
+            type = ctypes.c_int16,
+        ),
+        dict(
+            pointer = [1, "data"],
+            length = [1, "len"],
+            type = ctypes.c_int16,
+        ),
+    ]
+
+    def square_int_array_with_struct(data: List[int]) -> List[int]:
+        """
+        User-facing wrapper around DLL function
+        """
+
+        in_struct = ArrayData(
+            ctypes.cast(
+                ctypes.pointer((ctypes.c_int16 * len(data))(*data)),
+                ctypes.POINTER(ctypes.c_int16),
+            ),
+            len(data),
+        )
+        out_struct = ArrayData()
+
+        square_int_array_with_struct_dll(in_struct, out_struct)
+
+        return ctypes.cast(
+            out_struct.data, ctypes.POINTER(ctypes.c_int16 * len(data))
+        ).contents[:]
+
+    assert [4, 16, 9, 25] == square_int_array_with_struct([2, 4, 3, 5])
