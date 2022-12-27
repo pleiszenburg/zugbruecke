@@ -1,27 +1,27 @@
 .. csv-table:: "minimal" benchmark, CPython 3.10.6 on linux, versions of CPython on Wine
-    :header: "arch", "version", "convention", "ctypes [µs]", "zugbruecke [µs]", "overhead [µs]"
+    :header: "version", "arch", "convention", "ctypes [µs]", "zugbruecke [µs]", "overhead [µs]"
     :delim: 0x0003B
 
-    "win32"; "3.7.9"; "cdll"; 2; 345; 343
-    "win32"; "3.7.9"; "windll"; 2; 345; 343
-    "win32"; "3.8.10"; "cdll"; 2; 383; 381
-    "win32"; "3.8.10"; "windll"; 2; 336; 334
-    "win32"; "3.9.13"; "cdll"; 2; 336; 334
-    "win32"; "3.9.13"; "windll"; 2; 332; 330
-    "win32"; "3.10.9"; "cdll"; 2; 337; 335
-    "win32"; "3.10.9"; "windll"; 2; 336; 334
-    "win32"; "3.11.1"; "cdll"; 2; 323; 321
-    "win32"; "3.11.1"; "windll"; 2; 329; 327
-    "win64"; "3.7.9"; "cdll"; 1; 313; 312
-    "win64"; "3.7.9"; "windll"; 1; 328; 327
-    "win64"; "3.8.10"; "cdll"; 1; 321; 320
-    "win64"; "3.8.10"; "windll"; 1; 301; 300
-    "win64"; "3.9.13"; "cdll"; 1; 323; 322
-    "win64"; "3.9.13"; "windll"; 1; 322; 321
-    "win64"; "3.10.9"; "cdll"; 1; 313; 312
-    "win64"; "3.10.9"; "windll"; 1; 322; 321
-    "win64"; "3.11.1"; "cdll"; 1; 318; 317
-    "win64"; "3.11.1"; "windll"; 1; 318; 317
+    "3.7.9"; "win32"; "cdll"; 2; 386; 384
+    "3.7.9"; "win32"; "windll"; 2; 345; 343
+    "3.7.9"; "win64"; "cdll"; 1; 330; 329
+    "3.7.9"; "win64"; "windll"; 1; 337; 336
+    "3.8.10"; "win32"; "cdll"; 2; 384; 382
+    "3.8.10"; "win32"; "windll"; 2; 338; 336
+    "3.8.10"; "win64"; "cdll"; 1; 321; 320
+    "3.8.10"; "win64"; "windll"; 1; 322; 321
+    "3.9.13"; "win32"; "cdll"; 2; 336; 334
+    "3.9.13"; "win32"; "windll"; 2; 336; 334
+    "3.9.13"; "win64"; "cdll"; 1; 324; 323
+    "3.9.13"; "win64"; "windll"; 1; 321; 320
+    "3.10.9"; "win32"; "cdll"; 2; 338; 336
+    "3.10.9"; "win32"; "windll"; 2; 339; 337
+    "3.10.9"; "win64"; "cdll"; 1; 324; 323
+    "3.10.9"; "win64"; "windll"; 1; 323; 322
+    "3.11.1"; "win32"; "cdll"; 2; 329; 327
+    "3.11.1"; "win32"; "windll"; 2; 330; 328
+    "3.11.1"; "win64"; "cdll"; 1; 316; 315
+    "3.11.1"; "win64"; "windll"; 1; 322; 321
 
 
 The "minimal" benchmark is a simple function call with
