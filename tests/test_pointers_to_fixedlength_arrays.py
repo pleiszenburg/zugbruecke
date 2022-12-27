@@ -32,45 +32,64 @@ specific language governing rights and limitations under the License.
 
 HEADER = """
 {{ PREFIX }} void {{ SUFFIX }} gauss_elimination(
-	float (*A)[3][4],
-	float (*x)[3]
-	);
+    float (*A)[3][4],
+    float (*x)[3]
+    );
+
+{{ PREFIX }} void {{ SUFFIX }} mix_rgb_colors(
+    int8_t color_a[3],
+    int8_t color_b[3],
+    int8_t *color_mixed
+    );
 """
 
 SOURCE = """
 {{ PREFIX }} void {{ SUFFIX }} gauss_elimination(
-	float (*A)[3][4],
-	float (*x)[3]
-	)
+    float (*A)[3][4],
+    float (*x)[3]
+    )
 {
 
-	int i, j, k, n = 3;
-	float c, sum = 0.0;
+    int i, j, k, n = 3;
+    float c, sum = 0.0;
 
-	for(j = 0; j < n; j++)
+    for(j = 0; j < n; j++)
+    {
+        for(i = j + 1; i < n; i++)
+        {
+            c = (*A)[i][j] / (*A)[j][j];
+            for(k = 0; k <= n; k++)
+            {
+                (*A)[i][k] = (*A)[i][k] - c * (*A)[j][k];
+            }
+        }
+    }
+
+    (*x)[n - 1] = (*A)[n - 1][n] / (*A)[n - 1][n - 1];
+
+    for(i = n - 2; i >= 0; i--)
+    {
+        sum = 0;
+        for(j = i + 1; j < n; j++)
+        {
+            sum = sum + (*A)[i][j] * (*x)[j];
+        }
+        (*x)[i] = ((*A)[i][n] - sum) / (*A)[i][i];
+    }
+
+}
+
+{{ PREFIX }} void {{ SUFFIX }} mix_rgb_colors(
+	int8_t color_a[3],
+	int8_t color_b[3],
+	int8_t *color_mixed
+	)
+{
+	int i;
+	for (i = 0; i < 3; i++)
 	{
-		for(i = j + 1; i < n; i++)
-		{
-			c = (*A)[i][j] / (*A)[j][j];
-			for(k = 0; k <= n; k++)
-			{
-				(*A)[i][k] = (*A)[i][k] - c * (*A)[j][k];
-			}
-		}
+		color_mixed[i] = (color_a[i] + color_b[i]) / 2;
 	}
-
-	(*x)[n - 1] = (*A)[n - 1][n] / (*A)[n - 1][n - 1];
-
-	for(i = n - 2; i >= 0; i--)
-	{
-		sum = 0;
-		for(j = i + 1; j < n; j++)
-		{
-			sum = sum + (*A)[i][j] * (*x)[j];
-		}
-		(*x)[i] = ((*A)[i][n] - sum) / (*A)[i][i];
-	}
-
 }
 """
 
@@ -90,7 +109,7 @@ import pytest
 
 
 @pytest.mark.parametrize("arch,conv,ctypes,dll_handle", get_context(__file__))
-def test_pointers_to_fixedlength_arrays(arch, conv, ctypes, dll_handle):
+def test_pointers_to_fixedlength_nd_arrays(arch, conv, ctypes, dll_handle):
     """
     Test pointers to arrays of fixed length, n-dimensional
     """
@@ -129,3 +148,33 @@ def test_pointers_to_fixedlength_arrays(arch, conv, ctypes, dll_handle):
         [5.0, -6.0, 3.0],
         [[1.0, 2.0, 3.0, 2.0], [0.0, -1.0, -2.0, 0.0], [0.0, 0.0, -2.0, -6.0]],
     ) == (solution, eq_sys)
+
+
+@pytest.mark.parametrize("arch,conv,ctypes,dll_handle", get_context(__file__))
+def test_fixedlength_1d_arrays_by_value(arch, conv, ctypes, dll_handle):
+    """
+    Testing fixed-length 1D arrays by value (and as a pointer)
+    """
+
+    mix_rgb_colors_dll = dll_handle.mix_rgb_colors
+    mix_rgb_colors_dll.argtypes = (
+        ctypes.c_ubyte * 3,
+        ctypes.c_ubyte * 3,
+        ctypes.POINTER(ctypes.c_ubyte * 3),
+    )
+
+    def mix_rgb_colors(a: List[int], b: List[int]) -> List[int]:
+        """
+        User-facing wrapper around DLL function
+        """
+
+        color_type = ctypes.c_ubyte * 3
+        ct_a = color_type(*tuple(a))
+        ct_b = color_type(*tuple(b))
+        ct_m = color_type()
+        mix_rgb_colors_dll(
+            ct_a, ct_b, ctypes.pointer(ct_m)
+        )
+        return ct_m[:]
+
+    assert [45, 35, 30] == mix_rgb_colors([10, 20, 40], [80, 50, 20])
