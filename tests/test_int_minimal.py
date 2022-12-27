@@ -6,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-    tests/test_divide.py: Tests by reference argument passing (int pointer)
+    tests/test_int_minimal.py: Tests by reference argument passing (int pointer)
 
     Required to run on platform / side: [UNIX, WINE]
 
@@ -64,7 +64,7 @@ SOURCE = """
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 from .lib.ctypes import get_context
-from .lib.param import MAX_EXAMPLES
+from .lib.param import MAX_EXAMPLES, get_int_limits
 
 from hypothesis import (
     given,
@@ -80,11 +80,14 @@ import pytest
 
 @pytest.mark.parametrize("arch,conv,ctypes,dll_handle", get_context(__file__))
 @given(
-    x=st.integers(min_value=-1 * 2 ** 31, max_value=2 ** 31 - 1),
-    y=st.integers(min_value=-1 * 2 ** 31, max_value=2 ** 31 - 1),
+    x=st.integers(**get_int_limits(32, sign=True)),
+    y=st.integers(**get_int_limits(32, sign=True)),
 )
 @settings(max_examples=MAX_EXAMPLES)
-def test_divide(x, y, arch, conv, ctypes, dll_handle):
+def test_int_minimal(x, y, arch, conv, ctypes, dll_handle):
+    """
+    Tests by reference argument passing (int pointer) for c_int
+    """
 
     divide_int = dll_handle.divide_int
     divide_int.argtypes = (ctypes.c_int, ctypes.c_int, ctypes.POINTER(ctypes.c_int))
@@ -94,9 +97,11 @@ def test_divide(x, y, arch, conv, ctypes, dll_handle):
     quot = divide_int(x, y, rem_)
     rem = rem_.value
 
-    if x == -1 * 2 ** 31 and y == -1:
+    int_limits = get_int_limits(32, sign=True)
 
-        assert (2 ** 31 - 1, 0) == (quot, rem)
+    if x == int_limits['min_value'] and y == -1:
+
+        assert (int_limits['max_value'], 0) == (quot, rem)
 
     elif y != 0:
 
