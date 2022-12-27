@@ -176,8 +176,8 @@ def test_callback_memsync(arch, conv, ctypes, dll_handle):
     else:
         raise ValueError("unknown calling convention", conv)
 
-    filter_func_type = func_type(ctypes.c_int16, ctypes.POINTER(Image))
-    filter_func_type.memsync = [
+    FilterFunc = func_type(ctypes.c_int16, ctypes.POINTER(Image))
+    FilterFunc.memsync = [
         dict(
             pointer = [0, "data"],
             length = ([0, "width"], [0, "height"]),
@@ -190,7 +190,7 @@ def test_callback_memsync(arch, conv, ctypes, dll_handle):
     apply_filter_to_image_dll.argtypes = (
         ctypes.POINTER(Image),
         ctypes.POINTER(Image),
-        filter_func_type,
+        FilterFunc,
     )
     apply_filter_to_image_dll.memsync = [
         dict(
@@ -207,7 +207,7 @@ def test_callback_memsync(arch, conv, ctypes, dll_handle):
         ),
     ]
 
-    @filter_func_type
+    @FilterFunc
     def filter_edge_detection(buffer: ctypes.POINTER(Image)) -> int:
         """
         Callback function, called by DLL function
