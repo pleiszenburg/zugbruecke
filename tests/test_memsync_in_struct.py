@@ -79,6 +79,9 @@ import pytest
 
 @pytest.mark.parametrize("arch,conv,ctypes,dll_handle", get_context(__file__))
 def test_memsync_in_struct(arch, conv, ctypes, dll_handle):
+    """
+    Memsync pointer and length argument within struct that is passed as a pointer itself
+    """
 
     class BubblesortData(ctypes.Structure):
         _fields_ = [("a", ctypes.POINTER(ctypes.c_float)), ("n", ctypes.c_int)]
