@@ -136,6 +136,34 @@ For consistency, *zugbruecke* deals with this by sticking to the width of long i
 
     Integers with specified length, e.g. `c_int32`, always have the same length on both, the Unix and the Wine side.
 
+.. _longfloat:
+
+Platform-Dependent Floating-Point Behaviour
+-------------------------------------------
+
+Single-precision floats, `c_float`, 32 bits or 4 bytes long as per `IEEE 754`_, as well as double-precision floats, `c_double`, 64 bits or 8 bytes long as per IEEE 754, behave identical both on Unix-like systems and Windows. They can be passed to and retrieved from DLL functions without issues.
+
+.. warning::
+
+    `Long double`_ types or `quadruple-precision floating-point`_ types pose a special kind of problem. Long story short: Support and implementation between platforms differ significantly. Windows, a bit simplified, has virtually no support for those types although e.g. certain C compilers offer some support on Windows on their own. Since *zugbruecke* is build on top of CPython and `ctypes`, it is following its capabilities. While `c_longdouble` is in fact 128 bits or 16 bytes long on Linux for instance, it maps to `c_double` on Windows at 64 bits or 8 bytes. Passing floating point numbers longer than 64 bits is therefore basically not supported by `zugbruecke`. This may be partially worked around by passing buffers of 16 bytes.
+
+.. _IEEE 754: https://en.wikipedia.org/wiki/IEEE_754
+.. _long double: https://en.wikipedia.org/wiki/Long_double
+.. _quadruple-precision floating-point: https://en.wikipedia.org/wiki/Quadruple-precision_floating-point_format
+
+.. code:: bash
+
+    (env) user@comp:~> python -m platform
+    Linux
+    (env) user@comp:~> python -c "from ctypes import c_longdouble, sizeof as s; \
+    print(s(c_longdouble))"
+    16
+    (env) user@comp:~> wenv python -m platform
+    Windows
+    (env) user@comp:~> wenv python -c "from ctypes import c_longdouble, sizeof as s; \
+    print(s(c_longdouble))"
+    8
+
 .. _callingconvention:
 
 Calling Conventions

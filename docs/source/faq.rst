@@ -49,6 +49,11 @@ How are integer widths handled for long integer types?
 
 *zugbruecke* sticks to the Unix-specific width of long integer types. For details, see the :ref:`introduction to integer width handling <integerwidths>`.
 
+What about long doubles?
+------------------------
+
+They are basically not supported, see :ref:`introduction to floating point handling <longfloat>`.
+
 Is it thread-safe?
 ------------------
 
