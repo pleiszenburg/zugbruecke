@@ -6,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-    tests/test_distance.py: Tests by value struct type passing and return value
+    tests/test_pointers_and_struct.py: Tests by value struct type passing and return value
 
     Required to run on platform / side: [UNIX, WINE]
 
@@ -75,54 +75,41 @@ from .lib.ctypes import get_context
 import pytest
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# CLASSES AND ROUTINES
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-
-class sample_class:
-    def __init__(self, ctypes, dll_handle):
-        class Point(ctypes.Structure):
-            _fields_ = [("x", ctypes.c_double), ("y", ctypes.c_double)]
-
-        self.Point = Point
-
-        self.distance = dll_handle.distance
-        self.distance.argtypes = (ctypes.POINTER(Point), ctypes.POINTER(Point))
-        self.distance.restype = ctypes.c_double
-
-        self._distance_pointer = dll_handle.distance_pointer
-        self._distance_pointer.argtypes = (ctypes.POINTER(Point), ctypes.POINTER(Point))
-        self._distance_pointer.restype = ctypes.POINTER(ctypes.c_double)
-
-    def distance_pointer(self, in1, in2):
-
-        return self._distance_pointer(in1, in2).contents.value
-
-
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # TEST(s)
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
 @pytest.mark.parametrize("arch,conv,ctypes,dll_handle", get_context(__file__))
-def test_distance(arch, conv, ctypes, dll_handle):
+def test_pointer_args(arch, conv, ctypes, dll_handle):
+    """
+    Pointer arguments, pass structs directly though, get result by value
+    """
 
-    sample = sample_class(ctypes, dll_handle)
+    class Point(ctypes.Structure):
+        _fields_ = [("x", ctypes.c_double), ("y", ctypes.c_double)]
 
-    p1 = sample.Point(1, 2)
-    p2 = sample.Point(4, 5)
+    distance_dll = dll_handle.distance
+    distance_dll.argtypes = (ctypes.POINTER(Point), ctypes.POINTER(Point))
+    distance_dll.restype = ctypes.c_double
 
-    assert pytest.approx(4.242640687119285, 0.0000001) == sample.distance(p1, p2)
+    assert pytest.approx(4.242640687119285, 0.0000001) == distance_dll(
+        Point(1, 2), Point(4, 5)
+    )
 
 
 @pytest.mark.parametrize("arch,conv,ctypes,dll_handle", get_context(__file__))
-def test_distance_pointer(arch, conv, ctypes, dll_handle):
+def test_pointer_args_and_retval(arch, conv, ctypes, dll_handle):
+    """
+    Pointer arguments, pass structs directly though, get result as pointer (allocated by DLL)
+    """
 
-    sample = sample_class(ctypes, dll_handle)
+    class Point(ctypes.Structure):
+        _fields_ = [("x", ctypes.c_double), ("y", ctypes.c_double)]
 
-    p1 = sample.Point(1, 2)
-    p2 = sample.Point(4, 5)
+    distance_pointer_dll = dll_handle.distance_pointer
+    distance_pointer_dll.argtypes = (ctypes.POINTER(Point), ctypes.POINTER(Point))
+    distance_pointer_dll.restype = ctypes.POINTER(ctypes.c_double)
 
-    assert pytest.approx(4.242640687119285, 0.0000001) == sample.distance_pointer(
-        p1, p2
-    )
+    assert pytest.approx(4.242640687119285, 0.0000001) == distance_pointer_dll(
+        Point(1, 2), Point(4, 5)
+    ).contents.value
