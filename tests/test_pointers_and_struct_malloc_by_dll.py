@@ -32,29 +32,29 @@ specific language governing rights and limitations under the License.
 
 HEADER = """
 typedef struct int_array_data {
-	int16_t *data;
-	int16_t len;
+    int16_t *data;
+    int16_t len;
 } int_array_data;
 
 {{ PREFIX }} int_array_data {{ SUFFIX }} *fibonacci_sequence(
-	int16_t len
-	);
+    int16_t len
+    );
 """
 
 SOURCE = """
 {{ PREFIX }} int_array_data {{ SUFFIX }} *fibonacci_sequence(
-	int16_t len
-	)
+    int16_t len
+    )
 {
-	int16_t i;
-	int_array_data *out_data = malloc(sizeof(int_array_data));
-	out_data->len = len;
-	out_data->data = malloc(sizeof(int16_t) * out_data->len);
-	for(i = 0; i < len; i++){
-		if(i == 0 || i == 1) { out_data->data[i] = 1; continue; }
-		out_data->data[i] = out_data->data[i - 1] + out_data->data[i - 2];
-	}
-	return out_data;
+    int16_t i;
+    int_array_data *out_data = malloc(sizeof(int_array_data));
+    out_data->len = len;
+    out_data->data = malloc(sizeof(int16_t) * out_data->len);
+    for(i = 0; i < len; i++){
+        if(i == 0 || i == 1) { out_data->data[i] = 1; continue; }
+        out_data->data[i] = out_data->data[i - 1] + out_data->data[i - 2];
+    }
+    return out_data;
 }
 """
 
