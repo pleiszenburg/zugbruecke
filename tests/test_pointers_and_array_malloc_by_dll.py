@@ -32,26 +32,26 @@ specific language governing rights and limitations under the License.
 
 HEADER = """
 {{ PREFIX }} void {{ SUFFIX }} square_int_array(
-	int16_t *in_array,
-	void *out_array,
-	int16_t len
-	);
+    int16_t *in_array,
+    void *out_array,
+    int16_t len
+    );
 """
 
 SOURCE = """
 {{ PREFIX }} void {{ SUFFIX }} square_int_array(
-	int16_t *in_array,
-	void *out_array,
-	int16_t len
-	)
+    int16_t *in_array,
+    void *out_array,
+    int16_t len
+    )
 {
-	int i;
-	int16_t **out_array_p = out_array;
-	*out_array_p = malloc(sizeof(int16_t) * len);
-	for(i = 0; i < len; i++)
-	{
-		(*out_array_p)[i] = in_array[i] * in_array[i];
-	}
+    int i;
+    int16_t **out_array_p = out_array;
+    *out_array_p = malloc(sizeof(int16_t) * len);
+    for(i = 0; i < len; i++)
+    {
+        (*out_array_p)[i] = in_array[i] * in_array[i];
+    }
 }
 """
 

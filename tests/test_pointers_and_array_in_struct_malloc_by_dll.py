@@ -32,29 +32,29 @@ specific language governing rights and limitations under the License.
 
 HEADER = """
 typedef struct int_array_data {
-	int16_t *data;
-	int16_t len;
+    int16_t *data;
+    int16_t len;
 } int_array_data;
 
 {{ PREFIX }} void {{ SUFFIX }} square_int_array_with_struct(
-	int_array_data *in_array,
-	int_array_data *out_array
-	);
+    int_array_data *in_array,
+    int_array_data *out_array
+    );
 """
 
 SOURCE = """
 {{ PREFIX }} void {{ SUFFIX }} square_int_array_with_struct(
-	int_array_data *in_array,
-	int_array_data *out_array
-	)
+    int_array_data *in_array,
+    int_array_data *out_array
+    )
 {
-	int i;
-	out_array->len = in_array->len;
-	out_array->data = malloc(sizeof(int16_t) * out_array->len);
-	for(i = 0; i < in_array->len; i++)
-	{
-		out_array->data[i] = in_array->data[i] * in_array->data[i];
-	}
+    int i;
+    out_array->len = in_array->len;
+    out_array->data = malloc(sizeof(int16_t) * out_array->len);
+    for(i = 0; i < in_array->len; i++)
+    {
+        out_array->data[i] = in_array->data[i] * in_array->data[i];
+    }
 }
 """
 
