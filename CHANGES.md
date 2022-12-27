@@ -22,13 +22,15 @@ This **RELEASE FIXES A CRITICAL BUG** where *zugbruecke* was falsely translating
 - FIX: CI revealed that an issue similar to #50 returned as packages on Wine side can sometimes not be imported if they are symlinked. The new `copy_modules` configuration parameter can be used to indicate that a copy instead of symlinks is required.
 - FIX: If `zugbruecke` (and `wenv`) were installed into user site-packages, the installation would break, see #88.
 - FIX: Syncing entire structs via `memsync` was broken, see #92.
+- FIX: `restype` would not throw an exception when by accident set to a list or tuple like original `ctypes` does.
 - DEPRECATED: Single-character parameter names in memsync directives.
 - DEPRECATED: `ctypes` fundamental types specified by name as strings in `memsync` directives.
 - DOCS: More detailed explanation of `memsync`, where it is needed and where it is not, among other improvements.
 - DOCS: Updated benchmarks.
 - DOCS: Removed old `examples` folder from project as its code was more than outdated and can now be found in the documentation, the test suite and/or the newly added benchmarks.
 - DEV: Added tests on custom types and array objects (standard library) as well as numpy ndarray objects.
-- DEV: Added missing tests for int64 limits / overflows for win64.
+- DEV: Added tests for int64 limits / overflows for win64.
+- DEV: Added tests on `restype` configuration errors.
 - DEV: Simplified / clarified many of the older tests.
 - DEV: Test support library cleaned up, documented and typed.
 - DEV: New benchmark infrastructure similar to the test suite, allowing to easily add benchmarks. Their results now get automatically included into the project documentation.
