@@ -34,43 +34,43 @@ HEADER = """
 typedef int16_t {{ SUFFIX }} (*conveyor_belt)(int16_t index);
 
 {{ PREFIX }} int16_t {{ SUFFIX }} use_optional_callback_a(
-	int16_t in_data,
-	conveyor_belt process_data
-	);
+    int16_t in_data,
+    conveyor_belt process_data
+    );
 
 {{ PREFIX }} int16_t {{ SUFFIX }} use_optional_callback_b(
-	int16_t in_data,
-	conveyor_belt process_data
-	);
+    int16_t in_data,
+    conveyor_belt process_data
+    );
 """
 
 SOURCE = """
 {{ PREFIX }} int16_t {{ SUFFIX }} use_optional_callback_a(
-	int16_t in_data,
-	conveyor_belt process_data
-	)
+    int16_t in_data,
+    conveyor_belt process_data
+    )
 {
-	int16_t tmp;
-	if(process_data) {
-		tmp = process_data(in_data);
-	} else {
-		tmp = in_data;
-	}
-	return tmp * 2;
+    int16_t tmp;
+    if(process_data) {
+        tmp = process_data(in_data);
+    } else {
+        tmp = in_data;
+    }
+    return tmp * 2;
 }
 
 {{ PREFIX }} int16_t {{ SUFFIX }} use_optional_callback_b(
-	int16_t in_data,
-	conveyor_belt process_data
-	)
+    int16_t in_data,
+    conveyor_belt process_data
+    )
 {
-	int16_t tmp;
-	if(process_data) {
-		tmp = process_data(in_data);
-	} else {
-		tmp = in_data;
-	}
-	return tmp * 2;
+    int16_t tmp;
+    if(process_data) {
+        tmp = process_data(in_data);
+    } else {
+        tmp = in_data;
+    }
+    return tmp * 2;
 }
 """
 
