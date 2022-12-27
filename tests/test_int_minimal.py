@@ -36,6 +36,11 @@ HEADER = """
     int b,
     int *remainder
     );
+
+{{ PREFIX }} int {{ SUFFIX }} gcd(
+    int x,
+    int y
+    );
 """
 
 SOURCE = """
@@ -56,6 +61,22 @@ SOURCE = """
     int quot = a / b;
     *remainder = a % b;
     return quot;
+}
+
+{{ PREFIX }} int {{ SUFFIX }} gcd(
+    int x,
+    int y
+    )
+{
+    /* Compute the greatest common divisor */
+    int g = y;
+    while (x > 0)
+    {
+        g = x;
+        x = y % x;
+        y = g;
+    }
+    return g;
 }
 """
 
@@ -84,7 +105,7 @@ import pytest
     y=st.integers(**get_int_limits(32, sign=True)),
 )
 @settings(max_examples=MAX_EXAMPLES)
-def test_int_minimal(x, y, arch, conv, ctypes, dll_handle):
+def test_int_with_pointer(x, y, arch, conv, ctypes, dll_handle):
     """
     Tests by reference argument passing (int pointer) for c_int
     """
@@ -115,3 +136,19 @@ def test_int_minimal(x, y, arch, conv, ctypes, dll_handle):
     else:
 
         assert (0, 0) == (quot, rem)
+
+
+@pytest.mark.parametrize("arch,conv,ctypes,dll_handle", get_context(__file__))
+def test_int_without_pointer(arch, conv, ctypes, dll_handle):
+    """
+    Test simple int passing
+    """
+
+    gcd = dll_handle.gcd
+    gcd.argtypes = (
+        ctypes.c_int,
+        ctypes.c_int,
+    )
+    gcd.restype = ctypes.c_int
+
+    assert 7 == gcd(35, 42)
