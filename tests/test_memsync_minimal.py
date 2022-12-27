@@ -76,6 +76,9 @@ import pytest
 
 @pytest.mark.parametrize("arch,conv,ctypes,dll_handle", get_context(__file__))
 def test_memsync_minimal(arch, conv, ctypes, dll_handle):
+    """
+    Minimal memsync test with one pointer and one length argument
+    """
 
     bubblesort_dll = dll_handle.bubblesort
     bubblesort_dll.memsync = [  # Regular ctypes on Windows should ignore this statement
