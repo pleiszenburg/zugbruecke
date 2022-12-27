@@ -114,5 +114,5 @@ def test_memsync_computed_length(arch, conv, ctypes, dll_handle):
 
     data = [round(number, 2) for number in data]
     expected = [2.05, 3.72, 4.39, 4.75, 5.74, 6.28, 6.47, 8.6, 9.09, 9.34]
-    diff = sum([abs(a - b) for a, b in zip(data, expected)])
+    diff = sum(abs(a - b) for a, b in zip(data, expected))
     assert pytest.approx(0.0, 0.0000001) == diff
