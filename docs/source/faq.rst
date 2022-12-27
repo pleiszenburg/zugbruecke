@@ -53,10 +53,10 @@ If you want to be on the safe side, start one *zugbruecke* session per thread in
 
 .. code:: python
 
-	from zugbruecke import ctypes_session
+	from zugbruecke import CtypesSession
 	# start new thread or process (multiprocessing) - then, inside, do:
-	a = ctypes_session()
+	a = CtypesSession()
 	# now you can do stuff like
 	kernel32 = a.cdll.kernel32
 	# do not forget to terminate the session (i.e. the Windows Python interpreter)
-	a._zb_terminate()
+	a.zb_terminate()
