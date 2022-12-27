@@ -60,3 +60,8 @@ If you want to be on the safe side, start one *zugbruecke* session per thread in
 	kernel32 = a.cdll.kernel32
 	# do not forget to terminate the session (i.e. the Windows Python interpreter)
 	a.zb_terminate()
+
+Something is off by 8 bytes. What happened?
+-------------------------------------------
+
+You (probably) used the wrong :ref:`calling convention <callingconvention>`.
