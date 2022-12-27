@@ -166,7 +166,7 @@ Let's assume you are confronted with a regular *Python* string. With the help of
 
 .. code:: python
 
-    some_string = 'zategahuba'
+    some_string = 'Hello world!'
 
 The DLL function is defined as follows:
 
@@ -198,12 +198,12 @@ In *Python*, it can be configured as follows:
 
 The above configuration indicates that the first argument of the function is a pointer to a NULL-terminated string.
 
-While *Python* strings are actually Unicode strings, the function accepts an array of type ``char`` - a bytes array in *Python* terms. I.e. you have to encode the string before it is copied into a string buffer. The following example illustrates how the function ``replace_letter`` can be called on the string ``some_string``, exchanging all letters ``a`` with ``e``. Subsequently, the result is printed.
+While *Python* strings are actually Unicode strings, the function accepts an array of type ``char`` - a bytes array in *Python* terms. I.e. you have to encode the string before it is copied into a string buffer. The following example illustrates how the function ``replace_letter`` can be called on the string ``some_string``, exchanging all letters ``o`` with ``u``. Subsequently, the result is printed.
 
 .. code:: python
 
     string_buffer = ctypes.create_string_buffer(some_string.encode('utf-8'))
-    replace_letter(string_buffer, 'a'.encode('utf-8'), 'e'.encode('utf-8'))
+    replace_letter(string_buffer, 'o'.encode('utf-8'), 'u'.encode('utf-8'))
     print(string_buffer.value.decode('utf-8'))
 
 The process differs if the DLL function accepts Unicode strings. Let's assume the DLL function is defined as follows:
@@ -240,7 +240,7 @@ One key aspect has changed: ``memsync`` contains another parameter, ``unic``. It
 .. code:: python
 
     unicode_buffer = ctypes.create_unicode_buffer(some_string)
-    replace_letter_w(unicode_buffer, 'a', 'e')
+    replace_letter_w(unicode_buffer, 'o', 'u')
     print(unicode_buffer.value)
 
 Callbacks / Function Pointers
