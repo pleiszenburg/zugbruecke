@@ -32,18 +32,18 @@ specific language governing rights and limitations under the License.
 
 HEADER = """
 {{ PREFIX }} int16_t {{ SUFFIX }} sub_ints(
-	int16_t a,
-	int16_t b
-	);
+    int16_t a,
+    int16_t b
+    );
 """
 
 SOURCE = """
 {{ PREFIX }} int16_t {{ SUFFIX }} sub_ints(
-	int16_t a,
-	int16_t b
-	)
+    int16_t a,
+    int16_t b
+    )
 {
-	return a - b;
+    return a - b;
 }
 """
 

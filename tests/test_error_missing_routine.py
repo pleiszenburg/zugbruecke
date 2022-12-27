@@ -32,16 +32,16 @@ specific language governing rights and limitations under the License.
 
 HEADER = """
 {{ PREFIX }} int16_t {{ SUFFIX }} sqrt_int(
-	int16_t a
-	);
+    int16_t a
+    );
 """
 
 SOURCE = """
 {{ PREFIX }} int16_t {{ SUFFIX }} sqrt_int(
-	int16_t a
-	)
+    int16_t a
+    )
 {
-	return sqrt(a);
+    return sqrt(a);
 }
 """
 

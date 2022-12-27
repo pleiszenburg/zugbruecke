@@ -32,92 +32,92 @@ specific language governing rights and limitations under the License.
 
 HEADER = """
 {{ PREFIX }} int16_t {{ SUFFIX }} sqrt_int(
-	int16_t a
-	);
+    int16_t a
+    );
 
 {{ PREFIX }} int16_t {{ SUFFIX }} square_int(
-	int16_t a
-	);
+    int16_t a
+    );
 
 {{ PREFIX }} int16_t {{ SUFFIX }} add_ints(
-	int16_t a,
-	int16_t b
-	);
+    int16_t a,
+    int16_t b
+    );
 
 {{ PREFIX }} int16_t {{ SUFFIX }} mul_ints(
-	int16_t a,
-	int16_t b
-	);
+    int16_t a,
+    int16_t b
+    );
 
 {{ PREFIX }} float {{ SUFFIX }} add_floats(
-	float a,
-	float b
-	);
+    float a,
+    float b
+    );
 
 {{ PREFIX }} int16_t {{ SUFFIX }} subtract_ints(
-	int16_t a,
-	int16_t b
-	);
+    int16_t a,
+    int16_t b
+    );
 
 {{ PREFIX }} int16_t {{ SUFFIX }} pow_ints(
-	int16_t a,
-	int16_t b
-	);
+    int16_t a,
+    int16_t b
+    );
 """
 
 SOURCE = """
 {{ PREFIX }} int16_t {{ SUFFIX }} sqrt_int(
-	int16_t a
-	)
+    int16_t a
+    )
 {
-	return sqrt(a);
+    return sqrt(a);
 }
 
 {{ PREFIX }} int16_t {{ SUFFIX }} square_int(
-	int16_t a
-	)
+    int16_t a
+    )
 {
-	return a * a;
+    return a * a;
 }
 
 {{ PREFIX }} int16_t {{ SUFFIX }} add_ints(
-	int16_t a,
-	int16_t b
-	)
+    int16_t a,
+    int16_t b
+    )
 {
-	return a + b;
+    return a + b;
 }
 
 {{ PREFIX }} int16_t {{ SUFFIX }} mul_ints(
-	int16_t a,
-	int16_t b
-	)
+    int16_t a,
+    int16_t b
+    )
 {
-	return a * b;
+    return a * b;
 }
 
 {{ PREFIX }} float {{ SUFFIX }} add_floats(
-	float a,
-	float b
-	)
+    float a,
+    float b
+    )
 {
-	return a + b;
+    return a + b;
 }
 
 {{ PREFIX }} int16_t {{ SUFFIX }} subtract_ints(
-	int16_t a,
-	int16_t b
-	)
+    int16_t a,
+    int16_t b
+    )
 {
-	return a - b;
+    return a - b;
 }
 
 {{ PREFIX }} int16_t {{ SUFFIX }} pow_ints(
-	int16_t a,
-	int16_t b
-	)
+    int16_t a,
+    int16_t b
+    )
 {
-	return pow(a, b);
+    return pow(a, b);
 }
 """
 
