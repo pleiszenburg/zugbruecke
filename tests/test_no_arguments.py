@@ -41,17 +41,17 @@ HEADER = """
 SOURCE = """
 {{ PREFIX }} int16_t {{ SUFFIX }} get_const_int_a(void)
 {
-	return (int16_t)sqrt(49);
+    return (int16_t)sqrt(49);
 }
 
 {{ PREFIX }} int16_t {{ SUFFIX }} get_const_int_b(void)
 {
-	return (int16_t)sqrt(36);
+    return (int16_t)sqrt(36);
 }
 
 {{ PREFIX }} int16_t {{ SUFFIX }} get_const_int_c(void)
 {
-	return (int16_t)sqrt(25);
+    return (int16_t)sqrt(25);
 }
 """
 
