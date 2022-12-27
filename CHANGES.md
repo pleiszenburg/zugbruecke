@@ -8,7 +8,7 @@
 - FEATURE: In `memsync` directives, `ctypes` types do not need to be specified by their name as strings anymore - plain `ctypes` fundamental types and structure types can be used instead. Strings remain valid specifications for compatibility though.
 - FEATURE: `memsync` directives allow for more descriptive parameter names while the old single-character names remain valid for compatibility.
 - FEATURE: Added support for CPython 3.11, see #86 and #87.
-- FEATURE: Logging now relies on Python `logging` module's log levels, i.e. `NOTSET`, `DEBUG`, `INFO`, `WARNING`, `ERROR` and `CRITICAL`. This change serves to work towards #84.
+- FEATURE: Logging now relies on Python's `logging` module's log levels, i.e. `NOTSET`, `DEBUG`, `INFO`, `WARNING`, `ERROR` and `CRITICAL`. This change serves to work towards #84.
 - FEATURE: Log output has been divided into log levels, see #9.
 - FIX: Argtypes and restype would translate `c_int64` and `c_uint64` from Unix side to `c_int32` and `c_uint32` on Wine side (`c_long` vs `c_longlong` and `c_ulong` vs `c_ulonglong`).
 - FIX: CI revealed that an issue similar to #50 returned as packages on Wine side can sometimes not be imported if they are symlinked. The new `copy_modules` configuration parameter can be used to indicate that a copy instead of symlinks is required.
