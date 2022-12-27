@@ -6,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-    tests/test_sqrt_int.py: Test function call without parameters
+    tests/test_no_arguments.py: Test function call without parameters
 
     Required to run on platform / side: [UNIX, WINE]
 
@@ -69,7 +69,10 @@ import pytest
 
 
 @pytest.mark.parametrize("arch,conv,ctypes,dll_handle", get_context(__file__))
-def test_sqrt_int(arch, conv, ctypes, dll_handle):
+def test_no_configuration(arch, conv, ctypes, dll_handle):
+    """
+    Argtypes is not configured
+    """
 
     get_const_int = dll_handle.get_const_int_a
     get_const_int.restype = ctypes.c_int16
@@ -78,7 +81,10 @@ def test_sqrt_int(arch, conv, ctypes, dll_handle):
 
 
 @pytest.mark.parametrize("arch,conv,ctypes,dll_handle", get_context(__file__))
-def test_sqrt_int_with_tuple(arch, conv, ctypes, dll_handle):
+def test_empty_tuple(arch, conv, ctypes, dll_handle):
+    """
+    Argtypes is set to empty tuple
+    """
 
     get_const_int = dll_handle.get_const_int_b
     get_const_int.argtypes = tuple()
@@ -88,7 +94,10 @@ def test_sqrt_int_with_tuple(arch, conv, ctypes, dll_handle):
 
 
 @pytest.mark.parametrize("arch,conv,ctypes,dll_handle", get_context(__file__))
-def test_sqrt_int_with_list(arch, conv, ctypes, dll_handle):
+def test_empty_list(arch, conv, ctypes, dll_handle):
+    """
+    Argtypes is set to empty list
+    """
 
     get_const_int = dll_handle.get_const_int_c
     get_const_int.argtypes = []
