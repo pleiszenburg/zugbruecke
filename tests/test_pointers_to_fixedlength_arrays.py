@@ -6,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-    tests/test_gauss_elimination.py: Tests 2D fixed length arrays w/ floats
+    tests/test_pointers_to_fixedlength_arrays.py: Tests 2D fixed length arrays w/ floats
 
     Required to run on platform / side: [UNIX, WINE]
 
@@ -78,41 +78,11 @@ SOURCE = """
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+from typing import List
+
 from .lib.ctypes import get_context
 
 import pytest
-
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# CLASSES AND ROUTINES
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-
-class sample_class:
-    def __init__(self, ctypes, dll_handle):
-
-        self._c = ctypes
-        self._gauss_elimination = dll_handle.gauss_elimination
-        self._gauss_elimination.argtypes = (
-            self._c.POINTER(self._c.c_float * 4 * 3),
-            self._c.POINTER(self._c.c_float * 3),
-        )
-
-    def gauss_elimination(self, A):
-
-        N = 3
-        if len(A) != N or len(A[0]) != N + 1:
-            raise  # TODO
-
-        x = [0 for eq in range(N)]
-        _A = (self._c.c_float * (N + 1) * N)(*(tuple(eq) for eq in A))
-        _x = (self._c.c_float * N)(*tuple(x))
-        self._gauss_elimination(self._c.pointer(_A), self._c.pointer(_x))
-        for index, eq in enumerate(A):
-            eq[:] = _A[index][:]
-        x[:] = _x[:]
-
-        return x
-
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # TEST(s)
@@ -120,14 +90,42 @@ class sample_class:
 
 
 @pytest.mark.parametrize("arch,conv,ctypes,dll_handle", get_context(__file__))
-def test_gauss_elimination(arch, conv, ctypes, dll_handle):
+def test_pointers_to_fixedlength_arrays(arch, conv, ctypes, dll_handle):
+    """
+    Test pointers to arrays of fixed length, n-dimensional
+    """
 
-    sample = sample_class(ctypes, dll_handle)
+    gauss_elimination_dll = dll_handle.gauss_elimination
+    gauss_elimination_dll.argtypes = (
+        ctypes.POINTER(ctypes.c_float * 4 * 3),
+        ctypes.POINTER(ctypes.c_float * 3),
+    )
 
-    eq_sys = [[1, 2, 3, 2], [1, 1, 1, 2], [3, 3, 1, 0]]
-    eq_sys_solution = sample.gauss_elimination(eq_sys)
+    def gauss_elimination(A: List[List[float]]) -> List[float]:
+        """
+        User-facing wrapper around DLL function
+        """
+
+        N = 3
+        if len(A) != N or len(A[0]) != N + 1:
+            raise ValueError
+
+        x = [0 for eq in range(N)]
+        _A = (ctypes.c_float * (N + 1) * N)(*(tuple(eq) for eq in A))
+        _x = (ctypes.c_float * N)(*tuple(x))
+
+        gauss_elimination_dll(ctypes.pointer(_A), ctypes.pointer(_x))
+
+        for index, eq in enumerate(A):
+            eq[:] = _A[index][:]
+        x[:] = _x[:]
+
+        return x
+
+    eq_sys = [[1.0, 2.0, 3.0, 2.0], [1.0, 1.0, 1.0, 2.0], [3.0, 3.0, 1.0, 0.0]]
+    solution = gauss_elimination(eq_sys)
 
     assert (
         [5.0, -6.0, 3.0],
         [[1.0, 2.0, 3.0, 2.0], [0.0, -1.0, -2.0, 0.0], [0.0, 0.0, -2.0, -6.0]],
-    ) == (eq_sys_solution, eq_sys)
+    ) == (solution, eq_sys)
