@@ -33,7 +33,7 @@ This **RELEASE FIXES A CRITICAL BUG** where *zugbruecke* was falsely translating
 - DEV: Added tests on custom types and `array.array` objects (standard library) as well as `numpy.ndarray` objects.
 - DEV: Added tests for 64 bit integer limits / overflows for win64.
 - DEV: Added tests on `restype` configuration errors.
-- DEV: Simplified / clarified many of the older tests.
+- DEV: Cleaned and clarified all tests. Renamed all tests to more meaningful names referring to the features that they are testing.
 - DEV: Test support library cleaned up, documented and typed.
 - DEV: New benchmark infrastructure similar to the test suite, allowing to easily add benchmarks. Their results now get automatically included into the project documentation.
 
