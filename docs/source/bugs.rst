@@ -53,7 +53,11 @@ Alternatively, you can drop a configuration file named ``.zugbruecke.json`` into
 
     {"log_level": 10, "log_write": true}
 
-The lower the log level, the more output you will get. *zugbruecke* used Python's ``logging``'s modules log levels, see `logging documentation`_: ``DEBUG == 10``, ``INFO == 20``, ``WARNING == 30``, ``ERROR == 40`` and ``CRITICAL == 50``. Default is ``0`` for no logs as per ``NOTSET``. The on-screen log is color-coded for readability. The log can also, in addition, be written to disk, where every log item with plenty of meta data is represented as a one-line JSON object for easy parsing and analysis of larger log files. For more configuration options check the :ref:`chapter on configuration <configuration>`.
+.. note::
+
+    The lower the log level, the more output you will get. *zugbruecke* used Python's ``logging`` module's log levels, see `logging documentation`_: ``DEBUG == 10``, ``INFO == 20``, ``WARNING == 30``, ``ERROR == 40`` and ``CRITICAL == 50``. Default is ``0`` for no logs as per ``NOTSET``.
+
+The on-screen log is color-coded for readability. The log can also, in addition, be written to disk, where every log item with plenty of meta data is represented as a one-line JSON object for easy parsing and analysis of larger log files. For more configuration options check the :ref:`chapter on configuration <configuration>`.
 
 .. _logging documentation: https://docs.python.org/3/howto/logging.html#logging-levels
 
