@@ -94,7 +94,7 @@ def test_pointers_and_array_malloc_by_dll(arch, conv, ctypes, dll_handle):
 
     def square_int_array(data: List[int]) -> List[int]:
         """
-        Callback function, called by DLL function
+        User-facing wrapper around DLL function
         """
 
         in_ptr = ctypes.cast(
