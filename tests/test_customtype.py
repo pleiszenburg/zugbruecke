@@ -33,24 +33,24 @@ specific language governing rights and limitations under the License.
 
 HEADER = """
 {{ PREFIX }} double {{ SUFFIX }} avg(
-	double *a,
-	int n
-	);
+    double *a,
+    int n
+    );
 """
 
 SOURCE = """
 {{ PREFIX }} double {{ SUFFIX }} avg(
-	double *a,
-	int n
-	)
+    double *a,
+    int n
+    )
 {
-	int i;
-	double total = 0.0;
-	for (i = 0; i < n; i++)
-	{
-		total += a[i];
-	}
-	return total / n;
+    int i;
+    double total = 0.0;
+    for (i = 0; i < n; i++)
+    {
+        total += a[i];
+    }
+    return total / n;
 }
 """
 
