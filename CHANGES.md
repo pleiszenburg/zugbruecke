@@ -2,11 +2,13 @@
 
 ## 0.2.0 (2022-XX-XX)
 
-**CAUTION**: The datatype parser and definition code was rewritten completely. It should work as before in almost all instances although unexpected breakages may occur. If entire struct objects are synced via `memsync` directives, the struct types now have to be specified directly instead of their names as strings as before, breaking backwards compatibility for those use cases.
+**CAUTION**: The datatype parser and definition code was rewritten completely. It should work as before in almost all instances although unexpected breakages may occur. If entire struct objects are synced via `memsync` directives, the struct types now have to be specified directly instead of their names as strings as before, breaking backwards compatibility for those use cases. *zugbruecke* now follows the Python's `logging` module's log levels. The most logging output can now be achieved via `logging.DEBUG` or `10` (as opposed to `100` in earlier versions). Log level `0` remains as "no logs" as per `logging.NOTSET`. This change may break debugging and development workflows.
 
 - FEATURE: In `memsync` directives, `ctypes` types do not need to be specified by their name as strings anymore - plain `ctypes` fundamental types and structure types can be used instead. Strings remain valid specifications for compatibility though.
 - FEATURE: `memsync` directives allow for more descriptive parameter names while the old single-character names remain valid for compatibility.
 - FEATURE: Added support for CPython 3.11, see #86 and #87.
+- FEATURE: Logging now relies on Python `logging` module's log levels, i.e. `NOTSET`, `DEBUG`, `INFO`, `WARNING`, `ERROR` and `CRITICAL`. This change serves to work towards #84.
+- FEATURE: Log output has been divided into log levels, see #9.
 - FIX: CI revealed that an issue similar to #50 returned as packages on Wine side can sometimes not be imported if they are symlinked. The new `copy_modules` configuration parameter can be used to indicate that a copy instead of symlinks is required.
 - FIX: If `zugbruecke` (and `wenv`) were installed into user site-packages, the installation would break, see #88.
 - FIX: Syncing entire structs via `memsync` was broken, see #92.
