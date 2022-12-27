@@ -179,7 +179,7 @@ def make_dll(
         f.write(
             Template(DLL_HEADER).render(
                 HEADER=Template(header).render(
-                    PREFIX=PREFIX[convention], SUFFIX=SUFFIX[convention], **extra
+                    PREFIX=PREFIX[convention], SUFFIX=SUFFIX[convention], ARCH = arch, **extra,
                 ),
             )
         )
@@ -188,7 +188,7 @@ def make_dll(
             Template(DLL_SOURCE).render(
                 HEADER_FN=HEADER_FN,
                 SOURCE=Template(source).render(
-                    PREFIX=PREFIX[convention], SUFFIX=SUFFIX[convention], **extra
+                    PREFIX=PREFIX[convention], SUFFIX=SUFFIX[convention], ARCH = arch, **extra
                 ),
             )
         )
