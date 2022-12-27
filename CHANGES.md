@@ -18,7 +18,7 @@ This **RELEASE FIXES A CRITICAL BUG** where *zugbruecke* was falsely translating
 - FEATURE: Added support for CPython 3.11, see #86 and #87.
 - FEATURE: Logging now relies on Python's `logging` module's log levels, i.e. `NOTSET`, `DEBUG`, `INFO`, `WARNING`, `ERROR` and `CRITICAL`. This change serves to work towards #84.
 - FEATURE: Log output has been divided into log levels, see #9.
-- FIX: Argtypes and restype would translate `c_int64` and `c_uint64` from Unix side to `c_int32` and `c_uint32` on Wine side (`c_long` vs `c_longlong` and `c_ulong` vs `c_ulonglong`).
+- FIX: Argtypes and restype would translate `c_int64`, `c_uint64`, `c_long` and `c_ulong` from the Unix side to their 32-bit equivalents, `c_int32` and `c_uint32`, on the Wine side. This was due to `c_long` and `c_ulong` being 8 bytes long on Unix-like systems while they are 4 bytes long on Window.
 - FIX: CI revealed that an issue similar to #50 returned as packages on Wine side can sometimes not be imported if they are symlinked. The new `copy_modules` configuration parameter can be used to indicate that a copy instead of symlinks is required.
 - FIX: If `zugbruecke` (and `wenv`) were installed into user site-packages, the installation would break, see #88.
 - FIX: Syncing entire structs via `memsync` was broken, see #92.
