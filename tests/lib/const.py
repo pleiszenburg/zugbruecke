@@ -27,8 +27,27 @@ specific language governing rights and limitations under the License.
 """
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# IMPORT / PLATFORM
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+from platform import architecture
+from sys import platform
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # CONST
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+ARCHITECTURE = architecture()[0][:2]
+
+if any([platform.startswith(os_name) for os_name in ["linux", "darwin", "freebsd"]]):
+    PLATFORM = "unix"
+elif platform.startswith("win"):
+    PLATFORM = "wine"
+else:
+    raise SystemError("unsopported platform")
+
+HEADER_FN = "tmp_header.h"
+SOURCE_FN = "tmp_source.c"
 
 DLL_FLD = "dlls"
 
@@ -40,6 +59,7 @@ DLL_HEADER = """
 #include <stdio.h>
 #include <windows.h>
 #include <stdint.h>
+#include <float.h>
 #include <limits.h>
 #include <math.h>
 
@@ -89,4 +109,4 @@ LDFLAGS = [
 PYTHONBUILDS_FN = 'pythonbuilds.json'
 
 PYTHON_MINOR_MIN = 7
-PYTHON_MINOR_MAX = 10
+PYTHON_MINOR_MAX = 11

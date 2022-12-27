@@ -36,6 +36,9 @@ from abc import ABC
 # CLASSES
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+class CacheABC(ABC):
+    pass
+
 
 class CallbackClientABC(ABC):
     pass
@@ -61,6 +64,10 @@ class DefinitionABC(ABC):
     pass
 
 
+class DefinitionMemsyncABC(ABC):
+    pass
+
+
 class DllClientABC(ABC):
     pass
 
@@ -77,7 +84,7 @@ class LogABC(ABC):
     pass
 
 
-class MemsyncABC(ABC):
+class MempkgABC(ABC):
     pass
 
 

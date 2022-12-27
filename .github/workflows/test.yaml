@@ -11,7 +11,13 @@ jobs:
     strategy:
       matrix:
         os: ["ubuntu-20.04"]
-        python-version: [3.7, 3.8, 3.9, "3.10"]
+        python-version: [
+          3.7,
+          3.8,
+          3.9,
+          "3.10",
+          "3.11"
+        ]
 
     runs-on: ${{ matrix.os }}
 
@@ -41,7 +47,7 @@ jobs:
           pip install -U setuptools
       - name: Install zugbruecke package
         run: |
-          make install
+          ZUGBRUECKE_COPY_MODULES=true make install
       - name: Pre-check
         run: |
           wine --version

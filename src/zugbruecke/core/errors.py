@@ -58,7 +58,3 @@ class DataGroupError(DataError):
 
 class DataMemsyncpathError(DataError):
     pass
-
-
-class DataMemsyncsyntaxError(DataError):
-    pass

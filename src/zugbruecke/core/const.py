@@ -32,10 +32,11 @@ specific language governing rights and limitations under the License.
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 FLAG_POINTER = -1
-GROUP_VOID = 1
-GROUP_FUNDAMENTAL = 2
-GROUP_STRUCT = 4
-GROUP_FUNCTION = 8
+
+SIMPLE_GROUP = "PyCSimpleType"
+STRUCT_GROUP = "PyCStructType"
+FUNC_GROUP = "PyCFuncPtrType"
+CUSTOM_GROUP = "Custom"
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

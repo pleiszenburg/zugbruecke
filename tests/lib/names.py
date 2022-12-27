@@ -31,8 +31,10 @@ specific language governing rights and limitations under the License.
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 import os
+from typing import List
 
 from toml import loads
+from typeguard import typechecked
 
 from .const import DLL_FLD
 
@@ -41,35 +43,105 @@ from .const import DLL_FLD
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
-def get_dll_fn(arch, convention, test_fn, custom=None):
-    "get name & path of test dll for given arch and convention"
+@typechecked
+def get_dll_fn(arch: str, convention: str, fn: str) -> str:
+    """
+    get name & path of test dll for given arch and convention
 
-    assert test_fn.lower().endswith(".py")
-    name = test_fn[:-3]
+    Args:
+        - arch: Architecture of DLL
+        - convention: Calling convention
+        - fn: File name of Python source file
+    Returns:
+        DLL file name
+    """
 
-    return "{NAME:s}_{CONVENTION:s}-{ARCH:s}{CUSTOM:s}.dll".format(
+    assert fn.lower().endswith(".py")
+    name = fn[:-3]
+
+    return "{NAME:s}_{CONVENTION:s}-{ARCH:s}.dll".format(
         NAME=name,
         CONVENTION=convention,
         ARCH=arch,
-        CUSTOM=("-" + custom) if custom is not None else "",
     )
 
 
-def get_dll_path(arch, convention, test_fn, custom=None):
-    "get name & path of test dll for given arch and convention RELATIVE TO CWD"
+@typechecked
+def get_dll_path(arch: str, convention: str, fld: str, fn: str) -> str:
+    """
+    get path to dll for given arch and convention
+
+    Args:
+        - arch: Architecture
+        - convention: Calling convention
+        - fld: root, either tests or benchmark
+        - fn: File name of Python source file
+    Returns:
+        Path to DLL file
+    """
 
     return os.path.join(
-        get_test_fld(abspath=False),
+        fld,
         DLL_FLD,
-        get_dll_fn(arch, convention, test_fn, custom=custom),
+        get_dll_fn(arch, convention, fn),
     )
 
 
-def get_test_fld(abspath=True):
-    "get full path of project test folder"
+@typechecked
+def get_benchmark_fld(abspath: bool = True) -> str:
+    """
+    get full path of benchmark folder
+
+    Args:
+        - abspath: Require absolute path
+    Returns:
+        Path to benchmark
+    """
+
+    if not abspath:
+        return 'benchmark'
+
+    return os.path.join(os.path.abspath(os.getcwd()), 'benchmark')
+
+
+@typechecked
+def get_benchmark_fns(fld: str) -> List[str]:
+    """
+    get list of Python benchmark files in project benchmark folder
+
+    Args:
+        - fld: Path to directory containing Python benchmark code files
+    Returns:
+        List of file names
+    """
+
+    fns = []
+
+    for entry in os.listdir(fld):
+        if not entry.lower().endswith(".py"):
+            continue
+        if entry.lower().startswith("_"):
+            continue
+        if not os.path.isfile(os.path.join(fld, entry)):
+            continue
+        fns.append(entry)
+
+    return fns
+
+
+@typechecked
+def get_test_fld(abspath: bool = True) -> str:
+    """
+    get full path of project test folder
+
+    Args:
+        - abspath: Require absolute path
+    Returns:
+        Path to test folder
+    """
 
     cwd = os.path.abspath(os.getcwd())
-    test_fld = None
+    fld = None
 
     if not os.path.isfile("pyproject.toml"):
         raise FileNotFoundError("pyproject.toml configuration file missing in cwd")
@@ -77,14 +149,39 @@ def get_test_fld(abspath=True):
     with open('pyproject.toml', mode = 'r', encoding = 'utf-8') as f:
         pyproject = loads(f.read())
 
-    test_fld = pyproject['tool']['pytest']['ini_options']['testpaths'][0]
+    fld = pyproject['tool']['pytest']['ini_options']['testpaths'][0]
 
     if abspath:
-        test_fld = os.path.join(cwd, test_fld)
+        fld = os.path.join(cwd, fld)
 
-    if not os.path.isdir(test_fld):
+    if not os.path.isdir(fld):
         raise ValueError(
             '"testpaths" in "pyproject.toml" does not point to an existing directory'
         )
 
-    return test_fld
+    return fld
+
+
+@typechecked
+def get_test_fns(fld: str) -> List[str]:
+    """
+    get list of Python test files in project test folder
+
+    Args:
+        - fld: Path to directory containing Python test code files
+    Returns:
+        List of file names
+    """
+
+    fns = []
+
+    for entry in os.listdir(fld):
+        if not entry.lower().endswith(".py"):
+            continue
+        if not entry.lower().startswith("test_"):
+            continue
+        if not os.path.isfile(os.path.join(fld, entry)):
+            continue
+        fns.append(entry)
+
+    return fns

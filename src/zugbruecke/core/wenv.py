@@ -35,9 +35,12 @@ import importlib
 import os
 import shutil
 import site
+import warnings
 
 import zugbruecke
 from wenv import Env as _Env, __version__ as wenv_version
+
+from .typeguard import typechecked
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -45,17 +48,22 @@ from wenv import Env as _Env, __version__ as wenv_version
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
-def _symlink(src, dest):
+@typechecked
+def _symlink(src: str, dest: str):
+
+    if os.path.exists(dest) and not os.path.islink(dest):
+        warnings.warn(f'"{dest:s}" is exists but not a symlink', RuntimeWarning)
+        return
 
     if not os.path.lexists(dest):
         os.symlink(src, dest)
 
     if not os.path.exists(dest):
-        raise OSError('"{LINK:s}" could not be created'.format(LINK=dest))
+        raise OSError(f'"{dest:s}" could not be created / does not exist')
     if not os.path.islink(dest):
-        raise OSError('"{LINK:s}" is not a symlink'.format(LINK=dest))
+        warnings.warn(f'"{dest:s}" is not a symlink', RuntimeWarning)
     if os.readlink(dest) != src:
-        raise OSError('"{LINK:s}" points to the wrong source'.format(LINK=dest))
+        warnings.warn(f'"{dest:s}" points to the wrong source', RuntimeWarning)
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -63,6 +71,7 @@ def _symlink(src, dest):
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
+@typechecked
 class Env(_Env):
     """
     Represents one Wine Python environment. Derived from ``wenv.Env``. Mutable.
@@ -96,7 +105,7 @@ class Env(_Env):
             os.path.join(self._path_dict["sitepackages"], name)
         )
 
-        if not self._p["_issues_50_workaround"]:
+        if not self._p["copy_modules"]:
             # Link zugbruecke package into wine-python site-packages
             _symlink(unix_pkg_path, wine_pkg_path)
         else:
@@ -123,7 +132,7 @@ class Env(_Env):
             os.path.join(self._path_dict["sitepackages"], dist_name)
         )
 
-        if not self._p["_issues_50_workaround"]:
+        if not self._p["copy_modules"]:
             # Link zugbruecke dist into wine-python site-packages
             _symlink(unix_dist_path, wine_dist_path)
         else:

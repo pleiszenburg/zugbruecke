@@ -33,13 +33,24 @@ specific language governing rights and limitations under the License.
 from json import dumps, loads
 from typing import Dict, List
 
+from typeguard import typechecked
 from wenv import PythonVersion
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # ROUTINES
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+
+@typechecked
 def read_python_builds(fn: str) -> Dict[str, List[PythonVersion]]:
+    """
+    Read JSON file containing list of installed Windows Python builds
+
+    Args:
+        - fn: Location of JSON file
+    Returns:
+        Available Windows Python builds in Wine Python environments
+    """
 
     with open(fn, mode = "r", encoding="utf-8") as f:
         raw = f.read()
@@ -50,7 +61,14 @@ def read_python_builds(fn: str) -> Dict[str, List[PythonVersion]]:
     }
 
 
+@typechecked
 def write_python_builds(fn: str, builds: Dict[str, List[PythonVersion]]):
+    """
+    Read JSON file containing list of installed Windows Python builds
+
+    Args:
+        - Available Windows Python builds in Wine Python environments
+    """
 
     with open(fn, mode = "w", encoding="utf-8") as f:
         f.write(dumps({

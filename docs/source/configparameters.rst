@@ -73,7 +73,7 @@ The following parameters can be configured:
       - ``False``
     * - log_level
       - ``int``
-      - Verbosity, from ``0`` to ``100``.
+      - Verbosity, from ``0`` to ``50``.
       - ``0``
     * - arch
       - ``str``
@@ -91,10 +91,14 @@ The following parameters can be configured:
       - ``int``
       - Wait seconds for *Windows Python* to terminate.
       - ``30``
+    * - copy_modules
+      - ``bool``
+      - Copy ``zugbruecke`` and ``wenv`` modules into wenv instead of symlink.
+      - ``False``
 
 .. note::
 
-  (Only) ``log_level`` can be changed at run-time.
+  (Only) ``log_level`` can be changed at run-time. It follows Python's ``logging`` module's log levels, i.e. ``DEBUG == 10``, ``INFO == 20``, ``WARNING == 30``, ``ERROR == 40`` and ``CRITICAL == 50``. Default is ``0`` for no logs as per ``NOTSET``.
 
 .. note::
 

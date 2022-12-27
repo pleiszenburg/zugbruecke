@@ -32,18 +32,18 @@ specific language governing rights and limitations under the License.
 
 HEADER = """
 {{ PREFIX }} int16_t {{ SUFFIX }} sub_ints(
-	int16_t a,
-	int16_t b
-	);
+    int16_t a,
+    int16_t b
+    );
 """
 
 SOURCE = """
 {{ PREFIX }} int16_t {{ SUFFIX }} sub_ints(
-	int16_t a,
-	int16_t b
-	)
+    int16_t a,
+    int16_t b
+    )
 {
-	return a - b;
+    return a - b;
 }
 """
 
@@ -57,9 +57,6 @@ import pytest
 
 from sys import platform
 
-if any([platform.startswith(os_name) for os_name in ["linux", "darwin", "freebsd"]]):
-    from zugbruecke.core.errors import DataMemsyncsyntaxError
-
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # TEST(s)
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -67,15 +64,14 @@ if any([platform.startswith(os_name) for os_name in ["linux", "darwin", "freebsd
 
 @pytest.mark.parametrize("arch,conv,ctypes,dll_handle", get_context(__file__))
 def test_memsync_on_routine_not_list(arch, conv, ctypes, dll_handle):
+    """
+    Memsync on DLL function has wrong type
+    """
 
     sub_ints = dll_handle.sub_ints
 
-    if any(
-        [platform.startswith(os_name) for os_name in ["linux", "darwin", "freebsd"]]
-    ):
-        with pytest.raises(
-            (DataMemsyncsyntaxError, TypeError),
-        ):
+    if any(platform.startswith(os_name) for os_name in ["linux", "darwin", "freebsd"]):
+        with pytest.raises(TypeError):
             sub_ints.memsync = {}
     elif platform.startswith("win"):
         sub_ints.memsync = {}
@@ -83,6 +79,9 @@ def test_memsync_on_routine_not_list(arch, conv, ctypes, dll_handle):
 
 @pytest.mark.parametrize("arch,conv,ctypes,dll_handle", get_context(__file__))
 def test_memsync_on_callback_not_list(arch, conv, ctypes, dll_handle):
+    """
+    Memsync on callback function type has wrong type
+    """
 
     if conv == "cdll":
         func_type = ctypes.CFUNCTYPE
@@ -93,23 +92,8 @@ def test_memsync_on_callback_not_list(arch, conv, ctypes, dll_handle):
 
     conveyor_belt = func_type(ctypes.c_int16, ctypes.c_int16)
 
-    # BUG temporarily disabled - see below
-    # if any([platform.startswith(os_name) for os_name in ['linux', 'darwin', 'freebsd']]):
-    # 	with pytest.raises(DataMemsyncsyntaxError, match = 'memsync attribute must be a list'):
-    # 		conveyor_belt.memsync = {}
-    # elif platform.startswith('win'):
-    # 	conveyor_belt.memsync = {}
-
-    # HACK this test is a workaround and temporary replacement for the above
-    # BUG class property of FunctionType class causes segfault in Python 3.5 on Wine 4
-    # TODO temporary replacement, remove in future release!
-    conveyor_belt.memsync = {}
-    if any(
-        [platform.startswith(os_name) for os_name in ["linux", "darwin", "freebsd"]]
-    ):
-        with pytest.raises(
-            (DataMemsyncsyntaxError, TypeError), match="memsync attribute must be a list"
-        ):
-            ctypes._current_session.data.pack_definition_memsync(
-                conveyor_belt.memsync
-            )
+    if any(platform.startswith(os_name) for os_name in ['linux', 'darwin', 'freebsd']):
+        with pytest.raises(TypeError):
+            conveyor_belt.memsync = {}
+    elif platform.startswith('win'):
+        conveyor_belt.memsync = {}

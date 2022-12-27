@@ -33,25 +33,33 @@ If you want to increase the log level during run-time, you can do the following:
 
 .. code:: python
 
-	import zugbruecke.ctypes as ctypes
-	ctypes.zb_set_parameter('log_level', 100)
-	# proceed as usual - with a lot more verbosity
+    import zugbruecke.ctypes as ctypes
+    from logging import DEBUG
+    ctypes.zb_set_parameter('log_level', DEBUG)
+    # proceed as usual - with a lot more verbosity
 
 A custom session can be manipulated in a similar way:
 
 .. code:: python
 
-	from zugbruecke import CtypesSession
-	ctypes = CtypesSession(log_level = 100)
-	# proceed as usual - with a lot more verbosity
+    from zugbruecke import CtypesSession
+    from logging import DEBUG
+    ctypes = CtypesSession(log_level = DEBUG)
+    # proceed as usual - with a lot more verbosity
 
 Alternatively, you can drop a configuration file named ``.zugbruecke.json`` into your current working directory or *zugbruecke*'s configuration directory (likely ``~/.zugbruecke``) and add configuration parameters to it, for example:
 
 .. code:: json
 
-	{"log_level": 100, "log_write": true}
+    {"log_level": 10, "log_write": true}
 
-The higher the log level, the more output you will get. Default is 0 for no logs. The on-screen log is color-coded for readability. The log can also, in addition, be written to disk, where every log item with plenty of meta data is represented as a one-line JSON object for easy parsing and analysis of larger log files. For more configuration options check the :ref:`chapter on configuration <configuration>`.
+.. note::
+
+    The lower the log level, the more output you will get. *zugbruecke* used Python's ``logging`` module's log levels, see `logging documentation`_: ``DEBUG == 10``, ``INFO == 20``, ``WARNING == 30``, ``ERROR == 40`` and ``CRITICAL == 50``. Default is ``0`` for no logs as per ``NOTSET``.
+
+The on-screen log is color-coded for readability. The log can also, in addition, be written to disk, where every log item with plenty of meta data is represented as a one-line JSON object for easy parsing and analysis of larger log files. For more configuration options check the :ref:`chapter on configuration <configuration>`.
+
+.. _logging documentation: https://docs.python.org/3/howto/logging.html#logging-levels
 
 As a last resort, you can activate additional debugging features intended for developers by setting the ``ZUGBRUECKE_DEBUG`` environment variable to ``1`` before importing ``zugbruecke`` or any component of it. For this to work, the `typeguard package`_ must be present on your system.
 
