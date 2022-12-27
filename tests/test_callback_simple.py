@@ -34,27 +34,27 @@ HEADER = """
 typedef int16_t {{ SUFFIX }} (*conveyor_belt)(int16_t index);
 
 {{ PREFIX }} int16_t {{ SUFFIX }} sum_elements_from_callback(
-	int16_t len,
-	conveyor_belt get_data
-	);
+    int16_t len,
+    conveyor_belt get_data
+    );
 """
 
 SOURCE = """
 {{ PREFIX }} int16_t {{ SUFFIX }} sum_elements_from_callback(
-	int16_t len,
-	conveyor_belt get_data
-	)
+    int16_t len,
+    conveyor_belt get_data
+    )
 {
 
-	int16_t sum = 0;
-	int16_t i;
+    int16_t sum = 0;
+    int16_t i;
 
-	for(i = 0; i < len; i++)
-	{
-		sum += get_data(i);
-	}
+    for(i = 0; i < len; i++)
+    {
+        sum += get_data(i);
+    }
 
-	return sum;
+    return sum;
 
 }
 """
