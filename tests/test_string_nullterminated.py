@@ -221,6 +221,9 @@ def init_wchar(ctypes, dll_handle, suffix: str, wcharp: bool = False):
 
 @pytest.mark.parametrize("arch,conv,ctypes,dll_handle", get_context(__file__))
 def test_replace_char_in_longer_buffer(arch, conv, ctypes, dll_handle):
+    """
+    Null-terminated buffer longer than string, ctypes.POINTER(ctypes.c_char)
+    """
 
     func, _ = init_char(ctypes, dll_handle, suffix='a', charp=False)
 
@@ -231,6 +234,9 @@ def test_replace_char_in_longer_buffer(arch, conv, ctypes, dll_handle):
 def test_replace_char_in_equal_buffer(
     arch, conv, ctypes, dll_handle
 ):
+    """
+    Null-terminated buffer of length equal to string, ctypes.POINTER(ctypes.c_char)
+    """
 
     _, func = init_char(ctypes, dll_handle, suffix='b', charp=False)
 
@@ -239,6 +245,9 @@ def test_replace_char_in_equal_buffer(
 
 @pytest.mark.parametrize("arch,conv,ctypes,dll_handle", get_context(__file__))
 def test_replace_char_in_longer_buffer_charp(arch, conv, ctypes, dll_handle):
+    """
+    Null-terminated buffer longer than string, ctypes.c_char_p
+    """
 
     func, _ = init_char(ctypes, dll_handle, suffix='c', charp=True)
 
@@ -249,6 +258,9 @@ def test_replace_char_in_longer_buffer_charp(arch, conv, ctypes, dll_handle):
 def test_replace_char_in_equal_buffer_charp(
     arch, conv, ctypes, dll_handle
 ):
+    """
+    Null-terminated buffer of length equal to string, ctypes.c_char_p
+    """
 
     _, func = init_char(ctypes, dll_handle, suffix='d', charp=True)
 
@@ -259,6 +271,9 @@ def test_replace_char_in_equal_buffer_charp(
 def test_replace_wchar_in_longer_buffer(
     arch, conv, ctypes, dll_handle
 ):
+    """
+    Null-terminated buffer longer than string, ctypes.POINTER(ctypes.c_wchar)
+    """
 
     func, _ = init_wchar(ctypes, dll_handle, suffix='a', wcharp=False)
 
@@ -269,6 +284,9 @@ def test_replace_wchar_in_longer_buffer(
 def test_replace_wchar_in_equal_buffer(
     arch, conv, ctypes, dll_handle
 ):
+    """
+    Null-terminated buffer of length equal to string, ctypes.POINTER(ctypes.c_wchar)
+    """
 
     _, func = init_wchar(ctypes, dll_handle, suffix='b', wcharp=False)
 
@@ -279,6 +297,9 @@ def test_replace_wchar_in_equal_buffer(
 def test_replace_wchar_in_longer_buffer_charp(
     arch, conv, ctypes, dll_handle
 ):
+    """
+    Null-terminated buffer longer than string, ctypes.c_wchar_p
+    """
 
     func, _ = init_wchar(ctypes, dll_handle, suffix='c', wcharp=True)
 
@@ -289,6 +310,9 @@ def test_replace_wchar_in_longer_buffer_charp(
 def test_replace_wchar_in_equal_buffer_charp(
     arch, conv, ctypes, dll_handle
 ):
+    """
+    Null-terminated buffer of length equal to string, ctypes.c_wchar_p
+    """
 
     _, func = init_wchar(ctypes, dll_handle, suffix='d', wcharp=True)
 
