@@ -204,8 +204,8 @@ def _group_data(data: List) -> Dict:
     for name, group in by_benchmark.items():
         for entry in group:
             archver = (
-                entry['arch'],
                 entry['server'] if entry['server'] is not None else entry['client'],
+                entry['arch'],
                 entry['convention']
             )
             try:
@@ -226,22 +226,22 @@ def _make_table(name: str, group: Dict, doc: str):
 
     keys = sorted(
         group.keys(),
-        key = (lambda item: (item[0], PythonVersion.from_config(item[0], item[1]), item[2])),
+        key = (lambda item: (PythonVersion.from_config(item[1], item[0]), item[1], item[2])),
     )
 
     with open(os.path.join('docs', 'source', f'benchmark_{name}.rst'), mode = 'w', encoding="utf-8") as f:
 
         f.write(f'.. csv-table:: "{name:s}" benchmark, CPython {sys.version.split(" ")[0]:s} on {sys.platform:s}, versions of CPython on Wine\n')
-        f.write('    :header: "arch", "version", "convention", "ctypes [µs]", "zugbruecke [µs]", "overhead [µs]"\n')
+        f.write('    :header: "version", "arch", "convention", "ctypes [µs]", "zugbruecke [µs]", "overhead [µs]"\n')
         f.write('    :delim: 0x0003B\n')
         f.write('\n')
 
-        for arch, version, conv in keys:
-            unix, wine = group[(arch, version, conv)]
+        for version, arch, conv in keys:
+            unix, wine = group[(version, arch, conv)]
             if unix['server'] is None:
                 unix, wine = wine, unix
             unix, wine = round(unix['runtime'] / 1e3), round(wine['runtime'] / 1e3)
-            f.write(f'    "{arch:s}"; "{version:s}"; "{conv:s}"; {wine:,d}; {unix:,d}; {unix-wine:,d}\n')
+            f.write(f'    "{version:s}"; "{arch:s}"; "{conv:s}"; {wine:,d}; {unix:,d}; {unix-wine:,d}\n')
 
         f.write('\n')
         for line in doc.split('\n'):
