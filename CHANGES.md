@@ -26,6 +26,7 @@ This **RELEASE FIXES A CRITICAL BUG** where *zugbruecke* was falsely translating
 - DEPRECATED: Single-character parameter names in memsync directives.
 - DEPRECATED: `ctypes` fundamental types specified by name as strings in `memsync` directives.
 - DOCS: More detailed explanation of `memsync`, where it is needed and where it is not, among other improvements.
+- DOCS: Added explanation of handling of long integer types.
 - DOCS: Updated benchmarks.
 - DOCS: Removed old `examples` folder from project as its code was more than outdated and can now be found in the documentation, the test suite and/or the newly added benchmarks.
 - DEV: Added tests on custom types and array objects (standard library) as well as numpy ndarray objects.
