@@ -6,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-    tests/test_sqrt_int.py: Test function with single parameter
+    tests/test_string_strsxp.py: R-style strings
 
     Required to run on platform / side: [UNIX, WINE]
 
@@ -31,7 +31,7 @@ specific language governing rights and limitations under the License.
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 HEADER = """
-{{ PREFIX }} void {{ SUFFIX }} replace_letter_in_null_terminated_string_r(
+{{ PREFIX }} void {{ SUFFIX }} replace_char(
 	char **in_string,
 	char old_letter,
 	char new_letter
@@ -39,7 +39,7 @@ HEADER = """
 """
 
 SOURCE = """
-{{ PREFIX }} void {{ SUFFIX }} replace_letter_in_null_terminated_string_r(
+{{ PREFIX }} void {{ SUFFIX }} replace_char(
 	char **in_string,
 	char old_letter,
 	char new_letter
@@ -63,41 +63,6 @@ from .lib.ctypes import get_context, PLATFORM
 import pytest
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# CLASSES AND ROUTINES
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-
-class sample_class:
-    def __init__(self, ctypes, dll_handle):
-
-        self._c = ctypes
-        self._replace_r = dll_handle.replace_letter_in_null_terminated_string_r
-        self._replace_r.argtypes = (
-            self._c.POINTER(
-                self._c.POINTER(self._c.c_char)
-            ),  # Generate pointer to char manually
-            self._c.c_char,
-            self._c.c_char,
-        )
-        self._replace_r.memsync = [
-            ({"p": [0, -1], "n": True}, {"p": [0, -1], "n": True})
-        ]
-
-    def replace_r(self, in_string, old_letter, new_letter):
-
-        string_buffer = (self._c.c_char_p * 1)(in_string.encode("utf-8"))
-        string_buffer_p = self._c.cast(
-            string_buffer, self._c.POINTER(self._c.POINTER(self._c.c_char))
-        )
-
-        self._replace_r(
-            string_buffer_p, old_letter.encode("utf-8"), new_letter.encode("utf-8")
-        )
-
-        return string_buffer[:][0].decode("utf-8")
-
-
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # TEST(s)
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -105,6 +70,45 @@ class sample_class:
 @pytest.mark.xfail(PLATFORM == "unix", strict=True, reason="not yet implemented")
 @pytest.mark.parametrize("arch,conv,ctypes,dll_handle", get_context(__file__))
 def test_r_strsxp(arch, conv, ctypes, dll_handle):
+    """
+    Passing R-style strings, a pointer to an array of pointers to string fragments
+    """
 
-    sample = sample_class(ctypes, dll_handle)
-    assert "zetegehube" == sample.replace_r("zategahuba", "a", "e")
+    replace_char_dll = dll_handle.replace_char
+    replace_char_dll.argtypes = (
+        ctypes.POINTER(
+            ctypes.POINTER(ctypes.c_char)
+        ),  # Generate pointer to char manually
+        ctypes.c_char,
+        ctypes.c_char,
+    )
+    replace_char_dll.memsync = [
+        dict(
+            pointer = [0, -1],
+            null = True,
+        ),
+        dict(
+            pointer = [0, -1],
+            null = True,
+        ),
+    ]
+
+    def replace_char(string: str, old_char: str, new_char: str):
+        """
+        User-facing wrapper around DLL function
+        """
+
+        assert len(old_char) == 1 and len(new_char) == 1
+
+        buffer = (ctypes.c_char_p * 1)(string.encode("utf-8"))
+        ptr = ctypes.cast(
+            buffer, ctypes.POINTER(ctypes.POINTER(ctypes.c_char))
+        )
+
+        replace_char_dll(
+            ptr, old_char.encode("utf-8"), new_char.encode("utf-8")
+        )
+
+        return buffer[:][0].decode("utf-8")
+
+    assert "Hellu wurld!" == replace_char("Hello world!", "o", "u")
