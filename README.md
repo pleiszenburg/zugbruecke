@@ -65,7 +65,7 @@ A lot of code, which was written with `ctypes`' `cdll`, `windll` or `oledll` in 
 
 ## Speed
 
-`zugbruecke` performs reasonably well given its complexity with **around 0.3 µs overhead per simple call** on average on modern hardware. For significantly more complex calls, the overhead can go into several milliseconds. `zugbruecke` is not (yet) optimized for speed. Check the latest [benchmarks](https://zugbruecke.readthedocs.io/en/stable/benchmarks.html) for more details.
+`zugbruecke` performs reasonably well given its complexity with **around 0.15 µs overhead per simple call** on average on modern hardware. For significantly more complex calls, the overhead can go into several milliseconds. `zugbruecke` is not (yet) optimized for speed. Check the latest [benchmarks](https://zugbruecke.readthedocs.io/en/stable/benchmarks.html) for more details.
 
 ## Security
 
