@@ -164,6 +164,42 @@ def test_fixedlength_string_no_pointer(arch, conv, ctypes, dll_handle):
 
 
 @pytest.mark.parametrize("arch,conv,ctypes,dll_handle", get_context(__file__))
+def test_fixedlength_string_no_pointer_unicode(arch, conv, ctypes, dll_handle):
+    """
+    Test char arrays, fixed length, passed by value, UNICODE
+    """
+
+    concatenate_fixedlength_dll = dll_handle.concatenate_fixedlength_wf
+    concatenate_fixedlength_dll.argtypes = (
+        ctypes.c_wchar * 5,
+        ctypes.c_wchar * 5,
+        ctypes.POINTER(ctypes.c_wchar * 11),
+    )
+
+    def concatenate_fixedlength(a: str, b: str) -> str:
+        """
+        User-facing wrapper around DLL function
+        """
+
+        assert len(a) <= 5 and len(b) <= 5
+
+        c_wchar_array5 = ctypes.c_wchar * 5
+
+        a_wchars = c_wchar_array5()
+        a_wchars.value = a
+        b_wchars = c_wchar_array5()
+        b_wchars.value = b
+        out = ctypes.pointer((ctypes.c_wchar * 11)())
+
+        concatenate_fixedlength_dll(a_wchars, b_wchars, out)
+
+        return out.contents[:]
+
+    assert 'Hello world' == concatenate_fixedlength('Hello', 'world')
+    assert 'Hell  worl ' == concatenate_fixedlength('Hell', 'worl')
+
+
+@pytest.mark.parametrize("arch,conv,ctypes,dll_handle", get_context(__file__))
 def test_fixedlength_string_no_pointer_variation(arch, conv, ctypes, dll_handle):
     """
     Test char arrays, fixed length, passed by value; variation on buffer creation
@@ -196,6 +232,42 @@ def test_fixedlength_string_no_pointer_variation(arch, conv, ctypes, dll_handle)
         concatenate_fixedlength_dll(a_chars, b_chars, out)
 
         return out.contents[:].decode('utf-8')
+
+    assert 'Hello world' == concatenate_fixedlength('Hello', 'world')
+    assert 'Hell  worl ' == concatenate_fixedlength('Hell', 'worl')
+
+
+@pytest.mark.parametrize("arch,conv,ctypes,dll_handle", get_context(__file__))
+def test_fixedlength_string_no_pointer_variation_unicode(arch, conv, ctypes, dll_handle):
+    """
+    Test char arrays, fixed length, passed by value; variation on buffer creation, UNICODE
+    """
+
+    concatenate_fixedlength_dll = dll_handle.concatenate_fixedlength_wg
+    concatenate_fixedlength_dll.argtypes = (
+        ctypes.c_wchar * 5,
+        ctypes.c_wchar * 5,
+        ctypes.POINTER(ctypes.c_wchar * 11),
+    )
+
+    def concatenate_fixedlength(a: str, b: str) -> str:
+        """
+        User-facing wrapper around DLL function
+        """
+
+        assert len(a) <= 5 and len(b) <= 5
+
+        c_wchar_array5 = ctypes.c_wchar * 5
+
+        a_wchars = c_wchar_array5()  # create array buffer from type
+        a_wchars[:len(a)] = a
+        b_wchars = c_wchar_array5()  # create array buffer from type
+        b_wchars[:len(b)] = b
+        out = ctypes.pointer((ctypes.c_wchar * 11)())
+
+        concatenate_fixedlength_dll(a_wchars, b_wchars, out)
+
+        return out.contents[:]
 
     assert 'Hello world' == concatenate_fixedlength('Hello', 'world')
     assert 'Hell  worl ' == concatenate_fixedlength('Hell', 'worl')
