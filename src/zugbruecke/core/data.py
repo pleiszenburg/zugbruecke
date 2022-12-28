@@ -422,7 +422,10 @@ class Data(DataABC):
                         )
                 else:
                     if arraytype.GROUP == SIMPLE_GROUP:
-                        old_array[:] = new_array[:]
+                        # HACK can not overwrite immutable bytes, skipping sync operation.
+                        # Relevant for fixed-length char arrays by value in structs.
+                        if not isinstance(old_array, bytes):
+                            old_array[:] = new_array[:]
                     elif arraytype.GROUP == STRUCT_GROUP:
                         for old_struct, new_struct in zip(old_array[:], new_array[:]):
                             self._sync_struct(
@@ -625,11 +628,21 @@ class Data(DataABC):
 
             try:
 
-                setattr(
-                    new_struct,  # struct instance to be modified
-                    name,  # field name
-                    value,  # field value
-                )
+                if definition.base_type == ctypes.c_char and not definition.is_pointer and not definition.is_scalar:
+
+                    setattr(
+                        new_struct,  # struct instance to be modified
+                        name,  # field name
+                        value.value,  # field value
+                    )
+
+                else:  # TODO add unicode support
+
+                    setattr(
+                        new_struct,  # struct instance to be modified
+                        name,  # field name
+                        value,  # field value
+                    )
 
             except TypeError:  # TODO HACK relevant for structs & callbacks & memsync together
 
