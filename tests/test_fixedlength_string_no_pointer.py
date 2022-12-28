@@ -79,7 +79,7 @@ import pytest
 @pytest.mark.parametrize("arch,conv,ctypes,dll_handle", get_context(__file__))
 def test_fixedlength_string_no_pointer(arch, conv, ctypes, dll_handle):
     """
-    Test pointers to arrays of fixed length, n-dimensional
+    Test char arrays, fixed length, passed by value
     """
 
     concatenate_fixedlength_dll = dll_handle.concatenate_fixedlength
