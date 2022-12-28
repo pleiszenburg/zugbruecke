@@ -31,6 +31,11 @@ specific language governing rights and limitations under the License.
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 HEADER = """
+typedef struct twowords {
+    char a[5];
+    char b[5];
+} twowords;
+
 {{ PREFIX }} void {{ SUFFIX }} concatenate_fixedlength(
     char a[5],
     char b[5],
@@ -56,6 +61,26 @@ SOURCE = """
     for (int i = 0; i < 5; i++) {
         if (b[i] != '\\0') {
             (*out)[i + 6] = b[i];
+        }
+    }
+}
+
+{{ PREFIX }} void {{ SUFFIX }} concatenate_fixedlength_in_struct(
+    twowords *somewords,
+    char (*out)[11]
+    )
+{
+    for (int i = 0; i < 11; i++) {
+        (*out)[i] = ' ';
+    }
+    for (int i = 0; i < 5; i++) {
+        if (somewords->a[i] != '\\0') {
+            (*out)[i] = somewords->a[i];
+        }
+    }
+    for (int i = 0; i < 5; i++) {
+        if (somewords->b[i] != '\\0') {
+            (*out)[i + 6] = somewords->b[i];
         }
     }
 }
@@ -110,3 +135,41 @@ def test_fixedlength_string_no_pointer(arch, conv, ctypes, dll_handle):
 
     assert 'Hello world' == concatenate_fixedlength('Hello', 'world')
     assert 'Hell  worl ' == concatenate_fixedlength('Hell', 'worl')
+
+
+@pytest.mark.parametrize("arch,conv,ctypes,dll_handle", get_context(__file__))
+def test_fixedlength_string_no_pointer_in_struct(arch, conv, ctypes, dll_handle):
+    """
+    Test char arrays, fixed length, passed by value within struct
+    """
+
+    class TwoWords(ctypes.Structure):
+        _fields_ = [
+            ('a', ctypes.c_char * 5),
+            ('b', ctypes.c_char * 5),
+        ]
+
+    cconcatenate_fixedlength_in_struct_dll = dll_handle.concatenate_fixedlength_in_struct
+    cconcatenate_fixedlength_in_struct_dll.argtypes = (
+        ctypes.POINTER(TwoWords),
+        ctypes.POINTER(ctypes.c_char * 11),
+    )
+
+    def concatenate_fixedlength_in_struct(a: str, b: str) -> str:
+        """
+        User-facing wrapper around DLL function
+        """
+
+        assert len(a) <= 5 and len(b) <= 5
+
+        c_char_array5 = ctypes.c_char * 5
+
+        somewords = ctypes.pointer(TwoWords(a.encode('utf-8'), b.encode('utf-8')))
+        out = ctypes.pointer((ctypes.c_char * 11)())
+
+        cconcatenate_fixedlength_in_struct_dll(somewords, out)
+
+        return out.contents[:].decode('utf-8')
+
+    assert 'Hello world' == concatenate_fixedlength_in_struct('Hello', 'world')
+    assert 'Hell  worl ' == concatenate_fixedlength_in_struct('Hell', 'worl')
