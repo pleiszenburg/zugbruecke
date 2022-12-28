@@ -36,43 +36,46 @@ typedef struct twowords {
     char b[5];
 } twowords;
 
-{{ PREFIX }} void {{ SUFFIX }} concatenate_fixedlength(
-    char a[5],
-    char b[5],
-    char (*out)[11]
-    );
-
 {% for NAME in COPIES %}
+
+    {{ PREFIX }} void {{ SUFFIX }} concatenate_fixedlength_{{ NAME }}(
+        char a[5],
+        char b[5],
+        char (*out)[11]
+        );
+
     {{ PREFIX }} void {{ SUFFIX }} concatenate_fixedlength_in_struct_{{ NAME }}(
         twowords *somewords,
         char (*out)[11]
         );
+
 {% endfor %}
 """
 
 SOURCE = """
-{{ PREFIX }} void {{ SUFFIX }} concatenate_fixedlength(
-    char a[5],
-    char b[5],
-    char (*out)[11]
-    )
-{
-    for (int i = 0; i < 11; i++) {
-        (*out)[i] = ' ';
-    }
-    for (int i = 0; i < 5; i++) {
-        if (a[i] != '\\0') {
-            (*out)[i] = a[i];
-        }
-    }
-    for (int i = 0; i < 5; i++) {
-        if (b[i] != '\\0') {
-            (*out)[i + 6] = b[i];
-        }
-    }
-}
-
 {% for NAME in COPIES %}
+
+    {{ PREFIX }} void {{ SUFFIX }} concatenate_fixedlength_{{ NAME }}(
+        char a[5],
+        char b[5],
+        char (*out)[11]
+        )
+    {
+        for (int i = 0; i < 11; i++) {
+            (*out)[i] = ' ';
+        }
+        for (int i = 0; i < 5; i++) {
+            if (a[i] != '\\0') {
+                (*out)[i] = a[i];
+            }
+        }
+        for (int i = 0; i < 5; i++) {
+            if (b[i] != '\\0') {
+                (*out)[i + 6] = b[i];
+            }
+        }
+    }
+
     {{ PREFIX }} void {{ SUFFIX }} concatenate_fixedlength_in_struct_{{ NAME }}(
         twowords *somewords,
         char (*out)[11]
@@ -92,6 +95,7 @@ SOURCE = """
             }
         }
     }
+
 {% endfor %}
 """
 
@@ -120,7 +124,7 @@ def test_fixedlength_string_no_pointer(arch, conv, ctypes, dll_handle):
     Test char arrays, fixed length, passed by value
     """
 
-    concatenate_fixedlength_dll = dll_handle.concatenate_fixedlength
+    concatenate_fixedlength_dll = dll_handle.concatenate_fixedlength_f
     concatenate_fixedlength_dll.argtypes = (
         ctypes.c_char * 5,
         ctypes.c_char * 5,
@@ -140,6 +144,44 @@ def test_fixedlength_string_no_pointer(arch, conv, ctypes, dll_handle):
         a_chars.value = a.encode('utf-8')
         b_chars = c_char_array5()
         b_chars.value = b.encode('utf-8')
+        out = ctypes.pointer((ctypes.c_char * 11)())
+
+        concatenate_fixedlength_dll(a_chars, b_chars, out)
+
+        return out.contents[:].decode('utf-8')
+
+    assert 'Hello world' == concatenate_fixedlength('Hello', 'world')
+    assert 'Hell  worl ' == concatenate_fixedlength('Hell', 'worl')
+
+
+@pytest.mark.parametrize("arch,conv,ctypes,dll_handle", get_context(__file__))
+def test_fixedlength_string_no_pointer_variation(arch, conv, ctypes, dll_handle):
+    """
+    Test char arrays, fixed length, passed by value; variation on buffer creation
+    """
+
+    concatenate_fixedlength_dll = dll_handle.concatenate_fixedlength_g
+    concatenate_fixedlength_dll.argtypes = (
+        ctypes.c_char * 5,
+        ctypes.c_char * 5,
+        ctypes.POINTER(ctypes.c_char * 11),
+    )
+
+    def concatenate_fixedlength(a: str, b: str) -> str:
+        """
+        User-facing wrapper around DLL function
+        """
+
+        assert len(a) <= 5 and len(b) <= 5
+
+        c_char_array5 = ctypes.c_char * 5
+
+        a_bytes = a.encode('utf-8')
+        a_chars = c_char_array5()  # create array buffer from type
+        a_chars[:len(a_bytes)] = a_bytes
+        b_bytes = b.encode('utf-8')
+        b_chars = c_char_array5()  # create array buffer from type
+        b_chars[:len(b_bytes)] = b_bytes
         out = ctypes.pointer((ctypes.c_char * 11)())
 
         concatenate_fixedlength_dll(a_chars, b_chars, out)
