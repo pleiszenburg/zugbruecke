@@ -240,8 +240,8 @@ def _make_table(name: str, group: Dict, doc: str):
             unix, wine = group[(version, arch, conv)]
             if unix['server'] is None:
                 unix, wine = wine, unix
-            unix, wine = round(unix['runtime'] / 1e3), round(wine['runtime'] / 1e3)
-            f.write(f'    "{version:s}"; "{arch:s}"; "{conv:s}"; {wine:,d}; {unix:,d}; {unix-wine:,d}\n')
+            unix, wine = round(unix['runtime'] / 1e3, 1), round(wine['runtime'] / 1e3, 1)
+            f.write(f'    "{version:s}"; "{arch:s}"; "{conv:s}"; {wine:,.01f}; {unix:,.01f}; {unix-wine:,.01f}\n')
 
         f.write('\n')
         for line in doc.split('\n'):
