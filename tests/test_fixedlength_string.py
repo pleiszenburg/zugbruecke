@@ -6,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-    tests/test_fixedlength_string_no_pointer.py: Tests fixed length char buffers without pointers
+    tests/test_fixedlength_string.py: Tests fixed length char buffers with & without pointers
 
     Required to run on platform / side: [UNIX, WINE]
 
@@ -128,7 +128,7 @@ import pytest
 
 
 @pytest.mark.parametrize("arch,conv,ctypes,dll_handle", get_context(__file__))
-def test_fixedlength_string_no_pointer(arch, conv, ctypes, dll_handle):
+def test_fixedlength_string(arch, conv, ctypes, dll_handle):
     """
     Test char arrays, fixed length, passed by value
     """
@@ -164,7 +164,7 @@ def test_fixedlength_string_no_pointer(arch, conv, ctypes, dll_handle):
 
 
 @pytest.mark.parametrize("arch,conv,ctypes,dll_handle", get_context(__file__))
-def test_fixedlength_string_no_pointer_unicode(arch, conv, ctypes, dll_handle):
+def test_fixedlength_string_unicode(arch, conv, ctypes, dll_handle):
     """
     Test char arrays, fixed length, passed by value, UNICODE
     """
@@ -200,7 +200,7 @@ def test_fixedlength_string_no_pointer_unicode(arch, conv, ctypes, dll_handle):
 
 
 @pytest.mark.parametrize("arch,conv,ctypes,dll_handle", get_context(__file__))
-def test_fixedlength_string_no_pointer_variation(arch, conv, ctypes, dll_handle):
+def test_fixedlength_string_variation(arch, conv, ctypes, dll_handle):
     """
     Test char arrays, fixed length, passed by value; variation on buffer creation
     """
@@ -238,7 +238,7 @@ def test_fixedlength_string_no_pointer_variation(arch, conv, ctypes, dll_handle)
 
 
 @pytest.mark.parametrize("arch,conv,ctypes,dll_handle", get_context(__file__))
-def test_fixedlength_string_no_pointer_variation_unicode(arch, conv, ctypes, dll_handle):
+def test_fixedlength_string_variation_unicode(arch, conv, ctypes, dll_handle):
     """
     Test char arrays, fixed length, passed by value; variation on buffer creation, UNICODE
     """
@@ -274,7 +274,7 @@ def test_fixedlength_string_no_pointer_variation_unicode(arch, conv, ctypes, dll
 
 
 @pytest.mark.parametrize("arch,conv,ctypes,dll_handle", get_context(__file__))
-def test_fixedlength_string_no_pointer_in_struct(arch, conv, ctypes, dll_handle):
+def test_fixedlength_string_in_struct(arch, conv, ctypes, dll_handle):
     """
     Test char arrays, fixed length, passed by value within struct
     """
@@ -310,7 +310,7 @@ def test_fixedlength_string_no_pointer_in_struct(arch, conv, ctypes, dll_handle)
 
 
 @pytest.mark.parametrize("arch,conv,ctypes,dll_handle", get_context(__file__))
-def test_fixedlength_string_no_pointer_in_struct_unicode(arch, conv, ctypes, dll_handle):
+def test_fixedlength_string_in_struct_unicode(arch, conv, ctypes, dll_handle):
     """
     Test char arrays, fixed length, passed by value within struct, UNICODE
     """
@@ -346,7 +346,7 @@ def test_fixedlength_string_no_pointer_in_struct_unicode(arch, conv, ctypes, dll
 
 
 @pytest.mark.parametrize("arch,conv,ctypes,dll_handle", get_context(__file__))
-def test_fixedlength_string_no_pointer_in_struct_setattr(arch, conv, ctypes, dll_handle):
+def test_fixedlength_string_in_struct_setattr(arch, conv, ctypes, dll_handle):
     """
     Test char arrays, fixed length, passed by value within struct via setattr
     """
@@ -384,7 +384,7 @@ def test_fixedlength_string_no_pointer_in_struct_setattr(arch, conv, ctypes, dll
 
 
 @pytest.mark.parametrize("arch,conv,ctypes,dll_handle", get_context(__file__))
-def test_fixedlength_string_no_pointer_in_struct_setattr_unicode(arch, conv, ctypes, dll_handle):
+def test_fixedlength_string_in_struct_setattr_unicode(arch, conv, ctypes, dll_handle):
     """
     Test char arrays, fixed length, passed by value within struct via setattr, UNICODE
     """
