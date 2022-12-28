@@ -11,7 +11,7 @@
 Benchmarks
 ==========
 
-*zugbruecke* performs reasonably well given its complexity with **0.15 µs overhead per simple function call** on average on modern hardware. Very complex function calls involving callback functions and memory synchronization can involve an overhead of several milliseconds.
+*zugbruecke* performs reasonably well given its complexity with **0.15 ms overhead per simple function call** on average on modern hardware. Very complex function calls involving callback functions and memory synchronization can involve an overhead of several milliseconds.
 
 .. note::
 
