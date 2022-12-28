@@ -31,76 +31,85 @@ specific language governing rights and limitations under the License.
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 HEADER = """
-typedef struct twowords {
-    char a[5];
-    char b[5];
-} twowords;
+{% for W, T in UNIC %}
 
-{% for NAME in COPIES %}
+    typedef struct {{ W }}twowords {
+        {{ W }}char{{ T }} a[5];
+        {{ W }}char{{ T }} b[5];
+    } {{ W }}twowords;
 
-    {{ PREFIX }} void {{ SUFFIX }} concatenate_fixedlength_{{ NAME }}(
-        char a[5],
-        char b[5],
-        char (*out)[11]
-        );
+    {% for NAME in COPIES %}
 
-    {{ PREFIX }} void {{ SUFFIX }} concatenate_fixedlength_in_struct_{{ NAME }}(
-        twowords *somewords,
-        char (*out)[11]
-        );
+        {{ PREFIX }} void {{ SUFFIX }} concatenate_fixedlength_{{ W }}{{ NAME }}(
+            {{ W }}char{{ T }} a[5],
+            {{ W }}char{{ T }} b[5],
+            {{ W }}char{{ T }} (*out)[11]
+            );
+
+        {{ PREFIX }} void {{ SUFFIX }} concatenate_fixedlength_in_struct_{{ W }}{{ NAME }}(
+            {{ W }}twowords *somewords,
+            {{ W }}char{{ T }} (*out)[11]
+            );
+
+    {% endfor %}
 
 {% endfor %}
 """
 
 SOURCE = """
-{% for NAME in COPIES %}
+{% for W, T in UNIC %}
 
-    {{ PREFIX }} void {{ SUFFIX }} concatenate_fixedlength_{{ NAME }}(
-        char a[5],
-        char b[5],
-        char (*out)[11]
-        )
-    {
-        for (int i = 0; i < 11; i++) {
-            (*out)[i] = ' ';
-        }
-        for (int i = 0; i < 5; i++) {
-            if (a[i] != '\\0') {
-                (*out)[i] = a[i];
-            }
-        }
-        for (int i = 0; i < 5; i++) {
-            if (b[i] != '\\0') {
-                (*out)[i + 6] = b[i];
-            }
-        }
-    }
+    {% for NAME in COPIES %}
 
-    {{ PREFIX }} void {{ SUFFIX }} concatenate_fixedlength_in_struct_{{ NAME }}(
-        twowords *somewords,
-        char (*out)[11]
-        )
-    {
-        for (int i = 0; i < 11; i++) {
-            (*out)[i] = ' ';
-        }
-        for (int i = 0; i < 5; i++) {
-            if (somewords->a[i] != '\\0') {
-                (*out)[i] = somewords->a[i];
+        {{ PREFIX }} void {{ SUFFIX }} concatenate_fixedlength_{{ W }}{{ NAME }}(
+            {{ W }}char{{ T }} a[5],
+            {{ W }}char{{ T }} b[5],
+            {{ W }}char{{ T }} (*out)[11]
+            )
+        {
+            for (int i = 0; i < 11; i++) {
+                (*out)[i] = ' ';
+            }
+            for (int i = 0; i < 5; i++) {
+                if (a[i] != '\\0') {
+                    (*out)[i] = a[i];
+                }
+            }
+            for (int i = 0; i < 5; i++) {
+                if (b[i] != '\\0') {
+                    (*out)[i + 6] = b[i];
+                }
             }
         }
-        for (int i = 0; i < 5; i++) {
-            if (somewords->b[i] != '\\0') {
-                (*out)[i + 6] = somewords->b[i];
+
+        {{ PREFIX }} void {{ SUFFIX }} concatenate_fixedlength_in_struct_{{ W }}{{ NAME }}(
+            {{ W }}twowords *somewords,
+            {{ W }}char{{ T }} (*out)[11]
+            )
+        {
+            for (int i = 0; i < 11; i++) {
+                (*out)[i] = ' ';
+            }
+            for (int i = 0; i < 5; i++) {
+                if (somewords->a[i] != '\\0') {
+                    (*out)[i] = somewords->a[i];
+                }
+            }
+            for (int i = 0; i < 5; i++) {
+                if (somewords->b[i] != '\\0') {
+                    (*out)[i + 6] = somewords->b[i];
+                }
             }
         }
-    }
+
+    {% endfor %}
 
 {% endfor %}
 """
 
 EXTRA = {
-    "COPIES": ["f", "g"]
+    "COPIES": ["f", "g"],
+    "UNIC": [("", ""), ("w", "_t")],
 }
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
