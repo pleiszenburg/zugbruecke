@@ -141,6 +141,6 @@ def test_customtype(arch, conv, ctypes, dll_handle):
         [1.0, 2.0, 3.0, 4.0],
         (1.0, 2.0, 3.0, 4.0),
         # np.array([1.0, 2.0, 3.0, 4.0], dtype = 'f8'),
-        array('d', [1.0, 2.0, 3.0, 4.0]),
+        # array('d', [1.0, 2.0, 3.0, 4.0]),
     ):
         assert pytest.approx(2.5, 0.0000001) == avg_dll(blob, len(blob))
