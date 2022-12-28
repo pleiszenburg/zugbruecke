@@ -96,7 +96,7 @@ def test_memsync_in_struct(arch, conv, ctypes, dll_handle):
     ]
     bubblesort_struct_dll.argtypes = (ctypes.POINTER(BubblesortData),)
 
-    def bubblesort_struct(values: List[int]):
+    def bubblesort_struct(values: List[float]):
         """
         User-facing wrapper around DLL function
         """

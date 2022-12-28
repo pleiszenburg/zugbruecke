@@ -90,7 +90,7 @@ def test_memsync_minimal(arch, conv, ctypes, dll_handle):
     ]
     bubblesort_dll.argtypes = (ctypes.POINTER(ctypes.c_float), ctypes.c_int)
 
-    def bubblesort(values: List[int]):
+    def bubblesort(values: List[float]):
         """
         User-facing wrapper around DLL function
         """

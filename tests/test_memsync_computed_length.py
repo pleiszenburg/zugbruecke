@@ -98,7 +98,7 @@ def test_memsync_computed_length(arch, conv, ctypes, dll_handle):
         ctypes.c_int,
     )
 
-    def bubblesort(values: List[int], u: int, v: int):
+    def bubblesort(values: List[float], u: int, v: int):
         """
         User-facing wrapper around DLL function
         """
