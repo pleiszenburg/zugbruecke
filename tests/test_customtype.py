@@ -138,9 +138,6 @@ def test_customtype(data, arch, conv, ctypes, dll_handle):
                 ctypes.POINTER(ctypes.c_double)
             )
 
-    import gc
-    gc.disable()
-
     DoubleArray = DoubleArrayType()
     avg_dll = dll_handle.avg
     avg_dll.memsync = [  # Regular ctypes on Windows should ignore this statement
@@ -155,5 +152,3 @@ def test_customtype(data, arch, conv, ctypes, dll_handle):
     avg_dll.restype = ctypes.c_double
 
     assert pytest.approx(2.5, 0.0000001) == avg_dll(data, 4)
-
-    gc.enable()
