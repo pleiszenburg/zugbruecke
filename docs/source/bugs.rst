@@ -29,13 +29,14 @@ How to bisect issues
 
 *zugbruecke* is based on a :ref:`session model <session>`. Each session can be launched with parameters, which can either be passed into or picked up by the session constructor from a configuration file. It is also possible to change parameters during run-time.
 
-If you want to increase the log level during run-time, you can do the following:
+If you want to increase the log level and/or enable writing of logs to disk during run-time, you can do the following:
 
 .. code:: python
 
     import zugbruecke.ctypes as ctypes
     from logging import DEBUG
     ctypes.zb_set_parameter('log_level', DEBUG)
+    ctypes.zb_set_parameter('log_write', True)
     # proceed as usual - with a lot more verbosity
 
 A custom session can be manipulated in a similar way:

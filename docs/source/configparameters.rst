@@ -98,7 +98,7 @@ The following parameters can be configured:
 
 .. note::
 
-  (Only) ``log_level`` can be changed at run-time. It follows Python's ``logging`` module's log levels, i.e. ``DEBUG == 10``, ``INFO == 20``, ``WARNING == 30``, ``ERROR == 40`` and ``CRITICAL == 50``. Default is ``0`` for no logs as per ``NOTSET``.
+  (Only) ``log_level`` and ``log_write`` can be changed at run-time. ``log_level`` follows Python's ``logging`` module's log levels, i.e. ``DEBUG == 10``, ``INFO == 20``, ``WARNING == 30``, ``ERROR == 40`` and ``CRITICAL == 50``. Default is ``0`` for no logs as per ``NOTSET``.
 
 .. note::
 
