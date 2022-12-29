@@ -136,11 +136,8 @@ def test_customtype(arch, conv, ctypes, dll_handle):
     avg_dll.argtypes = (DoubleArray, ctypes.c_int)
     avg_dll.restype = ctypes.c_double
 
-    for blob in (
-        # [1, 2, 3, 4],  # TODO deactivated for testing on Github Actions
-        [1.0, 2.0, 3.0, 4.0],
-        (1.0, 2.0, 3.0, 4.0),
-        # np.array([1.0, 2.0, 3.0, 4.0], dtype = 'f8'),  # TODO deactivated for testing on Github Actions
-        # array('d', [1.0, 2.0, 3.0, 4.0]),  # TODO deactivated for testing on Github Actions
-    ):
-        assert pytest.approx(2.5, 0.0000001) == avg_dll(blob, len(blob))
+    assert pytest.approx(2.5, 0.0000001) == avg_dll([1, 2, 3, 4], 4)
+    assert pytest.approx(2.5, 0.0000001) == avg_dll([1.0, 2.0, 3.0, 4.0], 4)
+    assert pytest.approx(2.5, 0.0000001) == avg_dll((1.0, 2.0, 3.0, 4.0), 4)
+    assert pytest.approx(2.5, 0.0000001) == avg_dll(np.array([1.0, 2.0, 3.0, 4.0], dtype = 'f8'), 4)
+    assert pytest.approx(2.5, 0.0000001) == avg_dll(array('d', [1.0, 2.0, 3.0, 4.0]), 4)
