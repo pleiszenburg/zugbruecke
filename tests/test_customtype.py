@@ -91,8 +91,6 @@ def test_customtype(arch, conv, ctypes, dll_handle):
 
             if hasattr(self, "from_" + typename):
                 return getattr(self, "from_" + typename)(param)
-            if isinstance(param, ctypes.Array):
-                return param
 
             raise TypeError(f"Can't convert {typename:s}")
 
@@ -104,15 +102,20 @@ def test_customtype(arch, conv, ctypes, dll_handle):
             if param.typecode != "d":
                 raise TypeError("must be an array of doubles")
             ptr, _ = param.buffer_info()
-            return ctypes.cast(ptr, ctypes.POINTER(ctypes.c_double * len(param)))
+            return ctypes.cast(
+                ptr,
+                ctypes.POINTER(ctypes.c_double),
+            )
 
         def from_list(self, param: Union[List[float], Tuple[float, ...]]) -> Any:
             """
             Implementation for Python list (and tuple)
             """
 
-            # does not need to be a pointer IN THIS CASE (can be though)
-            return ((ctypes.c_double) * len(param))(*param)
+            return ctypes.cast(
+                ctypes.pointer(((ctypes.c_double) * len(param))(*param)),
+                ctypes.POINTER(ctypes.c_double),
+            )
 
         from_tuple = from_list
 
@@ -121,7 +124,9 @@ def test_customtype(arch, conv, ctypes, dll_handle):
             Implementation for numpy.ndarray
             """
 
-            return param.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
+            return param.ctypes.data_as(
+                ctypes.POINTER(ctypes.c_double)
+            )
 
     DoubleArray = DoubleArrayType()
     avg_dll = dll_handle.avg
