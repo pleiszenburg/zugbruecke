@@ -46,7 +46,8 @@ from typing import Any, Optional, Type
 from .abc import DataABC, SessionClientABC
 from .const import _FUNCFLAG_STDCALL, CONVENTIONS
 from .config import Config
-from .data import data_class
+from .data import Data
+from .definitions import DefinitionFunc
 from .dll_client import DllClient
 from .interpreter import Interpreter
 from .lib import get_free_port, get_hash_of_string
@@ -89,21 +90,12 @@ class SessionClient(SessionClientABC):
         # Start session logging
         self._log = Log(self._id, self._p, rpc_server=self._rpc_server)
 
-        self._log.out("[session-client] STARTING ...")
-        self._log.out(
-            "[session-client] Configured Wine-Python version is {PYTHONVERSION:s} for {ARCH:s}.".format(
-                PYTHONVERSION=str(self._p["pythonversion"]),
-                ARCH=self._p["arch"],
-            )
-        )
-        self._log.out(
-            "[session-client] Log socket port: {PORT:d}.".format(
-                PORT=self._p["port_socket_unix"]
-            )
-        )
+        self._log.info("[session-client] STARTING ...")
+        self._log.info(f'[session-client] Configured Wine-Python version is {str(self._p["pythonversion"]):s} for {self._p["arch"]:s}.')
+        self._log.info(f'[session-client] Log socket port: {self._p["port_socket_unix"]:d}.')
 
         # Set data cache and parser
-        self._data = data_class(
+        self._data = Data(
             self._log, is_server=False, callback_server=self._rpc_server
         )
 
@@ -146,11 +138,11 @@ class SessionClient(SessionClientABC):
         for name in ("load_library", "set_parameter", "terminate"):
             setattr(
                 self,
-                "_{NAME:s}_on_server".format(NAME=name),
+                f"_{name:s}_on_server",
                 getattr(self._rpc_client, name),
             )
 
-        self._log.out("[session-client] STARTED.")
+        self._log.info("[session-client] STARTED.")
 
     def CFUNCTYPE(self, restype: Any, *argtypes: Any, use_errno: bool = False, use_last_error: bool = False) -> Type:
 
@@ -160,7 +152,12 @@ class SessionClient(SessionClientABC):
         if use_last_error:
             flags |= _FUNCFLAG_USE_LASTERROR
 
-        return self._data.generate_callback_decorator(flags, restype, *argtypes)
+        return DefinitionFunc.generate_callback_decorator(
+            cache = self._data.cache,
+            func_flags = flags,
+            restype = restype,
+            argtypes = list(argtypes),
+        )
 
     def WINFUNCTYPE(self, restype: Any, *argtypes: Any, use_errno: bool = False, use_last_error: bool = False) -> Type:
 
@@ -171,7 +168,12 @@ class SessionClient(SessionClientABC):
         if use_last_error:
             flags |= _FUNCFLAG_USE_LASTERROR
 
-        return self._data.generate_callback_decorator(flags, restype, *argtypes)
+        return DefinitionFunc.generate_callback_decorator(
+            cache = self._data.cache,
+            func_flags = flags,
+            restype = restype,
+            argtypes = list(argtypes),
+        )
 
     def load_library(
         self,
@@ -188,12 +190,7 @@ class SessionClient(SessionClientABC):
         if name in self._dlls.keys():
             return self._dlls[name]
 
-        self._log.out(
-            '[session-client] Attaching to DLL file "{FN:s}" with calling convention "{CONVENTION:s}" ...'.format(
-                FN=name,
-                CONVENTION=convention,
-            )
-        )
+        self._log.info(f'[session-client] Attaching to DLL file "{name:s}" with calling convention "{convention:s}" ...')
 
         hash_id = get_hash_of_string(name)
 
@@ -207,7 +204,7 @@ class SessionClient(SessionClientABC):
                 use_last_error,
             )
         except OSError as e:
-            self._log.out("[session-client] ... failed!")
+            self._log.error("[session-client] ... failed!")
             raise e
 
         self._dlls[name] = DllClient(
@@ -219,7 +216,7 @@ class SessionClient(SessionClientABC):
             self._data,
         )
 
-        self._log.out("[session-client] ... attached.")
+        self._log.info("[session-client] ... attached.")
 
         return self._dlls[name]
 
@@ -251,12 +248,12 @@ class SessionClient(SessionClientABC):
         if not self._client_up:
             return
 
-        self._log.out("[session-client] TERMINATING ...")
+        self._log.info("[session-client] TERMINATING ...")
 
         try:
             self._terminate_on_server()
         except EOFError:  # EOFError is raised if server socket is closed - ignore it
-            self._log.out("[session-client] Remote socket closed.")
+            self._log.info("[session-client] Remote socket closed.")
 
         self._wait_for_server_status_change(
             target_status=False
@@ -265,7 +262,7 @@ class SessionClient(SessionClientABC):
         self._interpreter.terminate()
         self._rpc_server.terminate()
 
-        self._log.out("[session-client] TERMINATED.")
+        self._log.info("[session-client] TERMINATED.")
         self._log.terminate()
 
         self._client_up = False
@@ -303,11 +300,7 @@ class SessionClient(SessionClientABC):
             # No, so get out of here
             return
 
-        self._log.out(
-            "[session-client] Waiting for session-server to be {STATUS:s} ...".format(
-                STATUS="up" if target_status else "down",
-            )
-        )
+        self._log.info(f'[session-client] Waiting for session-server to be {"up" if target_status else "down":s} ...')
 
         # Timeout
         timeout_after_seconds = self._p[
@@ -329,20 +322,11 @@ class SessionClient(SessionClientABC):
         # Handle timeout
         if target_status != self._server_up:
 
-            self._log.out(
-                "[session-client] ... wait timed out (after {TIME:0.2f} seconds).".format(
-                    TIME=time.time() - started_waiting_at,
-                )
-            )
+            self._log.info(f"[session-client] ... wait timed out (after {time.time() - started_waiting_at:0.2f} seconds).")
 
             if target_status:
                 raise TimeoutError("session server did not appear")
             else:
                 raise TimeoutError("session server could not be stopped")
 
-        self._log.out(
-            "[session-client] ... session server is {STATUS:s} (after {TIME:0.2f} seconds).".format(
-                STATUS="up" if target_status else "down",
-                TIME=time.time() - started_waiting_at,
-            )
-        )
+        self._log.info(f'[session-client] ... session server is {"up" if target_status else "down":s} (after {time.time() - started_waiting_at:0.2f} seconds).')

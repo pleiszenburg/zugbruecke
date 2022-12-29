@@ -36,7 +36,8 @@ from pprint import pformat as pf
 from typing import Any, List, Tuple, Union
 
 from .abc import DataABC, LogABC, RoutineClientABC, RpcClientABC
-from .errors import DataMemsyncsyntaxError
+from .definitions import Definition, DefinitionMemsync
+from .mempkg import Mempkg
 from .typeguard import typechecked
 
 
@@ -73,16 +74,16 @@ class RoutineClient(RoutineClientABC):
         self._configured = False
 
         # By default, there is no memory to sync
-        self._memsync = []
-        self._memsync_d = None
+        self._memsyncs_raw = []
+        self._memsyncs = None
 
         # By default, assume no arguments
-        self._argtypes = []
-        self._argtypes_d = None
+        self._argtypes_raw = []
+        self._argtypes = None
 
         # By default, assume c_int return value like ctypes expects
-        self._restype = ctypes.c_int
-        self._restype_d = None
+        self._restype_raw = None
+        self._restype = None
 
         for attr in (
             "call",
@@ -91,12 +92,10 @@ class RoutineClient(RoutineClientABC):
         ):
             setattr(
                 self,
-                "_{ATTR:s}_on_server".format(ATTR=attr),
+                f"_{attr:s}_on_server",
                 getattr(
                     rpc_client,
-                    "{HASH_ID:s}_{NAME:s}_{ATTR:s}".format(
-                        HASH_ID=hash_id, NAME=str(self._name), ATTR=attr
-                    ),
+                    f"{hash_id:s}_{str(self._name):s}_{attr:s}",
                 ),
             )
 
@@ -105,71 +104,73 @@ class RoutineClient(RoutineClientABC):
         TODO Optimize for speed!
         """
 
-        self._log.out(
-            '[routine-client] Trying to call routine "{NAME:s}" in DLL file "{DLL_NAME:s}" ...'.format(
-                NAME=str(self._name),
-                DLL_NAME=self._dll_name,
-            )
-        )
+        args = list(args)
+
+        self._log.info(f'[routine-client] Trying to call routine "{str(self._name):s}" in DLL file "{self._dll_name:s}" ...')
 
         if not self._configured:
             self._configure()
 
-        self._log.out(
-            '[routine-client] ... parameters are "{ARGS:s}". Packing and pushing to server ...'.format(
-                ARGS=pf(args)
-            )
-        )
+        self._log.info('[routine-client] ... packing and pushing args to server ...')
 
-        # Handle memory
-        mem_package_list = self._data.client_pack_memory_list(args, self._memsync_d)
+        # Pack stuff
+        packed_args = self._data.pack_args(args, self._argtypes, self._convention)
+        mempkgs = DefinitionMemsync.pkg_memories(
+            args = args,
+            memsyncs = self._memsyncs,
+        )  # keep until after function call to avoid pointers being garbage collected
+        packed_mempkgs = [mempkg.as_packed() for mempkg in mempkgs]
 
-        # Actually call routine in DLL! TODO Handle kw ...
-        return_dict = self._call_on_server(
-            self._data.arg_list_pack(args, self._argtypes_d, self._convention),
-            mem_package_list,
-        )
+        self._log.debug(dict(
+            args = args,
+            packed_args = packed_args,
+            packed_mempkgs = packed_mempkgs,
+        ))
 
-        self._log.out(
-            "[routine-client] ... received feedback from server, unpacking & syncing arguments ..."
-        )
+        # Actually call routine in DLL
+        return_package = self._call_on_server(packed_args, packed_mempkgs)
+
+        self._log.info("[routine-client] ... received feedback from server, unpacking & syncing arguments ...")
 
         # Unpack return dict (call may have failed partially only)
-        self._data.arg_list_sync(
+        self._data.sync_args(
             args,
-            self._data.arg_list_unpack(
-                return_dict["args"],
-                self._argtypes_d,
+            self._data.unpack_args(
+                return_package["args"],
+                self._argtypes,
                 self._convention,
             ),
-            self._argtypes_d,
+            self._argtypes,
         )
 
-        self._log.out("[routine-client] ... unpacking return value ...")
+        self._log.info("[routine-client] ... unpacking return value ...")
 
         # Unpack return value of routine
-        return_value = self._data.return_msg_unpack(
-            return_dict["return_value"], self._restype_d
+        retval = self._data.unpack_retval(
+            return_package["retval"], self._restype
         )
 
-        self._log.out("[routine-client] ... overwriting memory ...")
+        self._log.info("[routine-client] ... overwriting memory ...")
 
         # Unpack memory (call may have failed partially only)
-        self._data.client_unpack_memory_list(
-            args, return_value, return_dict["memory"], self._memsync_d
+        DefinitionMemsync.unpkg_memories(
+            args = args,
+            retval = retval,
+            mempkgs = [Mempkg.from_packed(mempkg) for mempkg in return_package["mempkgs"]],
+            memsyncs = self._memsyncs,
         )
 
-        self._log.out("[routine-client] ... everything unpacked and overwritten ...")
+        self._log.info("[routine-client] ... everything unpacked and overwritten ...")
 
         # Raise the original error if call was not a success
-        if not return_dict["success"]:
-            self._log.out("[routine-client] ... call raised an error.")
-            raise return_dict["exception"]
+        if not return_package["success"]:
+            self._log.error("[routine-client] ... call raised an error.")
+            raise return_package["exception"]
 
-        self._log.out("[routine-client] ... return.")
+        self._log.info("[routine-client] ... return.")
 
         # Return result. return_value will be None if there was not a result.
-        return return_value
+        return retval
 
     def __repr__(self) -> str:
 
@@ -177,49 +178,61 @@ class RoutineClient(RoutineClientABC):
 
     def _configure(self):
 
-        self._log.out(
-            "[routine-client] ... has not been called before. Configuring ..."
+        self._log.info("[routine-client] ... has not been called before. Configuring ...")
+
+        # Parse raw argtypes into definitions
+        self._argtypes = Definition.from_data_types(
+            cache = self._data.cache,
+            data_types = self._argtypes_raw,
         )
 
-        # Prepare list of arguments by parsing them into list of dicts (TODO field name / kw)
-        self._argtypes_d = self._data.pack_definition_argtypes(self._argtypes)
+        # Parse raw return type into definition
+        self._restype = Definition.from_data_type(
+            cache = self._data.cache,
+            data_type = self._restype_raw,
+        ) if self._restype_raw is not None else None
 
-        # Parse return type
-        self._restype_d = self._data.pack_definition_returntype(self._restype)
-
-        # Compile memsync statements HACK just unpack the user input ...
-        self._memsync_d = self._data.unpack_definition_memsync(self._memsync)
-
-        # Pack memsync_d again for shipping
-        memsync_d_packed = self._data.pack_definition_memsync(self._memsync_d)
+        # Parse memsync statements into definitions
+        self._memsyncs = DefinitionMemsync.from_raws(
+            definitions = self._memsyncs_raw,
+            cache = self._data.cache,
+        )
 
         # Adjust definitions with void pointers
-        self._data.apply_memsync_to_argtypes_and_restype_definition(
-            self._memsync_d, self._argtypes_d, self._restype_d
+        self._argtypes, self._restype = DefinitionMemsync.apply_many(
+            cache = self._data.cache,
+            memsyncs = self._memsyncs,
+            argtypes = self._argtypes,
+            restype = self._restype,
         )
 
         # Log status
-        self._log.out("<memsync>", self._memsync_d, "</memsync>")
-        self._log.out("<argtypes>", self._argtypes, "</argtypes>")
-        self._log.out("<argtypes_d>", self._argtypes_d, "</argtypes_d>")
-        self._log.out("<restype>", self._restype, "</restype>")
-        self._log.out("<restype_d>", self._restype_d, "</restype_d>")
+        self._log.debug(dict(
+            argtypes_raw = self._argtypes_raw,
+            argtypes = self._argtypes,
+            restype_raw = self._restype_raw,
+            restype = self._restype,
+            memsync_raw = self._memsyncs_raw,
+            memsync = self._memsyncs,
+        ))
 
         # Pass argument and return value types as strings ...
         _ = self._configure_on_server(
-            self._argtypes_d, self._restype_d, memsync_d_packed
+            [argtype.as_packed() for argtype in self._argtypes],
+            self._restype.as_packed() if self._restype is not None else None,
+            [memsync.as_packed() for memsync in self._memsyncs],
         )
 
         # Change status of routine - it has been called once and is therefore configured
         self._configured = True
 
         # Log status
-        self._log.out("[routine-client] ... configured. Proceeding ...")
+        self._log.info("[routine-client] ... configured. Proceeding ...")
 
     @property
     def argtypes(self) -> Union[List, Tuple]:
 
-        return self._argtypes
+        return self._argtypes_raw
 
     @argtypes.setter
     def argtypes(self, value: Union[List, Tuple]):
@@ -227,27 +240,30 @@ class RoutineClient(RoutineClientABC):
         if not isinstance(value, list) and not isinstance(value, tuple):
             raise TypeError  # original ctypes does that
 
-        self._argtypes = value
+        self._argtypes_raw = list(value)
 
     @property
     def restype(self) -> Any:
 
-        return self._restype
+        return self._restype_raw
 
     @restype.setter
     def restype(self, value: Any):
 
-        self._restype = value
+        if isinstance(value, tuple) or isinstance(value, list):  # TODO better check for ctypes types?
+            raise TypeError  # original ctypes does that
+
+        self._restype_raw = value
 
     @property
     def memsync(self) -> List:
 
-        return self._memsync
+        return self._memsyncs_raw
 
     @memsync.setter
     def memsync(self, value: List):
 
         if not isinstance(value, list):
-            raise DataMemsyncsyntaxError("memsync attribute must be a list")
+            raise TypeError("memsync attribute must be a list")
 
-        self._memsync = value
+        self._memsyncs_raw = value

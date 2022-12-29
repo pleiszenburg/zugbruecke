@@ -42,7 +42,17 @@ Yes and no.
 
 Pointers to simple C data types (int, float, etc.) used as function parameters or within structures can be handled just fine.
 
-Pointers to arbitrary data structures can be handled if another parameter of the call contains the length of the memory section the pointer is pointing to. *zugbruecke* uses a special ``memsync`` protocol for indicating which memory sections must be kept in sync between the *Unix* and the *Wine* side of the code. If run on *Windows*, the regular *ctypes* will just ignore any ``memsync`` directive in the code.
+Pointers to arbitrary data structures can be handled if another parameter of the call contains the length of the memory section the pointer is pointing to or if it is a zero/null-terminated string buffer. *zugbruecke* uses a special ``memsync`` protocol for indicating which memory sections must be kept in sync between the *Unix* and the *Wine* side of the code. If executed on *Windows*, the regular *ctypes* will just ignore any ``memsync`` directive in the code. See :ref:`chapter on memsync <memsync>` for details.
+
+How are integer widths handled for long integer types?
+------------------------------------------------------
+
+*zugbruecke* sticks to the Unix-specific width of long integer types. For details, see the :ref:`introduction to integer width handling <integerwidths>`.
+
+What about long doubles and half precision?
+-------------------------------------------
+
+They are basically not supported, see :ref:`introduction to floating point handling <floattypes>`.
 
 Is it thread-safe?
 ------------------
@@ -53,10 +63,15 @@ If you want to be on the safe side, start one *zugbruecke* session per thread in
 
 .. code:: python
 
-	from zugbruecke import ctypes_session
+	from zugbruecke import CtypesSession
 	# start new thread or process (multiprocessing) - then, inside, do:
-	a = ctypes_session()
+	a = CtypesSession()
 	# now you can do stuff like
 	kernel32 = a.cdll.kernel32
 	# do not forget to terminate the session (i.e. the Windows Python interpreter)
-	a._zb_terminate()
+	a.zb_terminate()
+
+Something is off by 8 bytes. What happened?
+-------------------------------------------
+
+You (probably) used the wrong :ref:`calling convention <callingconvention>`.

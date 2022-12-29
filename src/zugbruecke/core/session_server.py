@@ -37,7 +37,7 @@ import traceback
 from typing import Any
 
 from .abc import ConfigABC, SessionServerABC
-from .data import data_class
+from .data import Data
 from .dll_server import DllServer
 from .log import Log
 from .path import PathStyles
@@ -81,9 +81,9 @@ class SessionServer(SessionServerABC):
         )
 
         self._log = Log(self._id, self._p, rpc_client=self._rpc_client)
-        self._log.out("[session-server] STARTING ...")
+        self._log.info("[session-server] STARTING ...")
 
-        self._data = data_class(
+        self._data = Data(
             self._log, is_server=True, callback_client=self._rpc_client
         )
 
@@ -114,12 +114,9 @@ class SessionServer(SessionServerABC):
         ]:
             self._rpc_server.register_function(getattr(source, name), name)
 
-        self._log.out(
-            "[session-server] ctypes server is listening on port %d."
-            % self._p["port_socket_wine"]
-        )
-        self._log.out("[session-server] STARTED.")
-        self._log.out("[session-server] Serve forever ...")
+        self._log.info(f'[session-server] ctypes server is listening on port {self._p["port_socket_wine"]:d}.')
+        self._log.info("[session-server] STARTED.")
+        self._log.info("[session-server] Serve forever ...")
 
         self._rpc_server.server_forever_in_thread(daemon=False)
         self._rpc_client.set_server_status(True)
@@ -140,12 +137,7 @@ class SessionServer(SessionServerABC):
         if name in self._dlls.keys():
             return
 
-        self._log.out(
-            '[session-server] Attaching to DLL file "{FN:s}" with calling convention "{CONVENTION:s}" ...'.format(
-                FN=name,
-                CONVENTION=convention,
-            )
-        )
+        self._log.info(f'[session-server] Attaching to DLL file "{name:s}" with calling convention "{convention:s}" ...')
 
         try:
             handler = CONVENTIONS[convention](
@@ -156,10 +148,10 @@ class SessionServer(SessionServerABC):
                 use_last_error=use_last_error,
             )
         except OSError as e:
-            self._log.out("[session-server] ... failed!")
+            self._log.error("[session-server] ... failed!")
             raise e
         except Exception as e:
-            self._log.err(traceback.format_exc())
+            self._log.error(traceback.format_exc())
             raise e
 
         self._dlls[name] = DllServer(
@@ -172,7 +164,7 @@ class SessionServer(SessionServerABC):
             self._data,
         )
 
-        self._log.out("[session-server] ... attached.")
+        self._log.info("[session-server] ... attached.")
 
     def set_parameter(self, key: str, value: Any):
         """
@@ -189,8 +181,8 @@ class SessionServer(SessionServerABC):
         if not self._up:
             return
 
-        self._log.out("[session-server] TERMINATING ...")
+        self._log.info("[session-server] TERMINATING ...")
         self._log.terminate()
         self._up = False
-        self._log.out("[session-server] TERMINATED.")
+        self._log.info("[session-server] TERMINATED.")
         self._rpc_client.set_server_status(False)

@@ -199,9 +199,10 @@ Consider the following example:
 .. code:: python
 
     from zugbruecke import CtypesSession
+    from logging import DEBUG, NOTSET
 
     ctypes = CtypesSession()
 
-    assert ctypes.zb_get_parameter('log_level') == 0
-    ctypes.zb_set_parameter('log_level', 100)
-    assert ctypes.zb_get_parameter('log_level') == 100
+    assert ctypes.zb_get_parameter('log_level') == NOTSET
+    ctypes.zb_set_parameter('log_level', DEBUG)
+    assert ctypes.zb_get_parameter('log_level') == DEBUG

@@ -1,5 +1,46 @@
 # Changes
 
+## 0.2.0 (2022-12-29)
+
+**CAUTION**: A number changes at least partially **BREAK BACKWARDS COMPATIBILITY** for certain use and edge cases.
+
+The datatype parser and definition code was rewritten completely. It should work as before in almost all instances although unexpected breakages may occur.
+
+If entire struct objects are synced via `memsync` directives, the struct types now have to be specified directly instead of their names as strings as before, breaking backwards compatibility for those use cases.
+
+*zugbruecke* now follows the Python's `logging` module's log levels. Maximum logging output can now be achieved via `logging.DEBUG` or `10` as opposed to `100` in earlier versions. Log level `0` remains as "no logs" as per `logging.NOTSET`. This change may break debugging and development workflows.
+
+This **RELEASE FIXES A CRITICAL BUG** where *zugbruecke* was falsely translating 64 bit integer types from the Unix side to 32 bit integer types on the Wine side.
+
+- FEATURE: Improved performance. With logging disabled, function calls carry 10% less overhead on average.
+- FEATURE: In `memsync` directives, `ctypes` types do not need to be specified by their name as strings anymore - plain `ctypes` fundamental types and structure types can be used instead. Strings remain valid specifications for compatibility though.
+- FEATURE: `memsync` directives allow for more descriptive parameter names while the old single-character names remain valid for compatibility.
+- FEATURE: Added support for CPython 3.11, see #86 and #87.
+- FEATURE: Logging now relies on Python's `logging` module's log levels, i.e. `NOTSET`, `DEBUG`, `INFO`, `WARNING`, `ERROR` and `CRITICAL`. This change serves to work towards #84.
+- FEATURE: Log output has been divided into log levels, see #9.
+- FIX: Argtypes and restype would translate `c_int64`, `c_uint64`, `c_long` and `c_ulong` from the Unix side to their 32-bit equivalents, `c_int32` and `c_uint32`, on the Wine side. This was due to `c_long` and `c_ulong` being 8 bytes long on Unix-like systems while they are 4 bytes long on Window.
+- FIX: Fixed-length `c_char` and `c_wchar` buffers passed by value within structures were not handled correctly, see #93.
+- FIX: The new `argtypes` and `restype` parser does not suffer from #61 anymore where earlier different structure types from different name spaces but with identical names would cause problems.
+- FIX: CI revealed that an issue similar to #50 returned as packages on Wine side can sometimes not be imported if they are symlinked. The new `copy_modules` configuration parameter can be used to indicate that a copy instead of symlinks is required. This problem is caused by [Wine bug #54228](https://bugs.winehq.org/show_bug.cgi?id=54228) in Wine Staging >= 7.18.
+- FIX: If `zugbruecke` (and `wenv`) were installed into user site-packages, the installation would break, see #88.
+- FIX: If writing of logs to disk (`log_write`) was set to `True` during run-time, `zugbruecke` would crash, see #77.
+- FIX: Syncing entire structs via `memsync` was broken, see #92.
+- FIX: `restype` was explicitly assumed to be `c_int`. Now, if a user does not specify it, assumptions about it are left to `ctypes` on the Wine side, potentially getting closer to `ctypes` original behaviour.
+- FIX: `restype` would not throw an exception when by accident set to a list or tuple like original `ctypes` does.
+- DEPRECATED: Single-character parameter names in memsync directives.
+- DEPRECATED: `ctypes` fundamental types specified by name as strings in `memsync` directives.
+- DOCS: More detailed explanation of `memsync`, where it is needed and where it is not, among other improvements.
+- DOCS: Added explanation of handling of long integer types.
+- DOCS: Added explanation of handling of floating point types and the lack of "long double" as well as "half precision" support.
+- DOCS: Updated benchmarks.
+- DOCS: Removed old `examples` folder from project as its code was more than outdated and can now be found in the documentation, the test suite and/or the newly added benchmarks.
+- DEV: Added tests on custom types and `array.array` objects (standard library) as well as `numpy.ndarray` objects.
+- DEV: Added tests for 64 bit integer limits / overflows for win64.
+- DEV: Added tests on `restype` configuration errors.
+- DEV: Cleaned and clarified all tests. Renamed all tests to more meaningful names referring to the features that they are testing.
+- DEV: Test support library cleaned up, documented and typed.
+- DEV: New benchmark infrastructure similar to the test suite, allowing to easily add benchmarks. Their results now get automatically included into the project documentation.
+
 ## 0.1.0 (2022-09-11)
 
 **CAUTION**: The module layout changed, effectively **BREAKING BACKWARDS COMPATIBILITY** for all use-cases!

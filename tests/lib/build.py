@@ -34,23 +34,34 @@ import multiprocessing
 import os
 import shutil
 import subprocess
+import sys
 import tempfile
+from typing import Any, Optional, Tuple
 
 from jinja2 import Template
+from typeguard import typechecked
 
 from .const import (
     ARCHS,
     CONVENTIONS,
     CC,
     CFLAGS,
+    HEADER_FN,
     LDFLAGS,
     DLL_FLD,
     DLL_HEADER,
     DLL_SOURCE,
     PREFIX,
     SUFFIX,
+    SOURCE_FN,
 )
-from .names import get_dll_fn, get_test_fld
+from .names import (
+    get_dll_fn,
+    get_benchmark_fld,
+    get_benchmark_fns,
+    get_test_fld,
+    get_test_fns,
+)
 from .parser import get_vars_from_source
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -58,89 +69,117 @@ from .parser import get_vars_from_source
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
-def get_header_and_source_from_test(fn):
-    "extract header and source from Python test file without importing it"
+@typechecked
+def get_header_and_source_from_test(fn: str) -> Tuple[Optional[str], Optional[str], Optional[Any]]:
+    """
+    extract header and source from Python test file without importing it
+
+    Args:
+        - fn: File name / path of Python code file
+    Returns:
+        Tuple of header, source and extra strings
+    """
 
     with open(fn, "r", encoding="utf-8") as f:
         src = f.read()
 
-    var_dict = get_vars_from_source(src, "HEADER", "SOURCE", "EXTRA")
+    variables = get_vars_from_source(src, "HEADER", "SOURCE", "EXTRA")
 
-    return var_dict["HEADER"], var_dict["SOURCE"], var_dict["EXTRA"]
-
-
-def get_testfn_list(test_fld):
-    "get list of Python test files in project test folder"
-
-    testfn_list = []
-
-    for entry in os.listdir(test_fld):
-        if not entry.lower().endswith(".py"):
-            continue
-        if not entry.lower().startswith("test_"):
-            continue
-        if not os.path.isfile(os.path.join(test_fld, entry)):
-            continue
-        testfn_list.append(entry)
-
-    return testfn_list
+    return variables["HEADER"], variables["SOURCE"], variables["EXTRA"]
 
 
 def make_all():
+    """
+    Build all DLLs C code templates in Python files in given folder
+    """
 
-    test_fld = get_test_fld()
-    test_fn_list = get_testfn_list(test_fld)
+    group = sys.argv[1]
+    assert group in ('tests', 'benchmark')
+
+    if group == 'tests':
+        fld = get_test_fld()
+        fns = get_test_fns(fld)
+    elif group == 'benchmark':
+        fld = get_benchmark_fld()
+        fns = get_benchmark_fns(fld)
+    else:
+        raise ValueError(f'unknown group of DLLs "{group:s}"')
 
     jobs = []
 
-    for test_fn in test_fn_list:
+    for fn in fns:
 
         header, source, extra = get_header_and_source_from_test(
-            os.path.join(test_fld, test_fn)
+            os.path.join(fld, fn)
         )
         if header is None:
-            print('test "%s" does not contain a C HEADER - ignoring' % test_fn)
+            print(f'test "{fn:s}" does not contain a C HEADER - ignoring')
             continue
         if source is None:
-            print('test "%s" does not contain C SOURCE - ignoring' % test_fn)
+            print(f'test "{fn:s}" does not contain C SOURCE - ignoring')
             continue
 
         for convention in CONVENTIONS:
             for arch in ARCHS:
                 jobs.append(
-                    (test_fld, arch, convention, test_fn, header, source, extra)
+                    (fld, fn, arch, convention, header, source, extra)
                 )
 
     with multiprocessing.Pool(multiprocessing.cpu_count()) as p:
-        _ = p.map(make_dll, jobs)
+        _ = p.map(make_dll_wrapper, jobs)
 
 
-def make_dll(param):
-    "compile test dll"
+@typechecked
+def make_dll_wrapper(params: Tuple):
+    """
+    Wrapper for argument unpacking in multiprocessing
+    """
 
-    test_fld, arch, convention, test_fn, header, source, extra = param
+    make_dll(*params)
+
+
+@typechecked
+def make_dll(
+    fld: str,
+    fn: str,
+    arch: str,
+    convention: str,
+    header: str,
+    source: str,
+    extra: Optional[Any] = None,
+):
+    """
+    compile DLL from fragments
+
+    Args:
+        - fld: Location of Python source code file
+        - fn: Name of Python source code file
+        - arch: Architecture
+        - convention: Calling convention
+        - header: C header template
+        - source: C source template
+        - extra: Additional parameters for template engine
+    """
 
     if extra is None:
         extra = dict()
 
-    HEADER_FN = "tmp_header.h"
-    SOURCE_FN = "tmp_source.c"
-
     build_fld = tempfile.mkdtemp()
 
-    dll_fn = get_dll_fn(arch, convention, test_fn)
-    dll_test_path = os.path.join(test_fld, DLL_FLD, dll_fn)
+    dll_fn = get_dll_fn(arch, convention, fn)
+
     dll_build_path = os.path.join(build_fld, dll_fn)
+    dll_deploy_path = os.path.join(fld, DLL_FLD, dll_fn)
     header_path = os.path.join(build_fld, HEADER_FN)
     source_path = os.path.join(build_fld, SOURCE_FN)
 
-    print('Building "{DLL_FN:s}" ... '.format(DLL_FN=dll_fn), end="")
+    print(f'Building "{dll_fn:s}" ... ', end = '')
 
     with open(header_path, "w", encoding="utf-8") as f:
         f.write(
             Template(DLL_HEADER).render(
                 HEADER=Template(header).render(
-                    PREFIX=PREFIX[convention], SUFFIX=SUFFIX[convention], **extra
+                    PREFIX=PREFIX[convention], SUFFIX=SUFFIX[convention], ARCH = arch, **extra,
                 ),
             )
         )
@@ -149,7 +188,7 @@ def make_dll(param):
             Template(DLL_SOURCE).render(
                 HEADER_FN=HEADER_FN,
                 SOURCE=Template(source).render(
-                    PREFIX=PREFIX[convention], SUFFIX=SUFFIX[convention], **extra
+                    PREFIX=PREFIX[convention], SUFFIX=SUFFIX[convention], ARCH = arch, **extra
                 ),
             )
         )
@@ -173,8 +212,8 @@ def make_dll(param):
             err.decode("utf-8"),
         )
 
-    shutil.move(dll_build_path, dll_test_path)
-    if not os.path.isfile(dll_test_path):
+    shutil.move(dll_build_path, dll_deploy_path)
+    if not os.path.isfile(dll_deploy_path):
         raise SystemError("dll file was not moved from build directory")
 
     shutil.rmtree(build_fld)

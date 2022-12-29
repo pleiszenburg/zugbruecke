@@ -33,9 +33,16 @@ specific language governing rights and limitations under the License.
 
 from pprint import pformat as pf
 import traceback
-from typing import Any, Dict, List
+from typing import Any, List
 
-from .abc import CallbackServerABC, DataABC, LogABC, RpcClientABC
+from .abc import (
+    CallbackServerABC,
+    DataABC,
+    LogABC,
+    RpcClientABC,
+)
+from .definitions import Definition, DefinitionMemsync
+from .mempkg import Mempkg
 from .typeguard import typechecked
 
 
@@ -56,68 +63,71 @@ class CallbackServer(CallbackServerABC):
         rpc_client: RpcClientABC,
         data: DataABC,
         log: LogABC,
-        argtypes_d: List,
-        restype_d: Dict,
-        memsync_d: List,
+        argtypes: List[Definition],
+        restype: Definition,
+        memsyncs: List[DefinitionMemsync],
     ):
 
         self._name = name
         self._handler = getattr(rpc_client, name)
         self._data = data
         self._log = log
-        self._argtypes_d = argtypes_d
-        self._restype_d = restype_d
-        self._memsync_d = memsync_d
+
+        self._argtypes = argtypes
+        self._restype = restype
+        self._memsyncs = memsyncs
 
     def __call__(self, *args: Any) -> Any:
 
-        self._log.out(
-            '[callback-server] Trying to call callback routine "{NAME:s}" ...'.format(NAME = self._name)
-        )
-        self._log.out(
-            '[callback-server] ... parameters are "{ARGS:s}". Packing and pushing to client ...'.format(ARGS = pf(args))
-        )
+        args = list(args)
+
+        self._log.info(f'[callback-server] Trying to call callback routine "{self._name:s}" ...')
+        self._log.info('[callback-server] ... packing and pushing to client ...')
+        self._log.debug(args)
 
         try:
-            mem_package_list = self._data.client_pack_memory_list(args, self._memsync_d)
+            packed_args = self._data.pack_args(args, self._argtypes)
+            packed_mempkgs = [mempkg.as_packed() for mempkg in DefinitionMemsync.pkg_memories(
+                args = args,
+                memsyncs = self._memsyncs,
+            )]
         except Exception as e:
-            self._log.out("[callback-server] ... memory packing failed!")
-            self._log.err(traceback.format_exc())
+            self._log.error("[callback-server] ... memory packing failed!")
+            self._log.error(traceback.format_exc())
             raise e
 
         try:
-            return_dict = self._handler(
-                self._data.arg_list_pack(args, self._argtypes_d), mem_package_list
-            )
+            return_package = self._handler(packed_args, packed_mempkgs)
         except Exception as e:
-            self._log.out("[callback-server] ... call failed!")
-            self._log.err(traceback.format_exc())
+            self._log.error("[callback-server] ... call failed!")
+            self._log.error(traceback.format_exc())
             raise e
 
         try:
-            self._log.out(
-                "[callback-server] ... received feedback from client, unpacking ..."
-            )
-            self._data.arg_list_sync(
+            self._log.info("[callback-server] ... received feedback from client, unpacking ...")
+            self._data.sync_args(
                 args,
-                self._data.arg_list_unpack(return_dict["args"], self._argtypes_d),
-                self._argtypes_d,
+                self._data.unpack_args(return_package["args"], self._argtypes),
+                self._argtypes,
             )
-            return_value = self._data.return_msg_unpack(
-                return_dict["return_value"], self._restype_d
+            retval = self._data.unpack_retval(
+                return_package["retval"], self._restype
             )
-            self._data.client_unpack_memory_list(
-                args, return_value, return_dict["memory"], self._memsync_d
+            DefinitionMemsync.unpkg_memories(
+                args = args,
+                retval = retval,
+                mempkgs = [Mempkg.from_packed(mempkg) for mempkg in return_package["mempkgs"]],
+                memsyncs = self._memsyncs,
             )
         except Exception as e:
-            self._log.out("[callback-server] ... unpacking failed!")
-            self._log.err(traceback.format_exc())
+            self._log.error("[callback-server] ... unpacking failed!")
+            self._log.error(traceback.format_exc())
             raise e
 
-        if not return_dict["success"]:
-            self._log.out("[callback-server] ... call raised an error.")
-            raise return_dict["exception"]
+        if not return_package["success"]:
+            self._log.error("[callback-server] ... call raised an error.")
+            raise return_package["exception"]
 
-        self._log.out("[callback-server] ... unpacked, return.")
+        self._log.info("[callback-server] ... unpacked, return.")
 
-        return return_value
+        return retval

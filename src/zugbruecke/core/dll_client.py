@@ -75,16 +75,16 @@ class DllClient(DllClientABC):
         ):
             setattr(
                 self,
-                "_{NAME:s}_on_server".format(NAME=name),
+                f"_{name:s}_on_server",
                 getattr(
                     self._rpc_client,
-                    "{HASH_ID:s}_{NAME:s}".format(HASH_ID=self._hash_id, NAME=name),
+                    f"{self._hash_id:s}_{name:s}",
                 ),
             )
 
     def __getattr__(self, name: str) -> RoutineClientABC:
 
-        if name in ["__objclass__", "__name__"]:
+        if name in ("__objclass__", "__name__"):
             raise AttributeError(name)
 
         if name not in self._routines.keys():
@@ -105,17 +105,12 @@ class DllClient(DllClientABC):
 
     def _register_routine(self, name: Union[str, int]):
 
-        self._log.out(
-            '[dll-client] Trying to register routine "{NAME:s}" in DLL file "{FN:s}" ...'.format(
-                NAME=str(name),
-                FN=self._name,
-            )
-        )
+        self._log.info(f'[dll-client] Trying to register routine "{str(name):s}" in DLL file "{self._name:s}" ...')
 
         try:
             self._register_routine_on_server(name)
         except AttributeError as e:
-            self._log.out("[dll-client] ... failed!")
+            self._log.info("[dll-client] ... failed!")
             raise e
 
         self._routines[name] = RoutineClient(
@@ -128,4 +123,4 @@ class DllClient(DllClientABC):
             self._data,
         )
 
-        self._log.out("[dll-client] ... registered (unconfigured).")
+        self._log.info("[dll-client] ... registered (unconfigured).")

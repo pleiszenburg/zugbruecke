@@ -30,14 +30,15 @@ specific language governing rights and limitations under the License.
 # IMPORT
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+from logging import DEBUG
 import os
-from subprocess import Popen
 import sys
-from typing import Dict, List, Optional
 
+from typeguard import typechecked
 from wenv import EnvConfig
 
 from .const import PYTHONBUILDS_FN
+from .cmd import run_cmd
 from .pythonversion import read_python_builds
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -62,11 +63,15 @@ def run_tests():
         raise SystemError('unknown test target', target)
 
 
+@typechecked
 def _run_tests_wine(*args: str):
     """
     Runs test suite on Wine as if it was running on Windows,
     i.e. testing & verifying against original ctypes.
     No coverage recorded.
+
+    Args:
+        - args: Remaining command line arguments
     """
 
     cfg = EnvConfig()
@@ -74,11 +79,14 @@ def _run_tests_wine(*args: str):
 
     for arch, _builds in builds.items():
         for build in _builds:
-            _run(
+            run_cmd(
                 cmd = ['make', '_clean_py'],
             )
-            _run(
-                cmd = ['wenv', 'pytest', '--hypothesis-show-statistics', *args],
+            run_cmd(
+                cmd = [
+                    'wenv', 'pytest',
+                    '--hypothesis-show-statistics', *args
+                ],
                 env = {
                     'WENV_DEBUG': '1',
                     'WENV_ARCH': arch,
@@ -87,15 +95,19 @@ def _run_tests_wine(*args: str):
             )
 
 
+@typechecked
 def _run_tests_unix(*args: str):
     """
     Does a single run of pytest. ARCH and PYTHONVERSION are parameterized within pytest.
+
+    Args:
+        - args: Remaining command line arguments
     """
 
-    _run(
+    run_cmd(
         cmd = ['make', '_clean_py'],
     )
-    _run(
+    run_cmd(
         cmd = [
             'pytest',
             '--cov=zugbruecke',
@@ -107,21 +119,10 @@ def _run_tests_unix(*args: str):
         env = {
             'WENV_DEBUG': '1',
             'ZUGBRUECKE_DEBUG': '1',
-            'ZUGBRUECKE_LOG_LEVEL': '100',
+            'ZUGBRUECKE_LOG_LEVEL': f'{DEBUG:d}',
+            # 'ZUGBRUECKE_LOG_WRITE': 'True',
         },
     )
-
-
-def _run(cmd: List[str], env: Optional[Dict[str, str]] = None):
-
-    envvars = os.environ.copy()
-    if env is not None:
-        envvars.update(env)
-
-    proc = Popen(cmd, env = envvars)
-    proc.wait()
-    if proc.returncode != 0:
-        raise SystemError('test command failed', cmd, env)
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

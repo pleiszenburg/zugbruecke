@@ -77,6 +77,9 @@ target/
 # celery beat schedule file
 celerybeat-schedule
 
+# vscode
+.vscode/
+
 # dotenv
 .env
 

@@ -32,6 +32,7 @@ specific language governing rights and limitations under the License.
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 import json
+from logging import NOTSET, DEBUG, INFO, WARNING, ERROR, CRITICAL
 from pprint import pformat
 import sys
 import time
@@ -86,12 +87,7 @@ class Log(LogABC):
 
         self._up = True
 
-        self._f = None
-        if self._p["log_write"]:
-            self._f = "zb_{ID:s}_{PLATFORM:s}.txt".format(
-                ID=self._id,
-                PLATFORM=self._p["platform"],
-            )
+        self._f = f'zb_{self._id:s}_{self._p["platform"]:s}.txt'
 
         if rpc_server is not None:
             rpc_server.register_function(self._receive, "transfer_message")
@@ -99,15 +95,25 @@ class Log(LogABC):
             rpc_client.transfer_message if rpc_client is not None else None
         )
 
-    def err(self, *raw_messages: Any, level: int = 1):
+    def debug(self, *raw_messages: Any):
 
-        if level <= self._p["log_level"]:
-            self._process_raw(*raw_messages, pipe="err", level=level)
+        self._process_raw(*raw_messages, pipe="out", level=DEBUG)
 
-    def out(self, *raw_messages: Any, level: int = 1):
+    def info(self, *raw_messages: Any):
 
-        if level <= self._p["log_level"]:
-            self._process_raw(*raw_messages, pipe="out", level=level)
+        self._process_raw(*raw_messages, pipe="out", level=INFO)
+
+    def warning(self, *raw_messages: Any):
+
+        self._process_raw(*raw_messages, pipe="out", level=WARNING)
+
+    def error(self, *raw_messages: Any):
+
+        self._process_raw(*raw_messages, pipe="err", level=ERROR)
+
+    def critical(self, *raw_messages: Any):
+
+        self._process_raw(*raw_messages, pipe="err", level=CRITICAL)
 
     def terminate(self):
 
@@ -116,7 +122,12 @@ class Log(LogABC):
 
         self._up = False
 
-    def _process_raw(self, *raw_messages: Any, pipe: str, level: int):
+    def _process_raw(self, *raw_messages: Any, pipe: str, level: int = NOTSET):
+
+        if self._p["log_level"] == NOTSET:
+            return
+        if level < self._p["log_level"]:
+            return
 
         for raw_message in raw_messages:
             for message in Message.from_raw(
@@ -187,17 +198,15 @@ class Message(MessageABC):
 
     def print(self):
 
-        message_list = []
+        msg = []
 
-        message_list.append(
-            c["GREY"] + "(%.2f/%s) " % (self._time, self._id) + c["RESET"]
-        )
+        msg.append(f'{c["GREY"]:s}({self._time:.2f}/{self._id:s}{c["RESET"]:s})')
 
-        message_list.append(c["BLUE"] if self._platform == "UNIX" else c["MAGENTA"])
-        message_list.append("%s " % self._platform + c["RESET"])
+        msg.append(c["BLUE"] if self._platform == "UNIX" else c["MAGENTA"])
+        msg.append(f'{self._platform:s} {c["RESET"]:s}')
 
-        message_list.append(c["GREEN"] if self._pipe == "out" else c["RED"])
-        message_list.append(self._pipe[0] + c["RESET"] + ": ")
+        msg.append(c["GREEN"] if self._pipe == "out" else c["RED"])
+        msg.append(f'{self._pipe[0]:s}{c["RESET"]:s}: ')
         if any(
             ext in self._cnt
             for ext in [
@@ -209,19 +218,19 @@ class Message(MessageABC):
                 ":trace:",
             ]
         ):
-            message_list.append(c["GREY"])
+            msg.append(c["GREY"])
         else:
-            message_list.append(c["WHITE"])
-        message_list.append(self._cnt + c["RESET"] + "\n")
+            msg.append(c["WHITE"])
+        msg.append(f'{self._cnt:s}{c["RESET"]:s}\n')
 
-        message_string = "".join(message_list)
+        msg = "".join(msg)
 
         pipe = sys.stdout if self._pipe == "out" else sys.stderr
-        pipe.write(message_string)
+        pipe.write(msg)
 
     def store(self, fn):
 
-        with open(fn, "a+") as f:
+        with open(fn, mode="a+", encoding="utf-8") as f:
             f.write(self.as_serialized() + "\n")
 
     @property

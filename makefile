@@ -28,13 +28,13 @@ _clean_coverage:
 	coverage erase
 
 _clean_dll:
-	find src/ tests/ -name '*.dll' -exec rm -f {} +
+	find src/ tests/ benchmark/ -name '*.dll' -exec rm -f {} +
 
 _clean_py:
-	find src/ tests/ -name '*.pyc' -exec rm -f {} +
-	find src/ tests/ -name '*.pyo' -exec rm -f {} +
-	find src/ tests/ -name '*~' -exec rm -f {} +
-	find src/ tests/ -name '__pycache__' -exec rm -fr {} +
+	find src/ tests/ benchmark/ -name '*.pyc' -exec rm -f {} +
+	find src/ tests/ benchmark/ -name '*.pyo' -exec rm -f {} +
+	find src/ tests/ benchmark/ -name '*~' -exec rm -f {} +
+	find src/ tests/ benchmark/ -name '__pycache__' -exec rm -fr {} +
 
 _clean_release:
 	-rm -r build/*
@@ -49,6 +49,16 @@ _clean_release:
 
 black:
 	black .
+
+benchmark:
+	make clean
+	-rm benchmark/data.raw
+	-rm docs/source/benchmark_*.rst
+	python -m tests.lib.build benchmark
+	python -m tests.lib.benchmark wine
+	python -m tests.lib.benchmark unix
+	python -m tests.lib.benchmark table
+	make docs
 
 clean:
 	make _clean_release
@@ -76,9 +86,10 @@ upload:
 
 test:
 	make clean
-	python -m tests.lib.build
+	python -m tests.lib.build tests
 	python -m tests.lib.run wine
 	python -m tests.lib.run unix
 	mv .coverage .coverage.00 ; coverage combine ; coverage html -i
 
 .PHONY: docs
+.PHONY: benchmark

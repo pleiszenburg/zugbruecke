@@ -27,7 +27,7 @@ About Wine (from [winehq.org](https://www.winehq.org/)): *Wine (originally an ac
 
 | type | prerequisite | version |
 | --- | --- | --- |
-| user | [CPython](https://www.python.org/) | 3.x (tested with 3.{7,8,9,10}) |
+| user | [CPython](https://www.python.org/) | 3.x (tested with 3.{7,8,9,10,11}) |
 | user | [Wine](https://www.winehq.org/) | >= 6.x (tested with regular & [staging](https://wine-staging.com/)) - expected to be in the user's [`PATH`](https://en.wikipedia.org/wiki/PATH_(variable)) |
 | developer | [mingw cross-compiler](https://mxe.cc) | For building DLLs against which examples and tests can be run. Latest stable release. |
 
@@ -65,7 +65,7 @@ A lot of code, which was written with `ctypes`' `cdll`, `windll` or `oledll` in 
 
 ## Speed
 
-`zugbruecke` performs reasonably well given its complexity with **less than 0.2 µs overhead per call** in average on modern hardware. It is not (yet) optimized for speed. Check the latest [benchmarks](https://zugbruecke.readthedocs.io/en/stable/benchmarks.html) for more details.
+`zugbruecke` performs reasonably well given its complexity with **around 0.15 ms overhead per simple call** on average on modern hardware. For significantly more complex calls, the overhead can go into several milliseconds. `zugbruecke` is not (yet) optimized for speed. Check the latest [benchmarks](https://zugbruecke.readthedocs.io/en/stable/benchmarks.html) for more details.
 
 ## Security
 
