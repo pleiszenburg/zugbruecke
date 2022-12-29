@@ -45,7 +45,7 @@ Alternative solutions with a somewhat more narrow scope were motivated by the de
 Implementation
 --------------
 
-During the first import of ``zugbruecke.ctypes``, a stand-alone *Windows*-version of the *CPython* interpreter is automatically downloaded and placed into the current virtual environment's ``share`` folder (by default located at ``{sys.prefix}/shared/wenv/``). Next to it, also during first import, *zugbruecke* generates its own *Wine*-profile directory for being used with a dedicated ``WINEPREFIX``. This way, any undesirable interference with other *Wine*-profile directories containing user settings and unrelated software are avoided. The management of of this :ref:`Wine Python environment <wineenv>` is handled by a `dedicated Python package named wenv`_.
+During the first import of ``zugbruecke.ctypes``, a stand-alone *Windows*-version of the *CPython* interpreter is automatically downloaded and placed into the current virtual environment's ``share`` folder (by default located at ``{sys.prefix}/shared/wenv/``). Next to it, also during first import, *zugbruecke* generates its own *Wine*-profile directory for being used with a dedicated ``WINEPREFIX``. This way, any undesirable interference with other *Wine*-profile directories containing user settings and unrelated software are avoided. The management of this :ref:`Wine Python environment <wineenv>` is handled by a `dedicated Python package named wenv`_.
 
 .. _dedicated Python package named wenv: https://wenv.readthedocs.io/en/latest/
 
