@@ -73,11 +73,11 @@ import pytest
 
 @pytest.mark.parametrize("arch,conv,ctypes,dll_handle", get_context(__file__))
 @pytest.mark.parametrize("data", [
-    [1, 2, 3, 4],
+    # [1, 2, 3, 4],
     [1.0, 2.0, 3.0, 4.0],
-    (1.0, 2.0, 3.0, 4.0),
-    np.array([1.0, 2.0, 3.0, 4.0], dtype = 'f8'),
-    array('d', [1.0, 2.0, 3.0, 4.0]),
+    # (1.0, 2.0, 3.0, 4.0),
+    # np.array([1.0, 2.0, 3.0, 4.0], dtype = 'f8'),
+    # array('d', [1.0, 2.0, 3.0, 4.0]),
 ])
 def test_customtype(data, arch, conv, ctypes, dll_handle):
     """
@@ -115,7 +115,7 @@ def test_customtype(data, arch, conv, ctypes, dll_handle):
                 ctypes.POINTER(ctypes.c_double),
             )
 
-        def from_list(self, param: Union[List[float], Tuple[float, ...]]) -> Any:
+        def from_list(self, param: Union[List[Union[float, int]], Tuple[Union[float, int], ...]]) -> Any:
             """
             Implementation for Python list (and tuple)
             """
