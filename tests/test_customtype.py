@@ -72,7 +72,14 @@ import pytest
 
 
 @pytest.mark.parametrize("arch,conv,ctypes,dll_handle", get_context(__file__))
-def test_customtype(arch, conv, ctypes, dll_handle):
+@pytest.mark.parametrize("data", [
+    [1, 2, 3, 4],
+    [1.0, 2.0, 3.0, 4.0],
+    (1.0, 2.0, 3.0, 4.0),
+    np.array([1.0, 2.0, 3.0, 4.0], dtype = 'f8'),
+    array('d', [1.0, 2.0, 3.0, 4.0]),
+])
+def test_customtype(data, arch, conv, ctypes, dll_handle):
     """
     Test basic handling of custom ctypes data types
     """
@@ -87,6 +94,7 @@ def test_customtype(arch, conv, ctypes, dll_handle):
             Called by ctypes/zugbruecke, dispatches to different implementations
             """
 
+            param = list(param) if isinstance(param, tuple) else param
             typename = type(param).__name__
 
             if hasattr(self, "from_" + typename):
@@ -100,7 +108,7 @@ def test_customtype(arch, conv, ctypes, dll_handle):
             """
 
             if param.typecode != "d":
-                raise TypeError("must be an array of doubles")
+                raise TypeError("must be an array of type double")
             ptr, _ = param.buffer_info()
             return ctypes.cast(
                 ptr,
@@ -117,13 +125,13 @@ def test_customtype(arch, conv, ctypes, dll_handle):
                 ctypes.POINTER(ctypes.c_double),
             )
 
-        from_tuple = from_list
-
         def from_ndarray(self, param: np.ndarray) -> Any:
             """
             Implementation for numpy.ndarray
             """
 
+            if param.dtype != np.float64:
+                raise TypeError("must be an ndarray of dtype doubles")
             return param.ctypes.data_as(
                 ctypes.POINTER(ctypes.c_double)
             )
@@ -141,8 +149,4 @@ def test_customtype(arch, conv, ctypes, dll_handle):
     avg_dll.argtypes = (DoubleArray, ctypes.c_int)
     avg_dll.restype = ctypes.c_double
 
-    assert pytest.approx(2.5, 0.0000001) == avg_dll([1, 2, 3, 4], 4)
-    assert pytest.approx(2.5, 0.0000001) == avg_dll([1.0, 2.0, 3.0, 4.0], 4)
-    assert pytest.approx(2.5, 0.0000001) == avg_dll((1.0, 2.0, 3.0, 4.0), 4)
-    assert pytest.approx(2.5, 0.0000001) == avg_dll(np.array([1.0, 2.0, 3.0, 4.0], dtype = 'f8'), 4)
-    assert pytest.approx(2.5, 0.0000001) == avg_dll(array('d', [1.0, 2.0, 3.0, 4.0]), 4)
+    assert pytest.approx(2.5, 0.0000001) == avg_dll(data, 4)
