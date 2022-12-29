@@ -23,6 +23,7 @@ This **RELEASE FIXES A CRITICAL BUG** where *zugbruecke* was falsely translating
 - FIX: The new `argtypes` and `restype` parser does not suffer from #61 anymore where earlier different structure types from different name spaces but with identical names would cause problems.
 - FIX: CI revealed that an issue similar to #50 returned as packages on Wine side can sometimes not be imported if they are symlinked. The new `copy_modules` configuration parameter can be used to indicate that a copy instead of symlinks is required. This problem is caused by [Wine bug #54228](https://bugs.winehq.org/show_bug.cgi?id=54228) in Wine Staging >= 7.18.
 - FIX: If `zugbruecke` (and `wenv`) were installed into user site-packages, the installation would break, see #88.
+- FIX: If writing of logs to disk (`log_write`) was set to `True` during run-time, `zugbruecke` would crash, see #77.
 - FIX: Syncing entire structs via `memsync` was broken, see #92.
 - FIX: `restype` was explicitly assumed to be `c_int`. Now, if a user does not specify it, assumptions about it are left to `ctypes` on the Wine side, potentially getting closer to `ctypes` original behaviour.
 - FIX: `restype` would not throw an exception when by accident set to a list or tuple like original `ctypes` does.
