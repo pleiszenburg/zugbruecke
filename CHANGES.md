@@ -2,7 +2,7 @@
 
 ## 0.2.1 (2022-XX-XX)
 
-- (TBD)
+- FIX: Indicate Python 3.11 support in `pyproject.toml`.
 
 ## 0.2.0 (2022-12-29)
 
