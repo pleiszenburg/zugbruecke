@@ -24,6 +24,7 @@ This **RELEASE FIXES A CRITICAL BUG** where *zugbruecke* was falsely translating
 - FIX: CI revealed that an issue similar to #50 returned as packages on Wine side can sometimes not be imported if they are symlinked. The new `copy_modules` configuration parameter can be used to indicate that a copy instead of symlinks is required. This problem is caused by [Wine bug #54228](https://bugs.winehq.org/show_bug.cgi?id=54228) in Wine Staging >= 7.18.
 - FIX: If `zugbruecke` (and `wenv`) were installed into user site-packages, the installation would break, see #88.
 - FIX: Syncing entire structs via `memsync` was broken, see #92.
+- FIX: `restype` was explicitly assumed to be `c_int`. Now, if a user does not specify it, assumptions about it are left to `ctypes` on the Wine side, potentially getting closer to `ctypes` original behaviour.
 - FIX: `restype` would not throw an exception when by accident set to a list or tuple like original `ctypes` does.
 - DEPRECATED: Single-character parameter names in memsync directives.
 - DEPRECATED: `ctypes` fundamental types specified by name as strings in `memsync` directives.
