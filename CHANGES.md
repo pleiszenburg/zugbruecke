@@ -1,6 +1,6 @@
 # Changes
 
-## 0.2.0 (2022-XX-XX)
+## 0.2.0 (2022-12-29)
 
 **CAUTION**: A number changes at least partially **BREAK BACKWARDS COMPATIBILITY** for certain use and edge cases.
 
