@@ -87,9 +87,7 @@ class Log(LogABC):
 
         self._up = True
 
-        self._f = None
-        if self._p["log_write"]:
-            self._f = f'zb_{self._id:s}_{self._p["platform"]:s}.txt'
+        self._f = f'zb_{self._id:s}_{self._p["platform"]:s}.txt'
 
         if rpc_server is not None:
             rpc_server.register_function(self._receive, "transfer_message")
