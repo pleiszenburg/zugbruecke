@@ -150,7 +150,7 @@ class Data(DataABC):
         # Number of arguments is just wrong
         raise TypeError  # Highly unlikely case, pack_args will fail instead
 
-    def pack_retval(self, value: Any, restype: Definition) -> Any:  # return_msg_pack
+    def pack_retval(self, value: Any, restype: Optional[Definition]) -> Any:
         """
         Args:
             - value: raw return value
@@ -162,9 +162,12 @@ class Data(DataABC):
         if value is None:
             return None
 
+        if restype is None:
+            return strip_simplecdata(value)
+
         return self._pack_item(value, restype)
 
-    def unpack_retval(self, value: Any, restype: Definition) -> Any:  # return_msg_unpack
+    def unpack_retval(self, value: Any, restype: Optional[Definition]) -> Any:
         """
         Args:
             - value: packed return value from shipping
@@ -175,6 +178,9 @@ class Data(DataABC):
 
         if value is None:
             return None
+
+        if restype is None:
+            return value
 
         # If this is not a fundamental datatype or if there is a pointer involved, just unpack
         if (

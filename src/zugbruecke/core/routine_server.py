@@ -34,7 +34,7 @@ specific language governing rights and limitations under the License.
 from ctypes import _CFuncPtr
 from pprint import pformat as pf
 import traceback
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, Optional, Union
 
 from .abc import DataABC, LogABC, RoutineServerABC, RpcServerABC
 from .definitions import Definition, DefinitionMemsync
@@ -145,7 +145,7 @@ class RoutineServer(RoutineServerABC):
             self._log.error(traceback.format_exc())
             raise e
 
-    def configure(self, packed_argtypes: List[Dict], packed_restype: Dict, packed_memsyncs: List[Dict]):
+    def configure(self, packed_argtypes: List[Dict], packed_restype: Optional[Dict], packed_memsyncs: List[Dict]):
         """
         Called by routine client
         """
@@ -165,7 +165,7 @@ class RoutineServer(RoutineServerABC):
             self._restype = Definition.from_packed(
                 packed = packed_restype,
                 cache = self._data.cache,
-            )
+            ) if packed_restype is not None else None
 
             # Unpack memory sync definitions
             self._memsyncs = [
@@ -183,7 +183,8 @@ class RoutineServer(RoutineServerABC):
                 self._handler.argtypes = argtypes
 
             # Parse and apply restype definition dict to actual ctypes routine
-            self._handler.restype = self._restype.data_type
+            if self._restype is not None:
+                self._handler.restype = self._restype.data_type
 
         except Exception as e:
 

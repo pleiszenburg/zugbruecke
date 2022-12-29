@@ -82,7 +82,7 @@ class RoutineClient(RoutineClientABC):
         self._argtypes = None
 
         # By default, assume c_int return value like ctypes expects
-        self._restype_raw = ctypes.c_int
+        self._restype_raw = None
         self._restype = None
 
         for attr in (
@@ -189,7 +189,7 @@ class RoutineClient(RoutineClientABC):
         self._restype = Definition.from_data_type(
             cache = self._data.cache,
             data_type = self._restype_raw,
-        )
+        ) if self._restype_raw is not None else None
 
         # Parse memsync statements into definitions
         self._memsyncs = DefinitionMemsync.from_raws(
@@ -218,7 +218,7 @@ class RoutineClient(RoutineClientABC):
         # Pass argument and return value types as strings ...
         _ = self._configure_on_server(
             [argtype.as_packed() for argtype in self._argtypes],
-            self._restype.as_packed(),
+            self._restype.as_packed() if self._restype is not None else None,
             [memsync.as_packed() for memsync in self._memsyncs],
         )
 
