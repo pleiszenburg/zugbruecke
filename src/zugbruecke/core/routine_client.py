@@ -115,10 +115,11 @@ class RoutineClient(RoutineClientABC):
 
         # Pack stuff
         packed_args = self._data.pack_args(args, self._argtypes, self._convention)
-        packed_mempkgs = [mempkg.as_packed() for mempkg in DefinitionMemsync.pkg_memories(
+        mempkgs = DefinitionMemsync.pkg_memories(
             args = args,
             memsyncs = self._memsyncs,
-        )]
+        )  # keep until after function call to avoid pointers being garbage collected
+        packed_mempkgs = [mempkg.as_packed() for mempkg in mempkgs]
 
         self._log.debug(dict(
             args = args,

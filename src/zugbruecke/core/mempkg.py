@@ -52,12 +52,14 @@ class Mempkg(MempkgABC):
         local_addr: Optional[int],  # local pointer address as integer
         remote_addr: Optional[int],  # remote pointer has not been initialized
         wchar: Optional[int],  # local length of Unicode wchar if required
+        ptr: Optional[Any] = None,  # original ctypes pointer to avoid garbage collection on client
     ):
 
         self._data = data
         self._local_addr = local_addr
         self._remote_addr = remote_addr
         self._wchar = wchar
+        self._ptr = ptr
 
     def __repr__(self) -> str:
 
@@ -211,4 +213,5 @@ class Mempkg(MempkgABC):
             local_addr = ctypes.cast(ptr, ctypes.c_void_p).value,
             remote_addr = None,
             wchar = wchar,
+            ptr = ptr,
         )
