@@ -37,6 +37,12 @@ typedef struct subparam {
     int diff;
 } subparam;
 
+typedef struct mulparam {
+    float a;
+    float b;
+    float prod;
+} mulparam;
+
 {{ PREFIX }} void {{ SUFFIX }} add_int(
     int a,
     int b,
@@ -45,6 +51,10 @@ typedef struct subparam {
 
 {{ PREFIX }} void {{ SUFFIX }} sub_int(
     subparam *values
+    );
+
+{{ PREFIX }} void {{ SUFFIX }} mul_float(
+    mulparam *values
     );
 """
 
@@ -63,6 +73,13 @@ SOURCE = """
     )
 {
     values->diff = values->a - values->b;
+}
+
+{{ PREFIX }} void {{ SUFFIX }} mul_float(
+    mulparam *values
+    )
+{
+    values->prod = values->a * values->b;
 }
 """
 
@@ -94,9 +111,9 @@ def test_pointers_byref_simple(arch, conv, ctypes, dll_handle):
 
 
 @pytest.mark.parametrize("arch,conv,ctypes,dll_handle", get_context(__file__))
-def test_pointers_byref_struct(arch, conv, ctypes, dll_handle):
+def test_pointers_byref_struct_int(arch, conv, ctypes, dll_handle):
     """
-    Tests byref with struct data type
+    Tests byref with struct data type containing int
     """
 
     class SubParam(ctypes.Structure):
@@ -112,3 +129,24 @@ def test_pointers_byref_struct(arch, conv, ctypes, dll_handle):
     param = SubParam(17, 15, 0)
     sub_int(ctypes.byref(param))
     assert param.diff == 2
+
+
+@pytest.mark.parametrize("arch,conv,ctypes,dll_handle", get_context(__file__))
+def test_pointers_byref_struct_float(arch, conv, ctypes, dll_handle):
+    """
+    Tests byref with struct data type containing float
+    """
+
+    class MulParam(ctypes.Structure):
+        _fields_ = [
+            ("a", ctypes.c_float),
+            ("b", ctypes.c_float),
+            ("prod", ctypes.c_float),
+        ]
+
+    mul_float = dll_handle.mul_float
+    mul_float.argtypes = (ctypes.POINTER(MulParam),)
+
+    param = MulParam(5.0, 6.0, 0.0)
+    mul_float(ctypes.byref(param))
+    assert pytest.approx(30.0) == param.prod
