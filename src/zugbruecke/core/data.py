@@ -32,7 +32,7 @@ specific language governing rights and limitations under the License.
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 import ctypes
-from typing import Any, Callable, List, Optional, Tuple
+from typing import Any, Callable, List, Optional, Tuple, Union
 
 from .abc import CacheABC, DataABC, LogABC, RpcClientABC, RpcServerABC
 from .cache import Cache
@@ -351,21 +351,30 @@ class Data(DataABC):
             for name, definition in structtype.fields
         ]
 
-    def _sync_arg(self, old_arg: Any, new_arg: Any, argtype: Definition):
+    def _sync_arg(
+        self,
+        old_arg: Any,
+        new_arg: Any,
+        argtype: Definition,
+        instruct: bool = False,
+    ) -> Optional[Any]:
         """
         Args:
             - old_arg: Raw argument
             - new_arg: Raw argument
             - argtype: zugbruecke argtype definition
         Returns:
-            Nothing
+            Can return data for writing it into a struct
         """
+
+        self._log.error('sync_arg', old_arg, new_arg, argtype)
 
         # The non-trivial case first, arrays
         if not argtype.is_scalar:
-            # Sync items in array
-            self._sync_array(old_arg, new_arg, argtype)
-            # Leave
+            # Sync items in array and return (if there is something to return)
+            value = self._sync_array(old_arg, new_arg, argtype, instruct = instruct)
+            if instruct:
+                return value
             return
 
         # Do not do this for void pointers, likely handled by memsync
@@ -385,7 +394,9 @@ class Data(DataABC):
                 return
             if argtype.is_pointer:
                 return
-            return new_arg  # only relevant in structs, struct sync should pick it up
+            if instruct:
+                return new_arg  # only relevant in structs, struct sync should pick it up
+            return
 
         if argtype.GROUP == STRUCT_GROUP:
             self._sync_struct(old_arg, new_arg, argtype)
@@ -396,7 +407,14 @@ class Data(DataABC):
 
         raise DataGroupError("unexpected datatype group")
 
-    def _sync_array(self, old_array: Any, new_array: Any, arraytype: Definition, start: int = 0):
+    def _sync_array(
+        self,
+        old_array: Any,
+        new_array: Any,
+        arraytype: Definition,
+        start: int = 0,
+        instruct: bool = False,
+    ) -> Optional[Union[str, bytes]]:
         """
         Recursive function, syncing one dimension per call
 
@@ -406,8 +424,10 @@ class Data(DataABC):
             - arraytype: zugbruecke argtype definition
             - start: dimension to start with when syncing
         Returns:
-            Nothing
+            Can return bytes/str for writing into a struct
         """
+
+        self._log.error(f'sync_array {start:d}', old_array, new_array, arraytype)
 
         for idx, flag in enumerate(arraytype.flags[start:], start = start):
 
@@ -431,8 +451,10 @@ class Data(DataABC):
                     if arraytype.GROUP == SIMPLE_GROUP:
                         # HACK can not overwrite immutable bytes & strings, skipping sync operation.
                         # Relevant for fixed-length char & wchar arrays by value in structs.
-                        if not isinstance(old_array, bytes) and not isinstance(old_array, str):
+                        if not isinstance(old_array, (bytes, str)):
                             old_array[:] = new_array[:]
+                        elif isinstance(old_array, (bytes, str)) and not arraytype.is_pointer and instruct:
+                            return new_array  # HACK return new string so it can be written into a struct field
                     elif arraytype.GROUP == STRUCT_GROUP:
                         for old_struct, new_struct in zip(old_array[:], new_array[:]):
                             self._sync_struct(
@@ -465,6 +487,7 @@ class Data(DataABC):
                 getattr(old_struct, name),
                 getattr(new_struct, name),
                 definition,
+                instruct = True,
             )
             if value is None or definition.GROUP != SIMPLE_GROUP:
                 continue
