@@ -31,10 +31,20 @@ specific language governing rights and limitations under the License.
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 HEADER = """
+typedef struct subparam {
+    int a;
+    int b;
+    int diff;
+} subparam;
+
 {{ PREFIX }} void {{ SUFFIX }} add_int(
     int a,
     int b,
     int *sum
+    );
+
+{{ PREFIX }} void {{ SUFFIX }} sub_int(
+    subparam *values
     );
 """
 
@@ -46,6 +56,13 @@ SOURCE = """
     )
 {
     *sum = a + b;
+}
+
+{{ PREFIX }} void {{ SUFFIX }} sub_int(
+    subparam *values
+    )
+{
+    values->diff = values->a - values->b;
 }
 """
 
@@ -74,3 +91,24 @@ def test_pointers_byref_simple(arch, conv, ctypes, dll_handle):
     sum_ = ctypes.c_int()
     add_int(3, 4, ctypes.byref(sum_))
     assert sum_.value == 7
+
+
+@pytest.mark.parametrize("arch,conv,ctypes,dll_handle", get_context(__file__))
+def test_pointers_byref_struct(arch, conv, ctypes, dll_handle):
+    """
+    Tests byref with struct data type
+    """
+
+    class SubParam(ctypes.Structure):
+        _fields_ = [
+            ("a", ctypes.c_int),
+            ("b", ctypes.c_int),
+            ("diff", ctypes.c_int),
+        ]
+
+    sub_int = dll_handle.sub_int
+    sub_int.argtypes = (ctypes.POINTER(SubParam),)
+
+    param = SubParam(17, 15, 0)
+    sub_int(ctypes.byref(param))
+    assert param.diff == 2
