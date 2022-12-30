@@ -2,6 +2,7 @@
 
 ## 0.2.1 (2022-XX-XX)
 
+- FIX: By value simple type members (scalar integers and floats) of structs passed as pointer / by reference were not synchronized correctly.
 - FIX: Indicate Python 3.11 support in `pyproject.toml`.
 
 ## 0.2.0 (2022-12-29)
