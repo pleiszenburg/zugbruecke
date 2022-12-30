@@ -2,8 +2,9 @@
 
 ## 0.2.1 (2022-XX-XX)
 
-- FIX: By value simple type members (scalar integers and floats) of structs passed as pointer / by reference were not synchronized correctly.
+- FIX: By value simple type members of structs passed as pointer / by reference were not synchronized correctly. This includes scalar integers and floats plus `c_char` and `w_char` arrays, i.e. strings.
 - FIX: Indicate Python 3.11 support in `pyproject.toml`.
+- DEV: Added test for light-weight pointers, `ctypes.byref`.
 
 ## 0.2.0 (2022-12-29)
 
