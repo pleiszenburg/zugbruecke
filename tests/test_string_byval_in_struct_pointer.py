@@ -31,37 +31,49 @@ specific language governing rights and limitations under the License.
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 HEADER = """
-typedef struct threewords {
-    char a[5];
-    char b[5];
-    char c[11];
-} threewords;
+{% for TYPE in TYPES %}
 
-{{ PREFIX }} void {{ SUFFIX }} concatenate_byval_fixedlength_in_struct(
-    threewords *somewords
-    );
+    typedef struct threewords_{{ TYPE }} {
+        {{ TYPE }} a[5];
+        {{ TYPE }} b[5];
+        {{ TYPE }} c[11];
+    } threewords_{{ TYPE }};
+
+    {{ PREFIX }} void {{ SUFFIX }} concatenate_byval_fixedlength_in_struct_{{ TYPE }}(
+        threewords_{{ TYPE }} *somewords
+        );
+
+{% endfor %}
 """
 
 SOURCE = """
-{{ PREFIX }} void {{ SUFFIX }} concatenate_byval_fixedlength_in_struct(
-    threewords *somewords
-    )
-{
-    for (int i = 0; i < 11; i++) {
-        somewords->c[i] = ' ';
-    }
-    for (int i = 0; i < 5; i++) {
-        if (somewords->a[i] != '\\0') {
-            somewords->c[i] = somewords->a[i];
+{% for TYPE in TYPES %}
+
+    {{ PREFIX }} void {{ SUFFIX }} concatenate_byval_fixedlength_in_struct_{{ TYPE }}(
+        threewords_{{ TYPE }} *somewords
+        )
+    {
+        for (int i = 0; i < 11; i++) {
+            somewords->c[i] = ' ';
+        }
+        for (int i = 0; i < 5; i++) {
+            if (somewords->a[i] != '\\0') {
+                somewords->c[i] = somewords->a[i];
+            }
+        }
+        for (int i = 0; i < 5; i++) {
+            if (somewords->b[i] != '\\0') {
+                somewords->c[i + 6] = somewords->b[i];
+            }
         }
     }
-    for (int i = 0; i < 5; i++) {
-        if (somewords->b[i] != '\\0') {
-            somewords->c[i + 6] = somewords->b[i];
-        }
-    }
-}
+
+{% endfor %}
 """
+
+EXTRA = {
+    "TYPES": ["char", "wchar_t"],
+}
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # IMPORT
@@ -77,7 +89,7 @@ import pytest
 
 
 @pytest.mark.parametrize("arch,conv,ctypes,dll_handle", get_context(__file__))
-def test_fixedlength_string_in_struct(arch, conv, ctypes, dll_handle):
+def test_fixedlength_string_in_struct_char(arch, conv, ctypes, dll_handle):
     """
     Test char arrays, fixed length, passed by value within struct
     """
@@ -89,7 +101,7 @@ def test_fixedlength_string_in_struct(arch, conv, ctypes, dll_handle):
             ('c', ctypes.c_char * 11),
         ]
 
-    concatenate_byval_fixedlength_in_struct_dll = dll_handle.concatenate_byval_fixedlength_in_struct
+    concatenate_byval_fixedlength_in_struct_dll = dll_handle.concatenate_byval_fixedlength_in_struct_char
     concatenate_byval_fixedlength_in_struct_dll.argtypes = (
         ctypes.POINTER(ThreeWords),
     )
@@ -106,6 +118,41 @@ def test_fixedlength_string_in_struct(arch, conv, ctypes, dll_handle):
         concatenate_byval_fixedlength_in_struct_dll(somewords)
 
         return somewords.contents.c.decode('utf-8')
+
+    assert 'Hello world' == concatenate_byval_fixedlength_in_struct('Hello', 'world')
+    assert 'Hell  worl ' == concatenate_byval_fixedlength_in_struct('Hell', 'worl')
+
+
+@pytest.mark.parametrize("arch,conv,ctypes,dll_handle", get_context(__file__))
+def test_fixedlength_string_in_struct_wchar(arch, conv, ctypes, dll_handle):
+    """
+    Test char arrays, fixed length, passed by value within struct, UNICODE
+    """
+
+    class ThreeWords(ctypes.Structure):
+        _fields_ = [
+            ('a', ctypes.c_wchar * 5),
+            ('b', ctypes.c_wchar * 5),
+            ('c', ctypes.c_wchar * 11),
+        ]
+
+    concatenate_byval_fixedlength_in_struct_dll = dll_handle.concatenate_byval_fixedlength_in_struct_wchar_t
+    concatenate_byval_fixedlength_in_struct_dll.argtypes = (
+        ctypes.POINTER(ThreeWords),
+    )
+
+    def concatenate_byval_fixedlength_in_struct(a: str, b: str) -> str:
+        """
+        User-facing wrapper around DLL function
+        """
+
+        assert len(a) <= 5 and len(b) <= 5
+
+        somewords = ctypes.pointer(ThreeWords(a, b, ''))
+
+        concatenate_byval_fixedlength_in_struct_dll(somewords)
+
+        return somewords.contents.c
 
     assert 'Hello world' == concatenate_byval_fixedlength_in_struct('Hello', 'world')
     assert 'Hell  worl ' == concatenate_byval_fixedlength_in_struct('Hell', 'worl')
