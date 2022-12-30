@@ -382,9 +382,10 @@ class Data(DataABC):
         if argtype.GROUP == SIMPLE_GROUP:
             if hasattr(old_arg, "value"):
                 old_arg.value = new_arg.value
-            else:
-                pass  # only relevant within structs or for actual pointers to scalars
-            return
+                return
+            if argtype.is_pointer:
+                return
+            return new_arg  # only relevant in structs, struct sync should pick it up
 
         if argtype.GROUP == STRUCT_GROUP:
             self._sync_struct(old_arg, new_arg, argtype)
@@ -460,11 +461,14 @@ class Data(DataABC):
 
         # Step through arguments
         for name, definition in structtype.fields:
-            self._sync_arg(
+            value = self._sync_arg(
                 getattr(old_struct, name),
                 getattr(new_struct, name),
                 definition,
             )
+            if value is None or definition.GROUP != SIMPLE_GROUP:
+                continue
+            setattr(old_struct, name, getattr(new_struct, name))  # HACK simple data types by value
 
     def _unpack_item(self, item: Any, itemtype: Definition) -> Any:
         """
