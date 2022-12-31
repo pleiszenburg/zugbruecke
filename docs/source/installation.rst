@@ -17,11 +17,11 @@ Getting *Wine*
 For using *zugbruecke*, you need to install **Wine** first. Depending on your platform, there are different ways of doing that.
 
 * `Installation instructions for various Linux distributions`_
-* `Installation instructions for Mac OS X`_
+* `Installation instructions for MacOS`_
 * `Installation instructions for FreeBSD`_
 
 .. _Installation instructions for various Linux distributions: https://www.winehq.org/download
-.. _Installation instructions for Mac OS X: https://wiki.winehq.org/MacOS
+.. _Installation instructions for MacOS: https://wiki.winehq.org/MacOS
 .. _Installation instructions for FreeBSD: https://wiki.winehq.org/FreeBSD
 
 .. note::
@@ -34,7 +34,7 @@ For using *zugbruecke*, you need to install **Wine** first. Depending on your pl
 
 .. warning::
 
-	Support for Mac OS X and FreeBSD is provided on a best-effort basis. *zugbruecke* currently does not receive regular testing on those platforms.
+	Support for MacOS and FreeBSD is provided on a best-effort basis. *zugbruecke* currently does not receive regular testing on those platforms.
 
 Getting *zugbruecke*
 --------------------
