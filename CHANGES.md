@@ -1,6 +1,6 @@
 # Changes
 
-## 0.2.1 (2022-XX-XX)
+## 0.2.1 (2023-XX-XX)
 
 - FIX: By value simple type members of structs passed as pointer / by reference were not synchronized correctly. This includes scalar integers and floats, individual `c_char` and `c_wchar` objects as well as `c_char` and `c_wchar` arrays, i.e. strings.
 - FIX: The type parser's cache could, under certain circumstances, confuse fixed length struct array types with their scalar base types.

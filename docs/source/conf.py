@@ -11,7 +11,7 @@ https://github.com/pleiszenburg/zugbruecke
 
     Required to run on platform / side: [UNIX]
 
-    Copyright (C) 2017-2022 Sebastian M. Ernst <ernst@pleiszenburg.de>
+    Copyright (C) 2017-2023 Sebastian M. Ernst <ernst@pleiszenburg.de>
 
 <LICENSE_BLOCK>
 The contents of this file are subject to the GNU Lesser General Public License
@@ -72,7 +72,7 @@ master_doc = "index"
 # General information about the project.
 project = "zugbruecke"
 author = "Sebastian M. Ernst"
-copyright = f"2017-2022 {author:s}"
+copyright = f"2017-2023 {author:s}"
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
