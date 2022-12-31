@@ -34,7 +34,7 @@ import ctypes
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 from ..abc import CacheABC, DefinitionABC
-from ..const import STRUCT_GROUP
+from ..const import FLAG_POINTER, STRUCT_GROUP
 from ..typeguard import typechecked
 
 from . import base
@@ -177,11 +177,12 @@ class DefinitionStruct(base.Definition):
                 cache = cache,
             )) for field in base_type._fields_
         ]
+        arrayflags = tuple(flag for flag in flags if flag != FLAG_POINTER)
 
         structtype = cls(
             flags = flags,
             field_name = field_name,
-            type_name = f'structtype_{hash(tuple((name, definition.data_type) for name, definition in fields)):x}',
+            type_name = f'structtype_{hash(tuple((name, definition.data_type) for name, definition in fields) + arrayflags):x}',
             data_type = data_type,
             base_type = base_type,
             fields = fields,
