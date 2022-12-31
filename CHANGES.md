@@ -6,6 +6,8 @@
 - FIX: By value simple type members of structs passed as pointer / by reference were not synchronized correctly. This includes scalar integers and floats, individual `c_char` and `c_wchar` objects as well as `c_char` and `c_wchar` arrays, i.e. strings.
 - FIX: The type parser's cache could, under certain circumstances, confuse fixed-length struct array types with their scalar base types.
 - FIX: Indicate Python 3.11 support in `pyproject.toml`.
+- DOCS: Updated benchmarks.
+- DOCS: Many small fixes.
 - DEV: Added test for light-weight pointers, `ctypes.byref`. Those were previously supported but remained untested.
 
 ## 0.2.0 (2022-12-29)
