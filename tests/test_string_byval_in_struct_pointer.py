@@ -39,8 +39,17 @@ HEADER = """
         {{ TYPE }} c[11];
     } threewords_{{ TYPE }};
 
+    typedef struct onechar_{{ TYPE }} {
+        {{ TYPE }} x;
+    } onechar_{{ TYPE }};
+
     {{ PREFIX }} void {{ SUFFIX }} concatenate_byval_fixedlength_in_struct_{{ TYPE }}(
         threewords_{{ TYPE }} *somewords
+        );
+
+    {{ PREFIX }} void {{ SUFFIX }} charbingo_byval_in_struct_{{ TYPE }}(
+        onechar_{{ TYPE }} *thechar,
+        int y
         );
 
 {% endfor %}
@@ -65,6 +74,19 @@ SOURCE = """
             if (somewords->b[i] != '\\0') {
                 somewords->c[i + 6] = somewords->b[i];
             }
+        }
+    }
+
+    {{ PREFIX }} void {{ SUFFIX }} charbingo_byval_in_struct_{{ TYPE }}(
+        onechar_{{ TYPE }} *thechar,
+        int y
+        )
+    {
+        thechar->x = ' ';
+        if (y == 1) {
+            thechar->x = 'f';
+        } else if (y == 2) {
+            thechar->x = 'g';
         }
     }
 
@@ -156,3 +178,67 @@ def test_fixedlength_string_in_struct_wchar(arch, conv, ctypes, dll_handle):
 
     assert 'Hello world' == concatenate_byval_fixedlength_in_struct('Hello', 'world')
     assert 'Hell  worl ' == concatenate_byval_fixedlength_in_struct('Hell', 'worl')
+
+
+@pytest.mark.parametrize("arch,conv,ctypes,dll_handle", get_context(__file__))
+def test_single_char_in_struct_char(arch, conv, ctypes, dll_handle):
+    """
+    Test single char passed by value within struct
+    """
+
+    class OneChar(ctypes.Structure):
+        _fields_ = [
+            ('x', ctypes.c_char),
+        ]
+
+    charbingo_byval_in_struct_char_dll = dll_handle.charbingo_byval_in_struct_char
+    charbingo_byval_in_struct_char_dll.argtypes = (
+        ctypes.POINTER(OneChar), ctypes.c_int,
+    )
+
+    def charbingo_byval_in_struct_char(y: int) -> str:
+        """
+        User-facing wrapper around DLL function
+        """
+
+        onechar = ctypes.pointer(OneChar())
+
+        charbingo_byval_in_struct_char_dll(onechar, y)
+
+        return onechar.contents.x.decode('utf-8')
+
+    assert 'f' == charbingo_byval_in_struct_char(1)
+    assert 'g' == charbingo_byval_in_struct_char(2)
+    assert ' ' == charbingo_byval_in_struct_char(3)
+
+
+@pytest.mark.parametrize("arch,conv,ctypes,dll_handle", get_context(__file__))
+def test_single_char_in_struct_wchar(arch, conv, ctypes, dll_handle):
+    """
+    Test single char passed by value within struct, UNICODE
+    """
+
+    class OneChar(ctypes.Structure):
+        _fields_ = [
+            ('x', ctypes.c_wchar),
+        ]
+
+    charbingo_byval_in_struct_char_dll = dll_handle.charbingo_byval_in_struct_wchar_t
+    charbingo_byval_in_struct_char_dll.argtypes = (
+        ctypes.POINTER(OneChar), ctypes.c_int,
+    )
+
+    def charbingo_byval_in_struct_char(y: int) -> str:
+        """
+        User-facing wrapper around DLL function
+        """
+
+        onechar = ctypes.pointer(OneChar())
+
+        charbingo_byval_in_struct_char_dll(onechar, y)
+
+        return onechar.contents.x
+
+    assert 'f' == charbingo_byval_in_struct_char(1)
+    assert 'g' == charbingo_byval_in_struct_char(2)
+    assert ' ' == charbingo_byval_in_struct_char(3)
