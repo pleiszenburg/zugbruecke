@@ -2,9 +2,10 @@
 
 ## 0.2.1 (2022-XX-XX)
 
-- FIX: By value simple type members of structs passed as pointer / by reference were not synchronized correctly. This includes scalar integers and floats plus `c_char` and `w_char` arrays, i.e. strings.
+- FIX: By value simple type members of structs passed as pointer / by reference were not synchronized correctly. This includes scalar integers and floats, individual `c_char` and `c_wchar` objects as well as `c_char` and `c_wchar` arrays, i.e. strings.
+- FIX: The type parser's cache could, under certain circumstances, confuse fixed length struct array types with their scalar base types.
 - FIX: Indicate Python 3.11 support in `pyproject.toml`.
-- DEV: Added test for light-weight pointers, `ctypes.byref`.
+- DEV: Added test for light-weight pointers, `ctypes.byref`. Those were previously supported but remained untested.
 
 ## 0.2.0 (2022-12-29)
 
@@ -19,7 +20,7 @@ If entire struct objects are synced via `memsync` directives, the struct types n
 This **RELEASE FIXES A CRITICAL BUG** where *zugbruecke* was falsely translating 64 bit integer types from the Unix side to 32 bit integer types on the Wine side.
 
 - FEATURE: Improved performance. With logging disabled, function calls carry 10% less overhead on average.
-- FEATURE: In `memsync` directives, `ctypes` types do not need to be specified by their name as strings anymore - plain `ctypes` fundamental types and structure types can be used instead. Strings remain valid specifications for compatibility though.
+- FEATURE: In `memsync` directives, `ctypes` types do not need to be specified by their name as strings anymore - plain `ctypes` fundamental types and structure types can be used instead. Strings remain valid specifications (only) for fundamental `ctypes` types for compatibility though.
 - FEATURE: `memsync` directives allow for more descriptive parameter names while the old single-character names remain valid for compatibility.
 - FEATURE: Added support for CPython 3.11, see #86 and #87.
 - FEATURE: Logging now relies on Python's `logging` module's log levels, i.e. `NOTSET`, `DEBUG`, `INFO`, `WARNING`, `ERROR` and `CRITICAL`. This change serves to work towards #84.
