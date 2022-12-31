@@ -70,6 +70,11 @@ As an alternative approach, you can also check what happens if you run your code
 
 If in doubt, please also test your code with *ctypes* on an actual *Windows* system - it might be a bug in this module or *Wine* as well.
 
+Known issues: Failing to import modules
+---------------------------------------
+
+You may encounter issues where *zugbruecke* shows exceptions during initialization, complaining that it could not import ``wenv``, submodules from ``wenv`` or even itself. *zugbruecke* relies on symbolic links to make itself available to a Windows Python interpreter within its dedicated ``site-packages`` folder. This approach has the benefit that if *zugbruecke* and/or its dependency *wenv* are beging updated on the Unix side, the update becomes immediately available to the Wine Python environment with no further user interaction required. Unfortunately, Wine keeps having various issues with handling symbolic links, for instance from stable versions 4.0 to 4.16 and more recently from staging version 7.17 onwards. Those issues break the import mechanisms of Windows builds of CPython. The workaround is to tell *zugbruecke* to copy the required modules into the Wine Python environment via the ``copy_modules`` configuration parameter instead of using symbolic links, see :ref:`section on configuration parameters <configparameter>`. Be aware that this may cause issues when updating *zugbruecke* and/or *wenv* later on. It is recommended to re-create the Wine Python environments in question whenever any of the two packages are updated.
+
 .. _centos:
 
 Known issues: Running on CentOS
