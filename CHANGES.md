@@ -2,8 +2,9 @@
 
 ## 0.2.1 (2023-XX-XX)
 
+- FEATURE: Added support for fixed-length arrays of function pointers (for callback functions). Similar to individual function pointers in *zugbruecke*, the pointers can not be overwritten by DLL functions.
 - FIX: By value simple type members of structs passed as pointer / by reference were not synchronized correctly. This includes scalar integers and floats, individual `c_char` and `c_wchar` objects as well as `c_char` and `c_wchar` arrays, i.e. strings.
-- FIX: The type parser's cache could, under certain circumstances, confuse fixed length struct array types with their scalar base types.
+- FIX: The type parser's cache could, under certain circumstances, confuse fixed-length struct array types with their scalar base types.
 - FIX: Indicate Python 3.11 support in `pyproject.toml`.
 - DEV: Added test for light-weight pointers, `ctypes.byref`. Those were previously supported but remained untested.
 
