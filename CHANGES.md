@@ -7,6 +7,7 @@
 - FIX: The type parser's cache could, under certain circumstances, confuse fixed-length struct array types with their scalar base types.
 - FIX: Indicate Python 3.11 support in `pyproject.toml`.
 - DOCS: Updated benchmarks.
+- DOCS: Added notes on known CentOS issues.
 - DOCS: Many small fixes.
 - DEV: Added test for light-weight pointers, `ctypes.byref`. Those were previously supported but remained untested.
 
