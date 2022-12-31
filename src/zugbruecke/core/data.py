@@ -367,8 +367,6 @@ class Data(DataABC):
             Can return data for writing it into a struct
         """
 
-        self._log.error('sync_arg', old_arg, new_arg, argtype)
-
         # The non-trivial case first, arrays
         if not argtype.is_scalar:
             # Sync items in array and return (if there is something to return)
@@ -426,8 +424,6 @@ class Data(DataABC):
         Returns:
             Can return bytes/str for writing into a struct
         """
-
-        self._log.error(f'sync_array {start:d}', old_array, new_array, arraytype)
 
         for idx, flag in enumerate(arraytype.flags[start:], start = start):
 
