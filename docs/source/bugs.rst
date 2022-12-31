@@ -48,7 +48,7 @@ A custom session can be manipulated in a similar way:
     ctypes = CtypesSession(log_level = DEBUG, log_write = True)
     # proceed as usual - with a lot more verbosity
 
-Alternatively, you can drop a configuration file named ``.zugbruecke.json`` into your current working directory or *zugbruecke*'s configuration directory (likely ``~/.zugbruecke``) and add configuration parameters to it, for example:
+Alternatively, you can drop a configuration file named ``.zugbruecke.json`` e.g. into your current working directory or your user account folder, ``/home/username``, and add configuration parameters to it, for example:
 
 .. code:: json
 
