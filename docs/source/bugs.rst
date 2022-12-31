@@ -69,3 +69,24 @@ As a last resort, you can activate additional debugging features intended for de
 As an alternative approach, you can also check what happens if you run your code directly in a *Windows Python* interpreter with *ctypes*. Consult the :ref:`chapter on the Wine Python environment <wineenv>` for details. It is easy to get *ctypes* syntax wrong, so this is a good approach for getting it right.
 
 If in doubt, please also test your code with *ctypes* on an actual *Windows* system - it might be a bug in this module or *Wine* as well.
+
+.. _centos:
+
+Known issues: Running on CentOS
+-------------------------------
+
+.. warning::
+
+    CentOS packages both CPython and Wine in rather unusual ways, effectively making it a minefield for *zugbruecke*. Avoid CentOS if possible.
+
+*zugbruecke* expects the command for Wine 32 bit to be ``wine`` and the command for Wine 64 bit to be ``wine64``. This is not the case for CentOS' Wine packages where ``wine`` points to Wine 64 bit. However, alternative packages for CentOS restore the expected behaviour. For a discussion see `issue 70`_.
+
+.. _issue 70: https://github.com/pleiszenburg/zugbruecke/issues/70
+
+CentOS uses a customized CPython interpreter which behaves differently compared to a regular CPython interpreter. Notably, in regular builds of CPython, the authentication mechanism used by ``multiprocessing`` for connecting to other processes uses the MD5 hash algorithm by default, which is generally considered insecure. In CentOS, this mechanism was patched to use SHA256 for improved security. As a consequence, CentOS' CPython can not connect to an official Windows build of CPython, causing *zugbruecke* to fail to launch. A discussion and workarounds can be found in `issue 73`_.
+
+.. _issue 73: https://github.com/pleiszenburg/zugbruecke/issues/73
+
+*zugbruecke* is prone to random crashes during startup on older versions of CentOS. An ongoing discussion and a partial workaround can be found in `issue 78`_.
+
+.. _issue 78: https://github.com/pleiszenburg/zugbruecke/issues/78

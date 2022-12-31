@@ -59,6 +59,10 @@ After installing the package with ``pip``, you may choose to manually :ref:`init
 
 If you are encountering any problems, see :ref:`section on bugs and known issues <bugs>`.
 
+.. warning::
+
+    CentOS is known to be problematic. It packages both CPython and Wine in rather unusual and partially incompatible ways. See section on :ref:`CentOS <centos>`.
+
 Installing *zugbruecke* in Development Mode
 -------------------------------------------
 
