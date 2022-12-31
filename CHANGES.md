@@ -8,6 +8,7 @@
 - FIX: Indicate Python 3.11 support in `pyproject.toml`.
 - DOCS: Updated benchmarks.
 - DOCS: Added notes on known CentOS issues.
+- DOCS: Added information on known symbolic link issues with certain versions of Wine, recently staging >=7.18, see #94.
 - DOCS: Many small fixes.
 - DEV: Added test for light-weight pointers, `ctypes.byref`. Those were previously supported but remained untested.
 
@@ -32,7 +33,7 @@ This **RELEASE FIXES A CRITICAL BUG** where *zugbruecke* was falsely translating
 - FIX: Argtypes and restype would translate `c_int64`, `c_uint64`, `c_long` and `c_ulong` from the Unix side to their 32-bit equivalents, `c_int32` and `c_uint32`, on the Wine side. This was due to `c_long` and `c_ulong` being 8 bytes long on Unix-like systems while they are 4 bytes long on Window, see #95.
 - FIX: Fixed-length `c_char` and `c_wchar` buffers passed by value within structures were not handled correctly, see #93.
 - FIX: The new `argtypes` and `restype` parser does not suffer from #61 anymore where earlier different structure types from different name spaces but with identical names would cause problems.
-- FIX: CI revealed that an issue similar to #50 returned as packages on Wine side can sometimes not be imported if they are symlinked. The new `copy_modules` configuration parameter can be used to indicate that a copy instead of symlinks is required. This problem is caused by [Wine bug #54228](https://bugs.winehq.org/show_bug.cgi?id=54228) in Wine Staging >= 7.18.
+- FIX: CI revealed that an issue similar to #50 returned as packages on Wine side can sometimes not be imported if they are symlinked. The new `copy_modules` configuration parameter can be used to indicate that a copy instead of symlinks is required. This problem is caused by [Wine bug #54228](https://bugs.winehq.org/show_bug.cgi?id=54228) in Wine Staging >= 7.18, see #94.
 - FIX: If `zugbruecke` (and `wenv`) were installed into user site-packages, the installation would break, see #88.
 - FIX: If writing of logs to disk (`log_write`) was set to `True` during run-time, `zugbruecke` would crash, see #77.
 - FIX: Syncing entire structs via `memsync` was broken, see #92.
