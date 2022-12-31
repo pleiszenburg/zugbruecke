@@ -81,7 +81,7 @@ User's guide
 
 `Interested in contributing?`_
 
-.. _Interested in contributing?: https://github.com/pleiszenburg/zugbruecke/blob/develop/CONTRIBUTING.rst
+.. _Interested in contributing?: https://github.com/pleiszenburg/zugbruecke/blob/develop/CONTRIBUTING.md
 
 Indices and tables
 ------------------
