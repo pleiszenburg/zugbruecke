@@ -291,6 +291,10 @@ class Data(DataABC):
                         array = [
                             self._pack_struct(struct, arraytype) for struct in array
                         ]
+                    elif arraytype.GROUP == FUNC_GROUP:
+                        array = [
+                            self._pack_func(func, arraytype) for func in array
+                        ]
 
             # Handle unknown flags
             else:
@@ -457,9 +461,7 @@ class Data(DataABC):
                                 old_struct, new_struct, arraytype
                             )
                     elif arraytype.GROUP == FUNC_GROUP:
-                        raise NotImplementedError(
-                            "functions in arrays are not supported"
-                        )
+                        return  # TODO function pointers may have been overwritten - ignore this case for now
                     else:
                         raise DataGroupError("unexpected datatype group")
 
@@ -596,7 +598,11 @@ class Data(DataABC):
                     *(self._unpack_struct(dim, arraytype) for dim in array)
                 )
             elif arraytype.GROUP == FUNC_GROUP:
-                raise NotImplementedError("functions in arrays are not supported")
+                subtype = arraytype.base_type * flag
+                if not all(dim is None for dim in array):  # Only unpack on server. Server returns None(s) to client - ignore.
+                    array = subtype(
+                        *(self._unpack_func(dim, arraytype) for dim in array)
+                    )
             else:
                 raise DataGroupError("unexpected datatype group")
 
