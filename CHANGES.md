@@ -1,5 +1,9 @@
 # Changes
 
+## 0.2.2 (2023-XX-XX)
+
+- (TBD)
+
 ## 0.2.1 (2023-01-01)
 
 - FEATURE: Added support for fixed-length arrays of function pointers (for callback functions). Similar to individual function pointers in *zugbruecke*, the pointers can not be overwritten by DLL functions.
