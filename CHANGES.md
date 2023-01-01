@@ -1,6 +1,6 @@
 # Changes
 
-## 0.2.1 (2023-XX-XX)
+## 0.2.1 (2023-01-01)
 
 - FEATURE: Added support for fixed-length arrays of function pointers (for callback functions). Similar to individual function pointers in *zugbruecke*, the pointers can not be overwritten by DLL functions.
 - FIX: By value simple type members of structs passed as pointer / by reference were not synchronized correctly. This includes scalar integers and floats, individual `c_char` and `c_wchar` objects as well as `c_char` and `c_wchar` arrays, i.e. strings.
