@@ -1,5 +1,17 @@
 # Changes
 
+## 0.2.1 (2023-01-01)
+
+- FEATURE: Added support for fixed-length arrays of function pointers (for callback functions). Similar to individual function pointers in *zugbruecke*, the pointers can not be overwritten by DLL functions.
+- FIX: By value simple type members of structs passed as pointer / by reference were not synchronized correctly. This includes scalar integers and floats, individual `c_char` and `c_wchar` objects as well as `c_char` and `c_wchar` arrays, i.e. strings.
+- FIX: The type parser's cache could, under certain circumstances, confuse fixed-length struct array types with their scalar base types.
+- FIX: Indicate Python 3.11 support in `pyproject.toml`.
+- DOCS: Updated benchmarks.
+- DOCS: Added notes on known CentOS issues.
+- DOCS: Added information on known symbolic link issues with certain versions of Wine, recently staging >=7.18, see #94.
+- DOCS: Many small fixes.
+- DEV: Added test for light-weight pointers, `ctypes.byref`. Those were previously supported but remained untested.
+
 ## 0.2.0 (2022-12-29)
 
 **CAUTION**: A number changes at least partially **BREAK BACKWARDS COMPATIBILITY** for certain use and edge cases.
@@ -13,15 +25,15 @@ If entire struct objects are synced via `memsync` directives, the struct types n
 This **RELEASE FIXES A CRITICAL BUG** where *zugbruecke* was falsely translating 64 bit integer types from the Unix side to 32 bit integer types on the Wine side.
 
 - FEATURE: Improved performance. With logging disabled, function calls carry 10% less overhead on average.
-- FEATURE: In `memsync` directives, `ctypes` types do not need to be specified by their name as strings anymore - plain `ctypes` fundamental types and structure types can be used instead. Strings remain valid specifications for compatibility though.
+- FEATURE: In `memsync` directives, `ctypes` types do not need to be specified by their name as strings anymore - plain `ctypes` fundamental types and structure types can be used instead. Strings remain valid specifications (only) for fundamental `ctypes` types for compatibility though.
 - FEATURE: `memsync` directives allow for more descriptive parameter names while the old single-character names remain valid for compatibility.
 - FEATURE: Added support for CPython 3.11, see #86 and #87.
 - FEATURE: Logging now relies on Python's `logging` module's log levels, i.e. `NOTSET`, `DEBUG`, `INFO`, `WARNING`, `ERROR` and `CRITICAL`. This change serves to work towards #84.
 - FEATURE: Log output has been divided into log levels, see #9.
-- FIX: Argtypes and restype would translate `c_int64`, `c_uint64`, `c_long` and `c_ulong` from the Unix side to their 32-bit equivalents, `c_int32` and `c_uint32`, on the Wine side. This was due to `c_long` and `c_ulong` being 8 bytes long on Unix-like systems while they are 4 bytes long on Window.
+- FIX: Argtypes and restype would translate `c_int64`, `c_uint64`, `c_long` and `c_ulong` from the Unix side to their 32-bit equivalents, `c_int32` and `c_uint32`, on the Wine side. This was due to `c_long` and `c_ulong` being 8 bytes long on Unix-like systems while they are 4 bytes long on Window, see #95.
 - FIX: Fixed-length `c_char` and `c_wchar` buffers passed by value within structures were not handled correctly, see #93.
 - FIX: The new `argtypes` and `restype` parser does not suffer from #61 anymore where earlier different structure types from different name spaces but with identical names would cause problems.
-- FIX: CI revealed that an issue similar to #50 returned as packages on Wine side can sometimes not be imported if they are symlinked. The new `copy_modules` configuration parameter can be used to indicate that a copy instead of symlinks is required. This problem is caused by [Wine bug #54228](https://bugs.winehq.org/show_bug.cgi?id=54228) in Wine Staging >= 7.18.
+- FIX: CI revealed that an issue similar to #50 returned as packages on Wine side can sometimes not be imported if they are symlinked. The new `copy_modules` configuration parameter can be used to indicate that a copy instead of symlinks is required. This problem is caused by [Wine bug #54228](https://bugs.winehq.org/show_bug.cgi?id=54228) in Wine Staging >= 7.18, see #94.
 - FIX: If `zugbruecke` (and `wenv`) were installed into user site-packages, the installation would break, see #88.
 - FIX: If writing of logs to disk (`log_write`) was set to `True` during run-time, `zugbruecke` would crash, see #77.
 - FIX: Syncing entire structs via `memsync` was broken, see #92.

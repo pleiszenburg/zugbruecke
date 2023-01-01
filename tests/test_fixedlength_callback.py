@@ -6,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-    tests/test_float_types.py: Tests by value argument passing and return value (float)
+    tests/test_fixedlength_callback.py: Tests fixed length arrays of function pointers
 
     Required to run on platform / side: [UNIX, WINE]
 
@@ -31,44 +31,30 @@ specific language governing rights and limitations under the License.
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 HEADER = """
-{% for DTYPE, _, _ in DTYPES %}
-    {{ PREFIX }} int {{ SUFFIX }} in_mandel_{{ DTYPE }}(
-        {{ DTYPE }} x0,
-        {{ DTYPE }} y0,
-        int n
-        );
-{% endfor %}
+typedef double {{ SUFFIX }} (*mathop)(double a, double b);
+
+{{ PREFIX }} double {{ SUFFIX }} apply_op(
+    mathop ops[2],
+    double a,
+    double b,
+    int opcode
+    );
 """
 
 SOURCE = """
-{% for DTYPE, _, _ in DTYPES %}
-    {{ PREFIX }} int {{ SUFFIX }} in_mandel_{{ DTYPE }}(
-        {{ DTYPE }} x0,
-        {{ DTYPE }} y0,
-        int n
-        )
-    {
-        /* Test if (x0,y0) is in the Mandelbrot set or not */
-        {{ DTYPE }} x = 0, y = 0, xtemp;
-        while (n > 0)
-        {
-            xtemp = x * x - y * y + x0;
-            y = 2 * x * y + y0;
-            x = xtemp;
-            n -= 1;
-            if (x * x + y * y > 4) return 0;
-        }
-        return 1;
+{{ PREFIX }} double {{ SUFFIX }} apply_op(
+    mathop ops[2],
+    double a,
+    double b,
+    int opcode
+    )
+{
+    if (opcode >= 0 && opcode <= 1) {
+        return ops[opcode](a, b);
     }
-{% endfor %}
-"""
-
-EXTRA = {
-    "DTYPES": [
-        ("float", "FLT_MIN", "FLT_MAX"),
-        ("double", "DBL_MIN", "DBL_MAX"),
-    ]
+    return 0.0;
 }
+"""
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # IMPORT
@@ -84,17 +70,56 @@ import pytest
 
 
 @pytest.mark.parametrize("arch,conv,ctypes,dll_handle", get_context(__file__))
-@pytest.mark.parametrize("dtype", ['float', 'double'])
-def test_float_types(dtype, arch, conv, ctypes, dll_handle):
+def test_fixedlength_callback(arch, conv, ctypes, dll_handle):
     """
-    Testing float arguments for multiple float types
+    Tests fixed length arrays of callback functions
     """
 
-    c_type = getattr(ctypes, f'c_{dtype:s}')
+    if conv == "cdll":
+        FuncType = ctypes.CFUNCTYPE
+    elif conv == "windll":
+        FuncType = ctypes.WINFUNCTYPE
+    else:
+        raise ValueError("unknown calling convention", conv)
 
-    in_mandel_dll = getattr(dll_handle, f'in_mandel_{dtype:s}')
-    in_mandel_dll.argtypes = (c_type, c_type, ctypes.c_int)
-    in_mandel_dll.restype = ctypes.c_int
+    MathOp = FuncType(ctypes.c_double, ctypes.c_double, ctypes.c_double)
 
-    assert 1 == in_mandel_dll(0.0, 0.0, 500)
-    assert 0 == in_mandel_dll(2.0, 1.0, 500)
+    apply_op_dll = dll_handle.apply_op
+    apply_op_dll.argtypes = (
+        MathOp * 2,
+        ctypes.c_double,
+        ctypes.c_double,
+        ctypes.c_int,
+    )
+    apply_op_dll.restype = ctypes.c_double
+
+    @MathOp
+    def add_op(a, b):
+        """
+        Callback function, called by DLL function
+        """
+
+        return a + b
+
+    @MathOp
+    def sub_op(a, b):
+        """
+        Callback function, called by DLL function
+        """
+
+        return a - b
+
+    def apply_op(a: float, b: float, opcode: int) -> float:
+        """
+        User-facing wrapper around DLL function
+        """
+
+        ops = (MathOp * 2)()
+        ops[0] = add_op
+        ops[1] = sub_op
+
+        return apply_op_dll(ops, a, b, opcode)
+
+    assert pytest.approx(10.0) == apply_op(7.0, 3.0, 0)
+    assert pytest.approx(4.0) == apply_op(7.0, 3.0, 1)
+    assert pytest.approx(0.0) == apply_op(7.0, 3.0, 2)

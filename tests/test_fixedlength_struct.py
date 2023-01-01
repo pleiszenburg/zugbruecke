@@ -6,7 +6,7 @@ ZUGBRUECKE
 Calling routines in Windows DLLs from Python scripts running on unixlike systems
 https://github.com/pleiszenburg/zugbruecke
 
-    tests/test_float_types.py: Tests by value argument passing and return value (float)
+    tests/test_fixedlength_struct.py: Tests fixed length arrays of structs
 
     Required to run on platform / side: [UNIX, WINE]
 
@@ -31,44 +31,39 @@ specific language governing rights and limitations under the License.
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 HEADER = """
-{% for DTYPE, _, _ in DTYPES %}
-    {{ PREFIX }} int {{ SUFFIX }} in_mandel_{{ DTYPE }}(
-        {{ DTYPE }} x0,
-        {{ DTYPE }} y0,
-        int n
-        );
-{% endfor %}
+typedef struct manynumbers {
+    float a, b, c, d, e, f;
+} manynumbers;
+
+{{ PREFIX }} void {{ SUFFIX }} sum_members(
+    manynumbers numbers[10],
+    manynumbers *sum
+    );
 """
 
 SOURCE = """
-{% for DTYPE, _, _ in DTYPES %}
-    {{ PREFIX }} int {{ SUFFIX }} in_mandel_{{ DTYPE }}(
-        {{ DTYPE }} x0,
-        {{ DTYPE }} y0,
-        int n
-        )
+{{ PREFIX }} void {{ SUFFIX }} sum_members(
+    manynumbers numbers[10],
+    manynumbers *sum
+    )
+{
+    sum->a = 0.0;
+    sum->b = 0.0;
+    sum->c = 0.0;
+    sum->d = 0.0;
+    sum->e = 0.0;
+    sum->f = 0.0;
+    for (int i = 0; i < 10; i++)
     {
-        /* Test if (x0,y0) is in the Mandelbrot set or not */
-        {{ DTYPE }} x = 0, y = 0, xtemp;
-        while (n > 0)
-        {
-            xtemp = x * x - y * y + x0;
-            y = 2 * x * y + y0;
-            x = xtemp;
-            n -= 1;
-            if (x * x + y * y > 4) return 0;
-        }
-        return 1;
+        sum->a += numbers[i].a;
+        sum->b += numbers[i].b;
+        sum->c += numbers[i].c;
+        sum->d += numbers[i].d;
+        sum->e += numbers[i].e;
+        sum->f += numbers[i].f;
     }
-{% endfor %}
-"""
-
-EXTRA = {
-    "DTYPES": [
-        ("float", "FLT_MIN", "FLT_MAX"),
-        ("double", "DBL_MIN", "DBL_MAX"),
-    ]
 }
+"""
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # IMPORT
@@ -84,17 +79,44 @@ import pytest
 
 
 @pytest.mark.parametrize("arch,conv,ctypes,dll_handle", get_context(__file__))
-@pytest.mark.parametrize("dtype", ['float', 'double'])
-def test_float_types(dtype, arch, conv, ctypes, dll_handle):
+def test_fixedlength_struct(arch, conv, ctypes, dll_handle):
     """
-    Testing float arguments for multiple float types
+    Tests fixed length arrays of structs
     """
 
-    c_type = getattr(ctypes, f'c_{dtype:s}')
+    class ManyNumbers(ctypes.Structure):
+        _fields_ = [
+            ('a', ctypes.c_float),
+            ('b', ctypes.c_float),
+            ('c', ctypes.c_float),
+            ('d', ctypes.c_float),
+            ('e', ctypes.c_float),
+            ('f', ctypes.c_float),
+        ]
 
-    in_mandel_dll = getattr(dll_handle, f'in_mandel_{dtype:s}')
-    in_mandel_dll.argtypes = (c_type, c_type, ctypes.c_int)
-    in_mandel_dll.restype = ctypes.c_int
+    sum_members_dll = dll_handle.sum_members
+    sum_members_dll.argtypes = (
+        ManyNumbers * 10,
+        ctypes.POINTER(ManyNumbers),
+    )
 
-    assert 1 == in_mandel_dll(0.0, 0.0, 500)
-    assert 0 == in_mandel_dll(2.0, 1.0, 500)
+    numbers = (ManyNumbers * 10)()
+    for idx in range(10):
+        numbers[idx].a = 1 + idx * 10
+        numbers[idx].b = 2 + idx * 10
+        numbers[idx].c = 3 + idx * 10
+        numbers[idx].d = 4 + idx * 10
+        numbers[idx].e = 5 + idx * 10
+        numbers[idx].f = 6 + idx * 10
+    sum_ = ManyNumbers()
+
+    sum_members_dll(numbers, ctypes.pointer(sum_))
+
+    assert all((
+        sum_.a == 460,
+        sum_.b == 470,
+        sum_.c == 480,
+        sum_.d == 490,
+        sum_.e == 500,
+        sum_.f == 510,
+    ))

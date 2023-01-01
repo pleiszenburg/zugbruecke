@@ -10,7 +10,7 @@ https://github.com/pleiszenburg/zugbruecke
 
     Required to run on platform / side: [UNIX, WINE]
 
-    Copyright (C) 2017-2022 Sebastian M. Ernst <ernst@pleiszenburg.de>
+    Copyright (C) 2017-2023 Sebastian M. Ernst <ernst@pleiszenburg.de>
 
 <LICENSE_BLOCK>
 The contents of this file are subject to the GNU Lesser General Public License
@@ -30,7 +30,7 @@ specific language governing rights and limitations under the License.
 # CONST
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-__version__ = "0.2.0"
+__version__ = "0.2.1"
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # EXPORT: zugbruecke core

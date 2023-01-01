@@ -10,7 +10,7 @@ https://github.com/pleiszenburg/zugbruecke
 
     Required to run on platform / side: [UNIX, WINE]
 
-    Copyright (C) 2017-2022 Sebastian M. Ernst <ernst@pleiszenburg.de>
+    Copyright (C) 2017-2023 Sebastian M. Ernst <ernst@pleiszenburg.de>
 
 <LICENSE_BLOCK>
 The contents of this file are subject to the GNU Lesser General Public License
@@ -32,7 +32,7 @@ specific language governing rights and limitations under the License.
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 import ctypes
-from typing import Any, Callable, List, Optional, Tuple
+from typing import Any, Callable, List, Optional, Tuple, Union
 
 from .abc import CacheABC, DataABC, LogABC, RpcClientABC, RpcServerABC
 from .cache import Cache
@@ -291,6 +291,10 @@ class Data(DataABC):
                         array = [
                             self._pack_struct(struct, arraytype) for struct in array
                         ]
+                    elif arraytype.GROUP == FUNC_GROUP:
+                        array = [
+                            self._pack_func(func, arraytype) for func in array
+                        ]
 
             # Handle unknown flags
             else:
@@ -351,21 +355,28 @@ class Data(DataABC):
             for name, definition in structtype.fields
         ]
 
-    def _sync_arg(self, old_arg: Any, new_arg: Any, argtype: Definition):
+    def _sync_arg(
+        self,
+        old_arg: Any,
+        new_arg: Any,
+        argtype: Definition,
+        instruct: bool = False,
+    ) -> Optional[Any]:
         """
         Args:
             - old_arg: Raw argument
             - new_arg: Raw argument
             - argtype: zugbruecke argtype definition
         Returns:
-            Nothing
+            Can return data for writing it into a struct
         """
 
         # The non-trivial case first, arrays
         if not argtype.is_scalar:
-            # Sync items in array
-            self._sync_array(old_arg, new_arg, argtype)
-            # Leave
+            # Sync items in array and return (if there is something to return)
+            value = self._sync_array(old_arg, new_arg, argtype, instruct = instruct)
+            if instruct:
+                return value
             return
 
         # Do not do this for void pointers, likely handled by memsync
@@ -382,8 +393,11 @@ class Data(DataABC):
         if argtype.GROUP == SIMPLE_GROUP:
             if hasattr(old_arg, "value"):
                 old_arg.value = new_arg.value
-            else:
-                pass  # only relevant within structs or for actual pointers to scalars
+                return
+            if argtype.is_pointer:
+                return
+            if instruct:
+                return new_arg  # only relevant in structs, struct sync should pick it up
             return
 
         if argtype.GROUP == STRUCT_GROUP:
@@ -395,7 +409,14 @@ class Data(DataABC):
 
         raise DataGroupError("unexpected datatype group")
 
-    def _sync_array(self, old_array: Any, new_array: Any, arraytype: Definition, start: int = 0):
+    def _sync_array(
+        self,
+        old_array: Any,
+        new_array: Any,
+        arraytype: Definition,
+        start: int = 0,
+        instruct: bool = False,
+    ) -> Optional[Union[str, bytes]]:
         """
         Recursive function, syncing one dimension per call
 
@@ -405,7 +426,7 @@ class Data(DataABC):
             - arraytype: zugbruecke argtype definition
             - start: dimension to start with when syncing
         Returns:
-            Nothing
+            Can return bytes/str for writing into a struct
         """
 
         for idx, flag in enumerate(arraytype.flags[start:], start = start):
@@ -430,17 +451,17 @@ class Data(DataABC):
                     if arraytype.GROUP == SIMPLE_GROUP:
                         # HACK can not overwrite immutable bytes & strings, skipping sync operation.
                         # Relevant for fixed-length char & wchar arrays by value in structs.
-                        if not isinstance(old_array, bytes) and not isinstance(old_array, str):
+                        if not isinstance(old_array, (bytes, str)):
                             old_array[:] = new_array[:]
+                        elif isinstance(old_array, (bytes, str)) and not arraytype.is_pointer and instruct:
+                            return new_array  # HACK return new string so it can be written into a struct field
                     elif arraytype.GROUP == STRUCT_GROUP:
                         for old_struct, new_struct in zip(old_array[:], new_array[:]):
                             self._sync_struct(
                                 old_struct, new_struct, arraytype
                             )
                     elif arraytype.GROUP == FUNC_GROUP:
-                        raise NotImplementedError(
-                            "functions in arrays are not supported"
-                        )
+                        return  # TODO function pointers may have been overwritten - ignore this case for now
                     else:
                         raise DataGroupError("unexpected datatype group")
 
@@ -460,11 +481,15 @@ class Data(DataABC):
 
         # Step through arguments
         for name, definition in structtype.fields:
-            self._sync_arg(
+            value = self._sync_arg(
                 getattr(old_struct, name),
                 getattr(new_struct, name),
                 definition,
+                instruct = True,
             )
+            if value is None or definition.GROUP != SIMPLE_GROUP:
+                continue
+            setattr(old_struct, name, getattr(new_struct, name))  # HACK simple data types by value
 
     def _unpack_item(self, item: Any, itemtype: Definition) -> Any:
         """
@@ -573,7 +598,11 @@ class Data(DataABC):
                     *(self._unpack_struct(dim, arraytype) for dim in array)
                 )
             elif arraytype.GROUP == FUNC_GROUP:
-                raise NotImplementedError("functions in arrays are not supported")
+                subtype = arraytype.base_type * flag
+                if not all(dim is None for dim in array):  # Only unpack on server. Server returns None(s) to client - ignore.
+                    array = subtype(
+                        *(self._unpack_func(dim, arraytype) for dim in array)
+                    )
             else:
                 raise DataGroupError("unexpected datatype group")
 

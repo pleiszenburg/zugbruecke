@@ -17,11 +17,11 @@ Getting *Wine*
 For using *zugbruecke*, you need to install **Wine** first. Depending on your platform, there are different ways of doing that.
 
 * `Installation instructions for various Linux distributions`_
-* `Installation instructions for Mac OS X`_
+* `Installation instructions for MacOS`_
 * `Installation instructions for FreeBSD`_
 
 .. _Installation instructions for various Linux distributions: https://www.winehq.org/download
-.. _Installation instructions for Mac OS X: https://wiki.winehq.org/MacOS
+.. _Installation instructions for MacOS: https://wiki.winehq.org/MacOS
 .. _Installation instructions for FreeBSD: https://wiki.winehq.org/FreeBSD
 
 .. note::
@@ -34,7 +34,7 @@ For using *zugbruecke*, you need to install **Wine** first. Depending on your pl
 
 .. warning::
 
-	Support for Mac OS X and FreeBSD is provided on a best-effort basis. *zugbruecke* currently does not receive regular testing on those platforms.
+	Support for MacOS and FreeBSD is provided on a best-effort basis. *zugbruecke* currently does not receive regular testing on those platforms.
 
 Getting *zugbruecke*
 --------------------
@@ -58,6 +58,10 @@ After installing the package with ``pip``, you may choose to manually :ref:`init
 	If you are relying on *zugbruecke*, please notice that it uses **semantic versioning**. Breaking changes are indicated by increasing the second version number, the minor version. Going for example from 0.0.x to 0.1.y or going from 0.1.x to 0.2.y therefore indicates a breaking change. For as long as *zugbruecke* has development status "alpha", please expect more breaking changes to come.
 
 If you are encountering any problems, see :ref:`section on bugs and known issues <bugs>`.
+
+.. warning::
+
+    CentOS is known to be problematic. It packages both CPython and Wine in rather unusual and partially incompatible ways. See section on :ref:`CentOS <centos>`.
 
 Installing *zugbruecke* in Development Mode
 -------------------------------------------
