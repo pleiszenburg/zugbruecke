@@ -81,8 +81,8 @@ The following parameters can be configured:
       - ``win32``
     * - pythonversion
       - ``PythonVersion``
-      - Version / build of *Windows Python*, >= 3.7.
-      - ``3.7.4``
+      - Version / build of *Windows Python*, >= 3.8.
+      - ``3.8.10``
     * - timeout_start
       - ``int``
       - Wait seconds for *Windows Python* to show up.
