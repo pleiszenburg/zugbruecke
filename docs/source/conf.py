@@ -72,7 +72,7 @@ master_doc = "index"
 # General information about the project.
 project = "zugbruecke"
 author = "Sebastian M. Ernst"
-copyright = f"2017-2023 {author:s}"
+copyright = f"2017-2024 {author:s}"
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
