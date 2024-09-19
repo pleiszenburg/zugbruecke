@@ -1,8 +1,11 @@
 # Changes
 
-## 0.2.2 (2023-XX-XX)
+## 0.3.0 (2024-XX-XX)
 
-- (TBD)
+**CAUTION**: Supported versions of Python changed.
+
+- FEATURE: Dropped support for CPython <= 3.7.
+- FEATURE: Bump default version for Python on Wine from 3.7.4 to 3.8.10.
 
 ## 0.2.1 (2023-01-01)
 

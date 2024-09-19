@@ -10,7 +10,7 @@ maintainers = [{name = "Sebastian M. Ernst", email = "ernst@pleiszenburg.de"}]
 keywords = ["ctypes", "wine"]
 readme = "README.md"
 license = {file = "LICENSE"}
-requires-python = ">=3.7"
+requires-python = ">=3.8"
 dependencies = ["wenv >=0.5.1,<0.6.0"]
 classifiers = [
     "Development Status :: 3 - Alpha",
@@ -23,7 +23,6 @@ classifiers = [
     "Operating System :: POSIX :: BSD",
     "Operating System :: POSIX :: Linux",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
