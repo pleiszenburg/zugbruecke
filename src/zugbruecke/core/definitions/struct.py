@@ -122,12 +122,12 @@ class DefinitionStruct(base.Definition):
         Counterpart to `as_packed`
         """
 
-        fields = [(name, base.Definition.from_packed(field, cache = cache)) for name, field in fields]
+        fields_ = [(name, base.Definition.from_packed(field, cache = cache)) for name, field in fields]
 
         try:
             base_type, data_type = cache.struct[type_name]
         except KeyError:
-            base_type, data_type = cls._assemble_datatype(type_name, flags, fields)
+            base_type, data_type = cls._assemble_datatype(type_name, flags, fields_)
             cache.struct[type_name] = base_type, data_type
 
         return cls(
@@ -136,7 +136,7 @@ class DefinitionStruct(base.Definition):
             type_name = type_name,
             data_type = data_type,
             base_type = base_type,
-            fields = fields,
+            fields = fields_,
         )
 
     @classmethod

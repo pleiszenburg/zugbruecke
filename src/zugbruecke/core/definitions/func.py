@@ -120,9 +120,9 @@ class DefinitionFunc(base.Definition):
         Counterpart to `as_packed`
         """
 
-        argtypes = [base.Definition.from_packed(argtype, cache = cache) for argtype in argtypes]
-        restype = base.Definition.from_packed(restype, cache = cache)
-        memsyncs = [ms.DefinitionMemsync.from_packed(item, cache = cache) for item in memsyncs]
+        argtypes_ = [base.Definition.from_packed(argtype, cache = cache) for argtype in argtypes]
+        restype_ = base.Definition.from_packed(restype, cache = cache)
+        memsyncs_ = [ms.DefinitionMemsync.from_packed(item, cache = cache) for item in memsyncs]
 
         conv = _FUNCFLAG_STDCALL if (func_flags & _FUNCFLAG_STDCALL) else _FUNCFLAG_CDECL
 
@@ -131,10 +131,10 @@ class DefinitionFunc(base.Definition):
         except KeyError:
             base_type, data_type = cls._assemble_datatype(
                 type_name = type_name,
-                argtypes = argtypes,
+                argtypes = argtypes_,
                 flags = flags,
-                restype = restype,
-                memsyncs = memsyncs,
+                restype = restype_,
+                memsyncs = memsyncs_,
                 func_flags = func_flags,
                 cache = cache,
             )
@@ -146,9 +146,9 @@ class DefinitionFunc(base.Definition):
             type_name = type_name,
             data_type = data_type,
             base_type = base_type,
-            argtypes = argtypes,
-            restype = restype,
-            memsyncs = memsyncs,
+            argtypes = argtypes_,
+            restype = restype_,
+            memsyncs = memsyncs_,
             func_flags = func_flags,
         )
 
