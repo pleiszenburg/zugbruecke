@@ -64,6 +64,7 @@ class DefinitionSimple(base.Definition):
             "flags": self._flags,
             "field_name": self._field_name,
             "type_name": self._type_name,
+            "uses_memsync": self._uses_memsync,
         }
 
     @classmethod
@@ -71,6 +72,7 @@ class DefinitionSimple(base.Definition):
         flags: List[int], # f
         field_name: Union[str, int, None], # n
         type_name: str, # t
+        uses_memsync: bool,
     ) -> DefinitionABC:
         """
         Unpack from dict received from other side
@@ -86,6 +88,7 @@ class DefinitionSimple(base.Definition):
             type_name = type_name,
             data_type = data_type,
             base_type = base_type,
+            uses_memsync = uses_memsync,
         )
 
     @classmethod
@@ -110,6 +113,7 @@ class DefinitionSimple(base.Definition):
         data_type: Any,
         base_type: Any,
         cache: CacheABC,
+        uses_memsync: bool = False,
     ):
         """
         Simple group-specific helper for from ctypes data type
@@ -126,4 +130,5 @@ class DefinitionSimple(base.Definition):
             type_name = type_name,
             data_type = data_type,
             base_type = base_type,
+            uses_memsync = uses_memsync,
         )
