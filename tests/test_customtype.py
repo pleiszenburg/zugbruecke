@@ -140,6 +140,8 @@ def test_customtype(data, arch, conv, ctypes, dll_handle):
 
     DoubleArray = DoubleArrayType()
     avg_dll = dll_handle.avg
+    avg_dll.argtypes = (DoubleArray, ctypes.c_int)
+    avg_dll.restype = ctypes.c_double
     avg_dll.memsync = [  # Regular ctypes on Windows should ignore this statement
         dict(
             pointer = [0],  # "path" to argument containing the pointer
@@ -148,7 +150,5 @@ def test_customtype(data, arch, conv, ctypes, dll_handle):
             custom = DoubleArray,  # custom datatype
         )
     ]
-    avg_dll.argtypes = (DoubleArray, ctypes.c_int)
-    avg_dll.restype = ctypes.c_double
 
     assert pytest.approx(2.5, 0.0000001) == avg_dll(data, 4)
