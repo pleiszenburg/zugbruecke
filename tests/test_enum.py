@@ -101,8 +101,8 @@ def test_enumtype(arch, conv, ctypes, dll_handle):
     operation_dll.restype = ctypes.c_double
     operation_dll.memsync = [  # Regular ctypes on Windows should ignore this statement
         dict(
-            value = [0],  # "path" to argument containing the value
-            length = [],  # "path" to argument containing the length
+            value = [2],  # "path" to argument containing the value
+            length = tuple(),  # "path" to argument containing the length
             type = ctypes.c_int,  # type of argument (optional, default char/byte): sizeof(type) * length == bytes
             custom = MODE,  # custom datatype
             func = "lambda: 1",  # compute length
