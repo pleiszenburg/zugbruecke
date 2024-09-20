@@ -99,6 +99,15 @@ def test_enumtype(arch, conv, ctypes, dll_handle):
     operation_dll = dll_handle.operation
     operation_dll.argtypes = (ctypes.c_double, ctypes.c_double, MODE)
     operation_dll.restype = ctypes.c_double
+    operation_dll.memsync = [  # Regular ctypes on Windows should ignore this statement
+        dict(
+            value = [0],  # "path" to argument containing the value
+            length = [],  # "path" to argument containing the length
+            type = ctypes.c_int,  # type of argument (optional, default char/byte): sizeof(type) * length == bytes
+            custom = MODE,  # custom datatype
+            func = "lambda: 1",  # compute length
+        )
+    ]
 
     assert pytest.approx(10.0, 0.0000001) == operation_dll(7.0, 3.0, MODE.ADD)
     assert pytest.approx(4.0, 0.0000001) == operation_dll(7.0, 3.0, MODE.SUB)
