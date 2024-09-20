@@ -52,6 +52,7 @@ class Mempkg(MempkgABC):
         local_addr: Optional[int],  # local pointer address as integer
         remote_addr: Optional[int],  # remote pointer has not been initialized
         wchar: Optional[int],  # local length of Unicode wchar if required
+        byvalue: bool = False,  # support by value for custom types
         ptr: Optional[Any] = None,  # original ctypes pointer to avoid garbage collection on client
     ):
 
@@ -59,6 +60,7 @@ class Mempkg(MempkgABC):
         self._local_addr = local_addr
         self._remote_addr = remote_addr
         self._wchar = wchar
+        self._byvalue = byvalue
         self._ptr = ptr
 
     def __repr__(self) -> str:
@@ -88,6 +90,11 @@ class Mempkg(MempkgABC):
     def remote_addr(self) -> Optional[int]:
 
         return self._remote_addr
+
+    @property
+    def byvalue(self) -> bool:
+
+        return self._byvalue
 
     @property
     def wchar(self) -> Optional[int]:
@@ -175,6 +182,7 @@ class Mempkg(MempkgABC):
             'local_addr': self._local_addr,
             'remote_addr': self._remote_addr,
             'wchar': self._wchar,
+            'byvalue': self._byvalue,
         }
 
     @classmethod
@@ -194,7 +202,7 @@ class Mempkg(MempkgABC):
         return cls(**packed)
 
     @classmethod
-    def from_pointer(cls, ptr: Any, length: int, wchar: Optional[int]):
+    def from_pointer(cls, ptr: Any, length: int, byvalue: bool = False, wchar: Optional[int] = None):
         """
         Generate package from ctypes pointer
 
@@ -213,5 +221,6 @@ class Mempkg(MempkgABC):
             local_addr = ctypes.cast(ptr, ctypes.c_void_p).value,
             remote_addr = None,
             wchar = wchar,
+            byvalue = byvalue,
             ptr = ptr,
         )
