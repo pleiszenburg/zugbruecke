@@ -136,7 +136,7 @@ class RoutineServer(RoutineServerABC):
             return {
                 "args": self._data.pack_args(args, self._argtypes, self._convention),
                 "retval": self._data.pack_retval(retval, self._restype),
-                "mempkgs": [mempkg.as_packed() for mempkg in mempkgs],
+                "mempkgs": [mempkg.as_packed() if not mempkg.byvalue else None for mempkg in mempkgs],
                 "success": True,
                 "exception": None,
             }

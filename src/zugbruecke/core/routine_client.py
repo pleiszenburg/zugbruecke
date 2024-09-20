@@ -156,7 +156,7 @@ class RoutineClient(RoutineClientABC):
         DefinitionMemsync.unpkg_memories(
             args = args,
             retval = retval,
-            mempkgs = [Mempkg.from_packed(mempkg) for mempkg in return_package["mempkgs"]],
+            mempkgs = [Mempkg.from_packed(mempkg) if mempkg is not None else None for mempkg in return_package["mempkgs"]],
             memsyncs = self._memsyncs,
         )
 
