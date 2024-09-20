@@ -100,7 +100,8 @@ class DefinitionFunc(base.Definition):
             "argtypes": [argtype.as_packed() for argtype in self._argtypes],
             "restype": self._restype.as_packed(),
             "memsyncs": [item.as_packed() for item in self._memsyncs],
-            "func_flags": self._func_flags
+            "func_flags": self._func_flags,
+            "uses_memsync": self._uses_memsync,
         }
 
     @classmethod
@@ -113,6 +114,7 @@ class DefinitionFunc(base.Definition):
         memsyncs: List[Dict],
         func_flags: int,
         cache: CacheABC,
+        uses_memsync: bool,
     ) -> DefinitionABC:
         """
         Unpack from dict received from other side
@@ -150,6 +152,7 @@ class DefinitionFunc(base.Definition):
             restype = restype_,
             memsyncs = memsyncs_,
             func_flags = func_flags,
+            uses_memsync = uses_memsync,
         )
 
     @classmethod
@@ -207,6 +210,7 @@ class DefinitionFunc(base.Definition):
         data_type: Any,
         base_type: Any,
         cache: CacheABC,
+        uses_memsync: bool = False,
     ):
         """
         Func group-specific helper for from ctypes data type
@@ -222,6 +226,7 @@ class DefinitionFunc(base.Definition):
             restype = cls.from_data_type(data_type = base_type._restype_, cache = cache),
             memsyncs = base_type.memsync,  # already parsed into definition via meta class
             func_flags = base_type._flags_,
+            uses_memsync = uses_memsync,
         )
 
     @classmethod
