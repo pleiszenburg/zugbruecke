@@ -56,6 +56,7 @@ class Definition(DefinitionABC):
         type_name: Optional[str], # t
         data_type: Any,
         base_type: Any,
+        uses_memsync: bool = False,
     ):
 
         self._flags = flags
@@ -64,6 +65,8 @@ class Definition(DefinitionABC):
 
         self._data_type = data_type
         self._base_type = base_type
+
+        self._uses_memsync = uses_memsync
 
     def __repr__(self) -> str:
 
@@ -137,6 +140,14 @@ class Definition(DefinitionABC):
         """
 
         return self._data_type == ctypes.c_void_p and not self.is_pointer and self.is_scalar
+
+    @property
+    def uses_memsync(self) -> bool:
+        """
+        Indicate use of memsync
+        """
+
+        return self._uses_memsync
 
     @staticmethod
     def _apply_flags(data_type: Any, flags: List[int]) -> Any:
@@ -245,6 +256,7 @@ class Definition(DefinitionABC):
         cache: CacheABC,
         data_type: Any,
         field_name: Union[str, int, None] = None,
+        uses_memsync: bool = False,
     ) -> DefinitionABC:
         """
         type_name: Name of datatype, such as c_int, if there is one, else None
@@ -266,6 +278,7 @@ class Definition(DefinitionABC):
             flags = flags,
             field_name = field_name,
             cache = cache,
+            uses_memsync = uses_memsync,
         )
 
         if group == DefinitionSimple.GROUP:
