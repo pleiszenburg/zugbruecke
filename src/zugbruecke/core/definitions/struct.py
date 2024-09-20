@@ -106,6 +106,7 @@ class DefinitionStruct(base.Definition):
             "field_name": self._field_name,
             "type_name": self._type_name,
             "fields": [(name, field.as_packed()) for name, field in self._fields],
+            "uses_memsync": self._uses_memsync,
         }
 
     @classmethod
@@ -115,6 +116,7 @@ class DefinitionStruct(base.Definition):
         type_name: str, # t
         fields: List[Tuple[str, Dict]],
         cache: CacheABC,
+        uses_memsync: bool,
     ) -> DefinitionABC:
         """
         Unpack from dict received from other side
@@ -137,6 +139,7 @@ class DefinitionStruct(base.Definition):
             data_type = data_type,
             base_type = base_type,
             fields = fields_,
+            uses_memsync = uses_memsync,
         )
 
     @classmethod
@@ -165,6 +168,7 @@ class DefinitionStruct(base.Definition):
         data_type: Any,
         base_type: Any,
         cache: CacheABC,
+        uses_memsync: bool = False,
     ):
         """
         Struct group-specific helper for from ctypes data type
@@ -186,6 +190,7 @@ class DefinitionStruct(base.Definition):
             data_type = data_type,
             base_type = base_type,
             fields = fields,
+            uses_memsync = uses_memsync,
         )
 
         if not structtype.type_name in cache.struct.keys():  # HACK for memsync
