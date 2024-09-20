@@ -371,6 +371,9 @@ class Data(DataABC):
             Can return data for writing it into a struct
         """
 
+        if argtype.uses_memsync:
+            return  # memsync stuff, nothing to do
+
         # The non-trivial case first, arrays
         if not argtype.is_scalar:
             # Sync items in array and return (if there is something to return)
